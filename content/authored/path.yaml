@@ -1,0 +1,8 @@
+# Lộ trình học: Stage → Unit → thứ tự bài. ID bài trùng với `id` trong content/authored/lessons/.
+stages:
+  - id: intro
+    title: Nhập môn
+    units:
+      - id: intro-pronunciation
+        title: Phát âm
+        lessons: [intro-01]

@@ -1,0 +1,504 @@
+# Nghĩa tiếng Việt của từ HSK (S2.2). Khởi tạo từ CVDICT bởi `content:fetch`.
+# Review xong một từ thì sửa nghĩa nếu cần và đặt `reviewed: true`.
+# `content:fetch` chỉ thêm từ còn thiếu, không ghi đè dòng đã có.
+
+爱: { vi: [ yêu; thích, tình cảm, có khuynh hướng (làm gì đó); có xu hướng (xảy ra) ], reviewed: false }
+爱好: { vi: [ thích; đam mê; lấy làm thú vui; say mê, sở thích ], reviewed: false }
+八: { vi: [ tám; 8 ], reviewed: false }
+爸爸: { vi: [ (thông tục) cha; ba ], reviewed: false }
+吧: { vi: [ (trợ từ ngữ khí chỉ gợi ý hoặc phỏng đoán), ...phải không?, ...được chứ?, ...tôi đoán. ], reviewed: false }
+白: { vi: [ trắng, tuyết, tinh khiết, sáng ], reviewed: false }
+白天: { vi: [ ban ngày, trong ngày, ngày ], reviewed: false }
+百: { vi: [ một trăm, nhiều, tất cả các loại ], reviewed: false }
+班: { vi: [ nhóm; lớp; khối, (quân sự) tiểu đội, ca làm việc, lượng từ cho nhóm người và các phương tiện giao thông theo lịch trình ], reviewed: false }
+半: { vi: [ một nửa, bán-, chưa hoàn chỉnh, (sau một số) một nửa ], reviewed: false }
+半年: { vi: [ nửa năm ], reviewed: false }
+半天: { vi: [ nửa ngày, một thời gian dài, khá lâu, giữa không trung ], reviewed: false }
+帮: { vi: [ giúp, hỗ trợ, ủng hộ, giúp ai đó (tức là như một sự giúp đỡ) ], reviewed: false }
+帮忙: { vi: [ giúp, giúp đỡ, làm ơn, làm giúp một tay ], reviewed: false }
+包: { vi: [ che phủ, gói, cầm, nắm bao gồm ], reviewed: false }
+包子: { vi: [ bánh bao (bánh hấp có nhân) ], reviewed: false }
+杯: { vi: [ cái cúp, cúp vô địch, "lượng từ cho một số đồ chứa chất lỏng: ly, cốc", cúp chiến thắng ], reviewed: false }
+杯子: { vi: [ cốc, ly ], reviewed: false }
+北: { vi: [ phía bắc, (văn cổ) bị đánh bại ], reviewed: false }
+北边: { vi: [ phía bắc, mặt bắc, phần phía bắc, về phía bắc của ], reviewed: false }
+北京: { vi: [ "Bắc Kinh, thủ đô nước Cộng hòa Nhân dân Trung Hoa" ], reviewed: false }
+本: { vi: [ (hình thức kết hợp) gốc; rễ, (hình thức kết hợp) nguồn gốc; nguyên nhân, (hình thức kết hợp) của mình; này, "(hình thức kết hợp) này; hiện tại (năm này, v.v.)" ], reviewed: false }
+本子: { vi: [ sách, quyển tập, 'truyện tranh tự xuất bản kiểu Nhật (đặc biệt là loại truyện người lớn), còn gọi là "dōjinshi"', phiên bản ], reviewed: false }
+比: { vi: [ Bỉ, Người Bỉ, so sánh, "(theo sau bởi danh từ và tính từ) {tính từ} hơn {danh từ}" ], reviewed: false }
+别: { vi: [ rời khỏi; chia tay, (văn học) phân biệt, (hình thức kết hợp) khác; nữa; khác biệt, đừng ...! ], reviewed: false }
+别的: { vi: [ khác ], reviewed: false }
+别人: { vi: [ người khác; những người khác ], reviewed: false }
+病: { vi: [ bệnh, bệnh tật, ngã bệnh, khuyết điểm ], reviewed: false }
+病人: { vi: [ người bệnh, bệnh nhân, người ốm ], reviewed: false }
+不大: { vi: [ không quá, không nhiều, không thường ], reviewed: false }
+不对: { vi: [ không chính xác, sai, sai lầm, bất thường ], reviewed: false }
+不客气: { vi: [ không có chi, đừng nhắc đến, không lịch sự, thô lỗ ], reviewed: false }
+不用: { vi: [ không cần ], reviewed: false }
+不: { vi: [ không; không phải, (hình thức kết hợp) không; bất- ], reviewed: false }
+菜: { vi: [ "rau (LT:棵[ke1])", "món ăn (LT:樣|样[yang4],道[dao4],盤|盘[pan2])", "(kỹ năng, v.v.) yếu; kém", (thông tục) mẫu người (mình thích) ], reviewed: false }
+茶: { vi: [ trà, cây trà ], reviewed: false }
+差: { vi: [ khác, sai; nhầm, thiếu, không đạt tiêu chuẩn; kém ], reviewed: false }
+常: { vi: [ luôn luôn, thường xuyên, thường, phổ biến ], reviewed: false }
+常常: { vi: [ thường xuyên, thường ], reviewed: false }
+唱: { vi: [ hát, gọi to, xướng ], reviewed: false }
+唱歌: { vi: [ hát một bài hát ], reviewed: false }
+车: { vi: [ xe, phương tiện giao thông, máy, mài giũa bằng máy tiện ], reviewed: false }
+车票: { vi: [ vé (xe buýt hoặc tàu hỏa) ], reviewed: false }
+车上: { vi: [ trên xe ], reviewed: false }
+车站: { vi: [ ga tàu, dừng xe buýt ], reviewed: false }
+吃: { vi: [ ăn; tiêu thụ, "ăn ở (nhà ăn, v.v.)", tiêu diệt; phá hủy, hấp thụ ], reviewed: false }
+吃饭: { vi: [ dùng bữa, ăn, kiếm sống ], reviewed: false }
+出: { vi: [ đi ra; đi ra ngoài, phát sinh; xảy ra, sản xuất; tạo ra, vượt quá ], reviewed: false }
+出来: { vi: [ đi ra, xuất hiện, phát sinh ], reviewed: false }
+出去: { vi: [ đi ra ngoài ], reviewed: false }
+穿: { vi: [ mặc, mang, mặc vào, xuyên qua ], reviewed: false }
+床: { vi: [ giường, ghế dài, lượng từ cho giường ], reviewed: false }
+次: { vi: [ tiếp theo, thứ hai, "ngày thứ hai, lần thứ hai, v.v.", thứ cấp ], reviewed: false }
+从: { vi: [ từ; thông qua; qua, (hình vị) theo, (hình vị) tuân theo, (hình vị) tham gia (một hoạt động) ], reviewed: false }
+错: { vi: [ lỗi, sai, xấu, đan xen ], reviewed: false }
+打: { vi: [ đánh, đập, vỗ, phá ], reviewed: false }
+打车: { vi: [ bắt taxi (trong thành phố), đón xe ], reviewed: false }
+打电话: { vi: [ gọi điện thoại ], reviewed: false }
+打开: { vi: [ mở, cho xem (vé), bật lên, kích hoạt ], reviewed: false }
+打球: { vi: [ chơi bóng, chơi với bóng ], reviewed: false }
+大: { vi: [ to; lớn; vĩ đại, lớn tuổi hơn, "người lớn nhất (như trong 大姐[da4 jie3])", rất; thoải mái; hoàn toàn ], reviewed: false }
+大学: { vi: [ "Đại học, một trong Tứ thư 四書|四书[Si4 shu1] của Nho giáo", trường đại học, trường cao đẳng ], reviewed: false }
+大学生: { vi: [ sinh viên đại học, sinh viên cao đẳng ], reviewed: false }
+到: { vi: [ đến; tới, rời đi đến; đi đến, đến (một nơi); cho đến (một thời gian); lên đến (một điểm), (bổ ngữ động từ chỉ đến một nơi hoặc đạt đến một điểm) ], reviewed: false }
+得到: { vi: [ được; đạt được; nhận được ], reviewed: false }
+地:de: { vi: [ "trợ từ kết cấu: dùng trước động từ hoặc tính từ, liên kết với trạng ngữ bổ nghĩa đứng trước" ], reviewed: false }
+的: { vi: [ của; ~(hậu tố sở hữu), (dùng sau định ngữ), (dùng để tạo thành cụm danh từ), (dùng cuối câu trần thuật để nhấn mạnh) ], reviewed: false }
+等: { vi: [ đợi; chờ đợi, đến lúc; khi; tới, "vân vân; v.v.; và những người khác, những thứ khác tương tự", (hình thức kết hợp) loại; cấp; hạng ], reviewed: false }
+地:dì: { vi: [ đất, mặt đất, ruộng, vùng ], reviewed: false }
+地点: { vi: [ nơi, chỗ, địa điểm, địa điểm tổ chức ], reviewed: false }
+地方: { vi: [ khu vực, nơi, chỗ, không gian ], reviewed: false }
+地上: { vi: [ trên mặt đất, trên sàn nhà ], reviewed: false }
+地图: { vi: [ bản đồ ], reviewed: false }
+弟弟: { vi: [ em trai ], reviewed: false }
+第: { vi: [ '(tiền tố chỉ số thứ tự, như trong 第六[di4 liu4] "thứ sáu")', (văn học) thứ hạng mà thí sinh đỗ đạt trong kỳ thi đình được xếp vào, (cũ) nơi ở của quan chức cao cấp, (văn học) nhưng; tuy nhiên ], reviewed: false }
+点: { vi: [ điểm, chấm, giọt, vết ], reviewed: false }
+电: { vi: [ sét, điện, dạng kết hợp của điện, bị (hoặc gây) điện giật ], reviewed: false }
+电话: { vi: [ điện thoại, cuộc gọi điện thoại, số điện thoại ], reviewed: false }
+电脑: { vi: [ máy tính ], reviewed: false }
+电视: { vi: [ truyền hình; TV ], reviewed: false }
+电视机: { vi: [ máy thu hình ], reviewed: false }
+电影: { vi: [ phim; điện ảnh ], reviewed: false }
+电影院: { vi: [ rạp chiếu phim; rạp phim ], reviewed: false }
+东: { vi: [ phía đông, chủ nhà (tức là ngồi phía đông của khách), địa chủ ], reviewed: false }
+东边: { vi: [ hướng đông, phía đông, phần phía đông, về phía đông của ], reviewed: false }
+东西: { vi: [ đồ vật, thứ, người, "lượng từ: 個|个[ge4], 件[jian4]" ], reviewed: false }
+动: { vi: [ (cái gì đó) di chuyển, bắt đầu chuyển động, dịch chuyển, chạm vào ], reviewed: false }
+动作: { vi: [ "chuyển động; cử động; hành động (LT:個|个[ge4])", diễn; di chuyển ], reviewed: false }
+都: { vi: [ tất cả; cả hai; hoàn toàn, (dùng để nhấn mạnh) thậm chí, đã, (không) chút nào ], reviewed: false }
+读: { vi: [ đọc ra; đọc to, đọc, theo học (trường); học (một môn ở trường), phát âm ], reviewed: false }
+读书: { vi: [ đọc sách, học, học ở trường ], reviewed: false }
+对: { vi: [ đúng; chính xác, hướng đến; tại; vì, về; liên quan đến, đối xử (với ai đó cách nào đó) ], reviewed: false }
+对不起: { vi: [ Tôi xin lỗi; xin thứ lỗi; tôi xin tha thứ, làm (ai đó) thất vọng; không đạt kỳ vọng ], reviewed: false }
+多: { vi: [ nhiều, quá nhiều; dư thừa, (sau một số) ... lẻ, "như thế nào (mức độ nào) (cách phát âm ở Đài Loan [duo2])" ], reviewed: false }
+多少: { vi: [ bao nhiêu?; mấy?, "(số điện thoại, mã sinh viên, v.v.) số bao nhiêu?" ], reviewed: false }
+饿: { vi: [ đói, làm cho đói ], reviewed: false }
+儿子: { vi: [ con trai ], reviewed: false }
+二: { vi: [ hai, "2", (tiếng Bắc Kinh) ngu ngốc ], reviewed: false }
+饭: { vi: [ cơm đã nấu, bữa ăn, (từ mượn) fan, người hâm mộ ], reviewed: false }
+饭店: { vi: [ nhà hàng, khách sạn ], reviewed: false }
+房间: { vi: [ phòng ], reviewed: false }
+房子: { vi: [ nhà, tòa nhà (một hoặc hai tầng), căn hộ, phòng ], reviewed: false }
+放: { vi: [ đặt, để, phát hành, thả ], reviewed: false }
+放假: { vi: [ nghỉ lễ hoặc kỳ nghỉ ], reviewed: false }
+放学: { vi: [ tan học ], reviewed: false }
+飞: { vi: [ bay ], reviewed: false }
+飞机: { vi: [ máy bay ], reviewed: false }
+非常: { vi: [ rất; thực sự, khác thường; phi thường ], reviewed: false }
+分: { vi: [ chia; tách, phân phối; phân bổ, phân biệt (tốt và xấu), "(hình thức kết hợp) chi nhánh (của một tổ chức); phụ- (như trong 分局[fen1 ju2])" ], reviewed: false }
+风: { vi: [ gió, tin tức, phong cách, tập quán ], reviewed: false }
+干:gān: { vi: [ khô, thức ăn khô, trống rỗng; rỗng tuếch, nhận làm thân thích danh nghĩa; nuôi; bố mẹ nuôi ], reviewed: false }
+干净: { vi: [ sạch, gọn gàng ], reviewed: false }
+干:gàn: { vi: [ thân cây, phần chính của cái gì, quản lý, làm ], reviewed: false }
+干什么: { vi: [ bạn đang làm gì?, anh ấy đang định làm gì? ], reviewed: false }
+高: { vi: [ cao, khoảng trên trung bình, to, lớn ], reviewed: false }
+高兴: { vi: [ vui, vui vẻ, sẵn lòng (làm gì đó), tâm trạng vui vẻ ], reviewed: false }
+告诉: { vi: [ nói; thông báo; cho biết ], reviewed: false }
+哥哥: { vi: [ anh trai ], reviewed: false }
+歌: { vi: [ bài hát, hát ], reviewed: false }
+个: { vi: [ (lượng từ dùng trước danh từ không có lượng từ cụ thể), (dạng kết hợp) cá nhân ], reviewed: false }
+给: { vi: [ cho, để, cho lợi ích của, đưa ], reviewed: false }
+跟: { vi: [ gót chân, theo sát, đi cùng, (phụ nữ) lấy ai ], reviewed: false }
+工人: { vi: [ công nhân, "Lượng từ: 個|个[ge4], 名[ming2]" ], reviewed: false }
+工作: { vi: [ làm việc, (máy móc) vận hành, công việc, việc ], reviewed: false }
+关: { vi: [ ải núi, đóng; khép; tắt, "giam giữ; nhốt; nhốt (ai đó trong phòng, chim trong lồng, v.v.)", liên quan; dính líu ], reviewed: false }
+关上: { vi: [ đóng (cửa), "tắt (đèn, thiết bị điện, v.v.)" ], reviewed: false }
+贵: { vi: [ đắt, (hình thức kết hợp) được coi trọng; quý giá, (hình thức kết hợp) quý tộc; có địa vị cao, (tiền tố) (kính ngữ) của bạn ], reviewed: false }
+国: { vi: [ "quốc gia; dân tộc; nhà nước (LT:個|个[ge4])", (hình thức kết hợp) quốc gia ], reviewed: false }
+国家: { vi: [ quốc gia; dân tộc; nhà nước ], reviewed: false }
+国外: { vi: [ ở nước ngoài, ngoại (sự vụ), hải ngoại, nước ngoài ], reviewed: false }
+过: { vi: [ băng qua, đi qua, trải qua (thời gian), ăn mừng (ngày lễ) ], reviewed: false }
+还:hái: { vi: [ vẫn, còn đang, càng thêm, còn nữa ], reviewed: false }
+还是: { vi: [ vẫn (như trước), nên (tốt hơn), không ngờ, hoặc ], reviewed: false }
+还有: { vi: [ vẫn còn; còn có, thêm vào đó ], reviewed: false }
+孩子: { vi: [ trẻ em ], reviewed: false }
+汉语: { vi: [ Ngôn ngữ tiếng Trung ], reviewed: false }
+汉字: { vi: [ chữ Hán, "Nhật: kanji", "Hàn: hanja", "Việt: hán tự" ], reviewed: false }
+好: { vi: [ tốt, thích hợp; đúng, (trước động từ) dễ, (trước động từ) tốt để ], reviewed: false }
+好吃: { vi: [ ngon; ngon miệng ], reviewed: false }
+好看: { vi: [ ưa nhìn, xinh đẹp, "hay (phim, sách, chương trình TV, v.v.)", xấu hổ ], reviewed: false }
+好听: { vi: [ nghe hay ], reviewed: false }
+好玩儿: { vi: [ vui vẻ, thú vị, hay ho ], reviewed: false }
+号: { vi: [ số thứ tự, ngày trong tháng, dấu, ký hiệu ], reviewed: false }
+喝: { vi: [ uống ], reviewed: false }
+和: { vi: [ "(nối hai danh từ) và; cùng với; với (cách đọc ở Đài Loan [han4])", (toán học) tổng, làm hoà, (thể thao) hoà; trận hoà ], reviewed: false }
+很: { vi: [ (phó từ mức độ), khá, rất, cực kỳ ], reviewed: false }
+后: { vi: [ hoàng hậu, nữ hoàng, (cổ đại) quân vương, người cai trị ], reviewed: false }
+后边: { vi: [ phía sau; đằng sau; phần cuối, đằng sau; gần cuối; ở phía sau, sau này; sau đó ], reviewed: false }
+后天: { vi: [ ngày mốt, "cuộc sống sau khi sinh (giai đoạn phát triển qua kinh nghiệm, tương phản với 先天[xian1 tian1])", mắc phải (không phải bẩm sinh hoặc di truyền), hậu nghiệm ], reviewed: false }
+花: { vi: [ hoa, bông, hoa văn, lòe loẹt ], reviewed: false }
+话: { vi: [ phương ngữ, ngôn ngữ, lời nói, ngôn từ ], reviewed: false }
+坏: { vi: [ xấu, bị hỏng, hư, hỏng ], reviewed: false }
+还:huán: { vi: [ trả lại, trở về ], reviewed: false }
+回: { vi: [ xoay vòng, quay lại, quay quanh, trả lời ], reviewed: false }
+回答: { vi: [ trả lời; đáp, trả lời; đáp án ], reviewed: false }
+回到: { vi: [ trở về ], reviewed: false }
+回家: { vi: [ trở về nhà ], reviewed: false }
+回来: { vi: [ trở về; quay lại ], reviewed: false }
+回去: { vi: [ trở về, quay lại ], reviewed: false }
+会: { vi: [ có thể; có kỹ năng; biết cách, có khả năng; chắc chắn, gặp gỡ; tụ họp, cuộc họp; buổi tụ họp ], reviewed: false }
+火车: { vi: [ tàu hỏa ], reviewed: false }
+机场: { vi: [ sân bay; phi trường, (tiếng lóng) nhà cung cấp dịch vụ cho Shadowsocks hoặc phần mềm tương tự để vượt kiểm duyệt Internet, "Lượng từ: 家[jia1],處|处[chu4]" ], reviewed: false }
+机票: { vi: [ vé máy bay, vé hành khách ], reviewed: false }
+鸡蛋: { vi: [ trứng (gà), trứng gà ], reviewed: false }
+几: { vi: [ bao nhiêu, mấy, một vài, vài ], reviewed: false }
+记: { vi: [ ghi chép, ghi lại, ghi nhớ, nhớ ], reviewed: false }
+记得: { vi: [ nhớ ], reviewed: false }
+记住: { vi: [ nhớ, ghi nhớ, học thuộc lòng ], reviewed: false }
+家: { vi: [ "dùng trong 傢伙|家伙[jia1 huo5] và 傢俱|家俱[jia1 ju4]", nhà, gia đình, "(lịch sự) của tôi (chị, chú, v.v.)" ], reviewed: false }
+家里: { vi: [ nhà ], reviewed: false }
+家人: { vi: [ thành viên gia đình, (cũ) người hầu ], reviewed: false }
+间: { vi: [ giữa, trong số, trong khoảng thời gian hoặc không gian nhất định, phòng ], reviewed: false }
+见: { vi: [ thấy, gặp, dường như, phỏng vấn ], reviewed: false }
+见面: { vi: [ gặp mặt; gặp nhau ], reviewed: false }
+教: { vi: [ tôn giáo, giảng dạy, làm, khiến ], reviewed: false }
+叫: { vi: [ kêu, gọi, đặt hàng, bảo ], reviewed: false }
+教学楼: { vi: [ tòa nhà trường học; tòa nhà học thuật ], reviewed: false }
+姐姐: { vi: [ chị gái ], reviewed: false }
+介绍: { vi: [ giới thiệu (ai với ai), thuyết trình, "trình bày (ai cho công việc, v.v.)", lời giới thiệu ], reviewed: false }
+今年: { vi: [ năm nay ], reviewed: false }
+今天: { vi: [ hôm nay, thời điểm hiện tại; bây giờ ], reviewed: false }
+进: { vi: [ tiến lên, tiến bộ, đi vào, nhập vào ], reviewed: false }
+进来: { vi: [ đến, vào ], reviewed: false }
+进去: { vi: [ đi vào ], reviewed: false }
+九: { vi: [ chín, "9" ], reviewed: false }
+就: { vi: [ (sau một mệnh đề giả định) trong trường hợp đó; thì, (sau một mệnh đề hành động) ngay khi; ngay sau khi, "(giống như 就是[jiu4 shi4]) chỉ; không gì khác ngoài; đơn giản là; chỉ là; chính xác; đúng", chỉ có; ít nhất là ], reviewed: false }
+觉得: { vi: [ nghĩ rằng ...; cảm thấy rằng ..., "cảm thấy (không thoải mái, v.v.)" ], reviewed: false }
+开: { vi: [ mở (ngoại động từ hoặc nội động từ), "(tàu thuyền, xe cộ, quân đội, v.v.) bắt đầu", bật; vận hành; hoạt động; chạy, đun sôi ], reviewed: false }
+开车: { vi: [ lái xe ], reviewed: false }
+开会: { vi: [ tổ chức cuộc họp, tham gia cuộc họp ], reviewed: false }
+开玩笑: { vi: [ đùa giỡn; chế nhạo; nói đùa ], reviewed: false }
+看: { vi: [ nhìn; xem, đọc, coi như, chăm sóc ], reviewed: false }
+看病: { vi: [ đi khám bệnh, khám bệnh nhân ], reviewed: false }
+看到: { vi: [ nhìn thấy ], reviewed: false }
+看见: { vi: [ nhìn thấy, bắt gặp ], reviewed: false }
+考: { vi: [ đánh, đập, kiểm tra, thi ], reviewed: false }
+考试: { vi: [ dự thi, kỳ thi ], reviewed: false }
+渴: { vi: [ khát ], reviewed: false }
+课: { vi: [ môn học, khoá học, lớp, bài học ], reviewed: false }
+课本: { vi: [ sách giáo khoa ], reviewed: false }
+课文: { vi: [ bài đọc ], reviewed: false }
+口: { vi: [ miệng, "lượng từ cho những thứ có miệng (người, động vật nuôi, đại bác, giếng, v.v.)", lượng từ cho vết cắn hoặc ngụm ], reviewed: false }
+块: { vi: [ cục; tảng; miếng, "lượng từ cho miếng vải, bánh, xà phòng, v.v.", (thông tục) lượng từ cho tiền và đơn vị tiền tệ ], reviewed: false }
+快: { vi: [ nhanh, nhanh chóng, tốc độ, tỷ lệ ], reviewed: false }
+来: { vi: [ đến, (dùng thay cho động từ cụ thể hơn), "lại đây (bổ ngữ hướng chỉ động tác về phía người nói, như trong 回來|回来[hui2lai5])", "từ khi (như trong 自古以來|自古以来[zi4gu3 yi3lai2])" ], reviewed: false }
+来到: { vi: [ đến; tới ], reviewed: false }
+老: { vi: [ tiền tố dùng trước họ của một người hoặc số thứ tự sinh của các con trong gia đình hoặc để chỉ sự thân mật hoặc quen thuộc, già (người), người đáng kính, có kinh nghiệm ], reviewed: false }
+老人: { vi: [ ông già hoặc bà già, người cao tuổi, bố mẹ hoặc ông bà lớn tuổi ], reviewed: false }
+老师: { vi: [ giáo viên ], reviewed: false }
+了: { vi: [ (trợ từ chỉ hành động đã hoàn thành), "(trợ từ ngữ khí chỉ sự thay đổi trạng thái, tình huống hiện tại)", (trợ từ ngữ khí nhấn mạnh mệnh đề đứng trước) ], reviewed: false }
+累: { vi: [ mệt, mỏi, căng thẳng, kiệt sức ], reviewed: false }
+冷: { vi: [ lạnh ], reviewed: false }
+里: { vi: [ lót, bên trong, phía trong, nội bộ ], reviewed: false }
+里边: { vi: [ bên trong ], reviewed: false }
+两: { vi: [ hai, cả hai, một vài, một ít ], reviewed: false }
+零: { vi: [ không, số không, ký hiệu không, phân số ], reviewed: false }
+六: { vi: [ sáu, "6" ], reviewed: false }
+楼: { vi: [ nhà có hơn 1 tầng, toà nhà nhiều tầng, tầng ], reviewed: false }
+楼上: { vi: [ tầng trên, (tiếng lóng Internet) người đăng trước trong một chủ đề diễn đàn ], reviewed: false }
+楼下: { vi: [ tầng dưới ], reviewed: false }
+路: { vi: [ "đường (LT:條|条[tiao2])", hành trình, tuyến, "đường (xe buýt,...)" ], reviewed: false }
+路口: { vi: [ giao lộ, ngã tư (của đường) ], reviewed: false }
+路上: { vi: [ trên đường, trên đường; đang đi ], reviewed: false }
+妈妈: { vi: [ mẹ, má ], reviewed: false }
+马路: { vi: [ đường phố, đường ], reviewed: false }
+马上: { vi: [ ngay lập tức, ngay tức khắc, lập tức, trên lưng ngựa (tức là bằng vũ lực quân sự) ], reviewed: false }
+吗: { vi: [ (trợ từ nghi vấn cho câu hỏi "có-không") ], reviewed: false }
+买: { vi: [ mua, mua sắm ], reviewed: false }
+慢: { vi: [ chậm ], reviewed: false }
+忙: { vi: [ bận, vội vã, vội vàng, lao vào ], reviewed: false }
+毛: { vi: [ tóc, lông, vụn lông, lông cừu ], reviewed: false }
+没: { vi: [ (tiền tố phủ định cho động từ) chưa; không ], reviewed: false }
+没关系: { vi: [ không sao đâu ], reviewed: false }
+没什么: { vi: [ không sao; không có gì; đừng bận tâm, nghĩ không có gì; rất hân hạnh; không có chi; không có gì ], reviewed: false }
+没事儿: { vi: [ có thời gian rảnh, rảnh rỗi, không quan trọng, không có gì ], reviewed: false }
+没有: { vi: [ không có, không tồn tại, chưa, không phải là ], reviewed: false }
+妹妹: { vi: [ em gái, phụ nữ trẻ ], reviewed: false }
+门: { vi: [ cổng, cửa, lối vào, khung cửa ], reviewed: false }
+门口: { vi: [ cửa ra vào, cổng ], reviewed: false }
+门票: { vi: [ "vé (xem kịch, rạp chiếu phim, v.v.)" ], reviewed: false }
+们: { vi: [ dùng để chỉ số nhiều cho đại từ và danh từ chỉ người ], reviewed: false }
+米饭: { vi: [ (cơm) đã nấu ], reviewed: false }
+面包: { vi: [ bánh mì ], reviewed: false }
+面条儿: { vi: [ mì sợi ], reviewed: false }
+名字: { vi: [ tên (của người hoặc vật) ], reviewed: false }
+明白: { vi: [ rõ ràng, hiển nhiên, không mơ hồ, hiểu ], reviewed: false }
+明年: { vi: [ năm sau ], reviewed: false }
+明天: { vi: [ ngày mai ], reviewed: false }
+拿: { vi: [ cầm, nắm, bắt, chụp ], reviewed: false }
+哪: { vi: [ như thế nào, cái nào ], reviewed: false }
+哪里: { vi: [ ở đâu?, một nơi nào đó, bất kỳ nơi nào, dù ở đâu ], reviewed: false }
+哪儿: { vi: [ ở đâu?, bất cứ đâu; nơi nào đó, (dùng trong câu hỏi tu từ) làm sao có thể ...?; làm sao có thể ... được? ], reviewed: false }
+哪些: { vi: [ những cái nào?, ai?, gì? ], reviewed: false }
+那: { vi: [ "(chỉ định) đó; cái; những (phát âm thông tục [nei4])", "(đại từ) đó (chỉ người, sự vật hoặc tình huống)", vậy thì (trong trường hợp đó) ], reviewed: false }
+那边: { vi: [ đằng kia, ở đằng đó ], reviewed: false }
+那里: { vi: [ ở đó; nơi đó ], reviewed: false }
+那儿: { vi: [ ở đó ], reviewed: false }
+那些: { vi: [ những cái đó ], reviewed: false }
+奶: { vi: [ vú, sữa, cho bú, mẹ ], reviewed: false }
+奶奶: { vi: [ (thân mật) bà (bà nội), (kính trọng) bà chủ nhà, (thông tục) vú, ngực ], reviewed: false }
+男: { vi: [ nam, "Nam tước, cấp thấp nhất trong năm cấp bậc quý tộc 五等爵位[wu3 deng3 jue2 wei4]" ], reviewed: false }
+男孩儿: { vi: [ cậu bé ], reviewed: false }
+男朋友: { vi: [ bạn trai ], reviewed: false }
+男人: { vi: [ một người đàn ông, một nam giới, đàn ông ], reviewed: false }
+男生: { vi: [ nam sinh, học sinh nam, con trai, chàng trai (nam thanh niên) ], reviewed: false }
+南: { vi: [ phía nam ], reviewed: false }
+南边: { vi: [ phía nam, mặt nam, phần phía nam, về phía nam của ], reviewed: false }
+难: { vi: [ khó (để...), vấn đề, khó khăn, khó ], reviewed: false }
+呢: { vi: [ 'trợ từ chỉ rằng câu hỏi được hỏi trước đó áp dụng cho từ đứng trước ("Còn ...?", "Và ...?")', trợ từ để hỏi về địa điểm ("Ở đâu ...?"), 'trợ từ biểu thị ngắt quãng, nhấn mạnh từ đứng trước và cho người nghe thời gian tiếp nhận ("được không?", "bạn hiểu không?")', (cuối câu trần thuật) trợ từ chỉ sự tiếp tục của trạng thái hoặc hành động ], reviewed: false }
+能: { vi: [ có thể, có khả năng, có khả năng sẽ, năng lực ], reviewed: false }
+你: { vi: [ "bạn (ngôi thứ hai thông dụng, khác với kính trọng 您[nin2])", "bạn (Lưu ý: Ở Đài Loan, 妳 được dùng để chỉ nữ giới, nhưng ở Trung Quốc đại lục, từ này không phổ biến. Thay vào đó, 你 được dùng cho cả nam và nữ.)" ], reviewed: false }
+你们: { vi: [ các bạn (số nhiều) ], reviewed: false }
+年: { vi: [ năm, "Lượng từ: 個|个[ge4]", ngũ cốc, mùa thu hoạch (cũ) ], reviewed: false }
+您: { vi: [ "bạn (kính trọng, trái với thân mật 你[ni3])" ], reviewed: false }
+牛奶: { vi: [ sữa bò ], reviewed: false }
+女: { vi: [ nữ, phụ nữ, con gái ], reviewed: false }
+女儿: { vi: [ con gái ], reviewed: false }
+女孩儿: { vi: [ cô gái; cô bé ], reviewed: false }
+女朋友: { vi: [ bạn gái ], reviewed: false }
+女人: { vi: [ vợ ], reviewed: false }
+女生: { vi: [ nữ sinh, học sinh nữ, cô gái ], reviewed: false }
+旁边: { vi: [ bên; nơi liền kề ], reviewed: false }
+跑: { vi: [ chạy, chạy trốn, bỏ trốn, "chạy quanh (làm việc vặt, v.v.)" ], reviewed: false }
+朋友: { vi: [ bạn ], reviewed: false }
+票: { vi: [ vé, phiếu, tiền giấy, người bị bắt đòi tiền chuộc ], reviewed: false }
+七: { vi: [ bảy, "7" ], reviewed: false }
+起: { vi: [ dậy, nâng lên, thức dậy, khởi hành ], reviewed: false }
+起床: { vi: [ thức dậy; ngủ dậy ], reviewed: false }
+起来: { vi: [ đứng lên; thức dậy, "cũng đọc là [qi3 lai2]" ], reviewed: false }
+汽车: { vi: [ xe hơi, xe ô tô, xe buýt ], reviewed: false }
+前: { vi: [ trước, phía trước, tiến lên, đầu tiên ], reviewed: false }
+前边: { vi: [ phía trước, mặt trước, ở phía trước ], reviewed: false }
+前天: { vi: [ ngày hôm kia ], reviewed: false }
+钱: { vi: [ tiền xu, tiền, "đơn vị trọng lượng, một phần mười của một lạng 兩|两[liang3]" ], reviewed: false }
+钱包: { vi: [ ví, bóp tiền ], reviewed: false }
+请: { vi: [ mời, mời mọc, xin (làm gì đó), "đãi (một bữa ăn, v.v.)" ], reviewed: false }
+请假: { vi: [ xin nghỉ phép ], reviewed: false }
+请进: { vi: [ '"mời vào"' ], reviewed: false }
+请问: { vi: [ "xin lỗi, cho tôi hỏi...?" ], reviewed: false }
+请坐: { vi: [ xin mời ngồi ], reviewed: false }
+球: { vi: [ quả bóng, hình cầu, địa cầu, trận bóng ], reviewed: false }
+去: { vi: [ đi, đi đến (một nơi), "(về thời gian, v.v.) trước", vừa qua ], reviewed: false }
+去年: { vi: [ năm ngoái ], reviewed: false }
+热: { vi: [ hâm nóng, làm nóng, nóng (thời tiết), nhiệt ], reviewed: false }
+人: { vi: [ người; mọi người ], reviewed: false }
+认识: { vi: [ biết, nhận ra, quen thuộc, làm quen với ai đó ], reviewed: false }
+认真: { vi: [ tận tâm, nghiêm túc, nghiêm chỉnh, để tâm ], reviewed: false }
+日: { vi: [ mặt trời, ngày, "ngày, ngày trong tháng" ], reviewed: false }
+日期: { vi: [ ngày tháng ], reviewed: false }
+肉: { vi: [ thịt, thịt quả, phần thịt (của quả), (thông tục) (quả) nhũn ], reviewed: false }
+三: { vi: [ ba, "3" ], reviewed: false }
+山: { vi: [ "núi; đồi (lượng từ: 座[zuo4])", (thông tục) bó rơm nhỏ cho tằm làm kén ], reviewed: false }
+商场: { vi: [ trung tâm mua sắm, trung tâm thương mại, cửa hàng bách hóa, thương xá ], reviewed: false }
+商店: { vi: [ cửa hàng; tiệm ], reviewed: false }
+上: { vi: [ (hình thức kết hợp) trên; phía trên; trước, đầu tiên (của nhiều phần), leo; lên; đi lên, tham dự (lớp hoặc đại học) ], reviewed: false }
+上班: { vi: [ đi làm, đi trực, bắt đầu làm việc, đến văn phòng ], reviewed: false }
+上边: { vi: [ phía trên, bên trên, trên đầu, hướng lên ], reviewed: false }
+上车: { vi: [ "lên (xe buýt, tàu, ô tô, v.v.)" ], reviewed: false }
+上次: { vi: [ lần trước ], reviewed: false }
+上课: { vi: [ đi học, tham dự lớp, học hoặc dạy một lớp ], reviewed: false }
+上网: { vi: [ lên mạng, kết nối Internet, "(tài liệu,...) được tải lên Internet", "(quần vợt, bóng chuyền,...) lên lưới" ], reviewed: false }
+上午: { vi: [ buổi sáng ], reviewed: false }
+上学: { vi: [ đi học, theo học ], reviewed: false }
+少: { vi: [ ít, hơn, thiếu, mất ], reviewed: false }
+谁: { vi: [ ai, "cũng đọc là [shui2]" ], reviewed: false }
+身上: { vi: [ trên cơ thể, trong tay, ở giữa ], reviewed: false }
+身体: { vi: [ cơ thể, sức khỏe ], reviewed: false }
+什么: { vi: [ gì?, điều gì đó; bất kỳ điều gì ], reviewed: false }
+生病: { vi: [ bị ốm ], reviewed: false }
+生气: { vi: [ nổi giận; tức giận, sinh khí; sức sống ], reviewed: false }
+生日: { vi: [ sinh nhật ], reviewed: false }
+十: { vi: [ mười, "10" ], reviewed: false }
+时候: { vi: [ thời gian, khoảng thời gian, khoảnh khắc, giai đoạn ], reviewed: false }
+时间: { vi: [ (khái niệm) thời gian, (khoảng thời gian), (thời điểm) thời gian ], reviewed: false }
+事: { vi: [ sự việc, điều, mục, công việc ], reviewed: false }
+试: { vi: [ thử, thí nghiệm, thi, cuộc kiểm tra ], reviewed: false }
+是: { vi: [ là (chỉ theo sau bởi danh từ), đúng; phải; thật, "sự thừa nhận tôn kính một mệnh lệnh: rất tốt", (phó từ để nhấn mạnh) ], reviewed: false }
+是不是: { vi: [ có phải hay không, phải hoặc không, có hay không ], reviewed: false }
+手: { vi: [ tay, (trang trọng) cầm, người làm các công việc nhất định, người có kỹ năng trong các công việc nhất định ], reviewed: false }
+手机: { vi: [ điện thoại di động ], reviewed: false }
+书: { vi: [ sách, thư, tài liệu, viết ], reviewed: false }
+书包: { vi: [ cặp sách, cặp đeo lưng, túi sách ], reviewed: false }
+书店: { vi: [ nhà sách ], reviewed: false }
+树: { vi: [ cây, trồng, triển khai ], reviewed: false }
+水: { vi: [ nước, sông, chất lỏng, đồ uống ], reviewed: false }
+水果: { vi: [ trái cây ], reviewed: false }
+睡: { vi: [ ngủ, nằm xuống ], reviewed: false }
+睡觉: { vi: [ đi ngủ, ngủ ], reviewed: false }
+说: { vi: [ nói; trò chuyện; nói ra, giải thích; bình luận, mắng; quở trách, "hình thức kết hợp: học thuyết; lý thuyết" ], reviewed: false }
+说话: { vi: [ nói, trò chuyện, buôn chuyện, kể chuyện ], reviewed: false }
+四: { vi: [ bốn, "4" ], reviewed: false }
+送: { vi: [ gửi; giao; truyền, tặng (như một món quà), tiễn, đi cùng; đi theo ], reviewed: false }
+岁: { vi: [ tuổi, lượng từ cho năm (tuổi), năm, năm (mùa vụ) ], reviewed: false }
+他: { vi: [ anh ấy; ông ấy (dùng cho bất kỳ giới tính nào khi giới tính không được biết hoặc không quan trọng), (dùng trước tên ai đó để nhấn mạnh), (dùng như một tân ngữ không có nghĩa), (văn học) khác ], reviewed: false }
+他们: { vi: [ họ; bọn họ ], reviewed: false }
+她: { vi: [ cô ấy ], reviewed: false }
+她们: { vi: [ họ; các cô ấy (nữ) ], reviewed: false }
+太: { vi: [ cao nhất, vĩ đại, quá (nhiều), rất ], reviewed: false }
+天: { vi: [ ngày, trời, thượng đế ], reviewed: false }
+天气: { vi: [ thời tiết ], reviewed: false }
+听: { vi: [ nghe, nghe theo; tuân theo, một lon (từ mượn từ tiếng Anh "tin"), lượng từ cho đồ uống đóng lon ], reviewed: false }
+听到: { vi: [ nghe thấy ], reviewed: false }
+听见: { vi: [ nghe thấy ], reviewed: false }
+听写: { vi: [ (của học sinh) viết chính tả; bài chính tả, (âm nhạc) chép lại bằng tai ], reviewed: false }
+同学: { vi: [ học cùng trường, bạn học, bạn cùng lớp, "Lượng từ: 位[wei4], 個|个[ge4]" ], reviewed: false }
+图书馆: { vi: [ thư viện ], reviewed: false }
+外: { vi: [ bên ngoài, thêm vào, ngoại, quốc tế ], reviewed: false }
+外边: { vi: [ bên ngoài, bề mặt ngoài, nước ngoài, nơi không phải nhà của mình ], reviewed: false }
+外国: { vi: [ (quốc gia) nước ngoài ], reviewed: false }
+外语: { vi: [ ngôn ngữ nước ngoài, "Lượng từ: 門|门[men2]" ], reviewed: false }
+玩儿: { vi: [ chơi, vui chơi, đi chơi ], reviewed: false }
+晚: { vi: [ buổi tối, đêm, muộn ], reviewed: false }
+晚饭: { vi: [ bữa tối, cơm tối, bữa ăn tối ], reviewed: false }
+晚上: { vi: [ buổi tối, đêm, vào buổi tối ], reviewed: false }
+网上: { vi: [ trực tuyến ], reviewed: false }
+网友: { vi: [ bạn online, người dùng Internet ], reviewed: false }
+忘: { vi: [ quên, bỏ qua, sao nhãng ], reviewed: false }
+忘记: { vi: [ quên ], reviewed: false }
+问: { vi: [ hỏi; thắc mắc ], reviewed: false }
+我: { vi: [ tôi; mình; của tôi ], reviewed: false }
+我们: { vi: [ chúng tôi; chúng ta; bản thân chúng ta; của chúng tôi ], reviewed: false }
+五: { vi: [ năm, "5" ], reviewed: false }
+午饭: { vi: [ bữa trưa ], reviewed: false }
+西: { vi: [ phương Tây, tiếng Tây Ban Nha, tây ], reviewed: false }
+西边: { vi: [ phía tây, bên phía tây, phần phía tây, về phía tây của ], reviewed: false }
+洗: { vi: [ rửa; tắm, rửa ảnh, "xào bài (lá,...)", xóa (ghi âm) ], reviewed: false }
+洗手间: { vi: [ nhà vệ sinh, phòng vệ sinh, phòng rửa tay ], reviewed: false }
+喜欢: { vi: [ thích; ưa thích ], reviewed: false }
+下: { vi: [ xuống, hướng xuống, dưới, thấp hơn ], reviewed: false }
+下班: { vi: [ tan làm, tan ca ], reviewed: false }
+下边: { vi: [ ở dưới, mặt dưới, bên dưới ], reviewed: false }
+下车: { vi: [ "xuống (xe buýt, tàu, ô tô,...)" ], reviewed: false }
+下次: { vi: [ lần tới ], reviewed: false }
+下课: { vi: [ tan học, ra khỏi lớp, (nghĩa bóng) (đặc biệt là huấn luyện viên thể thao) bị sa thải, bị đuổi việc ], reviewed: false }
+下午: { vi: [ buổi chiều, p.m. ], reviewed: false }
+下雨: { vi: [ trời mưa ], reviewed: false }
+先: { vi: [ trước; đầu tiên; sớm hơn, lúc đầu; vốn dĩ, tạm thời; hiện tại, (tiền tố) quá cố (khi nói về người thân đã mất lớn tuổi hơn mình) ], reviewed: false }
+先生: { vi: [ giáo viên, quý ông; ngài; ông (Mr.), chồng, (phương ngữ) bác sĩ ], reviewed: false }
+现在: { vi: [ bây giờ, hiện tại, lúc này, hiện đại ], reviewed: false }
+想: { vi: [ nghĩ (về), nghĩ đến; nghĩ ra, nghĩ (rằng); tin (rằng), mong muốn; muốn ], reviewed: false }
+小: { vi: [ nhỏ, bé, một vài, trẻ ], reviewed: false }
+小孩儿: { vi: [ đứa trẻ, "Lượng từ: 個|个[ge4]" ], reviewed: false }
+小姐: { vi: [ cô gái, cô, (tiếng lóng) gái mại dâm ], reviewed: false }
+小朋友: { vi: [ trẻ em ], reviewed: false }
+小时: { vi: [ giờ, "lượng từ: 個|个[ge4]" ], reviewed: false }
+小学: { vi: [ trường tiểu học; trường cấp một ], reviewed: false }
+小学生: { vi: [ học sinh tiểu học, trẻ em đi học, (nghĩa bóng) người mới bắt đầu ], reviewed: false }
+笑: { vi: [ cười; mỉm cười, cười nhạo ], reviewed: false }
+写: { vi: [ viết ], reviewed: false }
+谢谢: { vi: [ cảm ơn, cảm ơn bạn ], reviewed: false }
+新: { vi: [ mới, vừa mới, meso- (hoá học) ], reviewed: false }
+新年: { vi: [ Năm mới, "Lượng từ: 個|个[ge4]" ], reviewed: false }
+星期: { vi: [ tuần, ngày trong tuần, Chủ nhật ], reviewed: false }
+星期日: { vi: [ chủ nhật ], reviewed: false }
+星期天: { vi: [ Chủ Nhật ], reviewed: false }
+行: { vi: [ đi, đến, du lịch, chuyến thăm ], reviewed: false }
+休息: { vi: [ nghỉ, nghỉ ngơi ], reviewed: false }
+学: { vi: [ học, học tập, bắt chước, khoa học ], reviewed: false }
+学生: { vi: [ học sinh, trẻ đi học ], reviewed: false }
+学习: { vi: [ học, tìm hiểu ], reviewed: false }
+学校: { vi: [ trường học, "Lượng từ: 所[suo3]" ], reviewed: false }
+学院: { vi: [ trường cao đẳng, học viện, trường, khoa ], reviewed: false }
+要: { vi: [ muốn; cần; yêu cầu, sẽ; sắp; sắp sửa, cần phải; nên, "nếu (giống như 要是[yao4 shi5])" ], reviewed: false }
+爷爷: { vi: [ (thân mật) ông nội, ông bên nội ], reviewed: false }
+也: { vi: [ (phó từ) cũng; vừa ... vừa ... (chỉ dùng trước vị ngữ), "(văn viết) trợ từ có chức năng giống với 啊[a5]" ], reviewed: false }
+页: { vi: [ trang, lá ], reviewed: false }
+一: { vi: [ một, đơn, một cái (mạo từ), ngay khi ], reviewed: false }
+衣服: { vi: [ quần áo ], reviewed: false }
+医生: { vi: [ bác sĩ ], reviewed: false }
+医院: { vi: [ bệnh viện ], reviewed: false }
+一半: { vi: [ một nửa ], reviewed: false }
+一会儿: { vi: [ một lúc, một thời gian, ngay lập tức, lúc thì...lúc thì... ], reviewed: false }
+一块儿: { vi: [ một khối, một miếng, một (đơn vị tiền), cùng nhau ], reviewed: false }
+一下儿: { vi: [ (dùng sau động từ) thử xem, làm (gì đó một chút để thử), một lần, một lúc ], reviewed: false }
+一样: { vi: [ giống, như, bằng, với ], reviewed: false }
+一边: { vi: [ một bên, mỗi bên, một mặt, mặt khác ], reviewed: false }
+一点儿: { vi: [ một chút, một ít, một chấm, một điểm ], reviewed: false }
+一起: { vi: [ ở cùng một nơi, cùng nhau, với, tổng cộng (tổng số) ], reviewed: false }
+一些: { vi: [ một số, một vài, một ít, (đi sau tính từ) ...hơn một chút ], reviewed: false }
+用: { vi: [ sử dụng, tận dụng, phải, ăn hoặc uống ], reviewed: false }
+有: { vi: [ có; có (gì đó), "(dạng kết hợp) có; với; mang tính chất gì đó (như trong 有意[you3 yi4] cố ý)" ], reviewed: false }
+有的: { vi: [ (có) một số (người...), một số (tồn tại) ], reviewed: false }
+有名: { vi: [ nổi tiếng, được biết đến ], reviewed: false }
+有时候: { vi: [ đôi khi ], reviewed: false }
+有些: { vi: [ một số, hơi ], reviewed: false }
+有用: { vi: [ hữu ích ], reviewed: false }
+右: { vi: [ (hình thức kết hợp) bên phải; phía tay phải, (hình thức kết hợp) (chính trị) hữu khuynh, (hình thức kết hợp) (cũ) phía tây, (văn học) bên phải là bên ưu tiên ], reviewed: false }
+右边: { vi: [ bên phải, "phải, về bên phải" ], reviewed: false }
+雨: { vi: [ mưa, "Lượng từ: 陣|阵[zhen4], 場|场[chang2]" ], reviewed: false }
+元: { vi: [ triều Nguyên (1279-1368), đơn vị tiền tệ (đặc biệt là nhân dân tệ Trung Quốc), (hình vị liên kết) đầu tiên; nguyên thủy; sơ cấp, (hình vị liên kết) cơ bản; nền tảng ], reviewed: false }
+远: { vi: [ xa, xa xôi, xa xăm, (nhấn mạnh trong so sánh) hơn nhiều ], reviewed: false }
+月: { vi: [ mặt trăng, tháng, hàng tháng ], reviewed: false }
+再: { vi: [ lại; một lần nữa; tái-, lần thứ hai; cái khác, "rồi sau đó (sau việc gì đó, và chỉ sau đó)", "dù cho ... đi nữa (theo sau bởi tính từ hoặc động từ, rồi thường là 也[ye3] hoặc 都[dou1] để nhấn mạnh)" ], reviewed: false }
+再见: { vi: [ tạm biệt, gặp lại sau ], reviewed: false }
+在: { vi: [ tồn tại; còn sống, (ai đó hoặc cái gì đó) ở (vị trí), (dùng trước động từ để chỉ hành động đang diễn ra) ], reviewed: false }
+在家: { vi: [ ở nhà, "(tại nơi làm việc) có mặt (trái với đi vắng vì công việc chính thức 出差[chu1chai1])", "(Phật giáo, v.v.) vẫn là cư sĩ (trái với xuất gia thành tu sĩ 出家[chu1jia1])" ], reviewed: false }
+早: { vi: [ sớm, buổi sáng, Chào buổi sáng!, lâu rồi ], reviewed: false }
+早饭: { vi: [ bữa sáng ], reviewed: false }
+早上: { vi: [ buổi sáng sớm ], reviewed: false }
+怎么: { vi: [ như thế nào?, cái gì?, tại sao? ], reviewed: false }
+站: { vi: [ trạm, đứng, dừng, tạm dừng ], reviewed: false }
+找: { vi: [ cố gắng tìm, tìm, đến gặp ai đó, tìm thấy ], reviewed: false }
+找到: { vi: [ tìm thấy ], reviewed: false }
+这: { vi: [ (đại từ) này; những...này, (hình thức kết hợp) này; (được theo sau bởi danh từ), "(hình thức kết hợp) này; những...này (được theo sau bởi lượng từ) (trong nghĩa này, thường phát âm [zhei4], đặc biệt ở Bắc Kinh)" ], reviewed: false }
+这边: { vi: [ bên này, ở đây ], reviewed: false }
+这里: { vi: [ ở đây ], reviewed: false }
+这儿: { vi: [ ở đây ], reviewed: false }
+这些: { vi: [ những... này ], reviewed: false }
+着: { vi: [ trợ từ thể hiện hành động đang diễn ra hoặc trạng thái đang tiếp diễn ], reviewed: false }
+真: { vi: [ thật, sự thật, quả thật, có thật ], reviewed: false }
+真的: { vi: [ thực sự; thật sự; quả thật, thật; đúng; chính xác, (toán) chính quy ], reviewed: false }
+正: { vi: [ thẳng, nghiêm túc, đúng đắn, chính ], reviewed: false }
+正在: { vi: [ đang ở (thời điểm đó), ngay tại (nơi đó), đang trong quá trình (làm gì đó) ], reviewed: false }
+知道: { vi: [ biết; nhận thức được, "cũng đọc là [zhi1 dao5]" ], reviewed: false }
+知识: { vi: [ kiến thức, trí thức ], reviewed: false }
+中: { vi: [ (hình thức kết hợp) Trung Quốc; tiếng Trung, bên trong; ở giữa; trong, giữa; trung tâm, trong khi (làm gì đó); trong suốt ], reviewed: false }
+中国: { vi: [ Trung Quốc ], reviewed: false }
+中间: { vi: [ ở giữa; bên trong, ở giữa; trong; giữa; trong số, trong lúc; trong khi đó ], reviewed: false }
+中文: { vi: [ ngôn ngữ Trung Quốc ], reviewed: false }
+中午: { vi: [ buổi trưa, trưa ], reviewed: false }
+中学: { vi: [ trường trung học ], reviewed: false }
+中学生: { vi: [ học sinh trung học, học sinh cấp ba ], reviewed: false }
+重: { vi: [ nặng, nghiêm trọng, coi trọng ], reviewed: false }
+重要: { vi: [ quan trọng; đáng kể; chính yếu ], reviewed: false }
+住: { vi: [ sống, ở, lưu lại, cư trú ], reviewed: false }
+准备: { vi: [ sự chuẩn bị, chuẩn bị, dự định, sắp ], reviewed: false }
+桌子: { vi: [ bàn, bàn làm việc ], reviewed: false }
+字: { vi: [ chữ, ký hiệu, kí tự, từ ], reviewed: false }
+子: { vi: [ (hậu tố danh từ) ], reviewed: false }
+走: { vi: [ đi, bước, chạy, di chuyển (của phương tiện) ], reviewed: false }
+走路: { vi: [ đi bộ, đi bằng chân ], reviewed: false }
+最: { vi: [ nhất, tính từ so sánh nhất ], reviewed: false }
+最好: { vi: [ tốt nhất, nên ...; tốt hơn hết nên ... ], reviewed: false }
+最后: { vi: [ cuối cùng, sau cùng, tối hậu ], reviewed: false }
+昨天: { vi: [ hôm qua ], reviewed: false }
+左: { vi: [ trái, cánh tả (chính trị), đông, không chính thống ], reviewed: false }
+左边: { vi: [ bên trái, phía trái, ở bên trái của ], reviewed: false }
+坐: { vi: [ ngồi, ngồi xuống, "đi (xe buýt, máy bay, v.v.)", kết trái ], reviewed: false }
+坐下: { vi: [ ngồi xuống ], reviewed: false }
+做: { vi: [ làm; sản xuất, viết; sáng tác, "làm; tham gia; tổ chức (một bữa tiệc, v.v.)", "(về người) làm (trung gian, học sinh giỏi, v.v.); trở thành (vợ chồng, bạn bè, v.v.)" ], reviewed: false }
