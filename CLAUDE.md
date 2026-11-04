@@ -208,6 +208,8 @@ Không dùng `pnpm test` (watch mode, không tự thoát).
 
 - Mô tả PR theo đúng format `.github/pull_request_template.md` (References → Description →
   Screenshots → Checklist), không tự đổi tiêu đề mục.
+- Xoá mọi dòng placeholder của template (các dòng `> …` như "Describe what it related",
+  "UI screenshots for…", "Note: Developer is responsible…") trước khi gửi.
 - PR thay đổi giao diện **bắt buộc có screenshot** (mobile 375px, sáng và tối; có trước/sau nếu
   sửa UI cũ). PR không liên quan UI ghi `N/A` ở mục Screenshots.
 - Chỉ tick ô checklist đã thực sự kiểm tra.
