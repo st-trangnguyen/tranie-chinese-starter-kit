@@ -8,9 +8,14 @@
 - Mỗi chặng xây app cũng là một chặng nâng level dùng AI khi phát triển.
 - Mỗi level có một năng lực chính. Tool của level sau dùng sớm được, nhưng **tới level đó thì
   bắt buộc**. Level gán cho một epic là **level bắt buộc tối thiểu** khi làm epic đó.
-- Bỏ **L3 Plan-first** và **L4 Isolation**.
-- **L5, L6, L7 mỗi level 1 epic**, chỉ để dựng nền. Dồn phần còn lại sang **L8** để luyện nhiều
-  nhất ở level này.
+- Dùng L1, L2, L5, L6, L8. **Bỏ L3 Plan-first, L4 Isolation, L7 Parallel.**
+- Cách phân bổ:
+  1. **Level chỉ tăng, theo đúng thứ tự làm** trong [roadmap](../02-design/roadmap.md)
+     (E1 → E2 → E3 → E4 → E5 → E6 → E8 → E7 → E9 → …), vì không luyện được L8 khi hàng rào
+     của level trước chưa có.
+  2. **Mỗi level nhận epic có bản chất khớp nhất** với năng lực của nó.
+  3. **Mỗi level chỉ cần đủ số lần lặp để đạt tiêu chí ra trường** (khoảng 4–8 story). Mọi thứ
+     sau đó dồn sang **L8** để có nhiều thời gian trải nghiệm nhất.
 
 ## Thang level đang dùng
 
@@ -20,43 +25,39 @@
 | 1 · Foundation | L2 Advanced setup | Môi trường được kiểm soát | 35% |
 | 2 · Discipline | L5 Enforcement | Các check không bao giờ quên | 50% |
 | 2 · Discipline | L6 Spec + TDD | Spec định nghĩa thế nào là xong | 60% |
-| 3 · Scale | L7 Parallel | Làm nhiều hơn, chất lượng giữ nguyên | 65% |
 | 3 · Scale | L8 Autonomous | Agent giao việc, người quyết định | 70% |
 | — | L8+ Beyond | Chân trời, chưa là level | — |
 
 ## Map vào roadmap
 
-### Phase 1 · Foundation — phần lớn bản 0.1
+| Level | Epic | Story | Vì sao khớp | Tiêu chí ra trường |
+|---|---|---|---|---|
+| **L1** ✅ | Monorepo, CLAUDE.md, rules | — | Đã xong | Agent đọc được chuẩn dự án ngay ngày đầu |
+| **L2** | **E1** Nền tảng PWA · **Design system** | 4 | Thuần cấu hình môi trường: build, PWA, design token, preview | Agent tự chạy, tự xem preview, không phải hỏi quyền lặt vặt |
+| **L5** | **E2** Pipeline nội dung | 5 | Mọi AC của E2 là kiểm tra: sai schema báo lỗi kèm file và dòng, thiếu nghĩa cảnh báo, thiếu dữ liệu nét cảnh báo | `content:check`, lint Dependency Rule, typecheck, test chạy trong hook và CI |
+| **L6** | **E3** Lộ trình & chạy bài (S3.1–3.4) · **E4** Nghe & Pinyin | 8 | Business rule đầu tiên: khóa/mở/xong, chấm điểm, mở khóa; đổi `ni3` → `nǐ`, tô chỗ sai theo thanh mẫu / vận mẫu / thanh điệu | Mẫu spec → test viết trước → service 3 phần, đã lặp qua 2 epic để L8 dùng lại |
+| **L8** | **E5** Luyện nói · **E6** Luyện viết (S6.1–6.2) · **E8** Trang chủ & Cài đặt (S8.1–8.2) · **E7** Nội dung Nhập môn | 9 | Hết bản 0.1: agent nhận trọn từng epic, bạn duyệt PR | — |
+| **L8** | Toàn bộ **0.2**: **E9** SRS · **E10** Bài tập · phần 0.2 của E3/E6/E8 (S3.5, S3.6, S6.3, S8.3, S8.4, S8.5) · **E11** Nội dung HSK 1 | 25 | Tính năng theo mẫu spec + test của L6; nội dung theo `content:check` của L5 | — |
+| **L8** | **0.3** HSK 2 · **0.4** HSK 3 · **0.5** HSK 4 | chưa tách | Lặp lại cách làm của E11 cho từng cấp; bạn duyệt nghĩa tiếng Việt và ngữ pháp | — |
+| **L6** (quay lại) | **1.0** Chia sẻ | chưa tách | Tài khoản, đồng bộ: vùng bảo mật, người quyết định thiết kế | — |
+| **L8+** | AI trong app (sinh nội dung lúc học, hội thoại tự do với AI) | — | Ngoài MVP, xem [Brainstorm §6](../01-brainstorm.md) | — |
 
-| Level | Epic / tính năng |
-|---|---|
-| **L1** ✅ | Dựng monorepo, CLAUDE.md, rules |
-| **L2** | **E1** Nền tảng PWA · **E2** Pipeline nội dung · **Design system** · **E3** Lộ trình & chạy bài (S3.1–3.4) · **E4** Nghe & Pinyin · **E5** Luyện nói · **E6** Luyện viết (S6.1–6.2) · **E8** Trang chủ & Cài đặt (S8.1–8.2) |
+**Tỷ trọng:** L2 4 story · L5 5 · L6 8 · L8 34 (khoảng 67% của 51 story) + 3 bản HSK 2–4.
 
-### Phase 2 · Discipline — cuối 0.1, đầu 0.2
+## Cách làm ở L8
 
-| Level | Epic | Kết quả phải để lại cho L8 |
-|---|---|---|
-| **L5** | **E7** Nội dung Nhập môn | CI chặn được mọi vi phạm Dependency Rule và lỗi nội dung (`content:check`, lint, typecheck, test) |
-| **L6** | **E9** Ôn tập SRS | Mẫu spec + test cho business rule (FSRS, test viết trước) để agent L8 làm theo |
-
-### Phase 3 · Scale — từ 0.2 tới 1.0
-
-| Level | Epic / bản | Ghi chú |
-|---|---|---|
-| **L7** | **E10** Bài tập Từ vựng / Ngữ pháp / Đọc / Hội thoại | Dựng sẵn registry 9 `kind`, mỗi agent làm một dạng bài. Để lại cách chia việc song song đã chạy thử |
-| **L8** | **Phần 0.2 của E3/E6/E8** (S3.5, S3.6, S6.3, S8.3, S8.4, S8.5) | Tính năng app: agent tự làm theo mẫu spec + test của E9, người duyệt PR |
-| **L8** | **E11** Nội dung HSK 1 | Nội dung: agent soạn từng chủ đề, người duyệt nghĩa tiếng Việt và ngữ pháp |
-| **L8** | **0.3** HSK 2 · **0.4** HSK 3 · **0.5** HSK 4 | Lặp lại cách làm của E11 cho từng cấp |
-| **L6** (quay lại) | **1.0** Chia sẻ | Tài khoản, đồng bộ: vùng bảo mật, người quyết định thiết kế |
-| **L8+** | AI trong app (sinh nội dung lúc học, hội thoại tự do với AI) | Ngoài MVP, xem [Brainstorm §6](../01-brainstorm.md) |
+- Agent nhận **trọn một epic mỗi lần**, làm tuần tự (không có L7 nên không chạy song song).
+- Brief cho agent gồm: AC lấy nguyên văn từ `epics-stories.md`, phạm vi file được sửa, và định
+  nghĩa xong = CI xanh + business rule có test viết trước theo mẫu của L6.
+- Bạn chỉ quyết định: trả lời khi agent bị kẹt, duyệt PR, duyệt nội dung.
 
 ## Rủi ro
 
-- **L8 chỉ an toàn khi hàng rào đã chắc.** L5, L6, L7 mỗi level chỉ có 1 epic, nên kết quả để lại
-  của E7, E9, E10 (cột bên trên) là điều kiện bắt buộc trước khi sang L8. Thiếu cái nào thì phải
-  review tay mọi thứ, thực chất vẫn đang làm L2.
-- **L2 ôm gần hết 0.1.** Phần lớn 0.1 được làm khi chưa có hàng rào tự động, nên phải tự review
-  kỹ Dependency Rule cho tới khi L5 vào ở E7.
+- **L8 chỉ an toàn khi hàng rào đã chắc.** Tiêu chí ra trường của L5 (CI) và L6 (mẫu spec +
+  test) là điều kiện bắt buộc trước khi sang E5. Thiếu cái nào thì phải review tay mọi thứ, thực
+  chất vẫn đang làm L2.
+- **Nội dung soạn tuần tự sẽ chậm.** E11 (15 chủ đề) và HSK 2–4 soạn lần lượt từng chủ đề. Nếu
+  quá chậm, có thể bật L7 riêng cho phần nội dung: file YAML mỗi chủ đề tách rời nên gần như không
+  conflict.
 - **Bỏ L3.** E2 (schema, audio dựng theo hash) và E3 (quy tắc mở khóa) thiếu bước thiết kế trước.
   Nên thêm mục "thiết kế trước khi code" vào `CLAUDE.md` §8.
