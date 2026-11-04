@@ -1,0 +1,7 @@
+# Chữ đọc thay khi tạo audio TTS (S2.4). Dùng cho chữ đa âm mà edge-tts đọc sai khi đứng một
+# mình — edge-tts không nhận SSML <phoneme>, nên đọc một chữ đồng âm thay vào.
+# Khóa là ID từ (xem content/data-raw/hsk1.words.json). Sửa xong chạy `content:build` rồi
+# `content:audio`; nghe lại file mp3 để xác nhận.
+地:de: 的
+干:gān: 甘
+还:huán: 环

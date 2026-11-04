@@ -1,0 +1,3002 @@
+[
+  {
+    "id": "爱",
+    "hanzi": "爱",
+    "pinyin": "ài",
+    "en": "love, like, be fond of, be keen on, cherish, be apt to"
+  },
+  {
+    "id": "爱好",
+    "hanzi": "爱好",
+    "pinyin": "àihào",
+    "en": "love, like, be fond of, be keen on"
+  },
+  {
+    "id": "八",
+    "hanzi": "八",
+    "pinyin": "bā",
+    "en": "det.: eight"
+  },
+  {
+    "id": "爸爸",
+    "hanzi": "爸爸",
+    "pinyin": "bàba",
+    "en": "old man, father, papa, pappa, daddy, pa, begetter, pop, dada, dad, male parent, pater, pappy, pops, poppa"
+  },
+  {
+    "id": "吧",
+    "hanzi": "吧",
+    "pinyin": "ba",
+    "en": "particle: used to show mild imperative or uncertainty"
+  },
+  {
+    "id": "白",
+    "hanzi": "白",
+    "pinyin": "bái",
+    "en": "white, clear, pure, plain, wrongly written/mispronounced,"
+  },
+  {
+    "id": "白天",
+    "hanzi": "白天",
+    "pinyin": "báitian",
+    "en": "daytime, during the day, day, CL:個|个[ge4]"
+  },
+  {
+    "id": "百",
+    "hanzi": "百",
+    "pinyin": "bǎi",
+    "en": "cent, centum, century, hundred, det.: hundred"
+  },
+  {
+    "id": "班",
+    "hanzi": "班",
+    "pinyin": "bān",
+    "en": "m.[event]"
+  },
+  {
+    "id": "半",
+    "hanzi": "半",
+    "pinyin": "bàn",
+    "en": "det.: half"
+  },
+  {
+    "id": "半年",
+    "hanzi": "半年",
+    "pinyin": "bànnián",
+    "en": "half a year"
+  },
+  {
+    "id": "半天",
+    "hanzi": "半天",
+    "pinyin": "bàntiān",
+    "en": "half of the day, a long time, quite a while, midair, CL:個|个[ge4]"
+  },
+  {
+    "id": "帮",
+    "hanzi": "帮",
+    "pinyin": "bāng",
+    "en": "help"
+  },
+  {
+    "id": "帮忙",
+    "hanzi": "帮忙",
+    "pinyin": "bāng máng",
+    "en": "assist, aid, smile, lend a hand, do a favour, help, oblige, give a hand, do favor, do a good turn"
+  },
+  {
+    "id": "包",
+    "hanzi": "包",
+    "pinyin": "bāo",
+    "en": "wrap, surround, encircle, envelop, include, contain, undertake the whole thing, assure, guarantee"
+  },
+  {
+    "id": "包子",
+    "hanzi": "包子",
+    "pinyin": "bāozi",
+    "en": "steamed stuffed bun, CL:個|个[ge4]"
+  },
+  {
+    "id": "杯",
+    "hanzi": "杯",
+    "pinyin": "bēi",
+    "en": "m.[container]"
+  },
+  {
+    "id": "杯子",
+    "hanzi": "杯子",
+    "pinyin": "bēizi",
+    "en": "tumbler, drinking glass, cup, glass"
+  },
+  {
+    "id": "北",
+    "hanzi": "北",
+    "pinyin": "běi",
+    "en": "atomic number 97, northward, north, berkelium, Bk, northern"
+  },
+  {
+    "id": "北边",
+    "hanzi": "北边",
+    "pinyin": "běibian",
+    "en": "north, north side, northern part, to the north of"
+  },
+  {
+    "id": "北京",
+    "hanzi": "北京",
+    "pinyin": "Běijīng",
+    "en": "capital of Red China, Beijing, Peking, Beijing (Peking), Peiping"
+  },
+  {
+    "id": "本",
+    "hanzi": "本",
+    "pinyin": "běn",
+    "en": "det.: this"
+  },
+  {
+    "id": "本子",
+    "hanzi": "本子",
+    "pinyin": "běnzi",
+    "en": "book, notebook, edition, CL:本[ben3]"
+  },
+  {
+    "id": "比",
+    "hanzi": "比",
+    "pinyin": "bǐ",
+    "en": "compared with"
+  },
+  {
+    "id": "别",
+    "hanzi": "别",
+    "pinyin": "bié",
+    "en": "don't"
+  },
+  {
+    "id": "别的",
+    "hanzi": "别的",
+    "pinyin": "biéde",
+    "en": "else, other"
+  },
+  {
+    "id": "别人",
+    "hanzi": "别人",
+    "pinyin": "biéren",
+    "en": "others, other people, another person"
+  },
+  {
+    "id": "病",
+    "hanzi": "病",
+    "pinyin": "bìng",
+    "en": "disease"
+  },
+  {
+    "id": "病人",
+    "hanzi": "病人",
+    "pinyin": "bìngrén",
+    "en": "shut-in, patient, subject, sufferer, case, valetudinarian, invalid"
+  },
+  {
+    "id": "不大",
+    "hanzi": "不大",
+    "pinyin": "bùdà",
+    "en": "not very/too, not often"
+  },
+  {
+    "id": "不对",
+    "hanzi": "不对",
+    "pinyin": "bù duì",
+    "en": "incorrect, wrong, amiss, abnormal, queer"
+  },
+  {
+    "id": "不客气",
+    "hanzi": "不客气",
+    "pinyin": "bù kèqì",
+    "en": "you're welcome, don't mention it, impolite, rude, blunt"
+  },
+  {
+    "id": "不用",
+    "hanzi": "不用",
+    "pinyin": "bùyòng",
+    "en": "need not"
+  },
+  {
+    "id": "不",
+    "hanzi": "不",
+    "pinyin": "bù",
+    "en": "non, do not, no, nowise, not, nope, nae, no more, nix"
+  },
+  {
+    "id": "菜",
+    "hanzi": "菜",
+    "pinyin": "cài",
+    "en": "vegetable, greens, dish, course, food"
+  },
+  {
+    "id": "茶",
+    "hanzi": "茶",
+    "pinyin": "chá",
+    "en": "tea"
+  },
+  {
+    "id": "差",
+    "hanzi": "差",
+    "pinyin": "chà",
+    "en": "be short, lack"
+  },
+  {
+    "id": "常",
+    "hanzi": "常",
+    "pinyin": "cháng",
+    "en": "often, usually, frequently"
+  },
+  {
+    "id": "常常",
+    "hanzi": "常常",
+    "pinyin": "chángcháng",
+    "en": "oftentimes, ofttimes, commonly, ordinarily, oft, often, a great deal, normally, frequently, unremarkably, much, usually"
+  },
+  {
+    "id": "唱",
+    "hanzi": "唱",
+    "pinyin": "chàng",
+    "en": "cry, chant, chirm, tune, vocalize, call, sing"
+  },
+  {
+    "id": "唱歌",
+    "hanzi": "唱歌",
+    "pinyin": "chàng gē",
+    "en": "sing"
+  },
+  {
+    "id": "车",
+    "hanzi": "车",
+    "pinyin": "chē",
+    "en": "vehicle"
+  },
+  {
+    "id": "车票",
+    "hanzi": "车票",
+    "pinyin": "chēpiào",
+    "en": "ticket (for train/bus)"
+  },
+  {
+    "id": "车上",
+    "hanzi": "车上",
+    "pinyin": "chē shàng",
+    "en": "Car"
+  },
+  {
+    "id": "车站",
+    "hanzi": "车站",
+    "pinyin": "chēzhàn",
+    "en": "station"
+  },
+  {
+    "id": "吃",
+    "hanzi": "吃",
+    "pinyin": "chī",
+    "en": "feed, have, be subject to, absorb, chow, live on, eat, have one's meals, be a strain, exhaust, fare, take in, live off, annihilate, wipe out, partake, suffer, ingest, consume, graze, lunch, manducate, incur, take, get, use up, make, taste, soak up"
+  },
+  {
+    "id": "吃饭",
+    "hanzi": "吃饭",
+    "pinyin": "chī fàn",
+    "en": "feed, dine, make a living, keep alive, have a meal, eat"
+  },
+  {
+    "id": "出",
+    "hanzi": "出",
+    "pinyin": "chū",
+    "en": "produce, turn out, arise, happen"
+  },
+  {
+    "id": "出来",
+    "hanzi": "出来",
+    "pinyin": "chū lai",
+    "en": "come forward, issue, come up, step up, step to the fore, out (toward one), come_out, pop out, come out, rise, come to the fore, step forward, emergence, come forth, emerge"
+  },
+  {
+    "id": "出去",
+    "hanzi": "出去",
+    "pinyin": "chū qu",
+    "en": "go_out, go/get out, get_out, go out, get out, go, exit"
+  },
+  {
+    "id": "穿",
+    "hanzi": "穿",
+    "pinyin": "chuān",
+    "en": "to wear, to put on, to dress, to bore through, to pierce, to perforate, to penetrate, to pass through, to thread"
+  },
+  {
+    "id": "床",
+    "hanzi": "床",
+    "pinyin": "chuáng",
+    "en": "bed"
+  },
+  {
+    "id": "次",
+    "hanzi": "次",
+    "pinyin": "cì",
+    "en": "order, sequence, next"
+  },
+  {
+    "id": "从",
+    "hanzi": "从",
+    "pinyin": "cóng",
+    "en": "from, since, through"
+  },
+  {
+    "id": "错",
+    "hanzi": "错",
+    "pinyin": "cuò",
+    "en": "wrong, mistaken, bad, poor, confused, complex"
+  },
+  {
+    "id": "打",
+    "hanzi": "打",
+    "pinyin": "dǎ",
+    "en": "generalized verb of doing with specific meaning determined by its object, strike, hit, fight, construct, forge, mix"
+  },
+  {
+    "id": "打车",
+    "hanzi": "打车",
+    "pinyin": "dǎchē",
+    "en": "to take a taxi (in town), to hitch a lift"
+  },
+  {
+    "id": "打电话",
+    "hanzi": "打电话",
+    "pinyin": "dǎ diànhuà",
+    "en": "make telephone call"
+  },
+  {
+    "id": "打开",
+    "hanzi": "打开",
+    "pinyin": "dǎ kāi",
+    "en": "unscrew, undo, break_out, open up, unbar, unpack, unwind, shoot, turn, switch_on, open, switch on, unroll, turn/switch on, unclose, straighten, unfold, crack, unwrap, ope, turn_on, turn on, chop"
+  },
+  {
+    "id": "打球",
+    "hanzi": "打球",
+    "pinyin": "dǎqiú",
+    "en": "play a ball game using arms/hands"
+  },
+  {
+    "id": "大",
+    "hanzi": "大",
+    "pinyin": "dà",
+    "en": "great, macro, old, very, vast, tall, big, high, much"
+  },
+  {
+    "id": "大学",
+    "hanzi": "大学",
+    "pinyin": "dàxué",
+    "en": "university, college"
+  },
+  {
+    "id": "大学生",
+    "hanzi": "大学生",
+    "pinyin": "dàxuéshēng",
+    "en": "man, university/college student, college man, university student, colleger, university, undergrad, undergraduate, college boy, college student, collegian, university_student, undergraduate student, geeks"
+  },
+  {
+    "id": "到",
+    "hanzi": "到",
+    "pinyin": "dào",
+    "en": "up until"
+  },
+  {
+    "id": "得到",
+    "hanzi": "得到",
+    "pinyin": "dé dào",
+    "en": "to get, to obtain, to receive"
+  },
+  {
+    "id": "地:de",
+    "hanzi": "地",
+    "pinyin": "de",
+    "en": "structural particle before a verb or adjective"
+  },
+  {
+    "id": "的",
+    "hanzi": "的",
+    "pinyin": "de",
+    "en": "particle: emphasizing an action/situation"
+  },
+  {
+    "id": "等",
+    "hanzi": "等",
+    "pinyin": "děng",
+    "en": "conj.: and so on, etc"
+  },
+  {
+    "id": "地:dì",
+    "hanzi": "地",
+    "pinyin": "dì",
+    "en": "earth, ground, land, place"
+  },
+  {
+    "id": "地点",
+    "hanzi": "地点",
+    "pinyin": "dìdiǎn",
+    "en": "location, site, locale, locality, topographic point, point, venue, spot, situs, land site, place, locus"
+  },
+  {
+    "id": "地方",
+    "hanzi": "地方",
+    "pinyin": "dìfang",
+    "en": "country, soil, terrain, part, clime, way, territory, room, neighbourhood, tinderbox, locality (as distinct from the central administrat, child, tract, province, position, respect, where, region, space, place, local"
+  },
+  {
+    "id": "地上",
+    "hanzi": "地上",
+    "pinyin": "dìshang",
+    "en": "on the ground, on the floor"
+  },
+  {
+    "id": "地图",
+    "hanzi": "地图",
+    "pinyin": "dìtú",
+    "en": "map"
+  },
+  {
+    "id": "弟弟",
+    "hanzi": "弟弟",
+    "pinyin": "dìdi",
+    "en": "brother, little brother, younger brother, cadet, little_brother, viscount"
+  },
+  {
+    "id": "第",
+    "hanzi": "第",
+    "pinyin": "dì",
+    "en": "mansion, stadium, decker, det.: marker of ordinal numerals, abomasum, residence"
+  },
+  {
+    "id": "点",
+    "hanzi": "点",
+    "pinyin": "diǎn",
+    "en": "m.[proximation]"
+  },
+  {
+    "id": "电",
+    "hanzi": "电",
+    "pinyin": "diàn",
+    "en": "electricity"
+  },
+  {
+    "id": "电话",
+    "hanzi": "电话",
+    "pinyin": "diànhuà",
+    "en": "blower, phone call, headphone, earpiece, telephone, telephone_call, buzz, earphone, horn, telephone set, phone_call, telephony, phone"
+  },
+  {
+    "id": "电脑",
+    "hanzi": "电脑",
+    "pinyin": "diànnǎo",
+    "en": "electronic computer, computery, data processor, information processing system, computer"
+  },
+  {
+    "id": "电视",
+    "hanzi": "电视",
+    "pinyin": "diànshì",
+    "en": "TV, box, iconoscope, video, television set, teevee, orthicon, huckster, TV set, radiovision, television, telecasting, airwave, telly"
+  },
+  {
+    "id": "电视机",
+    "hanzi": "电视机",
+    "pinyin": "diànshìjī",
+    "en": "set, idiot_box, tv, goggle-box, idiot box, television receiver/set, teleset, television set, television receiver, TV set, goggle_box, tv set, goggle box, boob tube, receiver, telly, television"
+  },
+  {
+    "id": "电影",
+    "hanzi": "电影",
+    "pinyin": "diànyǐng",
+    "en": "cinematography, moving_picture, pix, kinema, picture, film, movie, moving picture, flick, cinema, motion_picture, cinematic, celluloid, picture show, motion picture, flicker"
+  },
+  {
+    "id": "电影院",
+    "hanzi": "电影院",
+    "pinyin": "diànyǐng yuàn",
+    "en": "cinema, movie (house)"
+  },
+  {
+    "id": "东",
+    "hanzi": "东",
+    "pinyin": "dōng",
+    "en": "east"
+  },
+  {
+    "id": "东边",
+    "hanzi": "东边",
+    "pinyin": "dōngbiān",
+    "en": "east, east side, eastern part, to the east of"
+  },
+  {
+    "id": "东西",
+    "hanzi": "东西",
+    "pinyin": "dōngxi",
+    "en": "thing, creature"
+  },
+  {
+    "id": "动",
+    "hanzi": "动",
+    "pinyin": "dòng",
+    "en": "concuss, get moving, travel, go, use, eat or drink, act, arouse, stir, disturb, alter, touch, change, dynamic, locomote, move"
+  },
+  {
+    "id": "动作",
+    "hanzi": "动作",
+    "pinyin": "dòngzuò",
+    "en": "demeanor, motion, behavior, performance, demeanour, play, turn, operation, operative, looseness, agency, gesticulation, movement, gesture, comportment, business, action, move"
+  },
+  {
+    "id": "都",
+    "hanzi": "都",
+    "pinyin": "dōu",
+    "en": "all, even, already"
+  },
+  {
+    "id": "读",
+    "hanzi": "读",
+    "pinyin": "dú",
+    "en": "study, read, attend school, take, read aloud, read (aloud), peruse"
+  },
+  {
+    "id": "读书",
+    "hanzi": "读书",
+    "pinyin": "dú shū",
+    "en": "read, study, attend school"
+  },
+  {
+    "id": "对",
+    "hanzi": "对",
+    "pinyin": "duì",
+    "en": "correct, true, toward"
+  },
+  {
+    "id": "对不起",
+    "hanzi": "对不起",
+    "pinyin": "duìbuqǐ",
+    "en": "be unfair to, I'm sorry, let ... down, let sb. down, excuse me"
+  },
+  {
+    "id": "多",
+    "hanzi": "多",
+    "pinyin": "duō",
+    "en": "many, much, more, more than the correct/required number, excessive, too much, much/far more"
+  },
+  {
+    "id": "多少",
+    "hanzi": "多少",
+    "pinyin": "duōshao",
+    "en": "det.: how many, how much, many"
+  },
+  {
+    "id": "饿",
+    "hanzi": "饿",
+    "pinyin": "è",
+    "en": "starve"
+  },
+  {
+    "id": "儿子",
+    "hanzi": "儿子",
+    "pinyin": "érzi",
+    "en": "viscount, man-child, boy, male offspring, son"
+  },
+  {
+    "id": "二",
+    "hanzi": "二",
+    "pinyin": "èr",
+    "en": "det.: two, second"
+  },
+  {
+    "id": "饭",
+    "hanzi": "饭",
+    "pinyin": "fàn",
+    "en": "food, meal, repast, cooked rice or other cereals, dinner"
+  },
+  {
+    "id": "饭店",
+    "hanzi": "饭店",
+    "pinyin": "fàndiàn",
+    "en": "restraurant, restaurant, hotel"
+  },
+  {
+    "id": "房间",
+    "hanzi": "房间",
+    "pinyin": "fángjiān",
+    "en": "apartment, aspect, houseroom, room, chamber, bedroom"
+  },
+  {
+    "id": "房子",
+    "hanzi": "房子",
+    "pinyin": "fángzi",
+    "en": "building (of less than three stories), room, building, property, house"
+  },
+  {
+    "id": "放",
+    "hanzi": "放",
+    "pinyin": "fàng",
+    "en": "loose, bloom, make longer, set ... free, let sb. have his own way, show, readjust, free, make larger, put in, fly, etc., release, discharge, leave alone, bung, lay aside, put, expansion, make longer/larger/etc., fling, localize, lend (money) at interest, let go, set, pasture, pose, set free, blossom, lay, let off, put out to pasture, send away, play, expand, make larger/etc., readjus"
+  },
+  {
+    "id": "放假",
+    "hanzi": "放假",
+    "pinyin": "fàng jià",
+    "en": "have a day off, have a vacation, have day off, have or be on vacation, have or be on holiday, have a holiday, vacation"
+  },
+  {
+    "id": "放学",
+    "hanzi": "放学",
+    "pinyin": "fàng xué",
+    "en": "have winter holidays, classes are over, finish classes, have summer holidays, finish classes (for the day)"
+  },
+  {
+    "id": "飞",
+    "hanzi": "飞",
+    "pinyin": "fēi",
+    "en": "hover in the air, flight, hover, volatilize, wing, disappear through volatilization, flutter, skip, hover/flutter in the air, fly, blow, flutter in the air, flit"
+  },
+  {
+    "id": "飞机",
+    "hanzi": "飞机",
+    "pinyin": "fēijī",
+    "en": "aerocraft, airplane, machine, craft, aeroplane, ship, aero, avion, aeronef, plane, aircraft"
+  },
+  {
+    "id": "非常",
+    "hanzi": "非常",
+    "pinyin": "fēicháng",
+    "en": "extraordinary, unusual, special, very, extremely, highly"
+  },
+  {
+    "id": "分",
+    "hanzi": "分",
+    "pinyin": "fēn",
+    "en": "m.[general]"
+  },
+  {
+    "id": "风",
+    "hanzi": "风",
+    "pinyin": "fēng",
+    "en": "wind, common practice, custom, general mood, style, news, information"
+  },
+  {
+    "id": "干:gān",
+    "hanzi": "干",
+    "pinyin": "gān",
+    "en": "dry"
+  },
+  {
+    "id": "干净",
+    "hanzi": "干净",
+    "pinyin": "gānjìng",
+    "en": "clean, clear"
+  },
+  {
+    "id": "干:gàn",
+    "hanzi": "干",
+    "pinyin": "gàn",
+    "en": "do, work"
+  },
+  {
+    "id": "干什么",
+    "hanzi": "干什么",
+    "pinyin": "gànshénme",
+    "en": "do something"
+  },
+  {
+    "id": "高",
+    "hanzi": "高",
+    "pinyin": "gāo",
+    "en": "tall, high"
+  },
+  {
+    "id": "高兴",
+    "hanzi": "高兴",
+    "pinyin": "gāoxìng",
+    "en": "glad, happy, cheerful, merry, pleased"
+  },
+  {
+    "id": "告诉",
+    "hanzi": "告诉",
+    "pinyin": "gàosu",
+    "en": "tell, preach, notify, impart, inform, represent, apprize, send word, share, advise, give notice, apprise, assure, let know"
+  },
+  {
+    "id": "哥哥",
+    "hanzi": "哥哥",
+    "pinyin": "gēge",
+    "en": "big brother, elder brother, big_brother"
+  },
+  {
+    "id": "歌",
+    "hanzi": "歌",
+    "pinyin": "gē",
+    "en": "song"
+  },
+  {
+    "id": "个",
+    "hanzi": "个",
+    "pinyin": "gè",
+    "en": "piece, item"
+  },
+  {
+    "id": "给",
+    "hanzi": "给",
+    "pinyin": "gěi",
+    "en": "give, give to"
+  },
+  {
+    "id": "跟",
+    "hanzi": "跟",
+    "pinyin": "gēn",
+    "en": "with, to, from"
+  },
+  {
+    "id": "工人",
+    "hanzi": "工人",
+    "pinyin": "gōngren",
+    "en": "navvy, hired man, operative, working person, laborer, shopworker, esne, working man, hired hand, worker, workpeople, workman, hand"
+  },
+  {
+    "id": "工作",
+    "hanzi": "工作",
+    "pinyin": "gōngzuò",
+    "en": "work, job"
+  },
+  {
+    "id": "关",
+    "hanzi": "关",
+    "pinyin": "guān",
+    "en": "shut, close, turn off, lock up, close down"
+  },
+  {
+    "id": "关上",
+    "hanzi": "关上",
+    "pinyin": "guānshàng",
+    "en": "to close (a door), to turn off (light, electrical equipment etc)"
+  },
+  {
+    "id": "贵",
+    "hanzi": "贵",
+    "pinyin": "guì",
+    "en": "expensive, costly, highly valued"
+  },
+  {
+    "id": "国",
+    "hanzi": "国",
+    "pinyin": "guó",
+    "en": "surname Guo, country, nation, state, national, CL:個|个[ge4]"
+  },
+  {
+    "id": "国家",
+    "hanzi": "国家",
+    "pinyin": "guójiā",
+    "en": "sirkar, state, country, patria, a people, nationality, nation, republic, soli, body politic, clime, national, civil order, polity, commonwealth, land, res publica"
+  },
+  {
+    "id": "国外",
+    "hanzi": "国外",
+    "pinyin": "guówài",
+    "en": "overseas"
+  },
+  {
+    "id": "过",
+    "hanzi": "过",
+    "pinyin": "guò",
+    "en": "[aspect]"
+  },
+  {
+    "id": "还:hái",
+    "hanzi": "还",
+    "pinyin": "hái",
+    "en": "still, yet, also"
+  },
+  {
+    "id": "还是",
+    "hanzi": "还是",
+    "pinyin": "háishi",
+    "en": "still, nevertheless"
+  },
+  {
+    "id": "还有",
+    "hanzi": "还有",
+    "pinyin": "háiyǒu",
+    "en": "conj.: furthermore, in addition"
+  },
+  {
+    "id": "孩子",
+    "hanzi": "孩子",
+    "pinyin": "háizi",
+    "en": "kid, issue, chap, daughter, children, sonny, son or daughter, child, spawn, boy, kipper, son"
+  },
+  {
+    "id": "汉语",
+    "hanzi": "汉语",
+    "pinyin": "Hànyǔ",
+    "en": "Chinese language, CL:門|门[men2]"
+  },
+  {
+    "id": "汉字",
+    "hanzi": "汉字",
+    "pinyin": "Hànzì",
+    "en": "Chinese character, CL:個|个[ge4], Japanese: kanji, Korean: hanja, Vietnamese: hán tự"
+  },
+  {
+    "id": "好",
+    "hanzi": "好",
+    "pinyin": "hǎo",
+    "en": "good"
+  },
+  {
+    "id": "好吃",
+    "hanzi": "好吃",
+    "pinyin": "hǎochī",
+    "en": "delicious, good to eat, tasty, enjoy eating good food, gluttonous"
+  },
+  {
+    "id": "好看",
+    "hanzi": "好看",
+    "pinyin": "hǎokàn",
+    "en": "embarrassed, interesting, nice, good-looking, delightful"
+  },
+  {
+    "id": "好听",
+    "hanzi": "好听",
+    "pinyin": "hǎotīng",
+    "en": "pleasant to hear"
+  },
+  {
+    "id": "好玩儿",
+    "hanzi": "好玩儿",
+    "pinyin": "hǎowánr",
+    "en": "interesting, delightful, amusing"
+  },
+  {
+    "id": "号",
+    "hanzi": "号",
+    "pinyin": "hào",
+    "en": "m.[general]"
+  },
+  {
+    "id": "喝",
+    "hanzi": "喝",
+    "pinyin": "hē",
+    "en": "drink"
+  },
+  {
+    "id": "和",
+    "hanzi": "和",
+    "pinyin": "hé",
+    "en": "and, with, gentle, peaceful"
+  },
+  {
+    "id": "很",
+    "hanzi": "很",
+    "pinyin": "hěn",
+    "en": "pretty, thrice, monstrously, gey, quite, mighty, stinking, sopping, some, assai, full, most, clinking, much, thumping, awfully, fiendishly, thundering, very, real, really, bally, proper, grossly, powerful, so, rattling, well, considerably, greatly, terribly"
+  },
+  {
+    "id": "后",
+    "hanzi": "后",
+    "pinyin": "hòu",
+    "en": "rear, back, behind"
+  },
+  {
+    "id": "后边",
+    "hanzi": "后边",
+    "pinyin": "hòubian",
+    "en": "back, rear, behind"
+  },
+  {
+    "id": "后天",
+    "hanzi": "后天",
+    "pinyin": "hòutiān",
+    "en": "the day after tomorrow, post-natal, acquired (not innate), a posteriori"
+  },
+  {
+    "id": "花",
+    "hanzi": "花",
+    "pinyin": "huā",
+    "en": "spend, expend, cost"
+  },
+  {
+    "id": "话",
+    "hanzi": "话",
+    "pinyin": "huà",
+    "en": "words, thing, language, tongue, talk, speech, spoken_language, conversation, utterance, expression, story, tale, saying, natural language, sayings, word"
+  },
+  {
+    "id": "坏",
+    "hanzi": "坏",
+    "pinyin": "huài",
+    "en": "spoiled"
+  },
+  {
+    "id": "还:huán",
+    "hanzi": "还",
+    "pinyin": "huán",
+    "en": "give back, return"
+  },
+  {
+    "id": "回",
+    "hanzi": "回",
+    "pinyin": "huí",
+    "en": "return, go back"
+  },
+  {
+    "id": "回答",
+    "hanzi": "回答",
+    "pinyin": "huídá",
+    "en": "answer, reply"
+  },
+  {
+    "id": "回到",
+    "hanzi": "回到",
+    "pinyin": "huídào",
+    "en": "remount, retour, recur, turn back, regress, regain, revert, go_back, return to, return, go back to"
+  },
+  {
+    "id": "回家",
+    "hanzi": "回家",
+    "pinyin": "huí jiā",
+    "en": "return home"
+  },
+  {
+    "id": "回来",
+    "hanzi": "回来",
+    "pinyin": "huí lai",
+    "en": "come back, get_back, recur, revisit, come, return, be back, come_back"
+  },
+  {
+    "id": "回去",
+    "hanzi": "回去",
+    "pinyin": "huí  qu",
+    "en": "go_home, go_back, retrocede, go back, be back, go, return"
+  },
+  {
+    "id": "会",
+    "hanzi": "会",
+    "pinyin": "huì",
+    "en": "to be able, can, will, to meet"
+  },
+  {
+    "id": "火车",
+    "hanzi": "火车",
+    "pinyin": "huǒchē",
+    "en": "choo-choo, railroad train, car train, marshalling_yard, puff-puff, train"
+  },
+  {
+    "id": "机场",
+    "hanzi": "机场",
+    "pinyin": "jīchǎng",
+    "en": "landing field, flying field, airfield, airport, airdrome, field, aerodrome"
+  },
+  {
+    "id": "机票",
+    "hanzi": "机票",
+    "pinyin": "jīpiào",
+    "en": "air ticket, passenger ticket, CL:張|张[zhang1]"
+  },
+  {
+    "id": "鸡蛋",
+    "hanzi": "鸡蛋",
+    "pinyin": "jīdàn",
+    "en": "(chicken) egg, hen's egg, CL:個|个[ge4],打[da2]"
+  },
+  {
+    "id": "几",
+    "hanzi": "几",
+    "pinyin": "jǐ",
+    "en": "det.: how many, a few, several, some"
+  },
+  {
+    "id": "记",
+    "hanzi": "记",
+    "pinyin": "jì",
+    "en": "write down, record"
+  },
+  {
+    "id": "记得",
+    "hanzi": "记得",
+    "pinyin": "jì de",
+    "en": "come to mind, think back, remember, recollect, recall, rememberance, mind, retain, place, spring to mind, bear in mind"
+  },
+  {
+    "id": "记住",
+    "hanzi": "记住",
+    "pinyin": "jì zhu",
+    "en": "to remember, to bear in mind, to learn by heart"
+  },
+  {
+    "id": "家",
+    "hanzi": "家",
+    "pinyin": "jiā",
+    "en": "family, household, home, house"
+  },
+  {
+    "id": "家里",
+    "hanzi": "家里",
+    "pinyin": "jiālǐ",
+    "en": "home"
+  },
+  {
+    "id": "家人",
+    "hanzi": "家人",
+    "pinyin": "jiārén",
+    "en": "relation, homefolk, inmate, kindred, household, relative, people, folks, kin, family members, family, kinsfolk, house"
+  },
+  {
+    "id": "间",
+    "hanzi": "间",
+    "pinyin": "jiān",
+    "en": "locality, room"
+  },
+  {
+    "id": "见",
+    "hanzi": "见",
+    "pinyin": "jiàn",
+    "en": "see, be exposed to, become visible, call on, refer to, meet with, appear to be, appear, vide, catch sight of, meet"
+  },
+  {
+    "id": "见面",
+    "hanzi": "见面",
+    "pinyin": "jiàn miàn",
+    "en": "meet, see"
+  },
+  {
+    "id": "教",
+    "hanzi": "教",
+    "pinyin": "jiào",
+    "en": "teach"
+  },
+  {
+    "id": "叫",
+    "hanzi": "叫",
+    "pinyin": "jiào",
+    "en": "to be called"
+  },
+  {
+    "id": "教学楼",
+    "hanzi": "教学楼",
+    "pinyin": "jiàoxuélóu",
+    "en": "teaching block, school building"
+  },
+  {
+    "id": "姐姐",
+    "hanzi": "姐姐",
+    "pinyin": "jiějie",
+    "en": "sis, big_sister, elder sister, sister"
+  },
+  {
+    "id": "介绍",
+    "hanzi": "介绍",
+    "pinyin": "jièshào",
+    "en": "introduce, present, recommend, suggest, let know, brief"
+  },
+  {
+    "id": "今年",
+    "hanzi": "今年",
+    "pinyin": "jīnnián",
+    "en": "this year"
+  },
+  {
+    "id": "今天",
+    "hanzi": "今天",
+    "pinyin": "jīntiān",
+    "en": "today, at the present, now"
+  },
+  {
+    "id": "进",
+    "hanzi": "进",
+    "pinyin": "jìn",
+    "en": "enter, come/go into, advance"
+  },
+  {
+    "id": "进来",
+    "hanzi": "进来",
+    "pinyin": "jìn lai",
+    "en": "come in, enter"
+  },
+  {
+    "id": "进去",
+    "hanzi": "进去",
+    "pinyin": "jìn qu",
+    "en": "enter, entry, go_in, get in, go in"
+  },
+  {
+    "id": "九",
+    "hanzi": "九",
+    "pinyin": "jiǔ",
+    "en": "det.: nine"
+  },
+  {
+    "id": "就",
+    "hanzi": "就",
+    "pinyin": "jiù",
+    "en": "then, at once, right away, an indicator strengthening speaker's evaluation"
+  },
+  {
+    "id": "觉得",
+    "hanzi": "觉得",
+    "pinyin": "juéde",
+    "en": "imagine, guess, believe, reckon, suspect, suppose, think, listen, feel, consider, think_of, appear, conceive"
+  },
+  {
+    "id": "开",
+    "hanzi": "开",
+    "pinyin": "kāi",
+    "en": "open, open up, reclaim (land), open out, come loose, start, begin, operate, turn on (light), run (business), hold (meeting/etc.), divide into, reveal"
+  },
+  {
+    "id": "开车",
+    "hanzi": "开车",
+    "pinyin": "kāi chē",
+    "en": "to drive a car"
+  },
+  {
+    "id": "开会",
+    "hanzi": "开会",
+    "pinyin": "kāi huì",
+    "en": "hold/attend meeting"
+  },
+  {
+    "id": "开玩笑",
+    "hanzi": "开玩笑",
+    "pinyin": "kāi wánxiào",
+    "en": "kid, spoof, jive, gag, make fun of, josh, daff, rot, quip, chaff, rib, banter, jolly, fun, sport, put_on, clown, fool, droll, jape, joke, skylark, jest, jocose, crack a joke"
+  },
+  {
+    "id": "看",
+    "hanzi": "看",
+    "pinyin": "kàn",
+    "en": "see, look at, watch, read, look upon, regard, look after, call on, visit"
+  },
+  {
+    "id": "看病",
+    "hanzi": "看病",
+    "pinyin": "kàn bìng",
+    "en": "to visit a doctor, to see a patient"
+  },
+  {
+    "id": "看到",
+    "hanzi": "看到",
+    "pinyin": "kàn dào",
+    "en": "view, receive, ken, observe, lamp, catch, see, take in, watch, chatter away, lay_eyes_on, boast, brag, shoot the breeze, spy, catch sight of, catch sight of"
+  },
+  {
+    "id": "看见",
+    "hanzi": "看见",
+    "pinyin": "kàn jian",
+    "en": "seeing, behold, see, descry, show, perceive, lay eyes on, lamp, spy, show up, sight, catch sight of, catch sight of"
+  },
+  {
+    "id": "考",
+    "hanzi": "考",
+    "pinyin": "kǎo",
+    "en": "study, inspect, give test, inspection, give, give/take test, test, investigate, verify, take test, give or take an examination, quiz, check"
+  },
+  {
+    "id": "考试",
+    "hanzi": "考试",
+    "pinyin": "kǎoshì",
+    "en": "examination, test"
+  },
+  {
+    "id": "渴",
+    "hanzi": "渴",
+    "pinyin": "kě",
+    "en": "thirsty"
+  },
+  {
+    "id": "课",
+    "hanzi": "课",
+    "pinyin": "kè",
+    "en": "subject, course, class"
+  },
+  {
+    "id": "课本",
+    "hanzi": "课本",
+    "pinyin": "kèběn",
+    "en": "text edition, textbook, text, school text, schoolbook"
+  },
+  {
+    "id": "课文",
+    "hanzi": "课文",
+    "pinyin": "kèwén",
+    "en": "text, CL:篇[pian1]"
+  },
+  {
+    "id": "口",
+    "hanzi": "口",
+    "pinyin": "kǒu",
+    "en": "m.[general]"
+  },
+  {
+    "id": "块",
+    "hanzi": "块",
+    "pinyin": "kuài",
+    "en": "m.[general]"
+  },
+  {
+    "id": "快",
+    "hanzi": "快",
+    "pinyin": "kuài",
+    "en": "fast, quick, quick-witted, ingenious, sharp (of knives), straightforward"
+  },
+  {
+    "id": "来",
+    "hanzi": "来",
+    "pinyin": "lái",
+    "en": "to"
+  },
+  {
+    "id": "来到",
+    "hanzi": "来到",
+    "pinyin": "láidào",
+    "en": "arrive, come"
+  },
+  {
+    "id": "老",
+    "hanzi": "老",
+    "pinyin": "lǎo",
+    "en": "old, aged;of long standing, outdated, tough, overgrown, dark (of colors)"
+  },
+  {
+    "id": "老人",
+    "hanzi": "老人",
+    "pinyin": "lǎoren",
+    "en": "oldster, ancient, old woman, crock, one's aged parents or grandparents, old man/woman, one's aged parents/grandparents, Sir, old person, gaffer, pop, one's aged parents, the aged/old, old_man, senior_citizen, oldie, greybeard, old man, graybeard, old, grandparents, the old, the aged, senior citizen, old_boy, old boy, woman, old-timer, old man or woman, one's aged grandparents"
+  },
+  {
+    "id": "老师",
+    "hanzi": "老师",
+    "pinyin": "lǎoshī",
+    "en": "rabbi, professor, swami, instructor, teacher, mast"
+  },
+  {
+    "id": "了",
+    "hanzi": "了",
+    "pinyin": "le",
+    "en": "entirely"
+  },
+  {
+    "id": "累",
+    "hanzi": "累",
+    "pinyin": "lèi",
+    "en": "tire, build by piling up, pile up, strain, weary, toil, accumulate, involve, tired, burthen, work hard, accumulation, fatigued, wear out"
+  },
+  {
+    "id": "冷",
+    "hanzi": "冷",
+    "pinyin": "lěng",
+    "en": "cool, rare, cold, unfrequented, feel cold, chill, frosty(in manner), shot from hiding, strange"
+  },
+  {
+    "id": "里",
+    "hanzi": "里",
+    "pinyin": "lǐ",
+    "en": "inside"
+  },
+  {
+    "id": "里边",
+    "hanzi": "里边",
+    "pinyin": "lǐbian",
+    "en": "inside"
+  },
+  {
+    "id": "两",
+    "hanzi": "两",
+    "pinyin": "liǎng",
+    "en": "det.: two, both (sides), either (side), a few, some"
+  },
+  {
+    "id": "零",
+    "hanzi": "零",
+    "pinyin": "líng",
+    "en": "det.: zero, naught, nil"
+  },
+  {
+    "id": "六",
+    "hanzi": "六",
+    "pinyin": "liù",
+    "en": "det.: six"
+  },
+  {
+    "id": "楼",
+    "hanzi": "楼",
+    "pinyin": "lóu",
+    "en": "storey, Lou, tower, superstructure, storied building, story, floor, Surname, a storied building"
+  },
+  {
+    "id": "楼上",
+    "hanzi": "楼上",
+    "pinyin": "lóushàng",
+    "en": "upstairs"
+  },
+  {
+    "id": "楼下",
+    "hanzi": "楼下",
+    "pinyin": "lóuxià",
+    "en": "downstairs"
+  },
+  {
+    "id": "路",
+    "hanzi": "路",
+    "pinyin": "lù",
+    "en": "road, path, way, journey, distance, means, sequence, logic, line, region, district, route, sort, grade, class"
+  },
+  {
+    "id": "路口",
+    "hanzi": "路口",
+    "pinyin": "lùkǒu",
+    "en": "crossing, intersection (of roads)"
+  },
+  {
+    "id": "路上",
+    "hanzi": "路上",
+    "pinyin": "lùshang",
+    "en": "on the road, on a journey, road surface"
+  },
+  {
+    "id": "妈妈",
+    "hanzi": "妈妈",
+    "pinyin": "māma",
+    "en": "mummy, mammy, ma, mother, mamma, mum, mommy, female parent, mom, Mama, mater, mama, momma"
+  },
+  {
+    "id": "马路",
+    "hanzi": "马路",
+    "pinyin": "mǎlù",
+    "en": "drive, road, driveway, riding, a road, carriageway, avenue, street, a street used by vehicular traffic"
+  },
+  {
+    "id": "马上",
+    "hanzi": "马上",
+    "pinyin": "mǎshàng",
+    "en": "in a short time, at_once, instantaneously, promptly, at once, incontinent, in the same breath, directively, instantly, slapbang, pronto, right_away, immediately, shortly, without delay, right away, tout-de-suite, forthwith, presently, in_no_time, at a time, soon, hereupon, in a few seconds, before long, at one time, outright, straightaway, in a minute, directly, momently, in a f"
+  },
+  {
+    "id": "吗",
+    "hanzi": "吗",
+    "pinyin": "ma",
+    "en": "particle: calling for agreement or disagreement"
+  },
+  {
+    "id": "买",
+    "hanzi": "买",
+    "pinyin": "mǎi",
+    "en": "pick up, invest, hire, buy, purchase, put_down, trade, get"
+  },
+  {
+    "id": "慢",
+    "hanzi": "慢",
+    "pinyin": "màn",
+    "en": "tardy, rude, slow down, slow, slow up, retard, lose, defer, supercilious, postpone, decelerate"
+  },
+  {
+    "id": "忙",
+    "hanzi": "忙",
+    "pinyin": "máng",
+    "en": "hurry, hasten"
+  },
+  {
+    "id": "毛",
+    "hanzi": "毛",
+    "pinyin": "máo",
+    "en": "Mao, wool, bristle, nap, pilus, down, feather, mold, mildew, Surname, hair, 1 1 0 th yuan, 1 0 th yuan, dime, silk, cent, fur, marking"
+  },
+  {
+    "id": "没",
+    "hanzi": "没",
+    "pinyin": "méi",
+    "en": "not"
+  },
+  {
+    "id": "没关系",
+    "hanzi": "没关系",
+    "pinyin": "méiguānxi",
+    "en": "it doesn't matter, never mind"
+  },
+  {
+    "id": "没什么",
+    "hanzi": "没什么",
+    "pinyin": "méishénme",
+    "en": "nothing, it doesn't matter, it's nothing, never mind"
+  },
+  {
+    "id": "没事儿",
+    "hanzi": "没事儿",
+    "pinyin": "méishìr",
+    "en": "to have spare time, free from work, it's not important, it's nothing, never mind"
+  },
+  {
+    "id": "没有",
+    "hanzi": "没有",
+    "pinyin": "méiyou",
+    "en": "not have, there is not, be without"
+  },
+  {
+    "id": "妹妹",
+    "hanzi": "妹妹",
+    "pinyin": "mèimei",
+    "en": "little_sister, sis, younger sister, little sister, sister"
+  },
+  {
+    "id": "门",
+    "hanzi": "门",
+    "pinyin": "mén",
+    "en": "door, gate"
+  },
+  {
+    "id": "门口",
+    "hanzi": "门口",
+    "pinyin": "ménkǒu",
+    "en": "porch, portal, doorway, gateway, threshold, room access, door, entering, entrance"
+  },
+  {
+    "id": "门票",
+    "hanzi": "门票",
+    "pinyin": "ménpiào",
+    "en": "entrance/admission ticket, admission ticket, admission fee, admission price, entrance ticket, admission charge, cover_charge, admission, entrance fee, entrance money, pasteboard, price of admission, entrance"
+  },
+  {
+    "id": "们",
+    "hanzi": "们",
+    "pinyin": "men",
+    "en": "pluralizer after pronouns and nouns of persons"
+  },
+  {
+    "id": "米饭",
+    "hanzi": "米饭",
+    "pinyin": "mǐfàn",
+    "en": "(cooked) rice"
+  },
+  {
+    "id": "面包",
+    "hanzi": "面包",
+    "pinyin": "miànbāo",
+    "en": "bun, staff of life, cookie, breadstuff, bread"
+  },
+  {
+    "id": "面条儿",
+    "hanzi": "面条儿",
+    "pinyin": "miàntiáor",
+    "en": "noodles, erhua variant of 麵條|面条[mian4 tiao2]"
+  },
+  {
+    "id": "名字",
+    "hanzi": "名字",
+    "pinyin": "míngzi",
+    "en": "first_name, forename, moniker, monaker, first name, monicker, cognomen, given name, name, patronymic, appellation"
+  },
+  {
+    "id": "明白",
+    "hanzi": "明白",
+    "pinyin": "míngbai",
+    "en": "clarify, downright, recognize, agnize, tumble, follow, make out, catch, understand, discern, think, know, seize, agnise, twig, realize, get, realization"
+  },
+  {
+    "id": "明年",
+    "hanzi": "明年",
+    "pinyin": "míngnián",
+    "en": "next year"
+  },
+  {
+    "id": "明天",
+    "hanzi": "明天",
+    "pinyin": "míngtiān",
+    "en": "tomorrow"
+  },
+  {
+    "id": "拿",
+    "hanzi": "拿",
+    "pinyin": "ná",
+    "en": "take, hold, seize, capture"
+  },
+  {
+    "id": "哪",
+    "hanzi": "哪",
+    "pinyin": "nǎ",
+    "en": "det.: which"
+  },
+  {
+    "id": "哪里",
+    "hanzi": "哪里",
+    "pinyin": "nǎli",
+    "en": "where"
+  },
+  {
+    "id": "哪儿",
+    "hanzi": "哪儿",
+    "pinyin": "nǎr",
+    "en": "where"
+  },
+  {
+    "id": "哪些",
+    "hanzi": "哪些",
+    "pinyin": "nǎxiē",
+    "en": "det.: which"
+  },
+  {
+    "id": "那",
+    "hanzi": "那",
+    "pinyin": "nà",
+    "en": "det.: that"
+  },
+  {
+    "id": "那边",
+    "hanzi": "那边",
+    "pinyin": "nàbian",
+    "en": "beyond, that side, there"
+  },
+  {
+    "id": "那里",
+    "hanzi": "那里",
+    "pinyin": "nàlǐ",
+    "en": "that place"
+  },
+  {
+    "id": "那儿",
+    "hanzi": "那儿",
+    "pinyin": "nàr",
+    "en": "that place"
+  },
+  {
+    "id": "那些",
+    "hanzi": "那些",
+    "pinyin": "nàxiē",
+    "en": "det.: those"
+  },
+  {
+    "id": "奶",
+    "hanzi": "奶",
+    "pinyin": "nǎi",
+    "en": "breasts, milk"
+  },
+  {
+    "id": "奶奶",
+    "hanzi": "奶奶",
+    "pinyin": "nǎinai",
+    "en": "nanna, address for married woman, granny, gran, grandmother, grandma, respectful form of address for an old woman, paternal grandmother"
+  },
+  {
+    "id": "男",
+    "hanzi": "男",
+    "pinyin": "nán",
+    "en": "baron, male, man, steady, mankind, male person, boy, chauvinism, creature, son"
+  },
+  {
+    "id": "男孩儿",
+    "hanzi": "男孩儿",
+    "pinyin": "nánháir",
+    "en": "boy, erhua variant of 男孩[nan2 hai2]"
+  },
+  {
+    "id": "男朋友",
+    "hanzi": "男朋友",
+    "pinyin": "nánpéngyou",
+    "en": "boyfriend"
+  },
+  {
+    "id": "男人",
+    "hanzi": "男人",
+    "pinyin": "nánren",
+    "en": "male, man, chap, mankind, buck, bastard, gentleman, jack, gent, men, blighter, cuss, hombre, lad, adult male, groom, husband, bimbo, dog, fellow, mon, menfolk, fella"
+  },
+  {
+    "id": "男生",
+    "hanzi": "男生",
+    "pinyin": "nánshēng",
+    "en": "brother, sonny boy, man, male, laddie, lad, boy student, male student, boy, schoolboy, sonny, cub, man student"
+  },
+  {
+    "id": "南",
+    "hanzi": "南",
+    "pinyin": "nán",
+    "en": "Yugoslavia, South, Nan, south, Surname, S, due south, austral, southern"
+  },
+  {
+    "id": "南边",
+    "hanzi": "南边",
+    "pinyin": "nánbian",
+    "en": "south, south side, southern part, to the south of"
+  },
+  {
+    "id": "难",
+    "hanzi": "难",
+    "pinyin": "nán",
+    "en": "make difficulties, take to task, put ... into a difficult position, disagreeable, make difficult, unpleasant, hard, difficult, troublesome, blame"
+  },
+  {
+    "id": "呢",
+    "hanzi": "呢",
+    "pinyin": "ne",
+    "en": "particle: marking quesitons about subject already mentioned; indicating strong affirmation"
+  },
+  {
+    "id": "能",
+    "hanzi": "能",
+    "pinyin": "néng",
+    "en": "can or to be capable of"
+  },
+  {
+    "id": "你",
+    "hanzi": "你",
+    "pinyin": "nǐ",
+    "en": "you"
+  },
+  {
+    "id": "你们",
+    "hanzi": "你们",
+    "pinyin": "nǐmen",
+    "en": "you, you (plural), you-all"
+  },
+  {
+    "id": "年",
+    "hanzi": "年",
+    "pinyin": "nián",
+    "en": "year"
+  },
+  {
+    "id": "您",
+    "hanzi": "您",
+    "pinyin": "nín",
+    "en": "you"
+  },
+  {
+    "id": "牛奶",
+    "hanzi": "牛奶",
+    "pinyin": "niúnǎi",
+    "en": "cow's milk"
+  },
+  {
+    "id": "女",
+    "hanzi": "女",
+    "pinyin": "nǚ",
+    "en": "girl, female, woman, neodymium, hen, daughter, beaver, creature"
+  },
+  {
+    "id": "女儿",
+    "hanzi": "女儿",
+    "pinyin": "nǚér",
+    "en": "daughter, girl"
+  },
+  {
+    "id": "女孩儿",
+    "hanzi": "女孩儿",
+    "pinyin": "nǚháir",
+    "en": "girl, erhua variant of 女孩[nu:3 hai2]"
+  },
+  {
+    "id": "女朋友",
+    "hanzi": "女朋友",
+    "pinyin": "nǚpéngyou",
+    "en": "jane, girl, girl friend, lady friend, girlfriend, amie"
+  },
+  {
+    "id": "女人",
+    "hanzi": "女人",
+    "pinyin": "nǚren",
+    "en": "jade, crumpet, female, female person, Gill, bitch, chick, fair, squaw, womenfolk, adult female, doll, momma, wench, skirt, womankind, girl, jill, wife, broad, petticoat, sister, woman, bimbo, bird, jane, she, hen, hairpin, dame, women"
+  },
+  {
+    "id": "女生",
+    "hanzi": "女生",
+    "pinyin": "nǚshēng",
+    "en": "schoolgirl, girl student, female student, female, girl, woman student, co-ed"
+  },
+  {
+    "id": "旁边",
+    "hanzi": "旁边",
+    "pinyin": "pángbiān",
+    "en": "by the side of, side, adjacency, near by"
+  },
+  {
+    "id": "跑",
+    "hanzi": "跑",
+    "pinyin": "pǎo",
+    "en": "travel, race, be away, escape, course, run errands, skirr, double, walk, be away/off, run away, be off, run about doing sth., run, drive, paw the earth, run about doing ..., ride, leg"
+  },
+  {
+    "id": "朋友",
+    "hanzi": "朋友",
+    "pinyin": "péngyou",
+    "en": "amigo, connections, kith, friend, boy, crony, ami, boy/girl friend, companion, mate, boy friend or girl friend, compadre, boy friend, Mac, paisano, matey, old_boy, sport, folks, pard, hearty, Kamerad, cocker, cobber, girl friend, pardner, company"
+  },
+  {
+    "id": "票",
+    "hanzi": "票",
+    "pinyin": "piào",
+    "en": "ticket, ballot, note"
+  },
+  {
+    "id": "七",
+    "hanzi": "七",
+    "pinyin": "qī",
+    "en": "det.: seven"
+  },
+  {
+    "id": "起",
+    "hanzi": "起",
+    "pinyin": "qǐ",
+    "en": "[aspect]"
+  },
+  {
+    "id": "起床",
+    "hanzi": "起床",
+    "pinyin": "qǐ chuáng",
+    "en": "uprise, get up from bed, arise, get out of bed, turn out, rise, deck, get_up, awake, get up"
+  },
+  {
+    "id": "起来",
+    "hanzi": "起来",
+    "pinyin": "qǐ  lai",
+    "en": "[aspect]"
+  },
+  {
+    "id": "汽车",
+    "hanzi": "汽车",
+    "pinyin": "qìchē",
+    "en": "automotive vehicle, machine, wheels, motorcar, motor vehicle, car, automotive, auto, wheel, autocar, motor, automobile, hoot, mobile, bus"
+  },
+  {
+    "id": "前",
+    "hanzi": "前",
+    "pinyin": "qián",
+    "en": "front"
+  },
+  {
+    "id": "前边",
+    "hanzi": "前边",
+    "pinyin": "qiánbian",
+    "en": "front, the front side, in front of"
+  },
+  {
+    "id": "前天",
+    "hanzi": "前天",
+    "pinyin": "qiántiān",
+    "en": "the day before yesterday"
+  },
+  {
+    "id": "钱",
+    "hanzi": "钱",
+    "pinyin": "qián",
+    "en": "copper coin, cash, money, fund, sum"
+  },
+  {
+    "id": "钱包",
+    "hanzi": "钱包",
+    "pinyin": "qiánbāo",
+    "en": "purse, wallet"
+  },
+  {
+    "id": "请",
+    "hanzi": "请",
+    "pinyin": "qǐng",
+    "en": "request, ask (a favor), engage, hire (teacher/etc.), Please..."
+  },
+  {
+    "id": "请假",
+    "hanzi": "请假",
+    "pinyin": "qǐng jià",
+    "en": "vacate, ask for leave"
+  },
+  {
+    "id": "请进",
+    "hanzi": "请进",
+    "pinyin": "qǐngjìn",
+    "en": "'please come in'"
+  },
+  {
+    "id": "请问",
+    "hanzi": "请问",
+    "pinyin": "qǐngwèn",
+    "en": "Excuse me, may I ask...?"
+  },
+  {
+    "id": "请坐",
+    "hanzi": "请坐",
+    "pinyin": "qǐng zuò",
+    "en": "Sitting"
+  },
+  {
+    "id": "球",
+    "hanzi": "球",
+    "pinyin": "qiú",
+    "en": "ball"
+  },
+  {
+    "id": "去",
+    "hanzi": "去",
+    "pinyin": "qù",
+    "en": "to go, to leave, in order to"
+  },
+  {
+    "id": "去年",
+    "hanzi": "去年",
+    "pinyin": "qùnián",
+    "en": "last year"
+  },
+  {
+    "id": "热",
+    "hanzi": "热",
+    "pinyin": "rè",
+    "en": "hot"
+  },
+  {
+    "id": "人",
+    "hanzi": "人",
+    "pinyin": "rén",
+    "en": "person, people"
+  },
+  {
+    "id": "认识",
+    "hanzi": "认识",
+    "pinyin": "rènshi",
+    "en": "know, recognize"
+  },
+  {
+    "id": "认真",
+    "hanzi": "认真",
+    "pinyin": "rènzhēn",
+    "en": "serious, earnest, take for real"
+  },
+  {
+    "id": "日",
+    "hanzi": "日",
+    "pinyin": "rì",
+    "en": "m.[standard]"
+  },
+  {
+    "id": "日期",
+    "hanzi": "日期",
+    "pinyin": "rìqī",
+    "en": "calendar, when, date"
+  },
+  {
+    "id": "肉",
+    "hanzi": "肉",
+    "pinyin": "ròu",
+    "en": "pulp, chilli, cabobs, meat, lobscouse, paella, meaty, fleshy, flesh, marmite"
+  },
+  {
+    "id": "三",
+    "hanzi": "三",
+    "pinyin": "sān",
+    "en": "det.: three"
+  },
+  {
+    "id": "山",
+    "hanzi": "山",
+    "pinyin": "shān",
+    "en": "Shan, jebel, pike, mountain, whitethorn, hump, anything resembling a mountain, gable, kop, chimney, hill, Surname, mount"
+  },
+  {
+    "id": "商场",
+    "hanzi": "商场",
+    "pinyin": "shāngchǎng",
+    "en": "department store, bazar, line of business, field of operation, grocery store, emporium, bazaar, grocery, mall, commercial circle, field, market"
+  },
+  {
+    "id": "商店",
+    "hanzi": "商店",
+    "pinyin": "shāngdiàn",
+    "en": "concern, hospital, business, store, shoppe, shop"
+  },
+  {
+    "id": "上",
+    "hanzi": "上",
+    "pinyin": "shàng",
+    "en": "on, above"
+  },
+  {
+    "id": "上班",
+    "hanzi": "上班",
+    "pinyin": "shàng bān",
+    "en": "start work, go to work, be on duty"
+  },
+  {
+    "id": "上边",
+    "hanzi": "上边",
+    "pinyin": "shàngbian",
+    "en": "the top, above, overhead, upwards, the top margin, above-mentioned, those higher up"
+  },
+  {
+    "id": "上车",
+    "hanzi": "上车",
+    "pinyin": "shàngchē",
+    "en": "to get on or into (a bus, train, car etc)"
+  },
+  {
+    "id": "上次",
+    "hanzi": "上次",
+    "pinyin": "shàngcì",
+    "en": "last time"
+  },
+  {
+    "id": "上课",
+    "hanzi": "上课",
+    "pinyin": "shàng kè",
+    "en": "attend class, go to class;give lesson/lecture"
+  },
+  {
+    "id": "上网",
+    "hanzi": "上网",
+    "pinyin": "shàng wǎng",
+    "en": "to go online, to connect to the Internet, (of a document etc) to be uploaded to the Internet, (tennis, volleyball etc) to move in close to the net"
+  },
+  {
+    "id": "上午",
+    "hanzi": "上午",
+    "pinyin": "shàngwǔ",
+    "en": "morning, CL:個|个[ge4]"
+  },
+  {
+    "id": "上学",
+    "hanzi": "上学",
+    "pinyin": "shàng xué",
+    "en": "attend school, be at school"
+  },
+  {
+    "id": "少",
+    "hanzi": "少",
+    "pinyin": "shǎo",
+    "en": "lack, be deficient, lose, be missing"
+  },
+  {
+    "id": "谁",
+    "hanzi": "谁",
+    "pinyin": "shéi",
+    "en": "who, someone, anyone"
+  },
+  {
+    "id": "身上",
+    "hanzi": "身上",
+    "pinyin": "shēnshang",
+    "en": "on the body, at hand, among"
+  },
+  {
+    "id": "身体",
+    "hanzi": "身体",
+    "pinyin": "shēntǐ",
+    "en": "soma, system, physical structure, body, health, carcase, corpus, frame, person, somatic, organic structure, personage"
+  },
+  {
+    "id": "什么",
+    "hanzi": "什么",
+    "pinyin": "shénme",
+    "en": "anything, what"
+  },
+  {
+    "id": "生病",
+    "hanzi": "生病",
+    "pinyin": "shēng bìng",
+    "en": "come down, ail, fall ill, traik, sick, sicken"
+  },
+  {
+    "id": "生气",
+    "hanzi": "生气",
+    "pinyin": "shēng qì",
+    "en": "get angry, be angry"
+  },
+  {
+    "id": "生日",
+    "hanzi": "生日",
+    "pinyin": "shēngri",
+    "en": "birthday"
+  },
+  {
+    "id": "十",
+    "hanzi": "十",
+    "pinyin": "shí",
+    "en": "det.: ten"
+  },
+  {
+    "id": "时候",
+    "hanzi": "时候",
+    "pinyin": "shíhou",
+    "en": "day, moment, (a point in) time, (duration of) time, time"
+  },
+  {
+    "id": "时间",
+    "hanzi": "时间",
+    "pinyin": "shíjiān",
+    "en": "moment, day, clock time, fourth_dimension, relativity, hour, duration, time, when, while, temporal, economy"
+  },
+  {
+    "id": "事",
+    "hanzi": "事",
+    "pinyin": "shì",
+    "en": "responsibility, trouble, event, thing, worry, accident, case, involvement, work, affair, job, concern, business, toast, matter"
+  },
+  {
+    "id": "试",
+    "hanzi": "试",
+    "pinyin": "shì",
+    "en": "offer, attempt, essay, flesh, try, seek, assay, test"
+  },
+  {
+    "id": "是",
+    "hanzi": "是",
+    "pinyin": "shì",
+    "en": "is, are, am, yes, to be, variant of 是[shi4], (used in given names)"
+  },
+  {
+    "id": "是不是",
+    "hanzi": "是不是",
+    "pinyin": "shìbùshì",
+    "en": "is or isn't, yes or no, whether or not"
+  },
+  {
+    "id": "手",
+    "hanzi": "手",
+    "pinyin": "shǒu",
+    "en": "hand"
+  },
+  {
+    "id": "手机",
+    "hanzi": "手机",
+    "pinyin": "shǒujī",
+    "en": "cell phone, mobile phone, CL:部[bu4],支[zhi1]"
+  },
+  {
+    "id": "书",
+    "hanzi": "书",
+    "pinyin": "shū",
+    "en": "volume, document, style of calligraphy, book, script, letter"
+  },
+  {
+    "id": "书包",
+    "hanzi": "书包",
+    "pinyin": "shūbāo",
+    "en": "bag, book bag, satchel, schoolbag"
+  },
+  {
+    "id": "书店",
+    "hanzi": "书店",
+    "pinyin": "shūdiàn",
+    "en": "bookstore"
+  },
+  {
+    "id": "树",
+    "hanzi": "树",
+    "pinyin": "shù",
+    "en": "wood, Ruptiliocarpon caracolito, tree, arbor, Surname, caracolito"
+  },
+  {
+    "id": "水",
+    "hanzi": "水",
+    "pinyin": "shuǐ",
+    "en": "water, H2O, liquid, bubble, a general term for rivers, lakes, seas, etc., Shiu, waters, aqueous, Aquarius, river, Surname, blister, drink, eau, aqua"
+  },
+  {
+    "id": "水果",
+    "hanzi": "水果",
+    "pinyin": "shuǐguǒ",
+    "en": "fruit"
+  },
+  {
+    "id": "睡",
+    "hanzi": "睡",
+    "pinyin": "shuì",
+    "en": "sleep"
+  },
+  {
+    "id": "睡觉",
+    "hanzi": "睡觉",
+    "pinyin": "shuì jiào",
+    "en": "turn_in, log Z's, doss, slumber, catch some Z's, go to bed, sleep, doss down, crash, go_to_sleep, hit_the_sack, kip"
+  },
+  {
+    "id": "说",
+    "hanzi": "说",
+    "pinyin": "shuō",
+    "en": "speak, talk, explain, scold"
+  },
+  {
+    "id": "说话",
+    "hanzi": "说话",
+    "pinyin": "shuō huà",
+    "en": "philosophize, thrum, talk, peach, babble out, speech, articulate, chat, speak, babble, gossip, blab out, sing, address, tattle, blab, mouth, say"
+  },
+  {
+    "id": "四",
+    "hanzi": "四",
+    "pinyin": "sì",
+    "en": "det.: four"
+  },
+  {
+    "id": "送",
+    "hanzi": "送",
+    "pinyin": "sòng",
+    "en": "accompaniment, escort, see sb. off, see sb. off/out, to dispatch, see ... off, accompany, to deliver, send, direct, serve, guide, give as a present, deliver, see sb. out, see, lead, see ... out, conduct, give, to send, carry, delivery, carriage, take, hospitalize"
+  },
+  {
+    "id": "岁",
+    "hanzi": "岁",
+    "pinyin": "suì",
+    "en": "year (for crops), m.[standard], , year of age, year (of age), year, annum, year for crops"
+  },
+  {
+    "id": "他",
+    "hanzi": "他",
+    "pinyin": "tā",
+    "en": "he, she, it, they (referring to inanimate things in object position)"
+  },
+  {
+    "id": "他们",
+    "hanzi": "他们",
+    "pinyin": "tāmen",
+    "en": "they"
+  },
+  {
+    "id": "她",
+    "hanzi": "她",
+    "pinyin": "tā",
+    "en": "she, her, she (neologism for {1ta1}[2]), )"
+  },
+  {
+    "id": "她们",
+    "hanzi": "她们",
+    "pinyin": "tāmen",
+    "en": "they (female)"
+  },
+  {
+    "id": "太",
+    "hanzi": "太",
+    "pinyin": "tài",
+    "en": "excessively, too, extremely, very"
+  },
+  {
+    "id": "天",
+    "hanzi": "天",
+    "pinyin": "tiān",
+    "en": "m.[standard]"
+  },
+  {
+    "id": "天气",
+    "hanzi": "天气",
+    "pinyin": "tiānqì",
+    "en": "sky, elements, weather condition, atmospheric condition, weather"
+  },
+  {
+    "id": "听",
+    "hanzi": "听",
+    "pinyin": "tīng",
+    "en": "hear, list, hearken, obey, obedience, listen, heed, administer, let, allow, hark"
+  },
+  {
+    "id": "听到",
+    "hanzi": "听到",
+    "pinyin": "tīngdào",
+    "en": "hear"
+  },
+  {
+    "id": "听见",
+    "hanzi": "听见",
+    "pinyin": "tīng jian",
+    "en": "hear"
+  },
+  {
+    "id": "听写",
+    "hanzi": "听写",
+    "pinyin": "tīngxiě",
+    "en": "dictate, dictation, CL:次[ci4]"
+  },
+  {
+    "id": "同学",
+    "hanzi": "同学",
+    "pinyin": "tóngxué",
+    "en": "class fellow, fellow student, condisciple, classmate, schoolmate, schoolfellow, form of address used in speaking to a student"
+  },
+  {
+    "id": "图书馆",
+    "hanzi": "图书馆",
+    "pinyin": "túshūguǎn",
+    "en": "library"
+  },
+  {
+    "id": "外",
+    "hanzi": "外",
+    "pinyin": "wài",
+    "en": "outside, in addition, foreign, external"
+  },
+  {
+    "id": "外边",
+    "hanzi": "外边",
+    "pinyin": "wàibian",
+    "en": "outside, outer surface, abroad, place other than one's home"
+  },
+  {
+    "id": "外国",
+    "hanzi": "外国",
+    "pinyin": "wàiguó",
+    "en": "foreign, foreign country, outland, outremer"
+  },
+  {
+    "id": "外语",
+    "hanzi": "外语",
+    "pinyin": "wàiyǔ",
+    "en": "foreign language"
+  },
+  {
+    "id": "玩儿",
+    "hanzi": "玩儿",
+    "pinyin": "wánr",
+    "en": "to play, to have fun, to hang out"
+  },
+  {
+    "id": "晚",
+    "hanzi": "晚",
+    "pinyin": "wǎn",
+    "en": "far on in time, late"
+  },
+  {
+    "id": "晚饭",
+    "hanzi": "晚饭",
+    "pinyin": "wǎnfàn",
+    "en": "evening meal, dinner, supper, CL:份[fen4],頓|顿[dun4],次[ci4],餐[can1]"
+  },
+  {
+    "id": "晚上",
+    "hanzi": "晚上",
+    "pinyin": "wǎnshang",
+    "en": "evening, night, CL:個|个[ge4], in the evening"
+  },
+  {
+    "id": "网上",
+    "hanzi": "网上",
+    "pinyin": "wǎngshàng",
+    "en": "online"
+  },
+  {
+    "id": "网友",
+    "hanzi": "网友",
+    "pinyin": "wǎngyǒu",
+    "en": "online friend, Internet user"
+  },
+  {
+    "id": "忘",
+    "hanzi": "忘",
+    "pinyin": "wàng",
+    "en": "forget, overlook, neglect"
+  },
+  {
+    "id": "忘记",
+    "hanzi": "忘记",
+    "pinyin": "wàngjì",
+    "en": "misremember, block, blank out, neglect, overlook, draw a blank, leave_out, disremember, fail, forget"
+  },
+  {
+    "id": "问",
+    "hanzi": "问",
+    "pinyin": "wèn",
+    "en": "ask, examine, question, interrogate"
+  },
+  {
+    "id": "我",
+    "hanzi": "我",
+    "pinyin": "wǒ",
+    "en": "I, me, ego, self"
+  },
+  {
+    "id": "我们",
+    "hanzi": "我们",
+    "pinyin": "wǒmen",
+    "en": "we"
+  },
+  {
+    "id": "五",
+    "hanzi": "五",
+    "pinyin": "wǔ",
+    "en": "det.: five"
+  },
+  {
+    "id": "午饭",
+    "hanzi": "午饭",
+    "pinyin": "wǔfàn",
+    "en": "lunch, CL:份[fen4],頓|顿[dun4],次[ci4],餐[can1]"
+  },
+  {
+    "id": "西",
+    "hanzi": "西",
+    "pinyin": "xī",
+    "en": "W, Spain, west, occident, due west, western"
+  },
+  {
+    "id": "西边",
+    "hanzi": "西边",
+    "pinyin": "xībian",
+    "en": "west, west side, western part, to the west of"
+  },
+  {
+    "id": "洗",
+    "hanzi": "洗",
+    "pinyin": "xǐ",
+    "en": "wash, bathe, sack, develop (film), shuffle (cards/etc.)"
+  },
+  {
+    "id": "洗手间",
+    "hanzi": "洗手间",
+    "pinyin": "xǐshǒujiān",
+    "en": "toilet, lavatory, washroom"
+  },
+  {
+    "id": "喜欢",
+    "hanzi": "喜欢",
+    "pinyin": "xǐhuan",
+    "en": "like, love, be fond of, be happy/elated"
+  },
+  {
+    "id": "下",
+    "hanzi": "下",
+    "pinyin": "xià",
+    "en": "under (condition/fact etc.)"
+  },
+  {
+    "id": "下班",
+    "hanzi": "下班",
+    "pinyin": "xià bān",
+    "en": "get_off"
+  },
+  {
+    "id": "下边",
+    "hanzi": "下边",
+    "pinyin": "xiàbian",
+    "en": "under, the underside, below"
+  },
+  {
+    "id": "下车",
+    "hanzi": "下车",
+    "pinyin": "xiàchē",
+    "en": "get off/out of vehicle"
+  },
+  {
+    "id": "下次",
+    "hanzi": "下次",
+    "pinyin": "xiàcì",
+    "en": "next time"
+  },
+  {
+    "id": "下课",
+    "hanzi": "下课",
+    "pinyin": "xià kè",
+    "en": "finish class, get out of class"
+  },
+  {
+    "id": "下午",
+    "hanzi": "下午",
+    "pinyin": "xiàwǔ",
+    "en": "afternoon, CL:個|个[ge4], p.m."
+  },
+  {
+    "id": "下雨",
+    "hanzi": "下雨",
+    "pinyin": "xiàyǔ",
+    "en": "rain"
+  },
+  {
+    "id": "先",
+    "hanzi": "先",
+    "pinyin": "xiān",
+    "en": "earlier, in advance, before"
+  },
+  {
+    "id": "先生",
+    "hanzi": "先生",
+    "pinyin": "xiānsheng",
+    "en": "doctor of Chinese medicine, Don, mulla, Ms., sir., teacher, gentleman, gospodin, Signor, signor, fortune-teller, babu, baboo, Herr, Mister, bey, mister, bwana, husband, siree, buckra, sirrah, senor, guv, sahib, Mr., rabbi, don, signore, Dan, sir, m'sieur, effendi, Tuan, baas, Monsieur, lording, monsieur, doctor, Mr, milord, Mynheer, signior, esquire, bookkeeper, Senor, rabboni, Senhor, sieur, sen"
+  },
+  {
+    "id": "现在",
+    "hanzi": "现在",
+    "pinyin": "xiànzài",
+    "en": "now, at present, at the moment, modern, current, nowadays"
+  },
+  {
+    "id": "想",
+    "hanzi": "想",
+    "pinyin": "xiǎng",
+    "en": "think, suppose, reckon, consider, want to, would like to, feel like (doing sth.)"
+  },
+  {
+    "id": "小",
+    "hanzi": "小",
+    "pinyin": "xiǎo",
+    "en": "small, little, petty, minor;young"
+  },
+  {
+    "id": "小孩儿",
+    "hanzi": "小孩儿",
+    "pinyin": "xiǎoháir",
+    "en": "child, erhua variant of 小孩[xiao3 hai2]"
+  },
+  {
+    "id": "小姐",
+    "hanzi": "小姐",
+    "pinyin": "xiǎojiě",
+    "en": "Signorina, Senorita, senorita, signorina, young_lady, damosel, Dona, mum, young lady, damoiselle, missy, tootsy, demoiselle, damsel, Miss, Fraulein, miss, sheila, sister, toots, senhorita, damozel, Ladyship, ladyship, Mademoiselle, mademoiselle"
+  },
+  {
+    "id": "小朋友",
+    "hanzi": "小朋友",
+    "pinyin": "xiǎopéngyǒu",
+    "en": "child (adult address to child), little boy, children, little boy/girl, girl, little girl, little boy or girl, child"
+  },
+  {
+    "id": "小时",
+    "hanzi": "小时",
+    "pinyin": "xiǎoshí",
+    "en": "hour"
+  },
+  {
+    "id": "小学",
+    "hanzi": "小学",
+    "pinyin": "xiǎoxué",
+    "en": "primary school, elementary school"
+  },
+  {
+    "id": "小学生",
+    "hanzi": "小学生",
+    "pinyin": "xiǎo xuésheng",
+    "en": "(primary) pupil, schoolboy, schoolgirl"
+  },
+  {
+    "id": "笑",
+    "hanzi": "笑",
+    "pinyin": "xiào",
+    "en": "smile, laugh"
+  },
+  {
+    "id": "写",
+    "hanzi": "写",
+    "pinyin": "xiě",
+    "en": "description, bewrite, direct, describe, pencil, draw, paint, inscribe, write, depiction, write_out, throw_off, depict, address, author, screeve, word, compose"
+  },
+  {
+    "id": "谢谢",
+    "hanzi": "谢谢",
+    "pinyin": "xièxie",
+    "en": "thank"
+  },
+  {
+    "id": "新",
+    "hanzi": "新",
+    "pinyin": "xīn",
+    "en": "new, fresh, up-to-date"
+  },
+  {
+    "id": "新年",
+    "hanzi": "新年",
+    "pinyin": "xīnnián",
+    "en": "New Year, CL:個|个[ge4]"
+  },
+  {
+    "id": "星期",
+    "hanzi": "星期",
+    "pinyin": "xīngqī",
+    "en": "Sunday, week"
+  },
+  {
+    "id": "星期日",
+    "hanzi": "星期日",
+    "pinyin": "Xīngqīrì",
+    "en": "Sunday, CL:個|个[ge4]"
+  },
+  {
+    "id": "星期天",
+    "hanzi": "星期天",
+    "pinyin": "xīngqītiān",
+    "en": "Sunday, CL:個|个[ge4]"
+  },
+  {
+    "id": "行",
+    "hanzi": "行",
+    "pinyin": "xíng",
+    "en": "go, travel, prevail, circulate, be current"
+  },
+  {
+    "id": "休息",
+    "hanzi": "休息",
+    "pinyin": "xiūxi",
+    "en": "repose, have, lie dormant, respire, take time off, have a rest, take a rest, take off, relax, take_time_off, have/take a rest, rest"
+  },
+  {
+    "id": "学",
+    "hanzi": "学",
+    "pinyin": "xué",
+    "en": "study, learn, imitate, mimic"
+  },
+  {
+    "id": "学生",
+    "hanzi": "学生",
+    "pinyin": "xuésheng",
+    "en": "academic, pupil, pup, tutee, follower, scholar, schoolchild, schoolboy, alumnus, disciple, learner, scholastic, student"
+  },
+  {
+    "id": "学习",
+    "hanzi": "学习",
+    "pinyin": "xuéxí",
+    "en": "study, learn, emulate"
+  },
+  {
+    "id": "学校",
+    "hanzi": "学校",
+    "pinyin": "xuéxiào",
+    "en": "seminary, schoolhouse, educational institution, school, institution"
+  },
+  {
+    "id": "学院",
+    "hanzi": "学院",
+    "pinyin": "xuéyuàn",
+    "en": "seminary, college, school, hall, institute, academy, faculty"
+  },
+  {
+    "id": "要",
+    "hanzi": "要",
+    "pinyin": "yào",
+    "en": "want, need, must, should"
+  },
+  {
+    "id": "爷爷",
+    "hanzi": "爷爷",
+    "pinyin": "yéye",
+    "en": "grandad, Grandpa, granddad, grandpa, (paternal) grandfather, gramps, granddaddy, grandfather"
+  },
+  {
+    "id": "也",
+    "hanzi": "也",
+    "pinyin": "yě",
+    "en": "also, too, as well, either, even"
+  },
+  {
+    "id": "页",
+    "hanzi": "页",
+    "pinyin": "yè",
+    "en": "page, leaf, m.[general], ,sheet of paper, sheet, piece, piece of paper, folio"
+  },
+  {
+    "id": "一",
+    "hanzi": "一",
+    "pinyin": "yī",
+    "en": "det.: one"
+  },
+  {
+    "id": "衣服",
+    "hanzi": "衣服",
+    "pinyin": "yīfu",
+    "en": "clothes, wearing apparel, toggery, gear, tog, wear, bib-and-tucker, drapery, thing, dress, duds, vestment, wardrobe, clout, apparel, clothing, dud, wrapping, vesture, clobber, habit, robe, togs, livery, habilimentation, array, hull, garb, attire, attirement, stitch, rig, garment, raiment, wearable, dressing"
+  },
+  {
+    "id": "医生",
+    "hanzi": "医生",
+    "pinyin": "yīshēng",
+    "en": "Galen, MD, physician, Dr., medic, doc, hakeem, medico, Aesculapius, medical man, surgeon, leech, doctor"
+  },
+  {
+    "id": "医院",
+    "hanzi": "医院",
+    "pinyin": "yīyuàn",
+    "en": "spital, hospital, infirmary, hospice"
+  },
+  {
+    "id": "一半",
+    "hanzi": "一半",
+    "pinyin": "yībàn",
+    "en": "det.: one half, in part, half"
+  },
+  {
+    "id": "一会儿",
+    "hanzi": "一会儿",
+    "pinyin": "yīhuìr",
+    "en": "a moment, a while, in a moment, now...now..., also pr. [yi1 hui3 r5]"
+  },
+  {
+    "id": "一块儿",
+    "hanzi": "一块儿",
+    "pinyin": "yīkuàir",
+    "en": "together"
+  },
+  {
+    "id": "一下儿",
+    "hanzi": "一下儿",
+    "pinyin": "yīxiàr",
+    "en": "(used after a verb) give it a go, to do (sth for a bit to give it a try), one time, once, in a while, all of a sudden, all at once, erhua variant of 一下[yi1 xia4]"
+  },
+  {
+    "id": "一样",
+    "hanzi": "一样",
+    "pinyin": "yīyàng",
+    "en": "same, equal, similar"
+  },
+  {
+    "id": "一边",
+    "hanzi": "一边",
+    "pinyin": "yībiān",
+    "en": "at the same time, simultaneously;on the one/other hand"
+  },
+  {
+    "id": "一点儿",
+    "hanzi": "一点儿",
+    "pinyin": "yīdiǎnr",
+    "en": "det.: a little bit"
+  },
+  {
+    "id": "一起",
+    "hanzi": "一起",
+    "pinyin": "yīqǐ",
+    "en": "in_chorus, together, in all, in the same place, holus-bolus, altogether, in company"
+  },
+  {
+    "id": "一些",
+    "hanzi": "一些",
+    "pinyin": "yīxiē",
+    "en": "det.: some, a few, a little"
+  },
+  {
+    "id": "用",
+    "hanzi": "用",
+    "pinyin": "yòng",
+    "en": "with"
+  },
+  {
+    "id": "有",
+    "hanzi": "有",
+    "pinyin": "yǒu",
+    "en": "have, possess"
+  },
+  {
+    "id": "有的",
+    "hanzi": "有的",
+    "pinyin": "yǒude",
+    "en": "det : some"
+  },
+  {
+    "id": "有名",
+    "hanzi": "有名",
+    "pinyin": "yǒu míng",
+    "en": "well-known, famous"
+  },
+  {
+    "id": "有时候",
+    "hanzi": "有时候",
+    "pinyin": "yǒushíhou",
+    "en": "from time to time, on_occasion, occasionally, somewhile, otherwhile, now and again, sometimes, now and then, at times, on occasion, whiles, once in a while"
+  },
+  {
+    "id": "有些",
+    "hanzi": "有些",
+    "pinyin": "yǒuxiē",
+    "en": "kind_of, rather, somewhat"
+  },
+  {
+    "id": "有用",
+    "hanzi": "有用",
+    "pinyin": "yǒuyòng",
+    "en": "belong, profit, count, useful, avail, powerful"
+  },
+  {
+    "id": "右",
+    "hanzi": "右",
+    "pinyin": "yòu",
+    "en": "right side as side of precedence, right side, west, winger, right, the right side, the Right, the right"
+  },
+  {
+    "id": "右边",
+    "hanzi": "右边",
+    "pinyin": "yòubian",
+    "en": "right side, right, to the right"
+  },
+  {
+    "id": "雨",
+    "hanzi": "雨",
+    "pinyin": "yǔ",
+    "en": "rain"
+  },
+  {
+    "id": "元",
+    "hanzi": "元",
+    "pinyin": "yuán",
+    "en": "m.[standard]"
+  },
+  {
+    "id": "远",
+    "hanzi": "远",
+    "pinyin": "yuǎn",
+    "en": "far, distant (lit./fig.)"
+  },
+  {
+    "id": "月",
+    "hanzi": "月",
+    "pinyin": "yuè",
+    "en": "moon"
+  },
+  {
+    "id": "再",
+    "hanzi": "再",
+    "pinyin": "zài",
+    "en": "again, once more, further(more), in a higher degree, and then, not (do sth.) before"
+  },
+  {
+    "id": "再见",
+    "hanzi": "再见",
+    "pinyin": "zàijiàn",
+    "en": "good-bye, see you again"
+  },
+  {
+    "id": "在",
+    "hanzi": "在",
+    "pinyin": "zài",
+    "en": "in, at, on, etc."
+  },
+  {
+    "id": "在家",
+    "hanzi": "在家",
+    "pinyin": "zàijiā",
+    "en": "At home"
+  },
+  {
+    "id": "早",
+    "hanzi": "早",
+    "pinyin": "zǎo",
+    "en": "early, long ago, in advance, beforehand, prematurely"
+  },
+  {
+    "id": "早饭",
+    "hanzi": "早饭",
+    "pinyin": "zǎofàn",
+    "en": "breakfast, CL:份[fen4],頓|顿[dun4],次[ci4],餐[can1]"
+  },
+  {
+    "id": "早上",
+    "hanzi": "早上",
+    "pinyin": "zǎoshang",
+    "en": "early morning, CL:個|个[ge4]"
+  },
+  {
+    "id": "怎么",
+    "hanzi": "怎么",
+    "pinyin": "zěnme",
+    "en": "how"
+  },
+  {
+    "id": "站",
+    "hanzi": "站",
+    "pinyin": "zhàn",
+    "en": "to stand"
+  },
+  {
+    "id": "找",
+    "hanzi": "找",
+    "pinyin": "zhǎo",
+    "en": "look for, seek, call on, approach"
+  },
+  {
+    "id": "找到",
+    "hanzi": "找到",
+    "pinyin": "zhǎodào",
+    "en": "light upon, find, discover, run_down, founded, regain, strike, come upon, come across, run down, trace, turn_up, happen upon, get, chance on, chance upon"
+  },
+  {
+    "id": "这",
+    "hanzi": "这",
+    "pinyin": "zhè",
+    "en": "now, this, det.: this, it"
+  },
+  {
+    "id": "这边",
+    "hanzi": "这边",
+    "pinyin": "zhèbiān",
+    "en": "this side, here"
+  },
+  {
+    "id": "这里",
+    "hanzi": "这里",
+    "pinyin": "zhèlǐ",
+    "en": "this place, there, here"
+  },
+  {
+    "id": "这儿",
+    "hanzi": "这儿",
+    "pinyin": "zhèr",
+    "en": "now, here"
+  },
+  {
+    "id": "这些",
+    "hanzi": "这些",
+    "pinyin": "zhèxiē",
+    "en": "det.: these"
+  },
+  {
+    "id": "着",
+    "hanzi": "着",
+    "pinyin": "zhe",
+    "en": "[aspect]"
+  },
+  {
+    "id": "真",
+    "hanzi": "真",
+    "pinyin": "zhēn",
+    "en": "really, truly, indeed, clearly"
+  },
+  {
+    "id": "真的",
+    "hanzi": "真的",
+    "pinyin": "zhēn de",
+    "en": "really, truly, indeed"
+  },
+  {
+    "id": "正",
+    "hanzi": "正",
+    "pinyin": "zhèng",
+    "en": "precisely, punctually"
+  },
+  {
+    "id": "正在",
+    "hanzi": "正在",
+    "pinyin": "zhèngzài",
+    "en": "course of, be, be in process"
+  },
+  {
+    "id": "知道",
+    "hanzi": "知道",
+    "pinyin": "zhīdao",
+    "en": "tell, have, ken, understand, infer, wis, learn, cognize, gather, know, be aware of, wise up, savvy, mind, realize"
+  },
+  {
+    "id": "知识",
+    "hanzi": "知识",
+    "pinyin": "zhīshi",
+    "en": "lear, know-how, understanding, ken, instruction, science, sophistication, consciousness, light, awareness, cognizance, knowledge, lore, mastery, know, cognition, acquaintanceship, mind, intellect, knowingness, equipment"
+  },
+  {
+    "id": "中",
+    "hanzi": "中",
+    "pinyin": "zhōng",
+    "en": "center, middle, interior"
+  },
+  {
+    "id": "中国",
+    "hanzi": "中国",
+    "pinyin": "Zhōngguó",
+    "en": "Cathay, China, china"
+  },
+  {
+    "id": "中间",
+    "hanzi": "中间",
+    "pinyin": "zhōngjiān",
+    "en": "center, middle"
+  },
+  {
+    "id": "中文",
+    "hanzi": "中文",
+    "pinyin": "Zhōngwén",
+    "en": "Chinese, Ch. (written) language, Ch. language, Sinitic"
+  },
+  {
+    "id": "中午",
+    "hanzi": "中午",
+    "pinyin": "zhōngwǔ",
+    "en": "noon, midday, CL:個|个[ge4]"
+  },
+  {
+    "id": "中学",
+    "hanzi": "中学",
+    "pinyin": "zhōngxué",
+    "en": "middle_school, grammar_school, secondary school, Ch. learning, middle school, high_school, grammar school"
+  },
+  {
+    "id": "中学生",
+    "hanzi": "中学生",
+    "pinyin": "zhōngxuéshēng",
+    "en": "middle-school student, high school student"
+  },
+  {
+    "id": "重",
+    "hanzi": "重",
+    "pinyin": "zhòng",
+    "en": "heavy, weighty, important, considerable in amount/value"
+  },
+  {
+    "id": "重要",
+    "hanzi": "重要",
+    "pinyin": "zhòngyào",
+    "en": "important, significant, major"
+  },
+  {
+    "id": "住",
+    "hanzi": "住",
+    "pinyin": "zhù",
+    "en": "inhabit, cease, stay, visit, shack, dwell, stop, people, live, reside, populate, dig"
+  },
+  {
+    "id": "准备",
+    "hanzi": "准备",
+    "pinyin": "zhǔnbèi",
+    "en": "prepare, get ready"
+  },
+  {
+    "id": "桌子",
+    "hanzi": "桌子",
+    "pinyin": "zhuōzi",
+    "en": "mahogany, table, desk"
+  },
+  {
+    "id": "字",
+    "hanzi": "字",
+    "pinyin": "zì",
+    "en": "graphic symbol, writing, pronunciation (of a word), form of a written character, receipt, printing type, script, name taken at the age of 20, courtesy name, wordage, character, grapheme, contract, scripts, symbolic representation, style of handwriting, word"
+  },
+  {
+    "id": "子",
+    "hanzi": "子",
+    "pinyin": "zi",
+    "en": "son, child, seed, egg, small thing, 1st earthly branch: 11 p.m.-1 a.m., midnight, 11th solar month (7th December to 5th January), year of the Rat, Viscount, fourth of five orders of nobility 五等爵位[wu3 deng3 jue2 wei4], ancient Chinese compass point: 0° (north), (noun suffix)"
+  },
+  {
+    "id": "走",
+    "hanzi": "走",
+    "pinyin": "zǒu",
+    "en": "scram, travel, foot, go away, evaporate, ankle, waltz, step, bugger off, etc., go through, leave, leak, run, buzz off, leg, pad, fork, visit, go, escape, lose flavor, work, call on, strike, sashay, trace, pursue, gang, lose shape/etc., get_along, come_along, walk, hoof it, lose flavor/shape/etc., leg it, let out, shape, drive, cover, take, get, hoof, move"
+  },
+  {
+    "id": "走路",
+    "hanzi": "走路",
+    "pinyin": "zǒu lù",
+    "en": "go away, stroam, go on foot, walk"
+  },
+  {
+    "id": "最",
+    "hanzi": "最",
+    "pinyin": "zuì",
+    "en": "most, to the highest degree, much, superlatively"
+  },
+  {
+    "id": "最好",
+    "hanzi": "最好",
+    "pinyin": "zuìhǎo",
+    "en": "had better, it would be best"
+  },
+  {
+    "id": "最后",
+    "hanzi": "最后",
+    "pinyin": "zuìhòu",
+    "en": "final, last, finally, ultimate"
+  },
+  {
+    "id": "昨天",
+    "hanzi": "昨天",
+    "pinyin": "zuótiān",
+    "en": "yesterday"
+  },
+  {
+    "id": "左",
+    "hanzi": "左",
+    "pinyin": "zuǒ",
+    "en": "left side, east, the Left"
+  },
+  {
+    "id": "左边",
+    "hanzi": "左边",
+    "pinyin": "zuǒbian",
+    "en": "left, the left side, to the left of"
+  },
+  {
+    "id": "坐",
+    "hanzi": "坐",
+    "pinyin": "zuò",
+    "en": "sit, take seat"
+  },
+  {
+    "id": "坐下",
+    "hanzi": "坐下",
+    "pinyin": "zuòxià",
+    "en": "subside, sit, sit down, sink, sit_down"
+  },
+  {
+    "id": "做",
+    "hanzi": "做",
+    "pinyin": "zuò",
+    "en": "make, do"
+  }
+]

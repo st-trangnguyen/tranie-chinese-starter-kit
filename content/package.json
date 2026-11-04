@@ -8,14 +8,20 @@
     "typecheck": "tsc --noEmit",
     "test:run": "vitest run --passWithNoTests",
     "font:subset": "tsx scripts/font-subset/index.ts",
-    "content:check": "tsx scripts/content-check/index.ts"
+    "content:check": "tsx scripts/content-check/index.ts",
+    "content:fetch": "tsx scripts/content-fetch/index.ts",
+    "content:build": "tsx scripts/content-build/index.ts",
+    "content:audio": "tsx scripts/content-audio/index.ts"
   },
   "dependencies": {
     "@csk/shared": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "hanzi-writer-data": "catalog:",
+    "msedge-tts": "catalog:",
     "subset-font": "catalog:",
-    "tsx": "catalog:"
+    "tsx": "catalog:",
+    "yaml": "catalog:"
   }
 }

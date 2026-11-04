@@ -1,0 +1,17 @@
+# Bài mẫu của pipeline (E2): đủ mỗi dạng bài tập 0.1 một lần. Nội dung thật soạn ở E7 (S7.1).
+id: intro-01
+type: lesson
+title: Bốn thanh điệu
+sentences:
+  - id: intro-01-nihao
+    hanzi: 你好！
+    pinyin: nǐ hǎo!
+    vi: Xin chào!
+exercises:
+  - { id: e1, kind: tone-choice, wordId: 八 }
+  - { id: e2, kind: tone-choice, wordId: 白 }
+  - { id: e3, kind: tone-choice, wordId: 百 }
+  - { id: e4, kind: sound-pair, wordIds: [四, 十], answerWordId: 四 }
+  - { id: e5, kind: pinyin-type, wordId: 爸爸 }
+  - { id: e6, kind: speak, sentenceId: intro-01-nihao }
+  - { id: e7, kind: stroke-write, wordId: 人 }

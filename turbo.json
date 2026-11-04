@@ -29,7 +29,8 @@
       "dependsOn": ["transit"],
       "inputs": [
         "$TURBO_DEFAULT$",
-        "$TURBO_ROOT$/apps/web/src/assets/content/**"
+        "$TURBO_ROOT$/apps/web/src/assets/content/**",
+        "$TURBO_ROOT$/apps/web/src/assets/audio/**"
       ]
     },
     "e2e": {

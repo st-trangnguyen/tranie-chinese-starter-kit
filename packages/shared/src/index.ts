@@ -8,3 +8,31 @@ export {
   settingsSchema,
 } from './progress.schema';
 export type { DailyGoalMinutes, Settings } from './progress.schema';
+export {
+  isToneMarkedPinyin,
+  numberedToToneMarks,
+  pinyinKey,
+} from './pinyin.utils';
+export {
+  LESSON_TYPES,
+  VOICES,
+  contentRootSchema,
+  exerciseSchema,
+  lessonSchema,
+  sentenceSchema,
+  stageSchema,
+  unitSchema,
+  voiceSchema,
+  wordSchema,
+} from './content.schema';
+export type {
+  ContentRoot,
+  Exercise,
+  ExerciseKind,
+  Lesson,
+  Sentence,
+  Stage,
+  Unit,
+  Voice,
+  Word,
+} from './content.schema';

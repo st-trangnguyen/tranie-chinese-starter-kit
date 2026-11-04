@@ -14,7 +14,7 @@
 ```mermaid
 flowchart LR
   subgraph Máy người soạn
-    R[content/data-raw/<br/>HSK 3.0 · CVDICT · hanzi-writer-data] --> P[content/scripts/<br/>content-build · content-check · audio-gen]
+    R[content/data-raw/<br/>HSK 3.0 · CVDICT · hanzi-writer-data] --> P[content/scripts/<br/>content-fetch · content-build · content-audio · content-check]
     C[content/authored/<br/>YAML soạn tay] --> P
     S[packages/shared<br/>schema zod] -.-> P
     P --> O[apps/web/src/assets/content/*.json<br/>apps/web/src/assets/audio/*.mp3]
@@ -99,9 +99,10 @@ chinese-starter-kit/
 │
 ├── content/                                   # @csk/content
 │   ├── package.json  tsconfig.json
-│   ├── authored/                              # YAML soạn tay: stages, units, lessons, grammar, dialogues
-│   ├── data-raw/                              # dữ liệu mở gốc + LICENSE: HSK 3.0, CVDICT, hanzi-writer-data, fonts/ (TTF LXGW WenKai không commit, font:subset tự tải)
-│   └── scripts/                               # content-build · content-check · audio-gen · font-subset (chạy sau content-build)
+│   ├── authored/                              # soạn tay: path.yaml (lộ trình), lessons/**/*.yaml, vi-meanings.yaml, tts-overrides.yaml
+│   ├── data-raw/                              # bản đã lọc của nguồn mở (hsk1.words.json, cvdict.hsk1.json) + README nguồn/license;
+│   │                                          # file gốc ở .cache/ (không commit), fonts/ (TTF không commit, font:subset tự tải)
+│   └── scripts/                               # content-fetch → content-build → content-audio → font-subset; content-check
 │                                              # output ghi vào apps/web/src/assets/{content,audio,fonts}
 │
 └── apps/web/                                  # @csk/web
@@ -196,18 +197,32 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
 
 ```ts
 Stage   { id, title, units: Unit[] }
-Unit    { id, title, lessons: Lesson[] }        // Nhập môn = 1 unit gồm 12 bài
+Unit    { id, title, lessonIds: LessonId[] }    // Nhập môn = 1 unit gồm 12 bài
 Lesson  { id, type, title, exercises: Exercise[] }
 Exercise = union phân biệt theo `kind`:
   tone-choice | sound-pair | pinyin-type | speak | stroke-write |
   flashcard | listen-choose | meaning-choose | reorder | fill-blank |
   grammar-card | dialogue | roleplay | reading
   // bài tập tham chiếu tới Word/Sentence bằng ID
-Word        { id, hanzi, pinyin, vi: string[], hsk, audio }
+Word        { id, hanzi, pinyin, vi: string[], viReviewed, hsk, audio }  // id = hanzi; chữ đa âm: `hanzi:pinyin`
 Sentence    { id, hanzi, pinyin, vi, audio, voice }
 GrammarPoint{ id, title, explanationVi, pattern, examples: SentenceId[] }
 // file gốc có `contentVersion`
 ```
+
+File output (`apps/web/src/assets/content/`): `content.json` (`contentVersion` + `stages`), `words.json`,
+`sentences.json`, `lessons/<id>.json`, `strokes/<chữ>.json` (hanzi-writer, chỉ chữ có trong bài).
+Audio: `apps/web/src/assets/audio/<hash>.mp3`, hash của giọng + chữ được đọc.
+
+**Lệnh pipeline** (`pnpm --filter @csk/content …`):
+
+| Lệnh | Việc | Cần mạng |
+|---|---|---|
+| `content:fetch` | Tải nguồn ghim SHA-256 (HSK 3.0, CVDICT), lọc vào `data-raw/*.json`, thêm từ mới vào `vi-meanings.yaml` | Có (lần đầu) |
+| `content:build` | Ghép nguồn + YAML soạn tay thành JSON, chép nét chữ; có lỗi thì không ghi | Không |
+| `content:audio` | Tạo mp3 còn thiếu bằng edge-tts (`msedge-tts`), xoá mp3 không còn dùng | Có |
+| `font:subset` | Cắt font chữ Hán theo nội dung | Có (lần đầu) |
+| `content:check` | Kiểm tra (S2.1–S2.5) + output khớp nguồn; chạy trong CI | Không |
 
 Cấu trúc `Stage → Unit → Lesson` dùng chung cho Nhập môn và mọi cấp HSK.
 

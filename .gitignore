@@ -38,3 +38,6 @@ playwright-report
 
 # Font gốc LXGW WenKai (~26 MB): tải bằng `pnpm --filter @csk/content font:subset`
 content/data-raw/fonts/*.ttf
+
+# Nguồn mở gốc của pipeline nội dung (tải bằng `content:fetch`); bản đã lọc *.json được commit
+content/data-raw/.cache
