@@ -11,19 +11,23 @@
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test:run": "vitest run --passWithNoTests",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "icons:generate": "pwa-assets-generator"
   },
   "dependencies": {
     "@csk/shared": "workspace:*",
     "@fontsource/baloo-2": "catalog:",
     "@fontsource/quicksand": "catalog:",
+    "dexie": "catalog:",
     "i18next": "catalog:",
     "i18next-http-backend": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-error-boundary": "catalog:",
     "react-i18next": "catalog:",
-    "react-router-dom": "catalog:"
+    "react-router-dom": "catalog:",
+    "workbox-window": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@playwright/test": "catalog:",
@@ -34,11 +38,14 @@
     "@testing-library/user-event": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vite-pwa/assets-generator": "catalog:",
     "@vitejs/plugin-react": "catalog:",
+    "fake-indexeddb": "catalog:",
     "jsdom": "catalog:",
     "tailwindcss": "catalog:",
     "vite": "catalog:",
     "vite-plugin-html": "catalog:",
+    "vite-plugin-pwa": "catalog:",
     "vite-plugin-svgr": "catalog:"
   }
 }

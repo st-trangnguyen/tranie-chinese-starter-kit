@@ -192,6 +192,18 @@ BEM dùng dấu gạch ngang, **không phải BEM truyền thống**:
 5. Chạy typecheck / lint / test. **Không nói "đã xong" khi chưa chạy và chưa
    thấy kết quả pass.**
 
+### Lệnh kiểm tra chuẩn
+
+| Khi nào | Lệnh |
+|---|---|
+| Mọi thay đổi code | `pnpm typecheck && pnpm lint && pnpm test:run` |
+| Đụng build, font, asset | `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts` |
+| Đụng luồng người dùng, PWA | `pnpm e2e` (Playwright, tự build + `vite preview` :4173) |
+| Xem UI | preview `web-dev` (:5173, không có service worker) |
+| Xem PWA (manifest, offline, cập nhật) | preview `web-build-preview` (build mới + :4173) |
+
+Không dùng `pnpm test` (watch mode, không tự thoát).
+
 ---
 
 ## 9. Khi nào hỏi lại thay vì tự quyết

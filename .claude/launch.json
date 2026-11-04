@@ -2,9 +2,24 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "web-dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@csk/web", "exec", "vite", "--port", "5173", "--strictPort"],
+      "port": 5173
+    },
+    {
       "name": "web-preview",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@csk/web", "exec", "vite", "preview", "--port", "4173", "--strictPort"],
+      "port": 4173
+    },
+    {
+      "name": "web-build-preview",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "pnpm --filter @csk/web build && pnpm --filter @csk/web exec vite preview --port 4173 --strictPort"
+      ],
       "port": 4173
     }
   ]
