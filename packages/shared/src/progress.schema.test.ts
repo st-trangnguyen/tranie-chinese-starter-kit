@@ -1,0 +1,34 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  DAILY_GOAL_OPTIONS,
+  DEFAULT_SETTINGS,
+  parseSettings,
+} from './progress.schema';
+
+describe('parseSettings', () => {
+  it('returns the defaults for an empty record', () => {
+    expect(parseSettings({})).toEqual(DEFAULT_SETTINGS);
+  });
+
+  it('keeps valid stored values', () => {
+    expect(
+      parseSettings({ dailyGoalMinutes: 60, hasCompletedOnboarding: true }),
+    ).toEqual({ dailyGoalMinutes: 60, hasCompletedOnboarding: true });
+  });
+
+  it('falls back per field when a stored value is invalid', () => {
+    expect(
+      parseSettings({ dailyGoalMinutes: 45, hasCompletedOnboarding: true }),
+    ).toEqual({ ...DEFAULT_SETTINGS, hasCompletedOnboarding: true });
+  });
+
+  it('ignores unknown keys and non-object input', () => {
+    expect(parseSettings({ legacy: 1 })).toEqual(DEFAULT_SETTINGS);
+    expect(parseSettings(null)).toEqual(DEFAULT_SETTINGS);
+  });
+
+  it('offers exactly 15, 30 and 60 minutes', () => {
+    expect(DAILY_GOAL_OPTIONS).toEqual([15, 30, 60]);
+  });
+});
