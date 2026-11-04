@@ -43,14 +43,14 @@ Là người học, tôi muốn cài app lên màn hình chính của điện th
 ### S1.2 Mở app khi không có mạng · F8
 Là người học, tôi muốn mở app và học khi không có mạng để học được ở bất cứ đâu.
 - **AC1** Đã mở app ít nhất 1 lần, sau đó tắt mạng và mở lại: vẫn vào được lộ trình.
-- **AC2** Học được trọn các bài của bản 0.1 khi offline, kể cả audio.
+- **AC2** Mọi file nội dung (JSON) và audio (mp3) có trong bản build đều được lưu sẵn (precache): đã mở app 1 lần thì khi offline vẫn tải và phát được.
 
 ### S1.3 Chọn mục tiêu mỗi ngày khi mở lần đầu · F1
 Là người học, tôi muốn chọn mục tiêu số phút học mỗi ngày ngay khi mở app lần đầu để app theo dõi tiến độ theo đúng thời gian tôi có.
 - **AC1** Lần mở đầu tiên hiện màn chào mừng, sau đó cho chọn 15 / 30 / 60 phút.
 - **AC2** Nếu app chưa chạy như PWA thì gợi ý cài, có nút bỏ qua.
-- **AC3** Onboarding chỉ hiện một lần. Lựa chọn được lưu lại và đổi được trong Cài đặt.
-- **AC4** Xong onboarding thì vào thẳng bài 1 Nhập môn.
+- **AC3** Onboarding chỉ hiện một lần. Lựa chọn được lưu lại (đổi lại trong Cài đặt: S8.2 AC1).
+- **AC4** Xong onboarding thì vào thẳng route bài đầu tiên của lộ trình (nội dung bài 1: S7.1 AC4).
 
 ### S1.4 Nhận bản cập nhật · (kỹ thuật)
 Là người học, tôi muốn biết khi app có bản mới để luôn dùng phiên bản mới nhất.
@@ -188,6 +188,8 @@ Là người soạn nội dung, tôi muốn có đủ 12 bài Nhập môn để 
   11. 30 bộ thủ phổ biến
   12. Ôn tổng hợp + câu chào đầu tiên
 - **AC3** `content:check` chạy qua mà không có lỗi.
+- **AC4** Xong onboarding thì mở được bài 1 "Thanh 1–4" (chuyển từ S1.3 AC4).
+- **AC5** Đã mở app 1 lần thì tắt mạng vẫn học trọn 12 bài, kể cả audio (chuyển từ S1.2 AC2).
 
 ## E8. Trang chủ & dữ liệu cá nhân
 

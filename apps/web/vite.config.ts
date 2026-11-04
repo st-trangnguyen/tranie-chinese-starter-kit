@@ -7,6 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import Path from 'path';
 
 import { alias } from './aliases';
+import { offlineFixturesPlugin } from './e2e/fixtures/offlineFixturesPlugin';
 
 // Màu `bg` sáng của design system: nền splash và thanh trạng thái khi cài PWA.
 const APP_BACKGROUND = '#F6F5EF';
@@ -29,6 +30,8 @@ export default defineConfig(({ mode }) => {
     envDir: __dirname,
     plugins: [
       react(),
+      // Chỉ bản build cho Playwright (`--mode e2e`): thêm nội dung + audio mẫu để kiểm offline.
+      mode === 'e2e' && offlineFixturesPlugin(),
       tailwindcss(),
       svgr(),
       createHtmlPlugin({
