@@ -35,3 +35,6 @@ coverage
 # Playwright
 test-results
 playwright-report
+
+# Font gốc LXGW WenKai (~26 MB): tải bằng `pnpm --filter @csk/content font:subset`
+content/data-raw/fonts/*.ttf

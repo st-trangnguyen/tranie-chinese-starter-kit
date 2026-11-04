@@ -6,13 +6,15 @@
   "scripts": {
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test:run": "vitest run --passWithNoTests"
+    "test:run": "vitest run --passWithNoTests",
+    "font:subset": "tsx scripts/font-subset/index.ts"
   },
   "dependencies": {
     "@csk/shared": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "subset-font": "catalog:",
     "tsx": "catalog:"
   }
 }

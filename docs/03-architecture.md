@@ -100,19 +100,21 @@ chinese-starter-kit/
 ├── content/                                   # @csk/content
 │   ├── package.json  tsconfig.json
 │   ├── authored/                              # YAML soạn tay: stages, units, lessons, grammar, dialogues
-│   ├── data-raw/                              # dữ liệu mở gốc + LICENSE: HSK 3.0, CVDICT, hanzi-writer-data
-│   └── scripts/                               # content-build · content-check · audio-gen
-│                                              # output ghi vào apps/web/src/assets/{content,audio}
+│   ├── data-raw/                              # dữ liệu mở gốc + LICENSE: HSK 3.0, CVDICT, hanzi-writer-data, fonts/ (TTF LXGW WenKai không commit, font:subset tự tải)
+│   └── scripts/                               # content-build · content-check · audio-gen · font-subset (chạy sau content-build)
+│                                              # output ghi vào apps/web/src/assets/{content,audio,fonts}
 │
 └── apps/web/                                  # @csk/web
     ├── package.json  CLAUDE.md                # CLAUDE.md riêng: quy ước frontend
     ├── aliases.ts  tsconfig.json  vite.config.ts  playwright.config.ts
     ├── e2e/                                   # Playwright, chia theo epic: E1/s1.2-offline.spec.ts…
     └── src/                                   # Vite root, publicDir = assets
-    ├── index.html  index.css               # index.css nạp Tailwind
+    ├── index.html  index.css               # index.css nạp styles/tailwind/main.css
+    ├── styles/tailwind/                    # design system: tokens/ (màu, spacing, chữ), base/ (font, nền), themes/_dark.css
     ├── assets/
     │   ├── i18n/vi/{common,home,path,lesson,review,settings}.json
     │   ├── icons/  images/
+    │   ├── fonts/                          # ← LXGW WenKai đã cắt (content: font:subset)
     │   ├── content/                        # ← output JSON của pipeline
     │   └── audio/                          # ← output mp3 của pipeline
     ├── config/environment.ts
