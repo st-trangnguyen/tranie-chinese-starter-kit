@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "title": "Chào mừng đến {{appName}}",
+    "body": "Học tiếng Trung từ Pinyin, nét chữ tới HSK, ngay trên điện thoại và cả khi không có mạng.",
+    "start": "Bắt đầu"
+  },
+  "goal": {
+    "title": "Mỗi ngày bạn muốn học bao lâu?",
+    "body": "Bạn có thể đổi lại trong Cài đặt bất cứ lúc nào.",
+    "minutes_one": "{{count}} phút",
+    "minutes_other": "{{count}} phút",
+    "hint": {
+      "15": "Nhẹ nhàng, giữ nhịp mỗi ngày",
+      "30": "Vừa phải, tiến bộ đều",
+      "60": "Tập trung, đi nhanh"
+    },
+    "confirm": "Tiếp tục",
+    "error": "Chưa lưu được lựa chọn. Hãy thử lại."
+  },
+  "install": {
+    "title": "Cài app lên màn hình chính",
+    "body": "Mở nhanh như một app thật và học được cả khi không có mạng.",
+    "ios": "Trên iPhone: bấm nút Chia sẻ, rồi chọn \"Thêm vào MH chính\".",
+    "manual": "Mở menu của trình duyệt và chọn \"Cài đặt ứng dụng\" hoặc \"Thêm vào màn hình chính\".",
+    "action": "Cài app",
+    "skip": "Bỏ qua",
+    "continue": "Vào học"
+  }
+}

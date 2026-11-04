@@ -1,0 +1,6 @@
+{
+  "placeholder": {
+    "title": "Bài {{lessonId}}",
+    "body": "Bài học đang được soạn và sẽ có trong bản tới."
+  }
+}

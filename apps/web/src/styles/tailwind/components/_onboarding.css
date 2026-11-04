@@ -1,0 +1,60 @@
+/* Màn onboarding — S1.3. */
+
+@layer components {
+  .onboarding-logo {
+    @apply rounded-lg shadow-sm;
+  }
+
+  .onboarding-title {
+    @apply text-title text-fg text-center;
+  }
+
+  .onboarding-text {
+    @apply text-body text-fg-muted text-center;
+  }
+
+  .onboarding-error {
+    @apply rounded-md bg-danger-soft p-md text-body-sm text-danger-text text-center;
+  }
+
+  .goal-option {
+    @apply cursor-pointer rounded-lg border-2 border-line bg-surface transition-colors;
+  }
+
+  .goal-option:hover {
+    @apply border-line-strong;
+  }
+
+  .goal-option.is-active {
+    @apply border-accent bg-accent-soft;
+  }
+
+  .goal-option:focus-within {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .goal-option-input {
+    @apply size-5 accent-accent;
+  }
+
+  .goal-option-title {
+    @apply text-title-sm text-fg;
+  }
+
+  .goal-option-hint {
+    @apply text-body-sm text-fg-muted;
+  }
+
+  .lesson-placeholder-title {
+    @apply text-title text-fg;
+  }
+
+  .lesson-placeholder-text,
+  .app-error-title {
+    @apply text-body text-fg-muted;
+  }
+
+  .app-error-title {
+    @apply text-title text-fg;
+  }
+}
