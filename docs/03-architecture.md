@@ -77,10 +77,11 @@ chinese-starter-kit/
 ├── .claude/
 │   ├── settings.json                          # permission + hook dùng chung
 │   ├── rules/                                 # rule theo đuôi file: typescript, react, styles
-│   ├── skills/                                # frontend, content-authoring, spec-writing…
+│   ├── skills/  commands/                     # openspec-* và /opsx:* (sinh bởi `openspec init`), frontend, content-authoring…
 │   ├── agents/                                # (khi cần) test-writer, implementer, reviewer…
 │   └── hooks/                                 # (khi cần) lint/typecheck sau khi sửa, chạy test trước khi xong
-├── .github/workflows/ci-workflow.yml          # turbo run lint test:run content:check --affected
+├── openspec/                                  # config.yaml, specs/ (hành vi đã giao), changes/ (đang làm, archive/)
+├── .github/workflows/ci-workflow.yml          # openspec validate · typecheck lint test:run content:check · build + check:fonts
 ├── docs/                                      # tài liệu chung cho mọi package
 │   ├── 01-brainstorm.md  02-design/  03-architecture.md
 │   ├── 04-specs/                              # spec chi tiết theo epic, AC ghi phạm vi [web] [api] [contract]
@@ -299,7 +300,12 @@ Lesson runner, màn ôn tập và màn luyện tự do chỉ làm việc qua `ex
 - Không import `i18n.service` trong test.
 - Kiểm tra bằng `pnpm test:run` ở gốc repo, không dùng `pnpm test` (chế độ watch sẽ không tự thoát).
 
-**CI** (`ci-workflow.yml`, chạy khi có PR): `pnpm install --frozen-lockfile` → `pnpm turbo run lint test:run content:check --affected`.
+**TDD:** test viết trước, thấy fail rồi mới code. Mỗi Scenario của OpenSpec có một test mang ID
+`S<epic>.<n>-AC<k>`. Quy trình và bảng Scenario → tầng test: `docs/05-standards/spec-driven.md`.
+
+**CI** (`ci-workflow.yml`, chạy khi có PR và push lên main): `pnpm install --frozen-lockfile` →
+`openspec validate --all --strict` → `pnpm turbo run typecheck lint test:run content:check` →
+build web + `check:fonts`. E2E chưa chạy trong CI.
 
 ## 10. Hướng nâng cấp
 

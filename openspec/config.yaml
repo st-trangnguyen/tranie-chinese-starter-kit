@@ -1,0 +1,49 @@
+schema: spec-driven
+
+context: |
+  Language: Vietnamese
+  All artifacts must be written in Vietnamese.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+
+  Project: Tranie Chinese — pnpm monorepo (apps/web React 19 + TypeScript + Tailwind v4,
+  packages/shared Zod schemas, content/). Offline-first PWA, IndexedDB via Dexie.
+  Backlog lives in docs/02-design/epics-stories.md (story S<epic>.<n>, AC1..n).
+  OpenSpec holds the living spec of delivered behavior; the backlog stays the source of intent.
+
+  Binding rules: CLAUDE.md (layer table §1, dependency rules §2, 3-part services §3).
+  Process standard: docs/05-standards/spec-driven.md.
+  Do not restate those rules in artifacts — link to them.
+
+  Naming: change id = s<epic>-<n>-<slug> (e.g. s3-1-lesson-list). Each Scenario carries an ID
+  S<epic>.<n>-AC<k> copied from the story's AC, so tests can be found with grep.
+
+rules:
+  proposal:
+    - Open with the story id, a link to its GitHub issue, and the line "Refs #<issue>".
+    - State the target layer(s) from CLAUDE.md §1 before describing the solution.
+    - State what is out of scope.
+  specs:
+    - Copy each story AC verbatim into one Requirement with one or more Scenarios (WHEN/THEN).
+    - Prefix every Scenario name with its ID, e.g. "S3.1-AC2".
+    - Every Scenario MUST be verifiable by an automated test. If it cannot be tested, rewrite it.
+  tasks:
+    - Order tasks test-first. For each Scenario write a task pair - "RED: write failing test
+      for <ID>" followed by "GREEN: implement <ID>".
+    - Name the test file and layer for each RED task (Vitest colocated, or Playwright
+      apps/web/e2e/E<n>/).
+    - Finish with a verification task - pnpm typecheck && pnpm lint && pnpm test:run
+      (plus content:check / e2e when the change touches content or user flows).
+
+operations:
+  apply:
+    guidance:
+      - "TDD is mandatory (superpowers:test-driven-development). No production code before a failing test for the Scenario exists."
+      - "For each RED task - write the test, run it, and show the failing output. It must fail because the behavior is missing, not because of a typo or import error. Commit it as test(...) before implementing."
+      - "For each GREEN task - write the minimum code in the correct layer (CLAUDE.md §1-§3) and run the test until it passes. Commit as feat(...) or fix(...)."
+      - "Name every test with its Scenario ID so it can be found by grep."
+      - "Exempt from test-first - docs-only, config-only and pure asset changes. State the exemption explicitly in the task."
+      - "Before reporting done - run the project check commands from CLAUDE.md §8 and report real output, including failures."
+  archive:
+    guidance:
+      - "Archive only after every Scenario has a passing test and the verification task is checked."
+      - "Summarize the archive outcome and name the PR line to use - Closes #<issue> when all AC are done, otherwise Refs #<issue>."

@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@eslint/js": "catalog:",
+    "@fission-ai/openspec": "catalog:",
     "@types/node": "catalog:",
     "@typescript-eslint/eslint-plugin": "catalog:",
     "@typescript-eslint/parser": "catalog:",
