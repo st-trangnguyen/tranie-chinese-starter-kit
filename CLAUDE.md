@@ -213,6 +213,13 @@ Không dùng `pnpm test` (watch mode, không tự thoát).
 - PR thay đổi giao diện **bắt buộc có screenshot** (mobile 375px, sáng và tối; có trước/sau nếu
   sửa UI cũ). PR không liên quan UI ghi `N/A` ở mục Screenshots.
 - Chỉ tick ô checklist đã thực sự kiểm tra.
+- Tiến độ epic/story theo dõi bằng GitHub Issues (mỗi story là sub-issue của issue epic) trên
+  board [Tranie Chinese · Roadmap](https://github.com/users/st-trangnguyen/projects/1).
+  Ở mục References, mỗi story PR đụng tới ghi một dòng:
+  - `Closes #<số issue story>` khi PR làm xong **mọi** AC của story → merge xong story tự đóng.
+  - `Refs #<số issue story>` khi chỉ xong một phần. Sau khi merge, tick các AC đã xong trong
+    issue và ghi rõ phần còn lại.
+  - Không `Closes` issue epic. Epic tự lên 100% khi mọi story con đã đóng; lúc đó đóng tay.
 
 ---
 
