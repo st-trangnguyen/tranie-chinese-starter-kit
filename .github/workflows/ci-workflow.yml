@@ -1,0 +1,38 @@
+# CI cho mọi PR và mỗi lần push lên main (L5 · Enforcement).
+# Chạy đúng bộ check của CLAUDE.md §8, nên agent và người dùng chung một hàng rào.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # Version pnpm lấy từ `packageManager` trong package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Khớp NODE_VERSION của Cloudflare Pages (docs/03-architecture.md).
+          node-version: 24.22.1
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck · lint · test · content:check
+        run: pnpm turbo run typecheck lint test:run content:check
+
+      - name: Build web + kiểm tra font
+        run: |
+          pnpm --filter @csk/web build
+          pnpm --filter @csk/web check:fonts

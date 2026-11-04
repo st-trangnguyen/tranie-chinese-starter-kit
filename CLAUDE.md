@@ -197,12 +197,18 @@ BEM dùng dấu gạch ngang, **không phải BEM truyền thống**:
 | Khi nào | Lệnh |
 |---|---|
 | Mọi thay đổi code | `pnpm typecheck && pnpm lint && pnpm test:run` |
+| Đụng nội dung (`content/`, `assets/content`) | `pnpm content:check` |
 | Đụng build, font, asset | `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts` |
 | Đụng luồng người dùng, PWA | `pnpm e2e` (Playwright, tự build + `vite preview` :4173) |
 | Xem UI | preview `web-dev` (:5173, không có service worker) |
 | Xem PWA (manifest, offline, cập nhật) | preview `web-build-preview` (build mới + :4173) |
 
 Không dùng `pnpm test` (watch mode, không tự thoát).
+
+Hàng rào tự động (L5): hook `.claude/hooks/` lint file vừa sửa và chạy typecheck · lint ·
+test · `content:check` trước khi agent kết thúc lượt; CI (`.github/workflows/ci-workflow.yml`)
+chạy lại cùng bộ đó kèm build + `check:fonts` cho mọi PR. Dependency Rule §2 được lint bằng
+`no-restricted-imports` trong `eslint.config.mjs`.
 
 ### Pull request
 

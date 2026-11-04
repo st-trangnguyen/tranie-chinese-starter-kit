@@ -25,6 +25,13 @@
     "test:run": {
       "dependsOn": ["transit"]
     },
+    "content:check": {
+      "dependsOn": ["transit"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/web/src/assets/content/**"
+      ]
+    },
     "e2e": {
       "dependsOn": ["^build"],
       "cache": false
