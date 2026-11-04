@@ -76,6 +76,7 @@ chinese-starter-kit/
 ├── .mcp.json                                  # (khi cần) MCP dùng chung
 ├── .claude/
 │   ├── settings.json                          # permission + hook dùng chung
+│   ├── rules/                                 # rule theo đuôi file: typescript, react, styles
 │   ├── skills/                                # frontend, content-authoring, spec-writing…
 │   ├── agents/                                # (khi cần) test-writer, implementer, reviewer…
 │   └── hooks/                                 # (khi cần) lint/typecheck sau khi sửa, chạy test trước khi xong
@@ -83,8 +84,9 @@ chinese-starter-kit/
 ├── docs/                                      # tài liệu chung cho mọi package
 │   ├── 01-brainstorm.md  02-design/  03-architecture.md
 │   ├── 04-specs/                              # spec chi tiết theo epic, AC ghi phạm vi [web] [api] [contract]
-│   ├── plans/  decisions/                     # (khi cần) plan theo story, ADR ngắn
-│   └── ai-practice/                           # kế hoạch luyện level, effort log, retro
+│   ├── 05-standards/                          # tài liệu standard gốc, .claude/rules trỏ tới
+│   ├── 06-ai-practice/                        # kế hoạch luyện level, effort log, retro
+│   └── plans/  decisions/                     # (khi cần) plan theo story, ADR ngắn
 ├── scripts/                                   # (khi cần) script cấp repo, ví dụ ac-coverage.ts
 │
 ├── packages/shared/                           # @csk/shared
