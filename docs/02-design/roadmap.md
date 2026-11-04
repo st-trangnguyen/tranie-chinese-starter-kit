@@ -1,7 +1,7 @@
 # 02 · Design: Roadmap
 
 > Trạng thái: **Đã chốt** · Ngày: 2026-10-27
-> Liên quan: [Business flow](business-flows.md) · [Epic & story](epics-stories.md)
+> Liên quan: [Business flow](business-flows.md) · [Epic & story](epics-stories.md) · [AI Level](../06-ai-practice/roadmap-ai-levels.md)
 
 ## Nguyên tắc
 
