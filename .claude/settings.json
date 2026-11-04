@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm test:run)",
+      "Bash(pnpm build)",
+      "Bash(pnpm --filter @csk/web build)",
+      "Bash(pnpm --filter @csk/web check:fonts)",
+      "Bash(pnpm e2e)"
+    ]
+  }
+}
