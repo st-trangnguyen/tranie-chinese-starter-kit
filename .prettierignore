@@ -1,0 +1,13 @@
+build
+dist
+coverage
+node_modules
+.turbo
+pnpm-lock.yaml
+.vscode
+.github
+*.md
+*.yml
+*.yaml
+content/data-raw
+apps/web/src/assets/content

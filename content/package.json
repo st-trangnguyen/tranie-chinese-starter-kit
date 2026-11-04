@@ -1,0 +1,18 @@
+{
+  "name": "@csk/content",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test:run": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@csk/shared": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "tsx": "catalog:"
+  }
+}
