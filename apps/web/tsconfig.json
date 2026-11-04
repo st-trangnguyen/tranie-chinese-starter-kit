@@ -19,6 +19,14 @@
       "@testing-library/jest-dom"
     ]
   },
-  "include": ["src", "aliases.ts", "vite.config.ts", "vitest.config.ts"],
+  "include": [
+    "src",
+    "e2e",
+    "aliases.ts",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "pwa-assets.config.ts"
+  ],
   "exclude": ["dist", "node_modules"]
 }

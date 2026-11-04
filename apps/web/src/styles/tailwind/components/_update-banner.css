@@ -1,0 +1,12 @@
+/* Banner "Có bản mới" — S1.4. Nổi ở đáy màn hình, tránh vùng home indicator. */
+
+@layer components {
+  .update-banner {
+    @apply fixed inset-x-md z-50 rounded-lg border border-line bg-surface shadow-lg;
+    bottom: max(var(--spacing-md), env(safe-area-inset-bottom));
+  }
+
+  .update-banner-text {
+    @apply text-body-sm text-fg;
+  }
+}

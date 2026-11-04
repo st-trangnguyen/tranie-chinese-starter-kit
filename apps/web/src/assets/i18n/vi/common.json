@@ -1,0 +1,15 @@
+{
+  "error": {
+    "title": "Có lỗi xảy ra",
+    "retry": "Thử lại"
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "home": "Về trang đầu"
+  },
+  "update": {
+    "available": "Có bản mới, tải lại để dùng.",
+    "reload": "Tải lại",
+    "later": "Để sau"
+  }
+}

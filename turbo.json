@@ -24,6 +24,10 @@
     },
     "test:run": {
       "dependsOn": ["transit"]
+    },
+    "e2e": {
+      "dependsOn": ["^build"],
+      "cache": false
     }
   }
 }

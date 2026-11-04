@@ -79,6 +79,13 @@ export default [
     },
   },
   {
+    // Web App Manifest bắt buộc key snake_case (short_name, start_url, theme_color…).
+    files: ['apps/web/vite.config.ts'],
+    rules: {
+      camelcase: [2, { properties: 'never' }],
+    },
+  },
+  {
     // Test files and test infrastructure.
     files: [
       '**/*.{test,spec}.{ts,tsx}',

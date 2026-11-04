@@ -1,0 +1,27 @@
+/* Nút — spec §5. Cao tối thiểu 44px để chạm dễ trên điện thoại. */
+
+@layer components {
+  .btn {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full px-xl text-body font-semibold transition-colors;
+  }
+
+  .btn:disabled {
+    @apply cursor-not-allowed bg-disabled text-fg-muted;
+  }
+
+  .btn-primary {
+    @apply bg-accent text-on-accent;
+  }
+
+  .btn-primary:not(:disabled):hover {
+    @apply bg-accent-hover;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-accent;
+  }
+
+  .btn-ghost:not(:disabled):hover {
+    @apply bg-accent-soft;
+  }
+}
