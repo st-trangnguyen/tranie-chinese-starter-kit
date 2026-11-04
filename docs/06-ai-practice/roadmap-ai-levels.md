@@ -9,7 +9,8 @@
 - Mỗi level có một năng lực chính. Tool của level sau dùng sớm được, nhưng **tới level đó thì
   bắt buộc**. Level gán cho một epic là **level bắt buộc tối thiểu** khi làm epic đó.
 - Bỏ **L3 Plan-first** và **L4 Isolation**.
-- **L5** và **L6** mỗi level tối đa 2 epic.
+- **L5, L6, L7 mỗi level 1 epic**, chỉ để dựng nền. Dồn phần còn lại sang **L8** để luyện nhiều
+  nhất ở level này.
 
 ## Thang level đang dùng
 
@@ -30,32 +31,32 @@
 | Level | Epic / tính năng |
 |---|---|
 | **L1** ✅ | Dựng monorepo, CLAUDE.md, rules |
-| **L2** | **E1** Nền tảng PWA · **E2** Pipeline nội dung · **Design system** · **E3** Lộ trình & chạy bài (S3.1–3.4) · **E4** Nghe & Pinyin · **E5** Luyện nói · **E6** Luyện viết (S6.1–6.2) |
+| **L2** | **E1** Nền tảng PWA · **E2** Pipeline nội dung · **Design system** · **E3** Lộ trình & chạy bài (S3.1–3.4) · **E4** Nghe & Pinyin · **E5** Luyện nói · **E6** Luyện viết (S6.1–6.2) · **E8** Trang chủ & Cài đặt (S8.1–8.2) |
 
-### Phase 2 · Discipline — từ cuối 0.1 sang đầu 0.2
+### Phase 2 · Discipline — cuối 0.1, đầu 0.2
 
-| Level | Epic | Vì sao chọn |
+| Level | Epic | Kết quả phải để lại cho L8 |
 |---|---|---|
-| **L5** | **E7** Nội dung Nhập môn · **E8** Trang chủ & Cài đặt (S8.1–8.2) | E7 là lúc đưa `content:check` vào CI. E8 là epic cuối của 0.1, hợp để khóa chất lượng trước khi ra bản: hook chạy typecheck/lint/test, lint kiểm Dependency Rule |
-| **L6** | **E9** Ôn tập SRS · **phần 0.2 của E3/E6/E8** (S3.5, S3.6, S6.3, S8.3, S8.4, S8.5) | Hai khối dày business rule nhất: FSRS, ngưỡng 80% mở khóa, streak, validate file backup. Test viết trước |
+| **L5** | **E7** Nội dung Nhập môn | CI chặn được mọi vi phạm Dependency Rule và lỗi nội dung (`content:check`, lint, typecheck, test) |
+| **L6** | **E9** Ôn tập SRS | Mẫu spec + test cho business rule (FSRS, test viết trước) để agent L8 làm theo |
 
 ### Phase 3 · Scale — từ 0.2 tới 1.0
 
-| Level | Epic / bản | Vì sao hợp |
+| Level | Epic / bản | Ghi chú |
 |---|---|---|
-| **L7** | **E10** Bài tập Từ vựng / Ngữ pháp / Đọc / Hội thoại · **E11** Nội dung HSK 1 | E10 gồm nhiều `kind` độc lập, mỗi agent làm một dạng bài. E11 chia theo chủ đề, mỗi agent soạn một chủ đề |
-| **L7 → L8** | **0.3** HSK 2 | Bắt đầu giao trọn từng chủ đề cho agent |
-| **L8** | **0.4** HSK 3 · **0.5** HSK 4 | Agent tự soạn nội dung từng cấp, người chỉ duyệt nghĩa tiếng Việt và ngữ pháp |
+| **L7** | **E10** Bài tập Từ vựng / Ngữ pháp / Đọc / Hội thoại | Dựng sẵn registry 9 `kind`, mỗi agent làm một dạng bài. Để lại cách chia việc song song đã chạy thử |
+| **L8** | **Phần 0.2 của E3/E6/E8** (S3.5, S3.6, S6.3, S8.3, S8.4, S8.5) | Tính năng app: agent tự làm theo mẫu spec + test của E9, người duyệt PR |
+| **L8** | **E11** Nội dung HSK 1 | Nội dung: agent soạn từng chủ đề, người duyệt nghĩa tiếng Việt và ngữ pháp |
+| **L8** | **0.3** HSK 2 · **0.4** HSK 3 · **0.5** HSK 4 | Lặp lại cách làm của E11 cho từng cấp |
 | **L6** (quay lại) | **1.0** Chia sẻ | Tài khoản, đồng bộ: vùng bảo mật, người quyết định thiết kế |
 | **L8+** | AI trong app (sinh nội dung lúc học, hội thoại tự do với AI) | Ngoài MVP, xem [Brainstorm §6](../01-brainstorm.md) |
 
 ## Rủi ro
 
+- **L8 chỉ an toàn khi hàng rào đã chắc.** L5, L6, L7 mỗi level chỉ có 1 epic, nên kết quả để lại
+  của E7, E9, E10 (cột bên trên) là điều kiện bắt buộc trước khi sang L8. Thiếu cái nào thì phải
+  review tay mọi thứ, thực chất vẫn đang làm L2.
 - **L2 ôm gần hết 0.1.** Phần lớn 0.1 được làm khi chưa có hàng rào tự động, nên phải tự review
-  kỹ Dependency Rule cho tới khi L5 vào. Phương án giảm rủi ro: đổi E2 với E7, tức E2 sang L5
-  (vì `content:check` sinh ra từ E2) và E7 về L2.
-- **E10 ở L7 mà không có L4.** Các dạng bài nằm ở thư mục riêng nhưng dùng chung file registry
-  theo `kind` trong `shared/components/exercises/`. Dựng sẵn registry cho đủ 9 dạng trước rồi mới
-  cho các agent chạy song song.
+  kỹ Dependency Rule cho tới khi L5 vào ở E7.
 - **Bỏ L3.** E2 (schema, audio dựng theo hash) và E3 (quy tắc mở khóa) thiếu bước thiết kế trước.
   Nên thêm mục "thiết kế trước khi code" vào `CLAUDE.md` §8.
