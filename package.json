@@ -15,6 +15,7 @@
     "test": "vitest",
     "test:run": "turbo run test:run",
     "e2e": "turbo run e2e",
+    "content:check": "turbo run content:check",
     "test:coverage": "vitest run --coverage",
     "format": "prettier --write . && eslint . --fix"
   },
