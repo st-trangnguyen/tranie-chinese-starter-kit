@@ -204,6 +204,14 @@ BEM dùng dấu gạch ngang, **không phải BEM truyền thống**:
 
 Không dùng `pnpm test` (watch mode, không tự thoát).
 
+### Pull request
+
+- Mô tả PR theo đúng format `.github/pull_request_template.md` (References → Description →
+  Screenshots → Checklist), không tự đổi tiêu đề mục.
+- PR thay đổi giao diện **bắt buộc có screenshot** (mobile 375px, sáng và tối; có trước/sau nếu
+  sửa UI cũ). PR không liên quan UI ghi `N/A` ở mục Screenshots.
+- Chỉ tick ô checklist đã thực sự kiểm tra.
+
 ---
 
 ## 9. Khi nào hỏi lại thay vì tự quyết
