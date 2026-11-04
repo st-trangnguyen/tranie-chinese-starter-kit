@@ -1,0 +1,9 @@
+# Cloudflare Pages: service worker và HTML luôn lấy bản mới để banner cập nhật (S1.4) hoạt động.
+/sw.js
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Cache-Control: no-cache
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

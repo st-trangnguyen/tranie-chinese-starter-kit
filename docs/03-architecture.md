@@ -45,7 +45,7 @@ flowchart LR
 | TypeScript | `tsconfig.base.json` ở gốc, mỗi package `extends` | Không dùng project references |
 | Test | **Vitest** (`projects` ở `vitest.config.ts` gốc: jsdom cho web, node cho shared và content) + Testing Library + **fake-indexeddb**; **Playwright** cho e2e | Một lệnh `pnpm test:run` chạy toàn repo |
 | Lint/format | ESLint (một flat config ở gốc) + Prettier | Theo boilerplate, `--max-warnings 0` cho toàn repo |
-| Hosting | **GitHub** + **Cloudflare Pages** | Tự build khi push `main`, có HTTPS (PWA bắt buộc). Root directory là gốc repo, build `pnpm turbo run build --filter=@csk/web`, output `apps/web/dist` |
+| Hosting | **GitHub** + **Cloudflare Pages** | Tự build khi push `main`, có HTTPS (PWA bắt buộc). Root directory là gốc repo, build `pnpm turbo run build --filter=@csk/web`, output `apps/web/dist`, biến môi trường `NODE_VERSION=22`, production branch `main`. `apps/web/src/assets/_headers` đặt `no-cache` cho `sw.js`, `index.html`, manifest để banner cập nhật hoạt động |
 
 ## 3. Cấu trúc thư mục
 
