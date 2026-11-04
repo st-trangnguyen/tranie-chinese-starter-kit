@@ -1,0 +1,11 @@
+/* Thứ tự theo .claude/rules/styles.md: tailwind → tokens → base → layout → components → themes. */
+@import "tailwindcss";
+
+@import "./tokens/_colors.css";
+@import "./tokens/_spacing.css";
+@import "./tokens/_typography.css";
+
+@import "./base/_fonts.css";
+@import "./base/_base.css";
+
+@import "./themes/_dark.css";

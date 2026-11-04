@@ -1,0 +1,68 @@
+/*
+ * Chế độ tối. Theo hệ điều hành, trừ khi có [data-theme='light']; [data-theme='dark'] luôn tối.
+ * Hai khối phải giống hệt nhau — tokens.test.ts kiểm tra.
+ */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --csk-bg: #141a17;
+    --csk-surface: #1c2420;
+    --csk-sunken: #0f1411;
+    --csk-border: #2c3631;
+    --csk-border-strong: #6e7972;
+    --csk-text: #eceee6;
+    --csk-text-muted: #a3ada6;
+    --csk-disabled: #56605a;
+    --csk-accent: #8cc3ae;
+    --csk-accent-hover: #a5d3c1;
+    --csk-accent-soft: #1a2c25;
+    --csk-on-accent: #141a17;
+    --csk-highlight: #d6bc86;
+    --csk-success: #8cc3ae;
+    --csk-success-soft: #1f3a30;
+    --csk-success-text: #a9dcc5;
+    --csk-danger: #f08a7a;
+    --csk-danger-soft: #43221c;
+    --csk-danger-text: #ffc2b8;
+    --csk-warning: #d6bc86;
+    --csk-warning-soft: #382d17;
+    --csk-warning-text: #e9d3a3;
+    --csk-tone-1: #f08a7a;
+    --csk-tone-2: #e2b45c;
+    --csk-tone-3: #86b8e6;
+    --csk-tone-4: #c49ad6;
+    --csk-tone-5: #a0a8a2;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --csk-bg: #141a17;
+  --csk-surface: #1c2420;
+  --csk-sunken: #0f1411;
+  --csk-border: #2c3631;
+  --csk-border-strong: #6e7972;
+  --csk-text: #eceee6;
+  --csk-text-muted: #a3ada6;
+  --csk-disabled: #56605a;
+  --csk-accent: #8cc3ae;
+  --csk-accent-hover: #a5d3c1;
+  --csk-accent-soft: #1a2c25;
+  --csk-on-accent: #141a17;
+  --csk-highlight: #d6bc86;
+  --csk-success: #8cc3ae;
+  --csk-success-soft: #1f3a30;
+  --csk-success-text: #a9dcc5;
+  --csk-danger: #f08a7a;
+  --csk-danger-soft: #43221c;
+  --csk-danger-text: #ffc2b8;
+  --csk-warning: #d6bc86;
+  --csk-warning-soft: #382d17;
+  --csk-warning-text: #e9d3a3;
+  --csk-tone-1: #f08a7a;
+  --csk-tone-2: #e2b45c;
+  --csk-tone-3: #86b8e6;
+  --csk-tone-4: #c49ad6;
+  --csk-tone-5: #a0a8a2;
+}

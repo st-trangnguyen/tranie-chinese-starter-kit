@@ -1,0 +1,66 @@
+/*
+ * Màu — bảng Personal Jade, chế độ sáng. Chế độ tối nằm ở themes/_dark.css.
+ * Spec: docs/04-specs/2026-11-04-design-system.md §3. Test: tokens.test.ts.
+ */
+
+:root {
+  color-scheme: light;
+  --csk-bg: #f6f5ef;
+  --csk-surface: #ffffff;
+  --csk-sunken: #eeede5;
+  --csk-border: #e5e7e0;
+  --csk-border-strong: #858c86;
+  --csk-text: #252d29;
+  --csk-text-muted: #5e6660;
+  --csk-disabled: #91a99a;
+  --csk-accent: #315c50;
+  --csk-accent-hover: #264a40;
+  --csk-accent-soft: #e8efea;
+  --csk-on-accent: #ffffff;
+  --csk-highlight: #bea16a;
+  --csk-success: #315c50;
+  --csk-success-soft: #dce6de;
+  --csk-success-text: #1f4238;
+  --csk-danger: #b23b2c;
+  --csk-danger-soft: #f8e3de;
+  --csk-danger-text: #8a2a1e;
+  --csk-warning: #bea16a;
+  --csk-warning-soft: #f4ecd9;
+  --csk-warning-text: #6b5020;
+  --csk-tone-1: #b23b2c;
+  --csk-tone-2: #8a5c0e;
+  --csk-tone-3: #2c6491;
+  --csk-tone-4: #7a4789;
+  --csk-tone-5: #646b66;
+}
+
+/* Token semantic cho Tailwind. `border` → `line`, `text` → `fg` để tránh `border-border`, `text-text`. */
+@theme inline {
+  --color-bg: var(--csk-bg);
+  --color-surface: var(--csk-surface);
+  --color-sunken: var(--csk-sunken);
+  --color-line: var(--csk-border);
+  --color-line-strong: var(--csk-border-strong);
+  --color-fg: var(--csk-text);
+  --color-fg-muted: var(--csk-text-muted);
+  --color-disabled: var(--csk-disabled);
+  --color-accent: var(--csk-accent);
+  --color-accent-hover: var(--csk-accent-hover);
+  --color-accent-soft: var(--csk-accent-soft);
+  --color-on-accent: var(--csk-on-accent);
+  --color-highlight: var(--csk-highlight);
+  --color-success: var(--csk-success);
+  --color-success-soft: var(--csk-success-soft);
+  --color-success-text: var(--csk-success-text);
+  --color-danger: var(--csk-danger);
+  --color-danger-soft: var(--csk-danger-soft);
+  --color-danger-text: var(--csk-danger-text);
+  --color-warning: var(--csk-warning);
+  --color-warning-soft: var(--csk-warning-soft);
+  --color-warning-text: var(--csk-warning-text);
+  --color-tone-1: var(--csk-tone-1);
+  --color-tone-2: var(--csk-tone-2);
+  --color-tone-3: var(--csk-tone-3);
+  --color-tone-4: var(--csk-tone-4);
+  --color-tone-5: var(--csk-tone-5);
+}

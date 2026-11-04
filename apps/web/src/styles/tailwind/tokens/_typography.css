@@ -1,0 +1,42 @@
+/* Font và thang cỡ chữ — spec §4. */
+
+@theme {
+  --font-ui: "Quicksand", ui-rounded, system-ui, sans-serif;
+  --font-pinyin: "Baloo 2", "Quicksand", system-ui, sans-serif;
+  --font-hanzi:
+    "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC",
+    "Microsoft YaHei", sans-serif;
+  --font-hanzi-display:
+    "LXGW WenKai", "Kaiti SC", "STKaiti", "KaiTi", "PingFang SC",
+    "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", serif;
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+  --text-caption--font-weight: 600;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.6;
+  --text-body-sm--font-weight: 500;
+  --text-body: 1rem;
+  --text-body--line-height: 1.65;
+  --text-body--font-weight: 500;
+  --text-title-sm: 1.125rem;
+  --text-title-sm--line-height: 1.4;
+  --text-title-sm--font-weight: 700;
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.35;
+  --text-title--font-weight: 700;
+  --text-title-lg: 1.75rem;
+  --text-title-lg--line-height: 1.25;
+  --text-title-lg--font-weight: 700;
+  --text-pinyin: 1.125rem;
+  --text-pinyin--line-height: 1.3;
+  --text-pinyin--font-weight: 500;
+  --text-hanzi-inline: 1.15em;
+  --text-hanzi-inline--line-height: 1.8;
+  --text-hanzi-md: 2rem;
+  --text-hanzi-md--line-height: 1.2;
+  --text-hanzi-lg: 3.5rem;
+  --text-hanzi-lg--line-height: 1.1;
+  --text-hanzi-xl: 6rem;
+  --text-hanzi-xl--line-height: 1;
+}

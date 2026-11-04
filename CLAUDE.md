@@ -49,6 +49,7 @@ Trả lời câu hỏi này trước khi viết dòng nào. Đường dẫn tín
 | Type riêng của UI | `shared/models/` |
 | Schema Zod nội dung/tiến độ, `pinyin.utils` | `packages/shared` (`@csk/shared`) |
 | App-wide constants | `core/constants/` |
+| Design token (màu, spacing, chữ), font, style nền, CSS component BEM | `apps/web/src/styles/tailwind/` (spec: `docs/04-specs/2026-11-04-design-system.md`) |
 
 Không tìm được ô phù hợp = chưa hiểu rõ yêu cầu. Hỏi lại, đừng đoán.
 

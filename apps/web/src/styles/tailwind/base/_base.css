@@ -1,0 +1,65 @@
+/* Style nền — spec §4, §5. Màu và font chỉ lấy từ token, không viết hex. */
+
+@layer base {
+  body {
+    @apply bg-bg font-ui text-body text-fg;
+  }
+
+  /*
+   * Chữ Hán luôn nằm trong phần tử lang="zh-CN" để hiện nét chuẩn đại lục.
+   * Chỉ đặt font trên chính phần tử có thuộc tính lang, con cháu thừa hưởng. Không dùng :lang(zh):
+   * nó khớp cả phần tử con, đè font của <span class="pinyin" lang="zh-Latn-pinyin"><span class="tone-3">
+   * và của <div lang="zh-CN" class="font-hanzi-display"><span>字</span></div>.
+   */
+  [lang|="zh"]:not([lang*="-Latn"]) {
+    font-family: var(--font-hanzi);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Pinyin: <span class="pinyin" lang="zh-Latn-pinyin">. Đặt sau :lang(zh) để không bị font chữ Hán đè. */
+  .pinyin {
+    @apply font-pinyin text-pinyin;
+  }
+
+  .tone-1 {
+    @apply text-tone-1;
+  }
+
+  .tone-2 {
+    @apply text-tone-2;
+  }
+
+  .tone-3 {
+    @apply text-tone-3;
+  }
+
+  .tone-4 {
+    @apply text-tone-4;
+  }
+
+  .tone-5 {
+    @apply text-tone-5;
+  }
+
+  /* Cài đặt "Tô màu thanh điệu" tắt. */
+  .pinyin.is-plain [class*="tone-"] {
+    @apply text-fg;
+  }
+}
