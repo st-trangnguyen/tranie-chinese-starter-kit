@@ -39,6 +39,10 @@
 | **L8** | **E5** Luyện nói · **E6** Luyện viết (S6.1–6.2) · **E8** Trang chủ & Cài đặt (S8.1–8.2) · **E7** Nội dung Nhập môn | 9 | Hết bản 0.1: agent nhận trọn từng epic, bạn duyệt PR | — |
 | **L8** | Toàn bộ **0.2**: **E9** SRS · **E10** Bài tập · phần 0.2 của E3/E6/E8 (S3.5, S3.6, S6.3, S8.3, S8.4, S8.5) · **E11** Nội dung HSK 1 | 25 | Tính năng theo mẫu spec + test của L6; nội dung theo `content:check` của L5 | — |
 | **L8** | **0.3** HSK 2 · **0.4** HSK 3 · **0.5** HSK 4 | chưa tách | Lặp lại cách làm của E11 cho từng cấp; bạn duyệt nghĩa tiếng Việt và ngữ pháp | — |
+
+**Công cụ cho L6 (đã có sẵn):** OpenSpec (`openspec/`, lệnh `/opsx:*`) giữ spec theo story, AC chép
+thành Scenario, mỗi Scenario có một test viết trước. Quy trình: [spec-driven.md](../05-standards/spec-driven.md).
+Story đầu tiên của E3 là lần chạy thử đầu tiên của vòng này; ghi ma sát vào effort log.
 | **L6** (quay lại) | **1.0** Chia sẻ | chưa tách | Tài khoản, đồng bộ: vùng bảo mật, người quyết định thiết kế | — |
 | **L8+** | AI trong app (sinh nội dung lúc học, hội thoại tự do với AI) | — | Ngoài MVP, xem [Brainstorm §6](../01-brainstorm.md) | — |
 

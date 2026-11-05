@@ -29,6 +29,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Kiểm tra spec OpenSpec
+        run: pnpm exec openspec validate --all --strict --no-interactive
+
       - name: Typecheck · lint · test · content:check
         run: pnpm turbo run typecheck lint test:run content:check
 

@@ -4,6 +4,7 @@
 
 - [Task/Bug URL]()
 - [Related PR URL]()
+- OpenSpec change: `openspec/changes/<id>` hoặc `openspec/specs/<capability>` (ghi `N/A` nếu chỉ sửa docs, config, asset)
 
 #### Description
 
@@ -26,6 +27,8 @@
 
 - [ ] Run correctly as the requirement.
 - [ ] All new and changes have enough test suites.
+- [ ] Mỗi Scenario có một test mang ID `S<epic>.<n>-AC<k>`, test được viết trước và đã thấy fail (RED).
+- [ ] Change đã `/opsx:archive` và `openspec validate --all --strict` pass.
 
 ##### Coding:
 

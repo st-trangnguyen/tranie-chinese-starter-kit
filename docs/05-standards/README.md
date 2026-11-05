@@ -12,6 +12,8 @@ CLAUDE.md                  ← nạp mọi phiên: architecture, luật tối ca
 ├── react.md               paths: **/*.tsx        ← React + markup/a11y
 └── styles.md              paths: **/*.css        ← Tailwind v4
 docs/05-standards/         ← 7 tài liệu gốc, đọc khi cần chi tiết
+docs/05-standards/spec-driven.md  ← quy trình OpenSpec + TDD cho mỗi story
+openspec/config.yaml       ← rule cho artifact và hướng dẫn TDD khi `/opsx:apply`
 ```
 
 **Cách nạp:** `CLAUDE.md` vào context mọi phiên. Rule có `paths` chỉ nạp khi

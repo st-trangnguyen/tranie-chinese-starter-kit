@@ -20,6 +20,9 @@ khi bạn đọc/sửa file khớp.
 5. **Không hardcode secret.** Không `dangerouslySetInnerHTML` với dữ liệu người dùng.
 6. **Không lách rule bằng comment**: không `eslint-disable`, không `@ts-ignore`,
    không silence `react-hooks/exhaustive-deps`. Lint cản = thiết kế sai, sửa thiết kế.
+7. **Không viết code production khi chưa có test fail** cho Scenario đang làm
+   (TDD: RED → GREEN → REFACTOR). Ngoại lệ có tên: docs thuần, config thuần, asset
+   thuần. Chi tiết: `docs/05-standards/spec-driven.md`.
 
 Nếu yêu cầu buộc phá rule trên: **dừng, nói rõ rule nào bị phá và tại sao, đề
 xuất cách đúng**, rồi mới hỏi người dùng có muốn làm ngoại lệ không.
@@ -184,13 +187,26 @@ BEM dùng dấu gạch ngang, **không phải BEM truyền thống**:
 
 ## 8. Quy trình làm task
 
+Mỗi story đi theo vòng **Story → OpenSpec change → RED → GREEN → REFACTOR → verify →
+archive**. Chi tiết, định dạng spec và bảng Scenario → tầng test:
+`docs/05-standards/spec-driven.md`.
+
 1. Xác định layer đích theo bảng §1, **nói ra trước khi code**.
-2. Tìm code tương tự đã có trong repo và theo đúng pattern đó — nhất quán với
+2. **Propose**: `/opsx:propose s<epic>-<n>-<slug>` tạo `openspec/changes/<id>/`. AC của story
+   chép nguyên văn thành Requirement + Scenario (ID `S<epic>.<n>-AC<k>`). **Dừng chờ người
+   dùng duyệt** trước khi viết bất kỳ code nào.
+3. Tìm code tương tự đã có trong repo và theo đúng pattern đó — nhất quán với
    codebase hiện tại quan trọng hơn áp dụng máy móc ví dụ trong tài liệu.
-3. Viết code. Diff nhỏ, một concern một chỗ.
-4. Self-review theo §0, §2, §7.
-5. Chạy typecheck / lint / test. **Không nói "đã xong" khi chưa chạy và chưa
+4. **RED**: viết test cho một Scenario (tên test chứa ID), chạy, thấy nó fail vì thiếu hành vi.
+   Commit `test(...)`.
+5. **GREEN**: code tối thiểu, đúng layer, đến khi test pass. Commit `feat(...)`. Lặp bước 4–5 cho
+   từng Scenario. Diff nhỏ, một concern một chỗ.
+6. **REFACTOR** khi đã xanh, rồi self-review theo §0, §2, §7.
+7. Chạy typecheck / lint / test. **Không nói "đã xong" khi chưa chạy và chưa
    thấy kết quả pass.**
+8. **Archive**: `/opsx:archive`, rồi `pnpm exec openspec validate --all --strict`.
+
+Việc không có Scenario (docs, config, asset thuần) bỏ qua bước 2, 4, 5 và 8.
 
 ### Lệnh kiểm tra chuẩn
 
