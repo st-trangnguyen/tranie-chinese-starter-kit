@@ -194,13 +194,15 @@ Mỗi story đi qua **ba pha, hai PR**: **Spec** (BA, PR spec) → **Code** (dev
 **Pha A — Spec (nhánh `spec/s<epic>-<n>-<slug>`, chỉ docs, không code):**
 
 1. Xác định layer đích theo bảng §1, **nói ra trước khi viết spec**.
-2. **Propose**: `/opsx:propose s<epic>-<n>-<slug>` tạo `openspec/changes/<id>/`. AC của story
-   chép nguyên văn thành Requirement + Scenario (ID `S<epic>.<n>-AC<k>`). Mở PR spec
-   (`Spec PR: N/A`) và **dừng chờ review + merge** trước khi viết bất kỳ code nào.
+2. **Propose**: `/relay spec s<epic>-<n>-<slug>` tạo `openspec/changes/<id>/` với **chỉ** `proposal.md`
+   và `specs/` (phần BA/QA đọc). AC của story chép nguyên văn thành Requirement + Scenario
+   (ID `S<epic>.<n>-AC<k>`). `design.md` và `tasks.md` là của dev, **không** nằm trong PR spec. Mở PR
+   spec (`Spec PR: N/A`) và **dừng chờ review + merge** trước khi viết bất kỳ code nào.
 
 **Pha B — Code (nhánh `feat/s<epic>-<n>-<slug>` cắt từ `main` sau khi PR spec merge):**
 
-3. Tìm code tương tự đã có trong repo và theo đúng pattern đó — nhất quán với
+3. **Plan** rồi tìm pattern: tạo `design.md` và `tasks.md` (`/relay plan <id>`; hai file này đi cùng
+   PR code). Tìm code tương tự đã có trong repo và theo đúng pattern đó — nhất quán với
    codebase hiện tại quan trọng hơn áp dụng máy móc ví dụ trong tài liệu.
 4. **RED**: viết test cho một Scenario (tên test chứa ID), chạy, thấy nó fail vì thiếu hành vi.
    Commit `test(...)`.
@@ -218,8 +220,8 @@ mới cho BA duyệt, đừng sửa spec trong PR code.
 
 Việc không có Scenario (docs, config, asset thuần) bỏ qua Pha A, bước 4–5 và Pha C, ghi `Spec PR: N/A`.
 
-**Chạy bằng agent:** `/relay <spec|code|fix> <change-id>` chạy các pha trên bằng subagent tách context
-(`spec-writer`, `test-writer`, `implementer`, `reviewer` trong `.claude/agents/`). Chi tiết:
+**Chạy bằng agent:** `/relay <spec|plan|code|fix> <change-id>` chạy các pha trên bằng subagent tách
+context (`spec-writer`, `planner`, `test-writer`, `implementer`, `reviewer` trong `.claude/agents/`). Chi tiết:
 `docs/05-standards/spec-driven.md` §7.
 
 ### Lệnh kiểm tra chuẩn

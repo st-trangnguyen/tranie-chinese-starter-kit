@@ -1,7 +1,7 @@
 ---
 name: "Relay"
 description: "Điều phối một story qua các agent tách context: spec, test (RED), implement (GREEN), review"
-argument-hint: "<spec|code|fix> <change-id>"
+argument-hint: "<spec|plan|code|fix> <change-id>"
 category: "Workflow"
 tags: ["workflow", "agents", "tdd"]
 ---
@@ -12,7 +12,10 @@ agent, thông tin đi qua file và git diff, không qua trí nhớ của bạn. 
 trả về.
 
 **Input**: `$ARGUMENTS` = `<pha> <change-id>`, ví dụ `code s3-5-topic-test`. Thiếu pha hoặc id thì hỏi
-lại, đừng đoán. Pha hợp lệ: `spec`, `code`, `fix`.
+lại, đừng đoán. Pha hợp lệ: `spec`, `plan`, `code`, `fix`.
+
+Thứ tự và chủ: `spec` (BA, PR spec) → merge → `plan` → `code` (dev, cùng một PR code). `plan` tạo
+`design.md` và `tasks.md` ở nhánh `feat/<id>`; hai file này không thuộc PR spec.
 
 Luật của dự án (`CLAUDE.md`, `docs/05-standards/spec-driven.md`) vẫn áp dụng nguyên. Lệnh này chỉ là
 cách chạy chúng bằng agent.
@@ -25,7 +28,8 @@ cách chạy chúng bằng agent.
 
   | Agent | Chỉ được đổi | Vi phạm khi đổi |
   |---|---|---|
-  | `spec-writer` | `openspec/changes/<id>/**` | mọi thứ khác |
+  | `spec-writer` | `openspec/changes/<id>/proposal.md`, `specs/**`, `.openspec.yaml` | `design.md`, `tasks.md`, mọi thứ khác |
+  | `planner` | `openspec/changes/<id>/design.md`, `tasks.md` | `proposal.md`, `specs/**`, code, test |
   | `test-writer` | `*.test.ts(x)`, `apps/web/e2e/**`, `apps/web/src/test/**` | code production, `openspec/` |
   | `implementer` | code production | file test (kể cả e2e, helper test), `openspec/` |
   | `reviewer` | không gì cả | mọi thay đổi |
@@ -43,15 +47,28 @@ cách chạy chúng bằng agent.
 2. Gọi `spec-writer` với story/id. Kiểm vùng ghi.
 3. Nếu có "Câu hỏi mở": dừng, đưa câu hỏi cho người dùng, rồi gọi lại `spec-writer` với câu trả lời.
 4. Chạy `pnpm exec openspec validate --all --strict`. Fail thì gọi lại `spec-writer` với output lỗi.
-5. **Dừng.** Báo: change đã sẵn sàng, mở PR spec (`Spec PR: N/A`), chờ review và merge trước khi chạy
-   `/relay code`. Không bắt đầu code.
+5. **Dừng.** Báo: spec (`proposal.md` + `specs/`) đã sẵn sàng, mở PR spec (`Spec PR: N/A`), chờ BA
+   review và merge, sau đó dev chạy `/relay plan` rồi `/relay code`. Không tạo `design.md`/`tasks.md`.
+
+## Pha `plan`
+
+1. **Cổng spec:** PR spec phải đã merge. Kiểm `openspec/changes/<id>/specs` có trên `origin/main`
+   (`git fetch origin main` rồi `git cat-file -e origin/main:openspec/changes/<id>/proposal.md`).
+   Không có thì dừng và nói cần merge PR spec trước. Phải đang ở nhánh `feat/<id>` cắt từ `main`;
+   nếu không, hỏi người dùng trước khi tạo.
+2. Gọi `planner` với change id. Kiểm vùng ghi.
+3. Nếu báo cáo có "Vấn đề với spec": **dừng**, không tự sửa spec. Báo cần mở PR spec fix
+   (`spec/<id>-fix`) cho BA duyệt (spec-driven §2), rồi rebase nhánh này.
+4. Nếu có "Câu hỏi mở": đưa cho người dùng, rồi gọi lại `planner` với câu trả lời.
+5. Chạy `pnpm exec openspec validate --all --strict`. Fail thì gọi lại `planner` với output lỗi.
+6. **Dừng.** Báo: `design.md` và `tasks.md` đã sẵn sàng (số task, layer đích, file dự kiến), người dùng
+   xem lại rồi chạy `/relay code`. Hai file này đi cùng PR code.
 
 ## Pha `code`
 
-1. **Cổng spec:** PR spec phải đã merge. Kiểm `openspec/changes/<id>/tasks.md` tồn tại trên
-   `origin/main` (`git fetch origin main` rồi `git cat-file -e origin/main:openspec/changes/<id>/tasks.md`).
-   Không có thì dừng và nói cần merge PR spec trước. Phải đang ở nhánh `feat/<id>` cắt từ `main`;
-   nếu không, hỏi người dùng trước khi tạo.
+1. **Cổng kế hoạch:** PR spec đã merge (như pha `plan`) **và** `openspec/changes/<id>/tasks.md` +
+   `design.md` đã có ở nhánh hiện tại. Thiếu thì dừng và bảo chạy `/relay plan <id>` trước. Phải đang
+   ở nhánh `feat/<id>` cắt từ `main`.
 2. Đọc `tasks.md` để lấy danh sách Scenario theo thứ tự. Với **mỗi** Scenario chưa xong, lần lượt:
    1. **RED:** gọi `test-writer` (id + đúng một Scenario). Kiểm vùng ghi. Báo cáo phải có output
       test fail đúng lý do; không có thì gọi lại. Chạy lại test đó và tự xác nhận nó fail.

@@ -24,7 +24,7 @@ chờ ai báo lại.
 
 | Pha | Chủ | PR | Kết thúc khi |
 |---|---|---|---|
-| A. Spec | BA | **PR spec** (nhánh `spec/s<epic>-<n>-<slug>`) | PR spec được review và **merge vào `main`**; change vẫn nằm ở `openspec/changes/` |
+| A. Spec | BA | **PR spec** (nhánh `spec/s<epic>-<n>-<slug>`) | PR spec được review và **merge vào `main`**; change vẫn nằm ở `openspec/changes/`, chỉ có `proposal.md` + `specs/` |
 | B. Code | Dev | **PR code** (nhánh `feat/s<epic>-<n>-<slug>`, cắt từ `main` sau pha A) | PR code được review và merge; mọi task trong `tasks.md` đã tick |
 | C. Archive | Workflow | **PR archive** tự mở sau khi PR code merge | PR archive được merge |
 
@@ -33,7 +33,7 @@ chờ ai báo lại.
 | # | Bước | Lệnh / việc | Cổng |
 |---|---|---|---|
 | A1 | Chọn story, tạo nhánh `spec/s<epic>-<n>-<slug>` | | |
-| A2 | **Propose** | `/opsx:propose s<epic>-<n>-<slug>`: proposal, spec, design, tasks | `pnpm exec openspec validate --all --strict` pass |
+| A2 | **Propose** | `/relay spec s<epic>-<n>-<slug>`: chỉ `proposal.md` và `specs/` (không `design.md`, `tasks.md`; nếu dùng `/opsx:propose` thì xoá hai file đó khỏi PR spec) | `pnpm exec openspec validate --all --strict` pass |
 | A3 | Mở **PR spec** | Theo template, `Spec PR: N/A`, `Refs #<story>`, Screenshots `N/A` | **Review và merge**; không có code trong PR này |
 
 ### Pha B: Code (dev)
@@ -41,6 +41,7 @@ chờ ai báo lại.
 | # | Bước | Lệnh / việc | Cổng |
 |---|---|---|---|
 | B1 | Cắt nhánh `feat/s<epic>-<n>-<slug>` từ `main` đã có spec | | PR spec đã merge |
+| B1a | **Plan** | `/relay plan <id>`: tạo `design.md` (cách làm, layer, file) và `tasks.md` (cặp RED/GREEN cho mỗi Scenario). Đi cùng PR code. Spec sai/thiếu thì dừng, mở PR spec fix | `openspec validate --all --strict` pass |
 | B2 | **RED** | Viết test cho một Scenario, chạy, thấy fail đúng lý do. Commit `test(...)` | Phải có output fail |
 | B3 | **GREEN** | `/opsx:apply`: code tối thiểu, đúng layer (CLAUDE.md §1–§3). Commit `feat(...)` | Test pass |
 | B4 | **REFACTOR** | Dọn code, giữ xanh | |
@@ -173,13 +174,14 @@ Không bỏ qua bước propose.
 
 ## 7. Chạy bằng agent: `/relay`
 
-Lệnh `/relay <spec|code|fix> <change-id>` chạy các pha trên bằng subagent tách context. Luật không đổi,
+Lệnh `/relay <spec|plan|code|fix> <change-id>` chạy các pha trên bằng subagent tách context. Luật không đổi,
 chỉ có thêm cách chạy. Phiên chính là **người điều phối**: không tự viết spec/test/code, mỗi lần giao
 việc là một agent mới, thông tin đi qua file và git diff.
 
 | Agent (`.claude/agents/`) | Pha | Được ghi | Trả về |
 |---|---|---|---|
-| `spec-writer` | A | `openspec/changes/<id>/` | change id, Scenario, kết quả validate |
+| `spec-writer` | A | `proposal.md`, `specs/` trong `openspec/changes/<id>/` | change id, Scenario, kết quả validate |
+| `planner` | B1a | `design.md`, `tasks.md` (không sửa spec) | số task, layer, file dự kiến, vấn đề với spec |
 | `test-writer` | B2 (RED) | file test | test + output fail đúng lý do |
 | `implementer` | B3–B4 (GREEN, REFACTOR), sửa finding | code production, không file test | file đã đổi + output pass |
 | `reviewer` | trước B6 | không gì cả | finding theo mức độ + độ phủ Scenario |
