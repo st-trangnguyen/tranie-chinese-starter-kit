@@ -17,7 +17,7 @@
 > UI screenshots to show what is difference between before and after changing
 > UI screenshots for Lighthouse reporting
 
-<!-- Bắt buộc khi PR thay đổi giao diện (component, CSS, layout, icon, manifest). Không liên quan UI thì ghi "N/A". -->
+<!-- Bắt buộc khi PR thay đổi giao diện (component, CSS, layout, icon, manifest): mobile 375×812 và desktop 1280×800, mỗi khổ sáng + tối (ảnh trên nhánh pr-assets, xem CLAUDE.md §8). Không liên quan UI thì ghi "N/A". -->
 
 #### Checklist
 
