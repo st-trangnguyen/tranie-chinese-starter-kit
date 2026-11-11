@@ -45,7 +45,7 @@ describe('LessonService — quy tắc phiên làm bài', () => {
     });
   });
 
-  it('S3.2-AC1: should count skipped exercises, not answered ones', () => {
+  it('S3.2-X1: should count skipped exercises, not answered ones', () => {
     let session = service.startSession(EXERCISES);
     session = service.skip(session);
     session = service.advance(
@@ -137,7 +137,7 @@ describe('LessonService — quy tắc phiên làm bài', () => {
     );
   });
 
-  it('S3.2-AC1: should skip an exercise without showing a result', () => {
+  it('S3.2-X1: should skip an exercise without showing a result', () => {
     const next = service.skip(service.startSession(EXERCISES));
 
     expect(next).toMatchObject({
