@@ -7,12 +7,13 @@ import { useLearningPath } from '../hooks/useLearningPath';
 /** Màn bản đồ lộ trình (S3.1): giai đoạn → nhóm → bài theo thứ tự. */
 const LearningPathContainer = () => {
   const { t } = useTranslation('learning-path');
-  const { pathMap, hasError } = useLearningPath();
+  const { pathMap, statuses, hasError } = useLearningPath();
 
   const renderLesson = (lessonId: string) => (
     <LearningPathLessonItem
       key={lessonId}
       title={pathMap?.lessonTitles.get(lessonId) ?? lessonId}
+      status={statuses.get(lessonId) ?? 'locked'}
     />
   );
 
