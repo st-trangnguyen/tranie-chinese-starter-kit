@@ -1,7 +1,7 @@
 # Proposal: S3.1 Bản đồ lộ trình
 
 Story **S3.1 Bản đồ lộ trình · F5** ([docs/02-design/epics-stories.md](../../../docs/02-design/epics-stories.md#s31-bản-đồ-lộ-trình--f5)) ·
-GitHub issue [#22](https://github.com/st-trangnguyen/chinese-starter-kit/issues/22).
+GitHub issue [#22](https://github.com/st-trangnguyen/tranie-chinese-starter-kit/issues/22).
 
 Refs #22
 
