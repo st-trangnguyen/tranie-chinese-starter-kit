@@ -45,9 +45,21 @@ export class LessonService {
 
   // Rule: sang câu kế sau khi đã xem kết quả; hết câu cuối thì kết thúc bài.
   advance(session: LessonSession): LessonSession {
-    if (session.phase !== 'feedback') {
+    return session.phase === 'feedback' ? this.moveToNext(session) : session;
+  }
+
+  // Rule: câu có dạng bài chưa được hỗ trợ thì được bỏ qua (có đếm), không có kết quả đúng/sai.
+  skip(session: LessonSession): LessonSession {
+    if (session.phase !== 'answering') {
       return session;
     }
+    return this.moveToNext({
+      ...session,
+      skippedCount: session.skippedCount + 1,
+    });
+  }
+
+  private moveToNext(session: LessonSession): LessonSession {
     const nextIndex = session.currentIndex + 1;
     if (nextIndex >= session.exerciseIds.length) {
       return { ...session, phase: 'finished', lastResult: null };
@@ -58,18 +70,6 @@ export class LessonService {
       phase: 'answering',
       lastResult: null,
     };
-  }
-
-  // Rule: câu có dạng bài chưa được hỗ trợ thì được bỏ qua (có đếm), không có kết quả đúng/sai.
-  skip(session: LessonSession): LessonSession {
-    if (session.phase !== 'answering') {
-      return session;
-    }
-    return this.advance({
-      ...session,
-      phase: 'feedback',
-      skippedCount: session.skippedCount + 1,
-    });
   }
 
   // Rule: chỉ giải thích khi trả lời sai; câu đúng không cần giải thích.

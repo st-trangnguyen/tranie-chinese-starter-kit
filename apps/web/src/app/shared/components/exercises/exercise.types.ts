@@ -8,4 +8,6 @@ export type { ExerciseResult };
 export interface ExerciseProps<K extends ExerciseKind> {
   exercise: Extract<Exercise, { kind: K }>;
   onResult: (result: ExerciseResult) => void;
+  /** true sau khi câu đã được chấm: dạng bài phải khóa đáp án, không nhận trả lời thêm. */
+  isLocked: boolean;
 }

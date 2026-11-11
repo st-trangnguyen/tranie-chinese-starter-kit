@@ -14,6 +14,7 @@ export const exerciseRegistry: ExerciseRegistry = {};
 type AnyExerciseComponent = ComponentType<{
   exercise: Exercise;
   onResult: (result: ExerciseResult) => void;
+  isLocked: boolean;
 }>;
 
 /**

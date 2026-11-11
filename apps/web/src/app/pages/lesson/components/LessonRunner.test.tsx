@@ -1,7 +1,6 @@
 import type { Exercise } from '@csk/shared';
 
 import type { ExerciseRegistry } from '@shared/components/exercises/exercise.registry';
-import type { LessonSession } from '@shared/models/lesson-session.model';
 import { renderWithProviders, screen } from '@test/render';
 import { LessonRunner } from './LessonRunner';
 
@@ -15,21 +14,16 @@ const registry: ExerciseRegistry = {
   'pinyin-type': ({ exercise }) => <p>Dạng gõ pinyin: {exercise.wordId}</p>,
 };
 
-const session = (currentIndex: number): LessonSession => ({
-  exerciseIds: EXERCISES.map((exercise) => exercise.id),
-  currentIndex,
-  phase: 'answering',
-  lastResult: null,
-  skippedCount: 0,
-});
-
 describe('LessonRunner', () => {
   it('should render the component registered for the current exercise kind', () => {
     renderWithProviders(
       <LessonRunner
-        exercise={EXERCISES[1]}
-        session={session(1)}
-        feedback={null}
+        view={{
+          exercise: EXERCISES[1],
+          current: 2,
+          total: EXERCISES.length,
+          feedback: null,
+        }}
         registry={registry}
         handlers={{ onResult: vi.fn(), onContinue: vi.fn(), onSkip: vi.fn() }}
       />,

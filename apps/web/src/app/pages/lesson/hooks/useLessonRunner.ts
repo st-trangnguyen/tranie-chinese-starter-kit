@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Lesson } from '@csk/shared';
 
 import type { ExerciseResult } from '@shared/models/exercise.model';
-import type { LessonSession } from '@shared/models/lesson-session.model';
+import type {
+  LessonFeedbackView,
+  LessonSession,
+} from '@shared/models/lesson-session.model';
 import { LessonService } from '@shared/services/lesson.service';
-import type { LessonFeedbackView } from '../components/LessonRunner';
 
 export interface LessonRunnerState {
   /** null khi đang nạp hoặc lỗi. */
@@ -17,26 +19,32 @@ export interface LessonRunnerState {
   skipExercise: () => void;
 }
 
+/** Bài đã nạp, gắn với `lessonId` để đổi bài thì không lẫn sang bài cũ. */
+interface OpenedState {
+  lessonId: string;
+  lesson: Lesson;
+  session: LessonSession;
+}
+
 /** State của một lượt làm bài; quy tắc nằm ở `LessonService` (S3.2). */
 export const useLessonRunner = (lessonId: string): LessonRunnerState => {
   const service = useMemo(() => new LessonService(), []);
-  const [lesson, setLesson] = useState<Lesson | null>(null);
-  const [session, setSession] = useState<LessonSession | null>(null);
-  const [hasError, setHasError] = useState(false);
+  const [opened, setOpened] = useState<OpenedState | null>(null);
+  const [failedLessonId, setFailedLessonId] = useState<string | null>(null);
 
   useEffect(() => {
     let isActive = true;
     service
       .openLesson(lessonId)
-      .then((opened) => {
+      .then((result) => {
         if (isActive) {
-          setLesson(opened.lesson);
-          setSession(opened.session);
+          setFailedLessonId(null);
+          setOpened({ lessonId, ...result });
         }
       })
       .catch(() => {
         if (isActive) {
-          setHasError(true);
+          setFailedLessonId(lessonId);
         }
       });
     return () => {
@@ -44,23 +52,29 @@ export const useLessonRunner = (lessonId: string): LessonRunnerState => {
     };
   }, [service, lessonId]);
 
+  const updateSession = useCallback(
+    (change: (session: LessonSession) => LessonSession) =>
+      setOpened((current) =>
+        current ? { ...current, session: change(current.session) } : current,
+      ),
+    [],
+  );
   const submitResult = useCallback(
     (result: ExerciseResult) =>
-      setSession((current) =>
-        current ? service.submitResult(current, result) : current,
-      ),
-    [service],
+      updateSession((session) => service.submitResult(session, result)),
+    [service, updateSession],
   );
   const continueLesson = useCallback(
-    () =>
-      setSession((current) => (current ? service.advance(current) : current)),
-    [service],
+    () => updateSession((session) => service.advance(session)),
+    [service, updateSession],
   );
   const skipExercise = useCallback(
-    () => setSession((current) => (current ? service.skip(current) : current)),
-    [service],
+    () => updateSession((session) => service.skip(session)),
+    [service, updateSession],
   );
 
+  const current = opened?.lessonId === lessonId ? opened : null;
+  const session = current?.session ?? null;
   const result = session?.lastResult ?? null;
   const feedback: LessonFeedbackView | null =
     session?.phase === 'feedback' && result
@@ -73,10 +87,10 @@ export const useLessonRunner = (lessonId: string): LessonRunnerState => {
       : null;
 
   return {
-    lesson,
+    lesson: current?.lesson ?? null,
     session,
     feedback,
-    hasError,
+    hasError: failedLessonId === lessonId,
     submitResult,
     continueLesson,
     skipExercise,

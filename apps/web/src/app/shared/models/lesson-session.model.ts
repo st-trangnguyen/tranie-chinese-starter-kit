@@ -1,3 +1,5 @@
+import type { Exercise } from '@csk/shared';
+
 import type { ExerciseResult } from './exercise.model';
 
 export type LessonPhase = 'answering' | 'feedback' | 'finished';
@@ -11,4 +13,21 @@ export interface LessonSession {
   lastResult: ExerciseResult | null;
   /** Số câu đã bỏ qua vì dạng bài chưa được hỗ trợ. */
   skippedCount: number;
+}
+
+/** Kết quả hiện sau khi trả lời. */
+export interface LessonFeedbackView {
+  isCorrect: boolean;
+  /** Đã lọc theo quy tắc: chỉ có khi trả lời sai. */
+  explanation?: string;
+}
+
+/** Những gì khung chạy bài cần để vẽ một câu (S3.2). */
+export interface LessonRunnerView {
+  exercise: Exercise;
+  /** Câu đang làm, tính từ 1. */
+  current: number;
+  total: number;
+  /** null khi chưa trả lời. */
+  feedback: LessonFeedbackView | null;
 }

@@ -5,6 +5,7 @@ import {
   exerciseRegistry,
   type ExerciseRegistry,
 } from '@shared/components/exercises/exercise.registry';
+import { LessonFinished } from '../components/LessonFinished';
 import { LessonRunner } from '../components/LessonRunner';
 import { useLessonRunner } from '../hooks/useLessonRunner';
 
@@ -40,17 +41,16 @@ const LessonRunnerContainer = ({
       )}
       {!lesson && !hasError && <p>{t('loading')}</p>}
       {session?.phase === 'finished' && (
-        <p className="lesson-finished">
-          {session.skippedCount > 0
-            ? t('finishedWithSkipped', { count: session.skippedCount })
-            : t('finished')}
-        </p>
+        <LessonFinished skippedCount={session.skippedCount} />
       )}
       {session && session.phase !== 'finished' && exercise && (
         <LessonRunner
-          exercise={exercise}
-          session={session}
-          feedback={feedback}
+          view={{
+            exercise,
+            current: session.currentIndex + 1,
+            total: session.exerciseIds.length,
+            feedback,
+          }}
           registry={registry}
           handlers={{
             onResult: submitResult,
