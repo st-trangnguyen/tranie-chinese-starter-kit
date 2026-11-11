@@ -114,7 +114,7 @@ chinese-starter-kit/
     ├── index.html  index.css               # index.css nạp styles/tailwind/main.css
     ├── styles/tailwind/                    # design system: tokens/ (màu, spacing, chữ), base/ (font, nền), themes/_dark.css
     ├── assets/
-    │   ├── i18n/vi/{common,home,path,lesson,review,settings}.json
+    │   ├── i18n/vi/{common,home,learning-path,lesson,review,settings}.json
     │   ├── icons/  images/
     │   ├── fonts/                          # ← LXGW WenKai đã cắt (content: font:subset)
     │   ├── content/                        # ← output JSON của pipeline
@@ -141,7 +141,7 @@ chinese-starter-kit/
         │       └── speech.service.ts           # adapter Web Speech
         ├── pages/
         │   ├── Page.tsx  page.routes.ts    # khung app: header + <Outlet/> + thanh điều hướng dưới
-        │   └── onboarding/ home/ path/ lesson/ review/ practice/ dictionary/ settings/ error/
+        │   └── onboarding/ home/ learning-path/ lesson/ review/ practice/ dictionary/ settings/ error/
         │       └── (mỗi feature) <feature>.routes.ts · containers/ · components/ · hooks/
         └── shared/
             ├── components/
@@ -177,7 +177,7 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
 | `shared/services/srs.service` | Bọc ts-fsrs: tạo thẻ, chấm, lấy thẻ đến hạn trong giới hạn mỗi ngày, thống kê | E9 |
 | `shared/services/backup.service` | Export/import, kiểm tra file trước khi ghi đè | E8 |
 | `shared/components/exercises` | Các dạng bài tập + registry theo `kind` | E4, E5, E6, E10 |
-| `pages/*` | Màn hình: onboarding, home, path, lesson, review, practice, dictionary, settings | E1, E3, E8, E9, E10 |
+| `pages/*` | Màn hình: onboarding, home, learning-path, lesson, review, practice, dictionary, settings | E1, E3, E8, E9, E10 |
 
 ## 5. Pattern (theo boilerplate)
 
@@ -189,6 +189,7 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
   - Service không import React hay router.
 - **Component bài tập** chỉ nhận dữ liệu qua props (`exercise`, `onResult`). Audio và ghi âm lấy qua hook trong `core/hooks`, không import service trực tiếp.
 - **Route:** mỗi feature export `PageRoute[]` (container lazy-load) từ `<feature>.routes.ts`, gom về `pages/page.routes.ts` rồi về `app.routes.ts`.
+  - URL theo RESTful: danh từ tài nguyên, kebab-case, collection số nhiều, tên cụ thể (`/learning-paths`, `/lessons/:lessonId`). `ROUTE_PATHS` trong `core/constants/app.constants.ts` là nguồn duy nhất của URL.
 - **i18n:** chuỗi giao diện đặt trong `apps/web/src/assets/i18n/vi/<namespace>.json`, dùng `useTranslation(namespace)`. Nội dung bài học không nằm trong i18n mà nằm trong JSON của pipeline.
 - **Alias:** trong `apps/web`, `aliases.ts` là nguồn duy nhất, giữ đồng bộ với `apps/web/tsconfig.json`. Sang package khác thì import bằng tên package (xem 3.1).
 

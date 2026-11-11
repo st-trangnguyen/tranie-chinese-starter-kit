@@ -11,6 +11,7 @@ import {
   progressStore,
   type ProgressStore,
 } from '@core/services/progress-store.service';
+import { listLessonIdsInOrder } from '@shared/utils/learningPath.utils';
 
 export class ProgressService {
   constructor(private readonly store: ProgressStore = progressStore) {}
@@ -49,9 +50,7 @@ export class ProgressService {
     stages: readonly Stage[],
     completedLessonIds: ReadonlySet<string>,
   ): Map<string, LessonStatus> {
-    const lessonIds = stages.flatMap((stage) =>
-      stage.units.flatMap((unit) => unit.lessonIds),
-    );
+    const lessonIds = listLessonIdsInOrder(stages);
     return new Map(
       lessonIds.map((lessonId, index): [string, LessonStatus] => {
         if (completedLessonIds.has(lessonId)) {

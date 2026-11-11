@@ -1,10 +1,11 @@
-import type { ContentRoot, Lesson, Stage } from '@csk/shared';
+import type { ContentRoot, Lesson } from '@csk/shared';
 
 import {
   contentSource,
   type ContentSource,
 } from '@core/services/content-source.service';
 import type { PathMap } from '@shared/models/learning-path.model';
+import { listLessonIdsInOrder } from '@shared/utils/learningPath.utils';
 
 export class ContentService {
   constructor(private readonly source: ContentSource = contentSource) {}
@@ -20,13 +21,7 @@ export class ContentService {
   }
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
-
-  /** Rule: thứ tự học là thứ tự khai báo Stage → Unit → lessonIds trong lộ trình (S3.1 AC1). */
-  listLessonIdsInOrder(stages: readonly Stage[]): string[] {
-    return stages.flatMap((stage) =>
-      stage.units.flatMap((unit) => unit.lessonIds),
-    );
-  }
+  // Thứ tự bài dùng chung `listLessonIdsInOrder` (shared/utils); chưa có rule riêng.
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
@@ -34,7 +29,7 @@ export class ContentService {
     try {
       const root = await this.readContentRoot();
       const lessons = await Promise.all(
-        this.listLessonIdsInOrder(root.stages).map((lessonId) =>
+        listLessonIdsInOrder(root.stages).map((lessonId) =>
           this.readLesson(lessonId),
         ),
       );
