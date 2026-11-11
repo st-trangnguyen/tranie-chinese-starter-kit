@@ -2,6 +2,7 @@ import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import common from '@assets/i18n/vi/common.json';
+import learningPath from '@assets/i18n/vi/learning-path.json';
 import lesson from '@assets/i18n/vi/lesson.json';
 import onboarding from '@assets/i18n/vi/onboarding.json';
 
@@ -14,9 +15,11 @@ const testI18n = createInstance();
 testI18n.use(initReactI18next).init({
   lng: 'vi',
   fallbackLng: 'vi',
-  ns: ['common', 'onboarding', 'lesson'],
+  ns: ['common', 'onboarding', 'learning-path', 'lesson'],
   defaultNS: 'common',
-  resources: { vi: { common, onboarding, lesson } },
+  resources: {
+    vi: { common, onboarding, 'learning-path': learningPath, lesson },
+  },
   interpolation: { escapeValue: false },
 });
 

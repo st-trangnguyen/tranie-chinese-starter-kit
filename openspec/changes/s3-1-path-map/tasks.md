@@ -31,8 +31,8 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 
 ## 4. Màn bản đồ lộ trình (S3.1-AC1, AC2, AC3) — `pages/learning-path`
 
-- [ ] 4.1 RED: test component S3.1-AC1 (thứ tự giai đoạn/nhóm/bài hiện trên màn) — Vitest + Testing Library (`src/test/render.tsx`), `apps/web/src/app/pages/learning-path/containers/LearningPathContainer.test.tsx`, mock `fetch` nội dung, `fake-indexeddb` cho tiến độ; kiểm: fail vì chưa có màn
-- [ ] 4.2 GREEN: thêm `ROUTE_PATHS.learningPaths`, `learning-path.routes.ts` (gom vào `page.routes.ts`), `useLearningPath`, `LearningPathContainer`, `LearningPathStage`, `LearningPathLessonItem`, i18n `assets/i18n/vi/learning-path.json`; kiểm: test 4.1 pass
+- [x] 4.1 RED: test component S3.1-AC1 (thứ tự giai đoạn/nhóm/bài hiện trên màn) — Vitest + Testing Library (`src/test/render.tsx`), `apps/web/src/app/pages/learning-path/containers/LearningPathContainer.test.tsx`, mock `fetch` nội dung, `fake-indexeddb` cho tiến độ; kiểm: fail vì chưa có màn
+- [x] 4.2 GREEN: thêm `ROUTE_PATHS.learningPaths`, `learning-path.routes.ts` (gom vào `page.routes.ts`), `useLearningPath`, `LearningPathContainer`, `LearningPathStage`, `LearningPathLessonItem`, i18n `assets/i18n/vi/learning-path.json`; kiểm: test 4.1 pass
 - [ ] 4.3 RED: test S3.1-AC2 "Bản đồ hiện nhãn trạng thái của từng bài" (seed 1 bài đã xong → thấy "Đã xong", "Đang mở", "Đã khóa") — `LearningPathContainer.test.tsx`; kiểm: fail
 - [ ] 4.4 GREEN: hiện nhãn trạng thái (chữ + icon `aria-hidden`); kiểm: test 4.3 pass
 - [ ] 4.5 RED: test S3.1-AC3 "Bấm bài khóa" (vẫn ở `/learning-paths`) và "Bấm bài đang mở" (tới `/lessons/<id>`) dùng `LocationProbe` — `LearningPathContainer.test.tsx`; kiểm: fail
