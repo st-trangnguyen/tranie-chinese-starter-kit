@@ -124,4 +124,14 @@ describe('LessonService — quy tắc phiên làm bài', () => {
       'Không mở được bài học.',
     );
   });
+
+  it('S3.2-AC1: should skip an exercise without showing a result', () => {
+    const next = service.skip(service.startSession(EXERCISES));
+
+    expect(next).toMatchObject({
+      currentIndex: 1,
+      phase: 'answering',
+      lastResult: null,
+    });
+  });
 });
