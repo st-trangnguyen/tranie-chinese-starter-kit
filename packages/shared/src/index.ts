@@ -3,12 +3,15 @@ export { PINYIN_CHARSET, findUnsupportedPinyinChars } from './pinyin.charset';
 export {
   DAILY_GOAL_OPTIONS,
   DEFAULT_SETTINGS,
+  LESSON_PROGRESS_STATUSES,
   dailyGoalMinutesSchema,
+  lessonProgressSchema,
   parseSettings,
   settingsSchema,
 } from './progress.schema';
 export type {
   DailyGoalMinutes,
+  LessonProgress,
   LessonStatus,
   Settings,
 } from './progress.schema';
