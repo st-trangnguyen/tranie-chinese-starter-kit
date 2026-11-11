@@ -25,6 +25,11 @@ thứ mấy trong tổng số câu.
 - **THEN** màn báo đã làm xong các câu của bài
 - **AND** không còn hiện câu nào
 
+#### Scenario: S3.2-AC1 Bỏ qua câu thì không báo là đã làm xong
+- **WHEN** người học bỏ qua 3 câu trong bài có 3 câu vì dạng bài chưa có
+- **THEN** màn báo đã bỏ qua 3 câu và bài chưa hoàn thành
+- **AND** màn không báo đã làm xong các câu của bài
+
 #### Scenario: S3.2-AC1 Không mở được bài
 - **WHEN** người học mở một bài mà nội dung không đọc được hoặc không tồn tại
 - **THEN** màn hiện thông báo không mở được bài

@@ -144,4 +144,23 @@ describe('LessonRunnerContainer', () => {
 
     expect(screen.getByRole('status')).not.toHaveTextContent('thanh 1');
   });
+
+  it('S3.2-AC1: should not report the lesson as done when every exercise was skipped', async () => {
+    const { user } = renderWithProviders(
+      <LessonRunnerContainer registry={{}} />,
+      { route: '/lessons/:lessonId' },
+    );
+    for (let step = 0; step < 3; step += 1) {
+      await user.click(
+        await screen.findByRole('button', { name: 'Bỏ qua câu này' }),
+      );
+    }
+
+    expect(
+      screen.getByText(/Bạn đã bỏ qua 3 câu.*chưa hoàn thành/),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('Bạn đã làm xong các câu của bài này.'),
+    ).not.toBeInTheDocument();
+  });
 });

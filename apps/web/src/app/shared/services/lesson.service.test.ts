@@ -45,6 +45,18 @@ describe('LessonService — quy tắc phiên làm bài', () => {
     });
   });
 
+  it('S3.2-AC1: should count skipped exercises, not answered ones', () => {
+    let session = service.startSession(EXERCISES);
+    session = service.skip(session);
+    session = service.advance(
+      service.submitResult(session, { isCorrect: true }),
+    );
+    session = service.skip(session);
+
+    expect(session.phase).toBe('finished');
+    expect(session.skippedCount).toBe(2);
+  });
+
   it('S3.2-AC1: should finish after the last exercise', () => {
     let session = service.startSession(EXERCISES);
     for (let step = 0; step < EXERCISES.length; step += 1) {
