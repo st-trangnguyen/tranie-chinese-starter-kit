@@ -1,0 +1,65 @@
+/* Màn bản đồ lộ trình — S3.1. Trạng thái bài luôn kèm nhãn chữ, màu chỉ là phụ. */
+
+@layer components {
+  .learning-path-title {
+    @apply text-title-lg text-fg;
+  }
+
+  .learning-path-stage-title {
+    @apply text-title text-fg;
+  }
+
+  .learning-path-unit-title {
+    @apply text-title-sm text-fg-muted;
+  }
+
+  .learning-path-error {
+    @apply rounded-md bg-danger-soft text-body-sm text-danger-text;
+  }
+
+  .learning-path-lesson {
+    @apply rounded-lg border-2 border-line bg-surface text-fg;
+  }
+
+  .learning-path-lesson-link {
+    @apply min-h-11 rounded-lg transition-colors;
+  }
+
+  .learning-path-lesson-link:hover {
+    @apply bg-sunken;
+  }
+
+  .learning-path-lesson-link:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .learning-path-lesson-title {
+    @apply text-body;
+  }
+
+  .learning-path-lesson-icon {
+    @apply text-body-sm;
+  }
+
+  .learning-path-lesson-status {
+    @apply text-caption;
+  }
+
+  .learning-path-lesson.is-open {
+    @apply border-accent bg-accent-soft;
+  }
+
+  .learning-path-lesson.is-completed .learning-path-lesson-status {
+    @apply text-success-text;
+  }
+
+  .learning-path-lesson.is-locked {
+    @apply bg-sunken text-fg-muted;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .learning-path-lesson-link {
+      @apply transition-none;
+    }
+  }
+}

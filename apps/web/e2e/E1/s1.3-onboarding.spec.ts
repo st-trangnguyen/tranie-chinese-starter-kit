@@ -13,11 +13,11 @@ test.describe('S1.3 Chọn mục tiêu mỗi ngày khi mở lần đầu', () =>
       page.getByRole('heading', { name: 'Cài app lên màn hình chính' }),
     ).toBeVisible();
     await page.getByRole('button', { name: /Bỏ qua|Vào học/ }).click();
-    await expect(page).toHaveURL(/\/lesson\/intro-01$/);
+    await expect(page).toHaveURL(/\/lessons\/intro-01$/);
 
     await page.goto('/');
-    await expect(page).toHaveURL(/\/lesson\/intro-01$/);
+    await expect(page).toHaveURL(/\/lessons\/intro-01$/);
     await page.goto('/onboarding');
-    await expect(page).toHaveURL(/\/lesson\/intro-01$/);
+    await expect(page).toHaveURL(/\/lessons\/intro-01$/);
   });
 });

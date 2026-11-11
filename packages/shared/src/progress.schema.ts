@@ -34,6 +34,21 @@ export const settingsSchema = z.object({
     .catch(DEFAULT_SETTINGS.hasCompletedOnboarding),
 });
 
+export const LESSON_PROGRESS_STATUSES = ['in-progress', 'completed'] as const;
+
+/**
+ * Tiến độ một bài lưu trong bảng `lessonProgress` (docs/03-architecture.md §6.2).
+ * `bestScore` (S3.4) và `cursor` (S3.3) thêm khi tới story đó.
+ */
+export const lessonProgressSchema = z.object({
+  lessonId: z.string().trim().min(1),
+  status: z.enum(LESSON_PROGRESS_STATUSES),
+});
+export type LessonProgress = z.infer<typeof lessonProgressSchema>;
+
+/** Trạng thái một bài trên bản đồ lộ trình (S3.1 AC2). Suy ra từ tiến độ, không lưu. */
+export type LessonStatus = 'locked' | 'open' | 'completed';
+
 export const parseSettings = (raw: unknown): Settings => {
   const record = typeof raw === 'object' && raw !== null ? raw : {};
   return settingsSchema.parse(record);

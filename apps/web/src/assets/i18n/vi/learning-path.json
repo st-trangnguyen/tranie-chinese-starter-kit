@@ -1,0 +1,9 @@
+{
+  "title": "Lộ trình học",
+  "status": {
+    "completed": "Đã xong",
+    "open": "Đang mở",
+    "locked": "Đã khóa"
+  },
+  "loadError": "Chưa tải được lộ trình. Kiểm tra kết nối rồi mở lại app."
+}

@@ -61,7 +61,7 @@ describe('OnboardingContainer', () => {
     await user.click(screen.getByRole('button', { name: 'Bỏ qua' }));
 
     expect(screen.getByTestId('location')).toHaveTextContent(
-      '/lesson/intro-01',
+      '/lessons/intro-01',
     );
   });
 
@@ -74,7 +74,7 @@ describe('OnboardingContainer', () => {
 
     await waitFor(() =>
       expect(screen.getByTestId('location')).toHaveTextContent(
-        '/lesson/intro-01',
+        '/lessons/intro-01',
       ),
     );
   });
@@ -85,7 +85,7 @@ describe('OnboardingContainer', () => {
 
     await waitFor(() =>
       expect(screen.getByTestId('location')).toHaveTextContent(
-        '/lesson/intro-01',
+        '/lessons/intro-01',
       ),
     );
     expect(

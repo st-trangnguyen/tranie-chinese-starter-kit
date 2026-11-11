@@ -65,7 +65,7 @@ src/
 ```
 UserList.tsx          # Component files: PascalCase
 useUsers.ts           # Hook files: camelCase with use prefix
-formatDate.ts         # Utility files: camelCase
+date.utils.ts         # Utility files: kebab-case + .utils.ts (xem CLAUDE.md §4)
 types.ts              # Shared types for the feature
 UserList.test.tsx     # Tests
 ```

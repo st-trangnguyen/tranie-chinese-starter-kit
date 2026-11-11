@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DAILY_GOAL_OPTIONS,
   DEFAULT_SETTINGS,
+  lessonProgressSchema,
   parseSettings,
 } from './progress.schema';
 
@@ -30,5 +31,36 @@ describe('parseSettings', () => {
 
   it('offers exactly 15, 30 and 60 minutes', () => {
     expect(DAILY_GOAL_OPTIONS).toEqual([15, 30, 60]);
+  });
+});
+
+describe('lessonProgressSchema', () => {
+  it('should accept a completed or in-progress lesson', () => {
+    expect(
+      lessonProgressSchema.parse({ lessonId: 'intro-01', status: 'completed' }),
+    ).toEqual({ lessonId: 'intro-01', status: 'completed' });
+    expect(
+      lessonProgressSchema.safeParse({
+        lessonId: 'intro-02',
+        status: 'in-progress',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('should reject an unknown status', () => {
+    expect(
+      lessonProgressSchema.safeParse({ lessonId: 'intro-01', status: 'done' })
+        .success,
+    ).toBe(false);
+  });
+
+  it('should reject a missing or empty lessonId', () => {
+    expect(
+      lessonProgressSchema.safeParse({ status: 'completed' }).success,
+    ).toBe(false);
+    expect(
+      lessonProgressSchema.safeParse({ lessonId: ' ', status: 'completed' })
+        .success,
+    ).toBe(false);
   });
 });

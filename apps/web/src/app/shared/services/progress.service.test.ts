@@ -1,15 +1,24 @@
-import { DEFAULT_SETTINGS, type Settings } from '@csk/shared';
+import {
+  DEFAULT_SETTINGS,
+  type LessonProgress,
+  type Settings,
+  type Stage,
+} from '@csk/shared';
 
 import type { ProgressStore } from '@core/services/progress-store.service';
 import { ProgressService } from './progress.service';
 
-const makeStore = (initial: Settings = DEFAULT_SETTINGS) => {
+const makeStore = (
+  initial: Settings = DEFAULT_SETTINGS,
+  lessonProgress: LessonProgress[] = [],
+) => {
   let saved = initial;
   const store: ProgressStore = {
     getSettings: vi.fn(async () => saved),
     saveSettings: vi.fn(async (settings: Settings) => {
       saved = settings;
     }),
+    getAllLessonProgress: vi.fn(async () => lessonProgress),
   };
   return store;
 };
@@ -33,6 +42,62 @@ describe('ProgressService — rules', () => {
         hasCompletedOnboarding: true,
       }),
     ).toBe(false);
+  });
+});
+
+describe('ProgressService — lesson status rule', () => {
+  const service = new ProgressService(makeStore());
+
+  const stage = (id: string, units: Record<string, string[]>): Stage => ({
+    id,
+    title: id,
+    units: Object.entries(units).map(([unitId, lessonIds]) => ({
+      id: unitId,
+      title: unitId,
+      lessonIds,
+    })),
+  });
+
+  const STAGES: Stage[] = [
+    stage('intro', { 'intro-a': ['l1', 'l2'], 'intro-b': ['l3'] }),
+    stage('hsk1', { 'hsk1-a': ['l4', 'l5'] }),
+  ];
+
+  const statusesOf = (completed: string[]) =>
+    Object.fromEntries(
+      service.deriveLessonStatuses(STAGES, new Set(completed)),
+    );
+
+  it('S3.1-AC2: should open only the first lesson when nothing is completed', () => {
+    expect(statusesOf([])).toEqual({
+      l1: 'open',
+      l2: 'locked',
+      l3: 'locked',
+      l4: 'locked',
+      l5: 'locked',
+    });
+  });
+
+  it('S3.1-AC2: should open the next lesson when the previous ones are completed', () => {
+    expect(statusesOf(['l1', 'l2'])).toEqual({
+      l1: 'completed',
+      l2: 'completed',
+      l3: 'open',
+      l4: 'locked',
+      l5: 'locked',
+    });
+  });
+
+  it('S3.1-AC2: should open the first lesson of the next unit or stage', () => {
+    expect(statusesOf(['l1', 'l2', 'l3'])).toMatchObject({
+      l3: 'completed',
+      l4: 'open',
+      l5: 'locked',
+    });
+  });
+
+  it('S3.1-AC2: should ignore completed ids that are not in the path', () => {
+    expect(statusesOf(['unknown'])).toMatchObject({ l1: 'open', l2: 'locked' });
   });
 });
 
@@ -64,5 +129,19 @@ describe('ProgressService — use cases', () => {
       'Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.',
     );
     expect(store.saveSettings).not.toHaveBeenCalled();
+  });
+
+  it('S3.1-AC2: should list only completed lessons as completed', async () => {
+    const service = new ProgressService(
+      makeStore(DEFAULT_SETTINGS, [
+        { lessonId: 'intro-01', status: 'completed' },
+        { lessonId: 'intro-02', status: 'in-progress' },
+        { lessonId: 'intro-03', status: 'completed' },
+      ]),
+    );
+
+    await expect(service.getCompletedLessonIds()).resolves.toEqual(
+      new Set(['intro-01', 'intro-03']),
+    );
   });
 });

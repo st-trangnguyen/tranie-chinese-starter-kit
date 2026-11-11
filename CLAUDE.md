@@ -120,7 +120,7 @@ chỉ tham khảo cấu trúc): `docs/05-standards/architecture.md`.
 | Component file / component | PascalCase | `UserList.tsx`, `function UserList()` |
 | Hook file / hook | camelCase, prefix `use` | `useUsers.ts` |
 | Service file | `<domain>.service.ts` | `booking.service.ts` |
-| Util file | camelCase | `formatDate.ts` |
+| Util file | kebab-case + hậu tố `.utils.ts` | `learning-path.utils.ts`, `date.utils.ts` |
 | Biến, function | camelCase | `userName`, `calculateTotal()` |
 | Constant | SCREAMING_SNAKE_CASE | `MAX_RETRIES` |
 | Boolean | prefix `is` / `has` / `can` | `isOpen`, `hasError` |
@@ -232,8 +232,11 @@ chạy lại cùng bộ đó kèm build + `check:fonts` cho mọi PR. Dependency
   Screenshots → Checklist), không tự đổi tiêu đề mục.
 - Xoá mọi dòng placeholder của template (các dòng `> …` như "Describe what it related",
   "UI screenshots for…", "Note: Developer is responsible…") trước khi gửi.
-- PR thay đổi giao diện **bắt buộc có screenshot** (mobile 375px, sáng và tối; có trước/sau nếu
-  sửa UI cũ). PR không liên quan UI ghi `N/A` ở mục Screenshots.
+- PR thay đổi giao diện **bắt buộc có screenshot** cả **mobile (375×812) và desktop (1280×800)**,
+  mỗi khổ sáng và tối; có trước/sau nếu sửa UI cũ. Ảnh commit vào nhánh `pr-assets` ở
+  `pr-<số PR>/<màn>-<mobile|desktop>-<light|dark>.png` (không merge vào `main`), nhúng bằng
+  `<img src="https://raw.githubusercontent.com/<owner>/<repo>/pr-assets/pr-<n>/…" width="…">` trong bảng
+  hàng Mobile/Desktop × cột Sáng/Tối. PR không liên quan UI ghi `N/A` ở mục Screenshots.
 - Chỉ tick ô checklist đã thực sự kiểm tra.
 - Tiến độ epic/story theo dõi bằng GitHub Issues (mỗi story là sub-issue của issue epic) trên
   board [Tranie Chinese · Roadmap](https://github.com/users/st-trangnguyen/projects/1).

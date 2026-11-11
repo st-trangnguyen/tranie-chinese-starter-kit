@@ -1,13 +1,17 @@
 import {
   DAILY_GOAL_OPTIONS,
   type DailyGoalMinutes,
+  type LessonProgress,
+  type LessonStatus,
   type Settings,
+  type Stage,
 } from '@csk/shared';
 
 import {
   progressStore,
   type ProgressStore,
 } from '@core/services/progress-store.service';
+import { listLessonIdsInOrder } from '@shared/utils/learning-path.utils';
 
 export class ProgressService {
   constructor(private readonly store: ProgressStore = progressStore) {}
@@ -22,6 +26,10 @@ export class ProgressService {
     return this.store.saveSettings(settings);
   }
 
+  private readAllLessonProgress(): Promise<LessonProgress[]> {
+    return this.store.getAllLessonProgress();
+  }
+
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
   /** Rule: mục tiêu mỗi ngày chỉ được là 15, 30 hoặc 60 phút (S1.3 AC1). */
@@ -32,6 +40,28 @@ export class ProgressService {
   /** Rule: onboarding chỉ hiện cho tới khi người học hoàn thành (S1.3 AC3). */
   shouldShowOnboarding(settings: Settings): boolean {
     return !settings.hasCompletedOnboarding;
+  }
+
+  /**
+   * Rule: mở khóa Nhập môn (F5, S3.1 AC2) — duỗi lộ trình theo thứ tự; bài đầu luôn mở, bài sau mở
+   * khi bài liền trước đã xong (kể cả qua ranh giới nhóm/giai đoạn), bài đã xong là đã xong.
+   */
+  deriveLessonStatuses(
+    stages: readonly Stage[],
+    completedLessonIds: ReadonlySet<string>,
+  ): Map<string, LessonStatus> {
+    const lessonIds = listLessonIdsInOrder(stages);
+    return new Map(
+      lessonIds.map((lessonId, index): [string, LessonStatus] => {
+        if (completedLessonIds.has(lessonId)) {
+          return [lessonId, 'completed'];
+        }
+        const previousId = lessonIds[index - 1];
+        const isOpen =
+          previousId === undefined || completedLessonIds.has(previousId);
+        return [lessonId, isOpen ? 'open' : 'locked'];
+      }),
+    );
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
@@ -51,5 +81,14 @@ export class ProgressService {
       dailyGoalMinutes: minutes,
       hasCompletedOnboarding: true,
     });
+  }
+
+  async getCompletedLessonIds(): Promise<Set<string>> {
+    const progress = await this.readAllLessonProgress();
+    return new Set(
+      progress
+        .filter((lesson) => lesson.status === 'completed')
+        .map((lesson) => lesson.lessonId),
+    );
   }
 }

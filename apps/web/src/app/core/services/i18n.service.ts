@@ -3,7 +3,12 @@ import Backend from 'i18next-http-backend';
 import { initReactI18next } from 'react-i18next';
 
 export const DEFAULT_LANGUAGE = 'vi';
-export const I18N_NAMESPACES = ['common', 'onboarding', 'lesson'] as const;
+export const I18N_NAMESPACES = [
+  'common',
+  'onboarding',
+  'learning-path',
+  'lesson',
+] as const;
 
 i18n
   .use(Backend)
