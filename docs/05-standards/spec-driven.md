@@ -170,3 +170,28 @@ Sửa lỗi vẫn phải có test tái hiện lỗi trước khi sửa.
 
 Story rất nhỏ vẫn dùng vòng này nhưng tối giản: proposal một đoạn, một Scenario, một cặp RED/GREEN.
 Không bỏ qua bước propose.
+
+## 7. Chạy bằng agent: `/relay`
+
+Lệnh `/relay <spec|code|fix> <change-id>` chạy các pha trên bằng subagent tách context. Luật không đổi,
+chỉ có thêm cách chạy. Phiên chính là **người điều phối**: không tự viết spec/test/code, mỗi lần giao
+việc là một agent mới, thông tin đi qua file và git diff.
+
+| Agent (`.claude/agents/`) | Pha | Được ghi | Trả về |
+|---|---|---|---|
+| `spec-writer` | A | `openspec/changes/<id>/` | change id, Scenario, kết quả validate |
+| `test-writer` | B2 (RED) | file test | test + output fail đúng lý do |
+| `implementer` | B3–B4 (GREEN, REFACTOR), sửa finding | code production, không file test | file đã đổi + output pass |
+| `reviewer` | trước B6 | không gì cả | finding theo mức độ + độ phủ Scenario |
+
+Tách `test-writer` khỏi `implementer` để người viết code không sửa test cho dễ pass. `reviewer` không
+nhận lời giải thích của `implementer`, chỉ nhận diff, spec và `CLAUDE.md`.
+
+- **Vùng ghi:** subagent không giới hạn được đường dẫn bằng cấu hình, nên sau mỗi agent điều phối
+  kiểm `git status`. Agent ghi sai vùng thì điều phối dừng và báo người dùng.
+- **Vòng review:** `blocker`/`major` đi qua tối đa 2 vòng sửa, mỗi vòng reviewer là agent mới chỉ kiểm
+  finding cũ và bản sửa. Finding loại `spec` dừng ngay để mở PR spec fix. Hết 2 vòng mà còn
+  `blocker`/`major` thì dừng hẳn và báo người dùng, không tự chạy vòng 3, không hạ mức độ finding.
+- **Sửa theo feedback:** trong vòng tự động dùng subagent mới. Comment PR đến muộn thì mở phiên mới
+  và chạy `/relay fix <id>`; trạng thái nằm ở nhánh, `tasks.md` và comment PR.
+- `/relay` dừng trước khi commit/mở PR; người dùng quyết.
