@@ -1,0 +1,151 @@
+# Sau khi PR code merge vào main, tự mở PR archive spec (chuyển delta vào openspec/specs/).
+# Quy trình: docs/05-standards/spec-driven.md §2.
+#
+# Change cần archive lấy từ dòng "OpenSpec change: openspec/changes/<id>" ở mục References của PR code.
+# Chỉ archive khi mọi task trong tasks.md đã tick; nếu còn task thì đó là story làm nhiều PR, chờ PR cuối.
+#
+# PR tạo bằng GITHUB_TOKEN không kích hoạt CI. Muốn PR archive tự chạy CI, đặt secret ARCHIVE_PR_TOKEN
+# (PAT hoặc GitHub App token có quyền contents + pull-requests: write).
+name: Archive spec
+
+on:
+  pull_request_target:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      change:
+        description: 'Id của change cần archive (vd. s3-3-lesson-result)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  archive:
+    name: Mở PR archive
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       !startsWith(github.event.pull_request.head.ref, 'spec/') &&
+       !startsWith(github.event.pull_request.head.ref, 'chore/archive-'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Xác định change cần archive
+        id: change
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          INPUT_CHANGE: ${{ inputs.change }}
+        run: |
+          set -euo pipefail
+          id="$INPUT_CHANGE"
+          if [[ -z "$id" ]]; then
+            id=$(printf '%s\n' "$PR_BODY" \
+              | grep -oE 'openspec/changes/[a-z0-9][a-z0-9-]*' \
+              | grep -v '/archive' | head -n 1 | sed 's#openspec/changes/##' || true)
+          fi
+          if [[ -z "$id" ]]; then
+            echo "PR không trỏ tới OpenSpec change nào, không có gì để archive."
+          elif [[ ! "$id" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
+            echo "::error::Id change không hợp lệ."
+            exit 1
+          fi
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+      # Luôn checkout main sau khi merge, không checkout nhánh của PR.
+      - uses: actions/checkout@v4
+        if: steps.change.outputs.id != ''
+        with:
+          ref: main
+          token: ${{ secrets.ARCHIVE_PR_TOKEN || github.token }}
+
+      - name: Kiểm tra change đã xong
+        id: ready
+        if: steps.change.outputs.id != ''
+        env:
+          CHANGE: ${{ steps.change.outputs.id }}
+        run: |
+          set -euo pipefail
+          dir="openspec/changes/$CHANGE"
+          if [[ ! -d "$dir" ]]; then
+            echo "Change $CHANGE không còn ở openspec/changes (đã archive?), bỏ qua."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          elif grep -qE '^[[:space:]]*- \[ \]' "$dir/tasks.md"; then
+            echo "Change $CHANGE còn task chưa tick, chờ PR code kế tiếp."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: pnpm/action-setup@v4
+        if: steps.ready.outputs.ready == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.ready.outputs.ready == 'true'
+        with:
+          node-version: 24.22.1
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+        if: steps.ready.outputs.ready == 'true'
+
+      - name: Archive và validate
+        if: steps.ready.outputs.ready == 'true'
+        env:
+          CHANGE: ${{ steps.change.outputs.id }}
+        run: |
+          pnpm exec openspec archive "$CHANGE" --yes
+          pnpm exec openspec validate --all --strict --no-interactive
+
+      - name: Mở PR archive
+        if: steps.ready.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.ARCHIVE_PR_TOKEN || github.token }}
+          CHANGE: ${{ steps.change.outputs.id }}
+          CODE_PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          branch="chore/archive-$CHANGE"
+
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "Archive không tạo thay đổi nào, bỏ qua."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add -A openspec
+          git commit -m "docs(openspec): archive $CHANGE"
+          git push --force-with-lease origin "$branch"
+
+          ref="PR code #${CODE_PR:-<chạy tay>}"
+          cat > "$RUNNER_TEMP/pr-body.md" <<EOF
+          #### References
+
+          - Spec PR: N/A
+          - OpenSpec change: \`openspec/changes/archive/*-$CHANGE\`
+          - Sinh tự động sau khi $ref được merge.
+
+          #### Description
+
+          Archive change \`$CHANGE\`: chuyển delta spec vào \`openspec/specs/\`, change vào \`openspec/changes/archive/\`.
+          Đã chạy \`openspec validate --all --strict\`.
+
+          #### Screenshots
+
+          N/A
+
+          #### Checklist
+
+          - [x] Change đã \`/opsx:archive\` và \`openspec validate --all --strict\` pass.
+          EOF
+
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "docs(openspec): archive $CHANGE" \
+            --body-file "$RUNNER_TEMP/pr-body.md"

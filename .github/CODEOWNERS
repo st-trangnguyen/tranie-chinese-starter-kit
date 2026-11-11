@@ -1,0 +1,9 @@
+# Người review mặc định. Quy trình spec/code tách riêng: docs/05-standards/spec-driven.md §2.
+# Dòng sau thắng dòng trước. Điền handle thật rồi bỏ dấu # ở dòng BA.
+
+# Mặc định: dev review code.
+*                     @st-trangnguyen
+
+# Spec do BA giữ: PR spec và PR archive tự xin BA review.
+# /openspec/          @<ba-github-handle>
+# /docs/02-design/    @<ba-github-handle>

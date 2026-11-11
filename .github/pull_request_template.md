@@ -4,6 +4,7 @@
 
 - [Task/Bug URL]()
 - [Related PR URL]()
+- Spec PR: #<số PR docs> (PR code bắt buộc; PR spec phải review và merge trước) hoặc `N/A` nếu không có spec đi kèm
 - OpenSpec change: `openspec/changes/<id>` hoặc `openspec/specs/<capability>` (ghi `N/A` nếu chỉ sửa docs, config, asset)
 
 #### Description
@@ -28,7 +29,7 @@
 - [ ] Run correctly as the requirement.
 - [ ] All new and changes have enough test suites.
 - [ ] Mỗi Scenario có một test mang ID `S<epic>.<n>-AC<k>`, test được viết trước và đã thấy fail (RED).
-- [ ] Change đã `/opsx:archive` và `openspec validate --all --strict` pass.
+- [ ] PR spec đã review và merge, mọi task trong `tasks.md` đã tick. Archive do workflow tự mở PR sau khi PR này merge.
 
 ##### Coding:
 

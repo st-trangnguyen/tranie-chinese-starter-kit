@@ -187,14 +187,19 @@ BEM dùng dấu gạch ngang, **không phải BEM truyền thống**:
 
 ## 8. Quy trình làm task
 
-Mỗi story đi theo vòng **Story → OpenSpec change → RED → GREEN → REFACTOR → verify →
-archive**. Chi tiết, định dạng spec và bảng Scenario → tầng test:
+Mỗi story đi qua **ba pha, hai PR**: **Spec** (BA, PR spec) → **Code** (dev, PR code) →
+**Archive** (workflow tự mở PR). Chi tiết, định dạng spec và bảng Scenario → tầng test:
 `docs/05-standards/spec-driven.md`.
 
-1. Xác định layer đích theo bảng §1, **nói ra trước khi code**.
+**Pha A — Spec (nhánh `spec/s<epic>-<n>-<slug>`, chỉ docs, không code):**
+
+1. Xác định layer đích theo bảng §1, **nói ra trước khi viết spec**.
 2. **Propose**: `/opsx:propose s<epic>-<n>-<slug>` tạo `openspec/changes/<id>/`. AC của story
-   chép nguyên văn thành Requirement + Scenario (ID `S<epic>.<n>-AC<k>`). **Dừng chờ người
-   dùng duyệt** trước khi viết bất kỳ code nào.
+   chép nguyên văn thành Requirement + Scenario (ID `S<epic>.<n>-AC<k>`). Mở PR spec
+   (`Spec PR: N/A`) và **dừng chờ review + merge** trước khi viết bất kỳ code nào.
+
+**Pha B — Code (nhánh `feat/s<epic>-<n>-<slug>` cắt từ `main` sau khi PR spec merge):**
+
 3. Tìm code tương tự đã có trong repo và theo đúng pattern đó — nhất quán với
    codebase hiện tại quan trọng hơn áp dụng máy móc ví dụ trong tài liệu.
 4. **RED**: viết test cho một Scenario (tên test chứa ID), chạy, thấy nó fail vì thiếu hành vi.
@@ -203,10 +208,15 @@ archive**. Chi tiết, định dạng spec và bảng Scenario → tầng test:
    từng Scenario. Diff nhỏ, một concern một chỗ.
 6. **REFACTOR** khi đã xanh, rồi self-review theo §0, §2, §7.
 7. Chạy typecheck / lint / test. **Không nói "đã xong" khi chưa chạy và chưa
-   thấy kết quả pass.**
-8. **Archive**: `/opsx:archive`, rồi `pnpm exec openspec validate --all --strict`.
+   thấy kết quả pass.** Tick các task đã làm trong `tasks.md`.
+8. Mở PR code, ghi `Spec PR: #<số PR spec>`. PR code **không merge được** khi PR spec chưa
+   review + merge (check `Spec PR đã merge`). **Không archive trong PR code.**
 
-Việc không có Scenario (docs, config, asset thuần) bỏ qua bước 2, 4, 5 và 8.
+**Pha C — Archive (tự động):** sau khi PR code merge, workflow `archive-spec-workflow.yml` mở PR
+`docs(openspec): archive <id>` nếu mọi task đã tick. Spec sai hoặc thiếu khi đang code: mở PR spec
+mới cho BA duyệt, đừng sửa spec trong PR code.
+
+Việc không có Scenario (docs, config, asset thuần) bỏ qua Pha A, bước 4–5 và Pha C, ghi `Spec PR: N/A`.
 
 ### Lệnh kiểm tra chuẩn
 
