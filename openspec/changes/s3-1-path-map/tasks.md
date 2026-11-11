@@ -37,7 +37,7 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 - [x] 4.4 GREEN: hiện nhãn trạng thái (chữ + icon `aria-hidden`); kiểm: test 4.3 pass
 - [x] 4.5 RED: test S3.1-AC3 "Bấm bài khóa" (vẫn ở `/learning-paths`) và "Bấm bài đang mở" (tới `/lessons/<id>`) dùng `LocationProbe` — `LearningPathContainer.test.tsx`; kiểm: fail
 - [x] 4.6 GREEN: bài mở/xong là `<Link>`, bài khóa không tương tác (không link, nhãn "Đã khóa"; không `aria-disabled` vì không phải control — design D5); kiểm: test 4.5 pass
-- [ ] 4.7 Style BEM cho bản đồ trong `apps/web/src/styles/tailwind/` (JSX chỉ layout/spacing, contrast ≥ 4.5:1, focus thấy được, sáng + tối) — ngoại lệ test-first: CSS thuần; kiểm: xem preview `web-dev` ở 375px sáng/tối
+- [x] 4.7 Style BEM cho bản đồ trong `apps/web/src/styles/tailwind/` (JSX chỉ layout/spacing, contrast ≥ 4.5:1, focus thấy được, sáng + tối) — ngoại lệ test-first: CSS thuần; kiểm: xem preview `web-dev` ở 375px sáng/tối
 
 ## 5. Luồng thật (S3.1-AC1) — e2e
 

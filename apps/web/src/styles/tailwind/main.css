@@ -9,6 +9,7 @@
 @import "./base/_base.css";
 
 @import "./components/_button.css";
+@import "./components/_learning-path.css";
 @import "./components/_onboarding.css";
 @import "./components/_update-banner.css";
 
