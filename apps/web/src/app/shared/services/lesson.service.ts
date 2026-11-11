@@ -1,11 +1,25 @@
-import type { Exercise } from '@csk/shared';
+import type { Exercise, Lesson } from '@csk/shared';
 
 import type { ExerciseResult } from '@shared/models/exercise.model';
 import type { LessonSession } from '@shared/models/lesson-session.model';
+import { ContentService } from './content.service';
+
+export type LessonSource = Pick<ContentService, 'getLesson'>;
+
+export interface OpenedLesson {
+  lesson: Lesson;
+  session: LessonSession;
+}
 
 export class LessonService {
+  constructor(private readonly source: LessonSource = new ContentService()) {}
+
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
-  // Chưa có: phiên làm bài chỉ nằm trong bộ nhớ (S3.3 sẽ lưu vị trí câu).
+  // Phiên làm bài chỉ nằm trong bộ nhớ (S3.3 sẽ lưu vị trí câu).
+
+  private readLesson(lessonId: string): Promise<Lesson> {
+    return this.source.getLesson(lessonId);
+  }
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
@@ -51,4 +65,9 @@ export class LessonService {
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
+
+  async openLesson(lessonId: string): Promise<OpenedLesson> {
+    const lesson = await this.readLesson(lessonId);
+    return { lesson, session: this.startSession(lesson.exercises) };
+  }
 }

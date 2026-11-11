@@ -43,4 +43,12 @@ export class ContentService {
       throw new Error('Không tải được lộ trình học.', { cause: error });
     }
   }
+
+  async getLesson(lessonId: string): Promise<Lesson> {
+    try {
+      return await this.readLesson(lessonId);
+    } catch (error) {
+      throw new Error('Không mở được bài học.', { cause: error });
+    }
+  }
 }
