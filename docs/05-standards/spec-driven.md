@@ -19,18 +19,64 @@ E1 và E2 đã xong trước khi có OpenSpec nên không migrate. Áp dụng t�
 
 ## 2. Vòng làm một story
 
+Mỗi story đi qua **ba pha, hai PR**, mỗi pha có chủ riêng. BA giữ spec, dev giữ code, không ai phải
+chờ ai báo lại.
+
+| Pha | Chủ | PR | Kết thúc khi |
+|---|---|---|---|
+| A. Spec | BA | **PR spec** (nhánh `spec/s<epic>-<n>-<slug>`) | PR spec được review và **merge vào `main`**; change vẫn nằm ở `openspec/changes/` |
+| B. Code | Dev | **PR code** (nhánh `feat/s<epic>-<n>-<slug>`, cắt từ `main` sau pha A) | PR code được review và merge; mọi task trong `tasks.md` đã tick |
+| C. Archive | Workflow | **PR archive** tự mở sau khi PR code merge | PR archive được merge |
+
+### Pha A: Spec (BA)
+
 | # | Bước | Lệnh / việc | Cổng |
 |---|---|---|---|
-| 1 | Chọn story, tạo nhánh `feat/s<epic>-<n>-<slug>` | | |
-| 2 | **Propose** | `/opsx:propose s<epic>-<n>-<slug>` | **Người dùng duyệt** proposal, spec, tasks |
-| 3 | **RED** | Viết test cho một Scenario, chạy, thấy fail đúng lý do. Commit `test(...)` | Phải có output fail |
-| 4 | **GREEN** | `/opsx:apply`: code tối thiểu, đúng layer (CLAUDE.md §1–§3). Commit `feat(...)` | Test pass |
-| 5 | **REFACTOR** | Dọn code, giữ xanh | |
-| 6 | **Verify** | `pnpm typecheck && pnpm lint && pnpm test:run` (+ `content:check`, `e2e` theo CLAUDE.md §8) | Toàn bộ pass |
-| 7 | **Archive** | `/opsx:archive`, rồi `pnpm exec openspec validate --all --strict` | Spec hợp lệ |
-| 8 | PR | Theo template. `Closes #<story>` nếu xong mọi AC, ngược lại `Refs #<story>` | |
+| A1 | Chọn story, tạo nhánh `spec/s<epic>-<n>-<slug>` | | |
+| A2 | **Propose** | `/opsx:propose s<epic>-<n>-<slug>`: proposal, spec, design, tasks | `pnpm exec openspec validate --all --strict` pass |
+| A3 | Mở **PR spec** | Theo template, `Spec PR: N/A`, `Refs #<story>`, Screenshots `N/A` | **Review và merge**; không có code trong PR này |
 
-Lặp bước 3–5 cho từng Scenario, không viết hết test rồi mới code.
+### Pha B: Code (dev)
+
+| # | Bước | Lệnh / việc | Cổng |
+|---|---|---|---|
+| B1 | Cắt nhánh `feat/s<epic>-<n>-<slug>` từ `main` đã có spec | | PR spec đã merge |
+| B2 | **RED** | Viết test cho một Scenario, chạy, thấy fail đúng lý do. Commit `test(...)` | Phải có output fail |
+| B3 | **GREEN** | `/opsx:apply`: code tối thiểu, đúng layer (CLAUDE.md §1–§3). Commit `feat(...)` | Test pass |
+| B4 | **REFACTOR** | Dọn code, giữ xanh | |
+| B5 | **Verify** | `pnpm typecheck && pnpm lint && pnpm test:run` (+ `content:check`, `e2e` theo CLAUDE.md §8) | Toàn bộ pass |
+| B6 | Mở **PR code** | Theo template, ghi `Spec PR: #<số PR spec>`. `Closes #<story>` nếu xong mọi AC, ngược lại `Refs #<story>` | Cổng spec (bên dưới) xanh |
+
+Lặp B2–B4 cho từng Scenario, không viết hết test rồi mới code. **Không archive trong PR code.**
+
+### Pha C: Archive (tự động)
+
+Khi PR code merge vào `main`, workflow `archive-spec-workflow.yml` lấy id change từ dòng
+`OpenSpec change:` của PR, và nếu mọi task đã tick thì chạy `openspec archive`, `openspec validate
+--all --strict`, rồi mở PR `docs(openspec): archive <id>`. Còn task chưa tick nghĩa là story làm nhiều
+PR code, workflow bỏ qua và chờ PR cuối. Cần chạy lại thủ công thì dùng `workflow_dispatch` với id change.
+
+PR archive chỉ đổi `openspec/`, cần review nhanh rồi merge. Nếu PR archive không tự chạy CI thì
+cấu hình secret `ARCHIVE_PR_TOKEN` (PR tạo bằng `GITHUB_TOKEN` không kích hoạt workflow khác).
+
+### Cổng spec
+
+PR code **bắt buộc** có dòng `Spec PR: #<số>` ở mục References, và PR đó phải ở trạng thái **merged**.
+Check `Spec PR đã merge` (`spec-gate-workflow.yml`) fail nếu thiếu dòng, số PR sai, hoặc PR spec chưa
+merge. Khi PR spec merge, workflow tự chạy lại check cho các PR code đang chờ. Dùng `Spec PR: N/A`
+cho PR không có spec đi kèm (docs, config, asset thuần) và cho chính PR spec và PR archive.
+
+PR spec chỉ merge được sau khi được duyệt, nên "merged" đồng nghĩa "đã review". Để cổng chặn thật,
+repo cần bật branch protection cho `main`: bắt buộc approval, và đặt check `Spec PR đã merge` làm required.
+Phần này cấu hình trong Settings, không nằm trong file.
+
+### Spec sai hoặc thiếu khi đang code
+
+Dev không sửa spec trong PR code. Mở PR spec mới (`spec/s<epic>-<n>-<slug>-fix`) cho BA duyệt, merge,
+rồi rebase nhánh code. PR code trỏ lại số PR spec mới nhất trong dòng `Spec PR:` nếu thay đổi đó là
+điều kiện để code.
+
+CODEOWNERS nên gán `openspec/` cho BA và phần còn lại cho dev, để mỗi PR tự xin đúng người review.
 
 ## 3. Viết spec
 

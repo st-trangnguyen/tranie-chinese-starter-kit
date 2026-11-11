@@ -1,0 +1,104 @@
+# Cổng spec: PR code chỉ merge được khi PR docs (spec) mà nó trỏ tới đã được review và merge.
+# Quy trình: docs/05-standards/spec-driven.md §2.
+#
+# PR code ghi một dòng ở mục References của template:
+#   - Spec PR: #<số>   → PR docs phải ở trạng thái merged
+#   - Spec PR: N/A     → PR không có spec đi kèm (docs, config, asset, hoặc chính PR spec)
+#
+# Để cổng này thực sự chặn merge: bật branch protection cho `main`, đặt check "Spec PR đã merge"
+# làm required và bắt buộc approval (Settings → Branches). PR docs chỉ merge được sau khi BA duyệt,
+# nên "merged" đồng nghĩa "đã review".
+name: Spec gate
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  # Khi PR spec merge, chạy lại cổng cho các PR code đang chờ nó.
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: write
+
+jobs:
+  check:
+    name: Spec PR đã merge
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Kiểm tra PR spec đã merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_REF: ${{ github.head_ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+
+          # PR spec (nhánh spec/*) là chính nơi spec được duyệt, không cần cổng này.
+          if [[ "$HEAD_REF" == spec/* ]]; then
+            echo "PR spec, bỏ qua cổng."
+            exit 0
+          fi
+
+          line=$(printf '%s\n' "$PR_BODY" | grep -iE '^[[:space:]-]*Spec PR:' | head -n 1 || true)
+          if [[ -z "$line" ]]; then
+            echo "::error::Thiếu dòng 'Spec PR: #<số>' hoặc 'Spec PR: N/A' ở mục References của PR."
+            exit 1
+          fi
+
+          if printf '%s' "$line" | grep -qiE 'N/A'; then
+            echo "Spec PR: N/A, không cần PR spec."
+            exit 0
+          fi
+
+          spec_pr=$(printf '%s' "$line" | grep -oE '#[0-9]+' | head -n 1 | tr -d '#' || true)
+          if [[ -z "$spec_pr" ]]; then
+            echo "::error::Dòng Spec PR không có số PR hợp lệ (dạng '#123')."
+            exit 1
+          fi
+          if [[ "$spec_pr" == "$PR_NUMBER" ]]; then
+            echo "::error::Spec PR không được trỏ tới chính PR này."
+            exit 1
+          fi
+
+          merged=$(gh api "repos/$REPO/pulls/$spec_pr" --jq '.merged')
+          if [[ "$merged" != "true" ]]; then
+            echo "::error::PR spec #$spec_pr chưa được review và merge. PR code chưa được merge."
+            exit 1
+          fi
+          echo "PR spec #$spec_pr đã merge."
+
+  rerun-waiting-code-prs:
+    name: Chạy lại cổng cho PR code đang chờ
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'spec/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Chỉ dùng số PR và API của GitHub, không checkout hay chạy code từ nhánh PR.
+      - name: Chạy lại check của các PR code trỏ tới PR spec vừa merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SPEC_PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          gh pr list --repo "$REPO" --state open --json number,body,headRefOid --limit 100 \
+            --jq ".[] | select(.body | test(\"Spec PR:[[:space:]]*#$SPEC_PR([^0-9]|\$)\"; \"i\")) | [.number, .headRefOid] | @tsv" |
+          while IFS=$'\t' read -r number sha; do
+            echo "PR code #$number chờ spec #$SPEC_PR, chạy lại cổng."
+            run_id=$(gh run list --repo "$REPO" --workflow "Spec gate" --commit "$sha" \
+              --json databaseId --jq '.[0].databaseId // empty')
+            if [[ -n "$run_id" ]]; then
+              gh run rerun "$run_id" --repo "$REPO"
+            else
+              echo "::warning::Không thấy lần chạy cổng nào cho PR #$number, hãy chạy lại thủ công."
+            fi
+          done
