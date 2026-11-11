@@ -25,16 +25,16 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 
 ## 4. Khung chạy bài (S3.2-AC1, AC2, AC3) — `pages/lesson`
 
-- [ ] 4.1 RED: test `LessonRunner` chọn component theo `kind` từ registry truyền qua props (dạng bài giả) — Vitest + Testing Library (`src/test/render.tsx`), `apps/web/src/app/pages/lesson/components/LessonRunner.test.tsx`; kiểm: fail vì chưa có component
-- [ ] 4.2 GREEN: thêm `LessonRunner`, `LessonProgressBar` (`role="progressbar"`, chữ "Câu k / n"), `LessonFeedback`, `LessonFinished` (tạm); kiểm: test 4.1 pass
-- [ ] 4.3 RED: test S3.2-AC1 "Bài mở ra ở câu đầu tiên", "Sang câu kế thì thanh tiến độ tăng", "Làm xong câu cuối", "Không mở được bài" — `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.test.tsx`, nguồn nội dung giả ở ranh giới `fetch`, registry giả; kiểm: fail vì chưa có container
-- [ ] 4.4 GREEN: thêm `useLessonRunner` (`useState<LessonSession>`, gọi `LessonService`), `LessonRunnerContainer`, gom vào `lesson.routes.ts` thay `LessonPlaceholder`, i18n `assets/i18n/vi/lesson.json`; kiểm: test 4.3 pass
-- [ ] 4.5 RED: test S3.2-AC2 "Trả lời đúng được báo ngay", "Trả lời sai được báo ngay", "Chưa trả lời thì chưa có kết quả" — `LessonRunnerContainer.test.tsx`; kiểm: fail
-- [ ] 4.6 GREEN: hiện `LessonFeedback` khi phase `feedback` (chữ + biểu tượng `aria-hidden`, `role="status"`, focus vào "Tiếp tục"); kiểm: test 4.5 pass
-- [ ] 4.7 RED: test S3.2-AC3 "Trả lời sai hiện giải thích", "Chưa bấm Tiếp tục thì chưa sang câu sau", "Trả lời đúng thì không có giải thích" — `LessonRunnerContainer.test.tsx`; kiểm: fail
-- [ ] 4.8 GREEN: hiện giải thích theo `shouldShowExplanation`, chặn sang câu kế tới khi bấm "Tiếp tục"; kiểm: test 4.7 pass
-- [ ] 4.9 Style BEM cho khung chạy bài trong `apps/web/src/styles/tailwind/` (JSX chỉ layout/spacing, contrast ≥ 4.5:1, focus thấy được, sáng + tối, `prefers-reduced-motion`) — ngoại lệ test-first: CSS thuần; kiểm: xem preview `web-dev` ở 375px sáng/tối
-- [ ] 4.10 Xoá `LessonPlaceholder` + test + i18n `placeholder.*`; sửa các test cũ còn chờ chữ của màn giữ chỗ (`OnboardingContainer.test.tsx`, `e2e/E1/s1.2-offline.spec.ts`, `e2e/E1/s1.3-onboarding.spec.ts`) nếu có; kiểm: `pnpm test:run` và `pnpm e2e` (E1) pass
+- [x] 4.1 RED: test `LessonRunner` chọn component theo `kind` từ registry truyền qua props (dạng bài giả) — Vitest + Testing Library (`src/test/render.tsx`), `apps/web/src/app/pages/lesson/components/LessonRunner.test.tsx`; kiểm: fail vì chưa có component
+- [x] 4.2 GREEN: thêm `LessonRunner`, `LessonProgressBar` (`role="progressbar"`, chữ "Câu k / n"), `LessonFeedback`, `LessonFinished` (tạm); kiểm: test 4.1 pass
+- [x] 4.3 RED: test S3.2-AC1 "Bài mở ra ở câu đầu tiên", "Sang câu kế thì thanh tiến độ tăng", "Làm xong câu cuối", "Không mở được bài" — `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.test.tsx`, nguồn nội dung giả ở ranh giới `fetch`, registry giả; kiểm: fail vì chưa có container
+- [x] 4.4 GREEN: thêm `useLessonRunner` (`useState<LessonSession>`, gọi `LessonService`), `LessonRunnerContainer`, gom vào `lesson.routes.ts` thay `LessonPlaceholder`, i18n `assets/i18n/vi/lesson.json`; kiểm: test 4.3 pass
+- [x] 4.5 RED: test S3.2-AC2 "Trả lời đúng được báo ngay", "Trả lời sai được báo ngay", "Chưa trả lời thì chưa có kết quả" — `LessonRunnerContainer.test.tsx`; kiểm: fail
+- [x] 4.6 GREEN: hiện `LessonFeedback` khi phase `feedback` (chữ + biểu tượng `aria-hidden`, `role="status"`, focus vào "Tiếp tục"); kiểm: test 4.5 pass
+- [x] 4.7 RED: test S3.2-AC3 "Trả lời sai hiện giải thích", "Chưa bấm Tiếp tục thì chưa sang câu sau", "Trả lời đúng thì không có giải thích" — `LessonRunnerContainer.test.tsx`; kiểm: fail
+- [x] 4.8 GREEN: hiện giải thích theo `shouldShowExplanation`, chặn sang câu kế tới khi bấm "Tiếp tục"; kiểm: test 4.7 pass
+- [x] 4.9 Style BEM cho khung chạy bài trong `apps/web/src/styles/tailwind/` (JSX chỉ layout/spacing, contrast ≥ 4.5:1, focus thấy được, sáng + tối, `prefers-reduced-motion`) — ngoại lệ test-first: CSS thuần; kiểm: xem preview `web-dev` ở 375px sáng/tối
+- [x] 4.10 Xoá `LessonPlaceholder` + test + i18n `placeholder.*`; sửa các test cũ còn chờ chữ của màn giữ chỗ (`OnboardingContainer.test.tsx`, `e2e/E1/s1.2-offline.spec.ts`, `e2e/E1/s1.3-onboarding.spec.ts`) nếu có; kiểm: `pnpm test:run` và `pnpm e2e` (E1) pass
 
 ## 5. Kiểm tra
 

@@ -45,15 +45,6 @@
     @apply text-body-sm text-fg-muted;
   }
 
-  .lesson-placeholder-title {
-    @apply text-title text-fg;
-  }
-
-  .lesson-placeholder-text,
-  .app-error-title {
-    @apply text-body text-fg-muted;
-  }
-
   .app-error-title {
     @apply text-title text-fg;
   }

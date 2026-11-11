@@ -73,7 +73,9 @@ describe('LessonRunnerContainer', () => {
   it('S3.2-AC1: should report the lesson finished after the last exercise', async () => {
     const { user } = renderRunner();
     for (let step = 0; step < 3; step += 1) {
-      await user.click(await screen.findByRole('button', { name: 'Chọn đúng' }));
+      await user.click(
+        await screen.findByRole('button', { name: 'Chọn đúng' }),
+      );
       await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
     }
 
