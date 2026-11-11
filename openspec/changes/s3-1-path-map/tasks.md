@@ -49,8 +49,8 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 - [x] 6.0 Cập nhật `docs/03-architecture.md` (cây thư mục `pages/learning-path`, i18n `learning-path.json`, ghi quy ước route RESTful) — ngoại lệ test-first: docs thuần; kiểm: đọc lại diff
 
 - [x] 6.1 Refactor + self-review theo CLAUDE.md §0, §2, §7 (không `any`, dependency một chiều, file < 300 dòng); kiểm: `pnpm lint` sạch
-- [ ] 6.2 Chạy `pnpm typecheck && pnpm lint && pnpm test:run && pnpm e2e` và ghi kết quả thật; kiểm: toàn bộ pass
-- [ ] 6.3 Chụp screenshot màn `/learning-paths` mobile 375px sáng và tối cho PR; kiểm: có file ảnh
+- [x] 6.2 Chạy `pnpm typecheck && pnpm lint && pnpm test:run && pnpm e2e` và ghi kết quả thật; kiểm: toàn bộ pass
+- [x] 6.3 Chụp screenshot màn `/learning-paths` mobile 375px sáng và tối cho PR; kiểm: có file ảnh
 
 ## Workflow follow-up
 
