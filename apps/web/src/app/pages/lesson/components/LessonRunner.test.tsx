@@ -20,6 +20,7 @@ const session = (currentIndex: number): LessonSession => ({
   currentIndex,
   phase: 'answering',
   lastResult: null,
+  skippedCount: 0,
 });
 
 describe('LessonRunner', () => {

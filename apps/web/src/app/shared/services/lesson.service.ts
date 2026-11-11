@@ -30,6 +30,7 @@ export class LessonService {
       currentIndex: 0,
       phase: 'answering',
       lastResult: null,
+      skippedCount: 0,
     };
   }
 
@@ -59,9 +60,16 @@ export class LessonService {
     };
   }
 
-  // Rule: câu có dạng bài chưa được hỗ trợ thì được bỏ qua, không có kết quả đúng/sai.
+  // Rule: câu có dạng bài chưa được hỗ trợ thì được bỏ qua (có đếm), không có kết quả đúng/sai.
   skip(session: LessonSession): LessonSession {
-    return this.advance({ ...session, phase: 'feedback' });
+    if (session.phase !== 'answering') {
+      return session;
+    }
+    return this.advance({
+      ...session,
+      phase: 'feedback',
+      skippedCount: session.skippedCount + 1,
+    });
   }
 
   // Rule: chỉ giải thích khi trả lời sai; câu đúng không cần giải thích.

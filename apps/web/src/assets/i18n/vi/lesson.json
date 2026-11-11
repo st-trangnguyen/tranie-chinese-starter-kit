@@ -11,5 +11,6 @@
     "message": "Dạng bài này chưa có.",
     "skip": "Bỏ qua câu này"
   },
-  "finished": "Bạn đã làm xong các câu của bài này."
+  "finished": "Bạn đã làm xong các câu của bài này.",
+  "finishedWithSkipped": "Bạn đã bỏ qua {{count}} câu vì dạng bài chưa có, bài chưa hoàn thành."
 }

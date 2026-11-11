@@ -40,7 +40,11 @@ const LessonRunnerContainer = ({
       )}
       {!lesson && !hasError && <p>{t('loading')}</p>}
       {session?.phase === 'finished' && (
-        <p className="lesson-finished">{t('finished')}</p>
+        <p className="lesson-finished">
+          {session.skippedCount > 0
+            ? t('finishedWithSkipped', { count: session.skippedCount })
+            : t('finished')}
+        </p>
       )}
       {session && session.phase !== 'finished' && exercise && (
         <LessonRunner

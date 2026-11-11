@@ -9,4 +9,6 @@ export interface LessonSession {
   phase: LessonPhase;
   /** Có khi `phase` là 'feedback'. */
   lastResult: ExerciseResult | null;
+  /** Số câu đã bỏ qua vì dạng bài chưa được hỗ trợ. */
+  skippedCount: number;
 }
