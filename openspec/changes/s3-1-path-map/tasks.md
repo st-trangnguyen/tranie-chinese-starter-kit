@@ -24,8 +24,8 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 
 ## 3. Nạp nội dung lộ trình (S3.1-AC1) — `core/services` + `shared/services`
 
-- [ ] 3.1 RED: test S3.1-AC1 "Bản đồ giữ đúng thứ tự giai đoạn, nhóm và bài" cho `ContentService.getPathMap()` với `ContentSource` giả (2 giai đoạn, nhiều nhóm, tiêu đề lấy từ bài) — `apps/web/src/app/shared/services/content.service.test.ts`; kiểm: fail vì chưa có service
-- [ ] 3.2 GREEN: thêm `core/services/content-source.service.ts` (interface `ContentSource` + bản `fetch`, parse bằng `contentRootSchema`/`lessonSchema`) và `shared/services/content.service.ts` (3 phần); kiểm: test 3.1 pass
+- [x] 3.1 RED: test S3.1-AC1 "Bản đồ giữ đúng thứ tự giai đoạn, nhóm và bài" cho `ContentService.getPathMap()` với `ContentSource` giả (2 giai đoạn, nhiều nhóm, tiêu đề lấy từ bài) — `apps/web/src/app/shared/services/content.service.test.ts`; kiểm: fail vì chưa có service
+- [x] 3.2 GREEN: thêm `core/services/content-source.service.ts` (interface `ContentSource` + bản `fetch`, parse bằng `contentRootSchema`/`lessonSchema`) và `shared/services/content.service.ts` (3 phần); kiểm: test 3.1 pass
 - [ ] 3.3 RED: test bản `fetch` của `ContentSource` báo lỗi rõ nghĩa khi JSON sai schema — `apps/web/src/app/core/services/content-source.service.test.ts` (mock `fetch` ở ranh giới); kiểm: fail
 - [ ] 3.4 GREEN: xử lý lỗi validate/HTTP trong `ContentSource`; kiểm: test 3.3 pass
 
