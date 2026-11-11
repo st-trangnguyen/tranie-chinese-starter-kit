@@ -46,4 +46,42 @@ describe('LessonService — quy tắc phiên làm bài', () => {
 
     expect(session.phase).toBe('finished');
   });
+
+  it('S3.2-AC2: should show no result before the learner answers', () => {
+    const session = service.startSession(EXERCISES);
+
+    expect(session.phase).toBe('answering');
+    expect(session.lastResult).toBeNull();
+  });
+
+  it.each([
+    ['correct', true],
+    ['incorrect', false],
+  ])('S3.2-AC2: should grade a %s answer immediately', (_label, isCorrect) => {
+    const session = service.submitResult(service.startSession(EXERCISES), {
+      isCorrect,
+    });
+
+    expect(session).toMatchObject({
+      currentIndex: 0,
+      phase: 'feedback',
+      lastResult: { isCorrect },
+    });
+  });
+
+  it('S3.2-AC2: should ignore a second answer to the same exercise', () => {
+    const graded = service.submitResult(service.startSession(EXERCISES), {
+      isCorrect: false,
+    });
+
+    const again = service.submitResult(graded, { isCorrect: true });
+
+    expect(again).toEqual(graded);
+  });
+
+  it('S3.2-AC3: should not advance before the learner has seen the feedback', () => {
+    const session = service.startSession(EXERCISES);
+
+    expect(service.advance(session)).toEqual(session);
+  });
 });
