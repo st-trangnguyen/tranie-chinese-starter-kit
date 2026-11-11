@@ -26,6 +26,13 @@ rules:
     - Copy each story AC verbatim into one Requirement with one or more Scenarios (WHEN/THEN).
     - Prefix every Scenario name with its ID, e.g. "S3.1-AC2".
     - Every Scenario MUST be verifiable by an automated test. If it cannot be tested, rewrite it.
+    - Write for BA/QA readers. Requirements and Scenarios use only what the learner sees - screens,
+      buttons, labels, outcomes. No routes, field/store/function names, internal codes (F5...),
+      or library names.
+    - A rule with several cases goes in a table inside the Requirement. The sentence before the
+      table still carries SHALL/MUST.
+    - Technical detail belongs in design.md or in the test. If a Scenario contains a backtick,
+      ask whether BA/QA need to know it. See docs/05-standards/spec-driven.md section 3.
   tasks:
     - Order tasks test-first. For each Scenario write a task pair - "RED: write failing test
       for <ID>" followed by "GREEN: implement <ID>".
