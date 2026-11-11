@@ -12,6 +12,7 @@ const LearningPathContainer = () => {
   const renderLesson = (lessonId: string) => (
     <LearningPathLessonItem
       key={lessonId}
+      lessonId={lessonId}
       title={pathMap?.lessonTitles.get(lessonId) ?? lessonId}
       status={statuses.get(lessonId) ?? 'locked'}
     />

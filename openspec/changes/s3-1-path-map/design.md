@@ -68,8 +68,9 @@ Duỗi `stages → units → lessonIds` theo thứ tự; bài `i` là `completed
 - `useLearningPath` gọi `ContentService.getPathMap()` và `ProgressService.getCompletedLessonIds()`, rồi
   `ProgressService.deriveLessonStatuses(...)`; trả `{ stages, statuses, isLoading, error }`.
 - Component: `LearningPathStage` (giai đoạn + nhóm), `LearningPathLessonItem` (một bài). Bài `open`/`completed` là
-  `<Link>` tới `ROUTE_PATHS.lesson(id)`; bài `locked` là phần tử không tương tác với
-  `aria-disabled="true"` và nhãn "Đã khóa" — không có handler nên bấm không chuyển màn (AC3).
+  `<Link>` tới `ROUTE_PATHS.lesson(id)`; bài `locked` là phần tử không tương tác (không link, không
+  handler) kèm nhãn chữ "Đã khóa" — bấm không chuyển màn (AC3). Không dùng `aria-disabled` vì phần tử
+  không phải control; trạng thái đã được đọc qua nhãn chữ.
 - Nhãn trạng thái là chữ (i18n namespace `learning-path`), kèm biểu tượng trang trí `aria-hidden` (WCAG: không chỉ dùng màu).
 - Style: BEM trong `apps/web/src/styles/tailwind/` (`.learning-path-lesson`, `.learning-path-lesson.is-locked`…), JSX chỉ layout/spacing (CLAUDE.md §6).
 
