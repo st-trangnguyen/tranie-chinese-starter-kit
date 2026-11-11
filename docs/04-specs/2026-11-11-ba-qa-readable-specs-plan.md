@@ -25,7 +25,7 @@
 2. Đổi tên Requirement thứ hai: phải dùng `RENAMED` rồi `MODIFIED`, nếu không archive tạo requirement trùng.
 3. Scenario e2e "mở bản đồ": test thật mở thẳng URL, nên WHEN viết "mở màn Lộ trình", **không** viết "từ menu" (sai với test, và là hành vi chưa có).
 4. Bỏ chi tiết kỹ thuật không được làm mất điều kiện: scenario "dữ liệu hỏng" vẫn phải còn, chỉ đổi cách nói.
-5. `grep -rn "S3.1-AC" apps` vẫn ra đủ 12 test như trước.
+5. `grep -rn "S3.1-AC" apps` vẫn ra đủ 13 test như trước.
 
 ---
 
@@ -82,7 +82,7 @@
 **Interfaces:**
 - Consumes: change đã duyệt ở Task 2.
 
-- [ ] **Step 1: Kiểm tra không đụng code** — `pnpm typecheck && pnpm lint && pnpm test:run`. Expected: pass; `grep -rn "S3.1-AC" apps | wc -l` ra 12 như trước.
+- [ ] **Step 1: Kiểm tra không đụng code** — `pnpm typecheck && pnpm lint && pnpm test:run`. Expected: pass; `grep -rn "S3.1-AC" apps | wc -l` ra 13 như trước.
 - [ ] **Step 2: Mở PR** theo `.github/pull_request_template.md`; mục Screenshots ghi `N/A` (không liên quan UI), xoá dòng placeholder `> …`. Chờ review.
 - [ ] **Step 3: Sau review, `/opsx:archive`.** Kiểm tra `openspec/specs/learning-path/spec.md` đã có bảng trạng thái, không còn `F5`, `/learning-paths`, `/lessons/<id`: `grep -nE "F5|/learning-paths|/lessons/" openspec/specs/learning-path/spec.md`. Expected: không có kết quả.
 - [ ] **Step 4: `pnpm exec openspec validate --all --strict`.** Expected: pass.
