@@ -8,8 +8,15 @@ export interface SettingRow {
   value: unknown;
 }
 
+/** Một dòng của bảng `lessonProgress`: chưa tin cậy, validate khi đọc. */
+export interface LessonProgressRow {
+  lessonId: string;
+  [field: string]: unknown;
+}
+
 export type AppDatabase = Dexie & {
   settings: EntityTable<SettingRow, 'key'>;
+  lessonProgress: EntityTable<LessonProgressRow, 'lessonId'>;
 };
 
 /**
@@ -21,6 +28,10 @@ export const createDatabase = (name: string = DB_NAME): AppDatabase => {
 
   db.version(1).stores({
     settings: 'key',
+  });
+  db.version(2).stores({
+    settings: 'key',
+    lessonProgress: 'lessonId',
   });
 
   return db;

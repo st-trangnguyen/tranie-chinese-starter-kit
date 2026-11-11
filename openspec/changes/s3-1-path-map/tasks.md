@@ -17,8 +17,8 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 
 - [x] 2.1 RED: test `lessonProgressSchema` (hợp lệ / sai status / thiếu lessonId) — `packages/shared/src/progress.schema.test.ts`; kiểm: fail vì chưa có schema
 - [x] 2.2 GREEN: thêm `lessonProgressSchema`, `LessonProgress`, export từ `@csk/shared`; kiểm: test 2.1 pass
-- [ ] 2.3 RED: test S3.1-AC2 "Tiến độ lưu bị hỏng không làm sai trạng thái" cho `getAllLessonProgress` (dòng hỏng bị bỏ qua) và nâng DB v1 → v2 giữ nguyên `settings` — Vitest + `fake-indexeddb`, `apps/web/src/app/core/services/progress-store.service.test.ts`; kiểm: fail vì thiếu bảng/method
-- [ ] 2.4 GREEN: Dexie `version(2)` thêm `lessonProgress: 'lessonId'` trong `core/helpers/db.helper.ts` (không sửa version 1); thêm `getAllLessonProgress` vào `ProgressStore` + `DexieProgressStore`; kiểm: test 2.3 pass
+- [x] 2.3 RED: test S3.1-AC2 "Tiến độ lưu bị hỏng không làm sai trạng thái" cho `getAllLessonProgress` (dòng hỏng bị bỏ qua) và nâng DB v1 → v2 giữ nguyên `settings` — Vitest + `fake-indexeddb`, `apps/web/src/app/core/services/progress-store.service.test.ts`; kiểm: fail vì thiếu bảng/method
+- [x] 2.4 GREEN: Dexie `version(2)` thêm `lessonProgress: 'lessonId'` trong `core/helpers/db.helper.ts` (không sửa version 1); thêm `getAllLessonProgress` vào `ProgressStore` + `DexieProgressStore`; kiểm: test 2.3 pass
 - [ ] 2.5 RED: test use case `getCompletedLessonIds()` với store giả (chỉ lấy `status: 'completed'`) — `progress.service.test.ts`; kiểm: fail vì thiếu method
 - [ ] 2.6 GREEN: thêm Phần 1 `readAllLessonProgress` + Phần 3 `getCompletedLessonIds` vào `ProgressService`; kiểm: test 2.5 pass
 

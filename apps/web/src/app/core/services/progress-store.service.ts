@@ -1,4 +1,9 @@
-import { parseSettings, type Settings } from '@csk/shared';
+import {
+  lessonProgressSchema,
+  parseSettings,
+  type LessonProgress,
+  type Settings,
+} from '@csk/shared';
 
 import { createDatabase, type AppDatabase } from '@core/helpers/db.helper';
 
@@ -9,6 +14,8 @@ import { createDatabase, type AppDatabase } from '@core/helpers/db.helper';
 export interface ProgressStore {
   getSettings(): Promise<Settings>;
   saveSettings(settings: Settings): Promise<void>;
+  /** Mọi tiến độ bài hợp lệ; dòng hỏng bị bỏ qua (S3.1 AC2). */
+  getAllLessonProgress(): Promise<LessonProgress[]>;
 }
 
 export class DexieProgressStore implements ProgressStore {
@@ -26,6 +33,14 @@ export class DexieProgressStore implements ProgressStore {
       value,
     }));
     await this.db.settings.bulkPut(rows);
+  }
+
+  async getAllLessonProgress(): Promise<LessonProgress[]> {
+    const rows = await this.db.lessonProgress.toArray();
+    return rows.flatMap((row) => {
+      const result = lessonProgressSchema.safeParse(row);
+      return result.success ? [result.data] : [];
+    });
   }
 }
 
