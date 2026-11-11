@@ -33,14 +33,14 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 - [x] 4.6 GREEN: hiện `LessonFeedback` khi phase `feedback` (chữ + biểu tượng `aria-hidden`, `role="status"`, focus vào "Tiếp tục"); kiểm: test 4.5 pass
 - [x] 4.7 RED: test S3.2-AC3 "Trả lời sai hiện giải thích", "Chưa bấm Tiếp tục thì chưa sang câu sau", "Trả lời đúng thì không có giải thích" — `LessonRunnerContainer.test.tsx`; kiểm: fail
 - [x] 4.8 GREEN: hiện giải thích theo `shouldShowExplanation`, chặn sang câu kế tới khi bấm "Tiếp tục"; kiểm: test 4.7 pass
-- [x] 4.9 Style BEM cho khung chạy bài trong `apps/web/src/styles/tailwind/` (JSX chỉ layout/spacing, contrast ≥ 4.5:1, focus thấy được, sáng + tối, `prefers-reduced-motion`) — ngoại lệ test-first: CSS thuần; kiểm: xem preview `web-dev` ở 375px sáng/tối
+- [ ] 4.9 Style BEM cho khung chạy bài trong `apps/web/src/styles/tailwind/` (JSX chỉ layout/spacing, contrast ≥ 4.5:1, focus thấy được, sáng + tối, `prefers-reduced-motion`) — ngoại lệ test-first: CSS thuần; kiểm: xem preview `web-dev` ở 375px sáng/tối
 - [x] 4.10 Xoá `LessonPlaceholder` + test + i18n `placeholder.*`; sửa các test cũ còn chờ chữ của màn giữ chỗ (`OnboardingContainer.test.tsx`, `e2e/E1/s1.2-offline.spec.ts`, `e2e/E1/s1.3-onboarding.spec.ts`) nếu có; kiểm: `pnpm test:run` và `pnpm e2e` (E1) pass
 
 ## 5. Kiểm tra
 
-- [ ] 5.0 Cập nhật `docs/03-architecture.md` (hợp đồng `ExerciseResult`, registry rỗng cho tới E4–E6, `LessonService`) — ngoại lệ test-first: docs thuần; kiểm: đọc lại diff
-- [ ] 5.1 Refactor + self-review theo CLAUDE.md §0, §2, §7 (không `any`, dependency một chiều, file < 300 dòng); kiểm: `pnpm lint` sạch
-- [ ] 5.2 Chạy `pnpm typecheck && pnpm lint && pnpm test:run && pnpm e2e` và ghi kết quả thật; kiểm: toàn bộ pass
+- [x] 5.0 Cập nhật `docs/03-architecture.md` (hợp đồng `ExerciseResult`, registry rỗng cho tới E4–E6, `LessonService`) — ngoại lệ test-first: docs thuần; kiểm: đọc lại diff
+- [x] 5.1 Refactor + self-review theo CLAUDE.md §0, §2, §7 (không `any`, dependency một chiều, file < 300 dòng); kiểm: `pnpm lint` sạch
+- [x] 5.2 Chạy `pnpm typecheck && pnpm lint && pnpm test:run && pnpm e2e` và ghi kết quả thật; kiểm: toàn bộ pass
 - [ ] 5.3 Chụp screenshot màn chạy bài (đang làm, đúng, sai kèm giải thích) mobile 375×812 và desktop 1280×800, sáng và tối cho PR; kiểm: có file ảnh
 
 ## Workflow follow-up

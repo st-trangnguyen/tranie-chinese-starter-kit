@@ -264,6 +264,10 @@ type ExerciseProps<K extends ExerciseKind> = {
 
 Lesson runner, màn ôn tập và màn luyện tự do chỉ làm việc qua `exercise.registry.ts` (map từ `kind` sang component), không cần biết bên trong từng dạng bài.
 
+- `ExerciseResult = { isCorrect: boolean; explanation?: string }`. Component dạng bài tự soạn `explanation` từ từ/câu của nó; runner chỉ hiện khi trả lời sai (`LessonService.shouldShowExplanation`).
+- `exerciseRegistry` là `Partial<Record<kind, component>>`, rỗng cho tới khi E4–E6 đăng ký. `kind` chưa đăng ký thì runner hiện "Dạng bài này chưa có" kèm nút bỏ qua.
+- `LessonService` (`shared/services`) giữ quy tắc phiên làm bài (`LessonSession`: câu hiện tại, pha `answering`/`feedback`/`finished`); `useLessonRunner` chỉ giữ state và gọi service.
+
 ## 7. PWA & cache
 
 | Tài nguyên | Chiến lược |
