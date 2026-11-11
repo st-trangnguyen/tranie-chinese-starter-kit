@@ -1,6 +1,7 @@
 import {
   DAILY_GOAL_OPTIONS,
   type DailyGoalMinutes,
+  type LessonProgress,
   type LessonStatus,
   type Settings,
   type Stage,
@@ -22,6 +23,10 @@ export class ProgressService {
 
   private writeSettings(settings: Settings): Promise<void> {
     return this.store.saveSettings(settings);
+  }
+
+  private readAllLessonProgress(): Promise<LessonProgress[]> {
+    return this.store.getAllLessonProgress();
   }
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
@@ -77,5 +82,14 @@ export class ProgressService {
       dailyGoalMinutes: minutes,
       hasCompletedOnboarding: true,
     });
+  }
+
+  async getCompletedLessonIds(): Promise<Set<string>> {
+    const progress = await this.readAllLessonProgress();
+    return new Set(
+      progress
+        .filter((lesson) => lesson.status === 'completed')
+        .map((lesson) => lesson.lessonId),
+    );
   }
 }
