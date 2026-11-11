@@ -53,6 +53,36 @@ Quy tắc:
 - Heading cấu trúc và `SHALL`/`MUST` giữ tiếng Anh, nội dung tiếng Việt.
 - Proposal ghi layer đích theo CLAUDE.md §1 và những gì **không** làm.
 
+### Viết cho BA/QA
+
+Spec là tài liệu BA/QA đọc để biết app *làm gì*. Chỉ dùng thứ người học nhìn thấy: màn hình, nút,
+nhãn, kết quả. Route, tên field/store/hàm, mã nội bộ, tên thư viện để ở `design.md` hoặc trong test.
+
+Quy tắc có nhiều trường hợp thì viết thành bảng, câu mở đầu vẫn chứa `SHALL`/`MUST`:
+
+```markdown
+### Requirement: Mỗi bài có đúng một trạng thái
+Hệ thống SHALL hiện cho mỗi bài một trong ba trạng thái, bằng chữ chứ không chỉ bằng màu:
+
+| Trạng thái | Nhãn hiện ra | Khi nào |
+|---|---|---|
+| Đã xong | "Đã xong" | Người học đã hoàn thành bài |
+| Đang mở | "Đang mở" | Bài đầu tiên của lộ trình, hoặc bài ngay sau một bài đã xong |
+| Khóa | "Đã khóa" | Các bài còn lại |
+```
+
+| Trước | Sau |
+|---|---|
+| THEN app chuyển tới route `/lessons/<id bài>` | THEN người học vào màn học của bài đó |
+| WHEN dữ liệu tiến độ đã lưu không hợp lệ | WHEN kết quả học đã lưu của một bài không đọc được |
+| WHEN mở route `/learning-paths` | WHEN người học mở màn Lộ trình |
+
+Tự kiểm trước khi gửi duyệt:
+- Requirement/Scenario còn route, tên field, tên store, tên hàm hay mã nội bộ không?
+- Quy tắc nhiều trường hợp đã thành bảng chưa?
+- Người không đọc code có hiểu WHEN/THEN không?
+- Chi tiết đã bỏ có nằm trong `design.md` hoặc test chưa?
+
 ## 4. Scenario → tầng test
 
 Chọn tầng thấp nhất kiểm tra được hành vi. Test đặt **cạnh file nguồn** (`*.test.ts(x)`), trừ e2e.

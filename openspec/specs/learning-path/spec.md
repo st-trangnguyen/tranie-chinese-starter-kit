@@ -16,14 +16,18 @@ trong nội dung lộ trình, mỗi bài kèm tiêu đề của bài.
 - **THEN** bản đồ hiện tiêu đề các giai đoạn, nhóm và bài theo đúng thứ tự đó
 
 #### Scenario: S3.1-AC1 Mở bản đồ lộ trình trong app thật
-- **WHEN** người học đã xong onboarding và mở route `/learning-paths`
+- **WHEN** người học đã xong onboarding và mở màn Lộ trình
 - **THEN** màn hiện giai đoạn "Nhập môn" và tiêu đề bài đầu tiên của giai đoạn đó
 
-### Requirement: Mỗi bài có một trong ba trạng thái: khóa / đang mở / đã xong
-Hệ thống SHALL gán cho mỗi bài trên bản đồ đúng một trạng thái trong ba trạng thái khóa, đang mở,
-đã xong, theo quy tắc mở khóa Nhập môn (F5): bài đầu tiên của lộ trình luôn được mở; một bài được mở
-khi bài liền trước nó trong lộ trình đã xong; bài có tiến độ đã xong là đã xong; các bài còn lại bị khóa.
-Trạng thái MUST được hiện bằng chữ, không chỉ bằng màu.
+### Requirement: Mỗi bài có đúng một trạng thái
+Hệ thống SHALL hiện cho mỗi bài trên bản đồ đúng một trong ba trạng thái, bằng chữ chứ không chỉ
+bằng màu:
+
+| Trạng thái | Nhãn hiện ra | Khi nào |
+|---|---|---|
+| Đã xong | "Đã xong" | Người học đã hoàn thành bài |
+| Đang mở | "Đang mở" | Bài đầu tiên của lộ trình, hoặc bài ngay sau một bài đã xong |
+| Khóa | "Đã khóa" | Các bài còn lại |
 
 #### Scenario: S3.1-AC2 Chưa học bài nào
 - **WHEN** người học chưa xong bài nào
@@ -42,7 +46,7 @@ Trạng thái MUST được hiện bằng chữ, không chỉ bằng màu.
 - **THEN** mỗi bài có nhãn chữ tương ứng "Đã xong", "Đang mở", "Đã khóa"
 
 #### Scenario: S3.1-AC2 Tiến độ lưu bị hỏng không làm sai trạng thái
-- **WHEN** dữ liệu tiến độ đã lưu của một bài không hợp lệ
+- **WHEN** kết quả học đã lưu của một bài không đọc được
 - **THEN** bài đó được coi là chưa xong và bản đồ vẫn hiện bình thường
 
 ### Requirement: Bấm vào bài khóa thì không vào được
@@ -55,4 +59,4 @@ Bài đang mở hoặc đã xong MUST dẫn tới màn của bài đó.
 
 #### Scenario: S3.1-AC3 Bấm bài đang mở
 - **WHEN** người học bấm vào một bài ở trạng thái đang mở
-- **THEN** app chuyển tới route `/lessons/<id bài>`
+- **THEN** người học vào màn học của bài đó
