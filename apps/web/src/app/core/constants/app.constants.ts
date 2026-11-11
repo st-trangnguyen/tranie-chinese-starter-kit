@@ -5,5 +5,5 @@ export const FIRST_LESSON_ID = 'intro-01';
 
 export const ROUTE_PATHS = {
   onboarding: '/onboarding',
-  lesson: (lessonId: string): string => `/lesson/${lessonId}`,
+  lesson: (lessonId: string): string => `/lessons/${lessonId}`,
 } as const;
