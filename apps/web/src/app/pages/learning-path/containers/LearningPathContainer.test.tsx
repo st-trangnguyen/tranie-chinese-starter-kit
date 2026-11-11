@@ -98,4 +98,29 @@ describe('LearningPathContainer', () => {
     expect(lessons[0]).toHaveTextContent('Đang mở');
     expect(lessons[1]).toHaveTextContent('Đã khóa');
   });
+
+  it('S3.1-AC3: should stay on the learning path when a locked lesson is clicked', async () => {
+    const { user } = renderPath();
+
+    const lockedLesson = await screen.findByText('Thanh nhẹ');
+    await user.click(lockedLesson);
+
+    expect(screen.queryByTestId('location')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Lộ trình học' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: /Thanh nhẹ/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('S3.1-AC3: should open the lesson route when an open lesson is clicked', async () => {
+    const { user } = renderPath();
+
+    await user.click(
+      await screen.findByRole('link', { name: /Bốn thanh điệu/ }),
+    );
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/lessons/l1');
+  });
 });
