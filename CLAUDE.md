@@ -218,6 +218,10 @@ mới cho BA duyệt, đừng sửa spec trong PR code.
 
 Việc không có Scenario (docs, config, asset thuần) bỏ qua Pha A, bước 4–5 và Pha C, ghi `Spec PR: N/A`.
 
+**Chạy bằng agent:** `/relay <spec|code|fix> <change-id>` chạy các pha trên bằng subagent tách context
+(`spec-writer`, `test-writer`, `implementer`, `reviewer` trong `.claude/agents/`). Chi tiết:
+`docs/05-standards/spec-driven.md` §7.
+
 ### Lệnh kiểm tra chuẩn
 
 | Khi nào | Lệnh |
