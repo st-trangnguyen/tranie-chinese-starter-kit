@@ -34,8 +34,8 @@ rules:
     - Technical detail belongs in design.md or in the test. If a Scenario contains a backtick,
       ask whether BA/QA need to know it. See docs/05-standards/spec-driven.md section 3.
   tasks:
-    - Order tasks test-first. For each Scenario write a task pair - "RED: write failing test
-      for <ID>" followed by "GREEN: implement <ID>".
+    - 'Order tasks test-first. For each Scenario write a task pair - "RED: write failing test
+      for <ID>" followed by "GREEN: implement <ID>".'
     - Name the test file and layer for each RED task (Vitest colocated, or Playwright
       apps/web/e2e/E<n>/).
     - Finish with a verification task - pnpm typecheck && pnpm lint && pnpm test:run
