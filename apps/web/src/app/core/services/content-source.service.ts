@@ -16,25 +16,38 @@ export interface ContentSource {
 
 const CONTENT_BASE_PATH = '/content';
 
+interface Schema<T> {
+  safeParse(
+    input: unknown,
+  ): { success: true; data: T } | { success: false; error: Error };
+}
+
 export class FetchContentSource implements ContentSource {
-  async getContentRoot(): Promise<ContentRoot> {
-    return contentRootSchema.parse(
-      await this.fetchJson(`${CONTENT_BASE_PATH}/content.json`),
+  getContentRoot(): Promise<ContentRoot> {
+    return this.load(`${CONTENT_BASE_PATH}/content.json`, contentRootSchema);
+  }
+
+  getLesson(lessonId: string): Promise<Lesson> {
+    return this.load(
+      `${CONTENT_BASE_PATH}/lessons/${encodeURIComponent(lessonId)}.json`,
+      lessonSchema,
     );
   }
 
-  async getLesson(lessonId: string): Promise<Lesson> {
-    return lessonSchema.parse(
-      await this.fetchJson(
-        `${CONTENT_BASE_PATH}/lessons/${encodeURIComponent(lessonId)}.json`,
-      ),
-    );
-  }
-
-  private async fetchJson(url: string): Promise<unknown> {
+  private async load<T>(url: string, schema: Schema<T>): Promise<T> {
     const response = await fetch(url);
-    const body: unknown = await response.json();
-    return body;
+    if (!response.ok) {
+      throw new Error(
+        `Không tải được nội dung: ${url} (HTTP ${response.status})`,
+      );
+    }
+    const result = schema.safeParse(await response.json());
+    if (!result.success) {
+      throw new Error(`Nội dung không hợp lệ: ${url}`, {
+        cause: result.error,
+      });
+    }
+    return result.data;
   }
 }
 
