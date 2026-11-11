@@ -55,6 +55,6 @@ mở chủ đề tiếp theo. Chưa đạt thì chủ đề MUST giữ nguyên k
 - **WHEN** người học đang ở chủ đề thứ 3, đạt bài kiểm tra vượt cấp của chủ đề thứ 5
 - **THEN** chủ đề thứ 4 vẫn "Đã khóa", chủ đề thứ 5 "Đã xong" và bài đầu của chủ đề thứ 6 "Đang mở"
 
-#### Scenario: S3.6-AC2 Không có điểm thì bài không bị đánh dấu xong
+#### Scenario: S3.6-AC2 Còn câu bỏ qua thì chưa đạt
 - **WHEN** người học làm hết bài kiểm tra vượt cấp nhưng còn 1 câu bỏ qua vì dạng bài chưa có
 - **THEN** trên bản đồ mọi bài của chủ đề đó vẫn "Đã khóa"
