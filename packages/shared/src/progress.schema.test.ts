@@ -55,9 +55,9 @@ describe('lessonProgressSchema', () => {
   });
 
   it('should reject a missing or empty lessonId', () => {
-    expect(lessonProgressSchema.safeParse({ status: 'completed' }).success).toBe(
-      false,
-    );
+    expect(
+      lessonProgressSchema.safeParse({ status: 'completed' }).success,
+    ).toBe(false);
     expect(
       lessonProgressSchema.safeParse({ lessonId: ' ', status: 'completed' })
         .success,
