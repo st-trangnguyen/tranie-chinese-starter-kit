@@ -78,4 +78,24 @@ describe('LearningPathContainer', () => {
       (title, index) => expect(lessons[index]).toHaveTextContent(title),
     );
   });
+
+  it('S3.1-AC2: should label each lesson as completed, open or locked', async () => {
+    await db.lessonProgress.put({ lessonId: 'l1', status: 'completed' });
+    renderPath();
+
+    const lessons = await screen.findAllByRole('listitem');
+    expect(lessons[0]).toHaveTextContent('Đã xong');
+    expect(lessons[1]).toHaveTextContent('Đang mở');
+    expect(lessons[2]).toHaveTextContent('Đã khóa');
+    expect(lessons[3]).toHaveTextContent('Đã khóa');
+  });
+
+  it('S3.1-AC2: should treat corrupted progress as not completed', async () => {
+    await db.lessonProgress.put({ lessonId: 'l1', status: 'done' });
+    renderPath();
+
+    const lessons = await screen.findAllByRole('listitem');
+    expect(lessons[0]).toHaveTextContent('Đang mở');
+    expect(lessons[1]).toHaveTextContent('Đã khóa');
+  });
 });
