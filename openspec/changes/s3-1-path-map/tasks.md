@@ -41,8 +41,8 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 
 ## 5. Luồng thật (S3.1-AC1) — e2e
 
-- [ ] 5.1 RED: test Playwright S3.1-AC1 "Mở bản đồ lộ trình trong app thật" (xong onboarding → `/learning-paths` → thấy "Nhập môn" và tiêu đề `intro-01`) — `apps/web/e2e/E3/s3.1-learning-path.spec.ts`, theo mẫu `test.describe('S3.1 …')`; kiểm: `pnpm e2e` fail trước 4.2 (nếu viết sau 4.2 thì tạm đổi route để thấy fail, rồi trả lại)
-- [ ] 5.2 GREEN: sửa đến khi pass; kiểm: `pnpm e2e` pass
+- [x] 5.1 RED: test Playwright S3.1-AC1 "Mở bản đồ lộ trình trong app thật" (xong onboarding → `/learning-paths` → thấy "Nhập môn" và tiêu đề `intro-01`) — `apps/web/e2e/E3/s3.1-learning-path.spec.ts`, theo mẫu `test.describe('S3.1 …')`; kiểm: `pnpm e2e` fail trước 4.2 (nếu viết sau 4.2 thì tạm đổi route để thấy fail, rồi trả lại)
+- [x] 5.2 GREEN: sửa đến khi pass; kiểm: `pnpm e2e` pass
 
 ## 6. Kiểm tra
 
