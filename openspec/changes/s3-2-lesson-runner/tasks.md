@@ -43,6 +43,10 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 - [x] 5.2 Chạy `pnpm typecheck && pnpm lint && pnpm test:run && pnpm e2e` và ghi kết quả thật; kiểm: toàn bộ pass
 - [ ] 5.3 Chụp screenshot màn chạy bài (đang làm, đúng, sai kèm giải thích) mobile 375×812 và desktop 1280×800, sáng và tối cho PR; kiểm: có file ảnh
 
+## 6. Sửa theo review PR #73
+
+- [x] 6.1 RED rồi GREEN: đổi `lessonId` không giữ bài/lỗi cũ (`useLessonRunner` gắn bài đã nạp với `lessonId`); focus về "Câu k / n" và màn hết bài; `role="status"` không bọc nút "Tiếp tục"; `ExerciseProps.isLocked` khóa đáp án sau khi chấm; thanh tiến độ theo số câu đã xong; `LessonRunner` gom props thành `view`; `skip()` dùng chung `moveToNext`; Scenario bỏ qua câu đổi sang ID `S3.2-X1`
+
 ## Workflow follow-up
 
 - `/opsx:archive s3-2-lesson-runner`, rồi `pnpm exec openspec validate --all --strict` (mở PR review trước, archive sau review).

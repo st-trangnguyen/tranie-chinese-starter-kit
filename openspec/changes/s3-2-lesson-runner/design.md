@@ -64,7 +64,9 @@ Rule thuần (mỗi cái kèm comment "Rule: …"):
 - `LessonRunner` (component trình bày) nhận `registry` qua props; `LessonRunnerContainer` truyền `exerciseRegistry` thật.
   Test truyền registry giả (dạng bài giả bấm "đúng"/"sai") → không phải mock module, không phụ thuộc E4–E6.
 - `kind` chưa đăng ký: runner hiện thông báo "Dạng bài này chưa có" kèm nút "Bỏ qua câu này" để không kẹt
-  (chỉ là biện pháp tạm cho tới khi E4–E6 xong; chi tiết và có nên đưa vào spec: Câu hỏi mở 1).
+  (biện pháp tạm cho tới khi E4–E6 xong; đã đưa vào spec thành Requirement riêng với ID `S3.2-X1`, ngoài AC của story).
+- `ExerciseProps` có thêm `isLocked` (true sau khi chấm) để dạng bài khóa đáp án; runner truyền theo `feedback !== null`.
+- `LessonRunner` nhận `view` (exercise, current, total, feedback) + `registry` + `handlers`; `LessonFeedbackView`/`LessonRunnerView` nằm ở `shared/models/lesson-session.model.ts`.
 - Component dạng bài **chỉ nhận props**; audio/ghi âm lấy qua `core/hooks` (architecture §3, CLAUDE.md §2).
 - Component dạng bài gắn `key={exercise.id}` để chuyển câu thì state nội bộ reset.
 

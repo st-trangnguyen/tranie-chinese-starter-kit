@@ -187,7 +187,7 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
   - Các service trong `shared/services` giữ một instance `ProgressStore`, giống cách `ArticleService` giữ `ApiService` trong boilerplate.
   - Mỗi service gồm 3 lớp: truy cập dữ liệu (private), quy tắc nghiệp vụ thuần (public, không đụng vào store), use-case điều phối.
   - Service không import React hay router.
-- **Component bài tập** chỉ nhận dữ liệu qua props (`exercise`, `onResult`). Audio và ghi âm lấy qua hook trong `core/hooks`, không import service trực tiếp.
+- **Component bài tập** chỉ nhận dữ liệu qua props (`exercise`, `onResult`, `isLocked`). Audio và ghi âm lấy qua hook trong `core/hooks`, không import service trực tiếp.
 - **Route:** mỗi feature export `PageRoute[]` (container lazy-load) từ `<feature>.routes.ts`, gom về `pages/page.routes.ts` rồi về `app.routes.ts`.
   - URL theo RESTful: danh từ tài nguyên, kebab-case, collection số nhiều, tên cụ thể (`/learning-paths`, `/lessons/:lessonId`). `ROUTE_PATHS` trong `core/constants/app.constants.ts` là nguồn duy nhất của URL.
 - **i18n:** chuỗi giao diện đặt trong `apps/web/src/assets/i18n/vi/<namespace>.json`, dùng `useTranslation(namespace)`. Nội dung bài học không nằm trong i18n mà nằm trong JSON của pipeline.
@@ -259,6 +259,7 @@ interface ProgressStore {
 type ExerciseProps<K extends ExerciseKind> = {
   exercise: Extract<Exercise, { kind: K }>;
   onResult: (result: ExerciseResult) => void;
+  isLocked: boolean; // true sau khi chấm: khóa đáp án
 };
 ```
 
