@@ -18,10 +18,10 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 
 ## 3. Nạp bài (S3.2-AC1 "Không mở được bài") — `shared/services` Phần 1 + 3
 
-- [ ] 3.1 RED: test `ContentService.getLesson(id)` với `ContentSource` giả (trả bài; ném lỗi khi không có/sai schema) — `content.service.test.ts`; kiểm: fail vì thiếu method
-- [ ] 3.2 GREEN: thêm `getLesson` vào Phần 3 của `ContentService`; kiểm: test 3.1 pass
-- [ ] 3.3 RED: test S3.2-AC1 "Không mở được bài" cho `LessonService.openLesson` (nguồn giả ném lỗi → `openLesson` throw rõ nghĩa; bài hợp lệ → session ở câu 1) — `lesson.service.test.ts`; kiểm: fail vì thiếu `openLesson`
-- [ ] 3.4 GREEN: thêm Phần 1 `readLesson` + Phần 3 `openLesson`; kiểm: test 3.3 pass
+- [x] 3.1 RED: test `ContentService.getLesson(id)` với `ContentSource` giả (trả bài; ném lỗi khi không có/sai schema) — `content.service.test.ts`; kiểm: fail vì thiếu method
+- [x] 3.2 GREEN: thêm `getLesson` vào Phần 3 của `ContentService`; kiểm: test 3.1 pass
+- [x] 3.3 RED: test S3.2-AC1 "Không mở được bài" cho `LessonService.openLesson` (nguồn giả ném lỗi → `openLesson` throw rõ nghĩa; bài hợp lệ → session ở câu 1) — `lesson.service.test.ts`; kiểm: fail vì thiếu `openLesson`
+- [x] 3.4 GREEN: thêm Phần 1 `readLesson` + Phần 3 `openLesson`; kiểm: test 3.3 pass
 
 ## 4. Khung chạy bài (S3.2-AC1, AC2, AC3) — `pages/lesson`
 

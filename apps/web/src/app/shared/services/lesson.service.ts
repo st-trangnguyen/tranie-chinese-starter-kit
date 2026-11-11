@@ -59,6 +59,11 @@ export class LessonService {
     };
   }
 
+  // Rule: câu có dạng bài chưa được hỗ trợ thì được bỏ qua, không có kết quả đúng/sai.
+  skip(session: LessonSession): LessonSession {
+    return this.advance({ ...session, phase: 'feedback' });
+  }
+
   // Rule: chỉ giải thích khi trả lời sai; câu đúng không cần giải thích.
   shouldShowExplanation(result: ExerciseResult): boolean {
     return !result.isCorrect && result.explanation !== undefined;
