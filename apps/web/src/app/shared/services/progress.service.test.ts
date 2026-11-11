@@ -1,15 +1,24 @@
-import { DEFAULT_SETTINGS, type Settings, type Stage } from '@csk/shared';
+import {
+  DEFAULT_SETTINGS,
+  type LessonProgress,
+  type Settings,
+  type Stage,
+} from '@csk/shared';
 
 import type { ProgressStore } from '@core/services/progress-store.service';
 import { ProgressService } from './progress.service';
 
-const makeStore = (initial: Settings = DEFAULT_SETTINGS) => {
+const makeStore = (
+  initial: Settings = DEFAULT_SETTINGS,
+  lessonProgress: LessonProgress[] = [],
+) => {
   let saved = initial;
   const store: ProgressStore = {
     getSettings: vi.fn(async () => saved),
     saveSettings: vi.fn(async (settings: Settings) => {
       saved = settings;
     }),
+    getAllLessonProgress: vi.fn(async () => lessonProgress),
   };
   return store;
 };
@@ -120,5 +129,19 @@ describe('ProgressService — use cases', () => {
       'Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.',
     );
     expect(store.saveSettings).not.toHaveBeenCalled();
+  });
+
+  it('S3.1-AC2: should list only completed lessons as completed', async () => {
+    const service = new ProgressService(
+      makeStore(DEFAULT_SETTINGS, [
+        { lessonId: 'intro-01', status: 'completed' },
+        { lessonId: 'intro-02', status: 'in-progress' },
+        { lessonId: 'intro-03', status: 'completed' },
+      ]),
+    );
+
+    await expect(service.getCompletedLessonIds()).resolves.toEqual(
+      new Set(['intro-01', 'intro-03']),
+    );
   });
 });
