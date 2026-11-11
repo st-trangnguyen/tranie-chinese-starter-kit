@@ -5,7 +5,7 @@ import {
   type ContentSource,
 } from '@core/services/content-source.service';
 import type { PathMap } from '@shared/models/learning-path.model';
-import { listLessonIdsInOrder } from '@shared/utils/learningPath.utils';
+import { listLessonIdsInOrder } from '@shared/utils/learning-path.utils';
 
 export class ContentService {
   constructor(private readonly source: ContentSource = contentSource) {}

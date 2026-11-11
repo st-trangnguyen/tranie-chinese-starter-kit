@@ -120,7 +120,7 @@ chỉ tham khảo cấu trúc): `docs/05-standards/architecture.md`.
 | Component file / component | PascalCase | `UserList.tsx`, `function UserList()` |
 | Hook file / hook | camelCase, prefix `use` | `useUsers.ts` |
 | Service file | `<domain>.service.ts` | `booking.service.ts` |
-| Util file | camelCase | `formatDate.ts` |
+| Util file | kebab-case + hậu tố `.utils.ts` | `learning-path.utils.ts`, `date.utils.ts` |
 | Biến, function | camelCase | `userName`, `calculateTotal()` |
 | Constant | SCREAMING_SNAKE_CASE | `MAX_RETRIES` |
 | Boolean | prefix `is` / `has` / `can` | `isOpen`, `hasError` |

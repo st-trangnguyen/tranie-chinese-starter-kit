@@ -11,7 +11,7 @@ import {
   progressStore,
   type ProgressStore,
 } from '@core/services/progress-store.service';
-import { listLessonIdsInOrder } from '@shared/utils/learningPath.utils';
+import { listLessonIdsInOrder } from '@shared/utils/learning-path.utils';
 
 export class ProgressService {
   constructor(private readonly store: ProgressStore = progressStore) {}
