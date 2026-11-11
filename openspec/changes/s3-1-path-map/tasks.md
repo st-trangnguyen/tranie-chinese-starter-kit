@@ -10,8 +10,8 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 
 ## 1. Quy tắc trạng thái bài (S3.1-AC2) — `shared/services` Phần 2
 
-- [ ] 1.1 RED: viết test fail cho S3.1-AC2 "Chưa học bài nào", "Xong bài trước thì bài kế tiếp mở", "Bài kế tiếp nằm ở nhóm hoặc giai đoạn sau" — Vitest thuần, `apps/web/src/app/shared/services/progress.service.test.ts`; kiểm: `pnpm test:run progress.service` fail vì thiếu `deriveLessonStatuses`
-- [ ] 1.2 GREEN: thêm `LessonStatus` + `deriveLessonStatuses(stages, completedLessonIds)` vào Phần 2 của `ProgressService` (comment "Rule: …"); kiểm: test 1.1 pass
+- [x] 1.1 RED: viết test fail cho S3.1-AC2 "Chưa học bài nào", "Xong bài trước thì bài kế tiếp mở", "Bài kế tiếp nằm ở nhóm hoặc giai đoạn sau" — Vitest thuần, `apps/web/src/app/shared/services/progress.service.test.ts`; kiểm: `pnpm test:run progress.service` fail vì thiếu `deriveLessonStatuses`
+- [x] 1.2 GREEN: thêm `LessonStatus` + `deriveLessonStatuses(stages, completedLessonIds)` vào Phần 2 của `ProgressService` (comment "Rule: …"); kiểm: test 1.1 pass
 
 ## 2. Đọc tiến độ bài (S3.1-AC2 tiến độ hỏng) — `@csk/shared` + `core/services`
 

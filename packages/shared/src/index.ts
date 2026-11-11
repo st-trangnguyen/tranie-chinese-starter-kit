@@ -7,7 +7,11 @@ export {
   parseSettings,
   settingsSchema,
 } from './progress.schema';
-export type { DailyGoalMinutes, Settings } from './progress.schema';
+export type {
+  DailyGoalMinutes,
+  LessonStatus,
+  Settings,
+} from './progress.schema';
 export {
   isToneMarkedPinyin,
   numberedToToneMarks,

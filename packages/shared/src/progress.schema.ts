@@ -34,6 +34,9 @@ export const settingsSchema = z.object({
     .catch(DEFAULT_SETTINGS.hasCompletedOnboarding),
 });
 
+/** Trạng thái một bài trên bản đồ lộ trình (S3.1 AC2). Suy ra từ tiến độ, không lưu. */
+export type LessonStatus = 'locked' | 'open' | 'completed';
+
 export const parseSettings = (raw: unknown): Settings => {
   const record = typeof raw === 'object' && raw !== null ? raw : {};
   return settingsSchema.parse(record);
