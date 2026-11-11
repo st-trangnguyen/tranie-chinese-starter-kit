@@ -1,3 +1,4 @@
+import Dexie from 'dexie';
 import { DEFAULT_SETTINGS, type Settings } from '@csk/shared';
 
 import { createDatabase } from '@core/helpers/db.helper';
@@ -36,5 +37,43 @@ describe('DexieProgressStore', () => {
       ...DEFAULT_SETTINGS,
       hasCompletedOnboarding: true,
     });
+  });
+});
+
+describe('DexieProgressStore — lesson progress', () => {
+  it('should return no lesson progress on a fresh database', async () => {
+    const { store } = makeStore();
+
+    await expect(store.getAllLessonProgress()).resolves.toEqual([]);
+  });
+
+  it('S3.1-AC2: should skip corrupted lesson progress rows', async () => {
+    const { db, store } = makeStore();
+    await db.lessonProgress.bulkPut([
+      { lessonId: 'intro-01', status: 'completed' },
+      { lessonId: 'intro-02', status: 'done' },
+      { lessonId: 'intro-03', status: 'in-progress' },
+    ]);
+
+    await expect(store.getAllLessonProgress()).resolves.toEqual([
+      { lessonId: 'intro-01', status: 'completed' },
+      { lessonId: 'intro-03', status: 'in-progress' },
+    ]);
+  });
+
+  it('should keep settings when upgrading a version 1 database', async () => {
+    const name = `test-${crypto.randomUUID()}`;
+    const legacy = new Dexie(name);
+    legacy.version(1).stores({ settings: 'key' });
+    await legacy.table('settings').put({ key: 'dailyGoalMinutes', value: 60 });
+    legacy.close();
+
+    const store = new DexieProgressStore(createDatabase(name));
+
+    await expect(store.getSettings()).resolves.toEqual({
+      ...DEFAULT_SETTINGS,
+      dailyGoalMinutes: 60,
+    });
+    await expect(store.getAllLessonProgress()).resolves.toEqual([]);
   });
 });
