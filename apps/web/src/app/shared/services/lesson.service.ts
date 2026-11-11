@@ -45,5 +45,10 @@ export class LessonService {
     };
   }
 
+  // Rule: chỉ giải thích khi trả lời sai; câu đúng không cần giải thích.
+  shouldShowExplanation(result: ExerciseResult): boolean {
+    return !result.isCorrect && result.explanation !== undefined;
+  }
+
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 }
