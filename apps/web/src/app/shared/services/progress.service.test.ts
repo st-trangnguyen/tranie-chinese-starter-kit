@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, type Settings } from '@csk/shared';
+import { DEFAULT_SETTINGS, type Settings, type Stage } from '@csk/shared';
 
 import type { ProgressStore } from '@core/services/progress-store.service';
 import { ProgressService } from './progress.service';
@@ -33,6 +33,62 @@ describe('ProgressService — rules', () => {
         hasCompletedOnboarding: true,
       }),
     ).toBe(false);
+  });
+});
+
+describe('ProgressService — lesson status rule', () => {
+  const service = new ProgressService(makeStore());
+
+  const stage = (id: string, units: Record<string, string[]>): Stage => ({
+    id,
+    title: id,
+    units: Object.entries(units).map(([unitId, lessonIds]) => ({
+      id: unitId,
+      title: unitId,
+      lessonIds,
+    })),
+  });
+
+  const STAGES: Stage[] = [
+    stage('intro', { 'intro-a': ['l1', 'l2'], 'intro-b': ['l3'] }),
+    stage('hsk1', { 'hsk1-a': ['l4', 'l5'] }),
+  ];
+
+  const statusesOf = (completed: string[]) =>
+    Object.fromEntries(
+      service.deriveLessonStatuses(STAGES, new Set(completed)),
+    );
+
+  it('S3.1-AC2: should open only the first lesson when nothing is completed', () => {
+    expect(statusesOf([])).toEqual({
+      l1: 'open',
+      l2: 'locked',
+      l3: 'locked',
+      l4: 'locked',
+      l5: 'locked',
+    });
+  });
+
+  it('S3.1-AC2: should open the next lesson when the previous ones are completed', () => {
+    expect(statusesOf(['l1', 'l2'])).toEqual({
+      l1: 'completed',
+      l2: 'completed',
+      l3: 'open',
+      l4: 'locked',
+      l5: 'locked',
+    });
+  });
+
+  it('S3.1-AC2: should open the first lesson of the next unit or stage', () => {
+    expect(statusesOf(['l1', 'l2', 'l3'])).toMatchObject({
+      l3: 'completed',
+      l4: 'open',
+      l5: 'locked',
+    });
+  });
+
+  it('S3.1-AC2: should ignore completed ids that are not in the path', () => {
+    expect(statusesOf(['unknown'])).toMatchObject({ l1: 'open', l2: 'locked' });
   });
 });
 

@@ -5,8 +5,8 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 
 ## 0. Chuẩn hoá route bài học `/lesson/:id` → `/lessons/:id` (design D4b)
 
-- [ ] 0.1 RED: sửa kỳ vọng URL sang `/lessons/intro-01` trong `apps/web/src/app/pages/onboarding/containers/OnboardingContainer.test.tsx`, `apps/web/e2e/E1/s1.3-onboarding.spec.ts`, `apps/web/e2e/E1/s1.2-offline.spec.ts`; kiểm: `pnpm test:run OnboardingContainer` fail vì app vẫn dùng `/lesson/`
-- [ ] 0.2 GREEN: đổi `ROUTE_PATHS.lesson` thành `/lessons/${id}` và route `lessons/:lessonId` trong `pages/lesson/lesson.routes.ts`; kiểm: test 0.1 pass, `pnpm e2e` (E1) pass
+- [x] 0.1 RED: sửa kỳ vọng URL sang `/lessons/intro-01` trong `apps/web/src/app/pages/onboarding/containers/OnboardingContainer.test.tsx`, `apps/web/e2e/E1/s1.3-onboarding.spec.ts`, `apps/web/e2e/E1/s1.2-offline.spec.ts`; kiểm: `pnpm test:run OnboardingContainer` fail vì app vẫn dùng `/lesson/`
+- [x] 0.2 GREEN: đổi `ROUTE_PATHS.lesson` thành `/lessons/${id}` và route `lessons/:lessonId` trong `pages/lesson/lesson.routes.ts`; kiểm: test 0.1 pass, `pnpm e2e` (E1) pass
 
 ## 1. Quy tắc trạng thái bài (S3.1-AC2) — `shared/services` Phần 2
 
