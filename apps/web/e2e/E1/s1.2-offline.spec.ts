@@ -27,7 +27,7 @@ test.describe('S1.2 Mở app khi không có mạng', () => {
     await expect(page.getByRole('button', { name: 'Bắt đầu' })).toBeVisible();
     await page.goto('/lessons/intro-01');
     await expect(
-      page.getByRole('heading', { name: 'Bài intro-01' }),
+      page.getByRole('heading', { name: 'Bốn thanh điệu' }),
     ).toBeVisible();
   });
 

@@ -1,0 +1,53 @@
+/* Màn chạy bài — S3.2. Đúng/sai luôn kèm chữ và biểu tượng, màu chỉ là phụ. */
+
+@layer components {
+  .lesson-title {
+    @apply text-title text-fg;
+  }
+
+  .lesson-error {
+    @apply rounded-md bg-danger-soft text-body-sm text-danger-text;
+  }
+
+  .lesson-finished {
+    @apply text-body text-fg;
+  }
+
+  .lesson-progress-label {
+    @apply text-caption text-fg-muted;
+  }
+
+  .lesson-progress-track {
+    @apply h-2 overflow-hidden rounded-full bg-sunken;
+  }
+
+  .lesson-progress-fill {
+    @apply h-full rounded-full bg-accent transition-all;
+  }
+
+  .lesson-feedback {
+    @apply rounded-lg border-2;
+  }
+
+  .lesson-feedback.is-correct {
+    @apply border-success bg-success-soft text-success-text;
+  }
+
+  .lesson-feedback.is-incorrect {
+    @apply border-danger bg-danger-soft text-danger-text;
+  }
+
+  .lesson-feedback-verdict {
+    @apply text-title-sm font-semibold;
+  }
+
+  .lesson-feedback-explanation {
+    @apply text-body;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lesson-progress-fill {
+      @apply transition-none;
+    }
+  }
+}
