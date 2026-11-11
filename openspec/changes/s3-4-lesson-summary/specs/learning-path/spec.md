@@ -1,8 +1,9 @@
 ## ADDED Requirements
 
 ### Requirement: Xong một bài thì bài kế tiếp mở
-Hệ thống SHALL ghi nhận bài là "Đã xong" khi người học làm hết các câu mà không bỏ qua câu nào, và mở bài
-kế tiếp theo quy tắc Nhập môn: học xong bài trước thì mở bài sau, không đòi điểm tối thiểu.
+Hệ thống SHALL ghi nhận bài học thường là "Đã xong" khi người học làm hết các câu mà không bỏ qua câu nào, và
+mở bài kế tiếp theo quy tắc Nhập môn: học xong bài trước thì mở bài sau, không đòi điểm tối thiểu. Bài kiểm tra
+cuối chủ đề có quy tắc riêng (S3.5).
 
 | Tình huống | Bài vừa học | Bài kế tiếp |
 |---|---|---|
