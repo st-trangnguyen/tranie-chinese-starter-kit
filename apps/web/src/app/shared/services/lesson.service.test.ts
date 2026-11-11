@@ -84,4 +84,16 @@ describe('LessonService — quy tắc phiên làm bài', () => {
 
     expect(service.advance(session)).toEqual(session);
   });
+
+  it('S3.2-AC3: should show the explanation for an incorrect answer that has one', () => {
+    expect(
+      service.shouldShowExplanation({ isCorrect: false, explanation: 'bā' }),
+    ).toBe(true);
+  });
+
+  it('S3.2-AC3: should show no explanation for a correct answer', () => {
+    expect(
+      service.shouldShowExplanation({ isCorrect: true, explanation: 'bā' }),
+    ).toBe(false);
+  });
 });
