@@ -36,6 +36,7 @@ jobs:
           HEAD_REF: ${{ github.head_ref }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_BODY: ${{ github.event.pull_request.body }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
 
@@ -72,6 +73,29 @@ jobs:
             exit 1
           fi
           echo "PR spec #$spec_pr đã merge."
+
+          # PR ghi `Closes #<story>` là PR cuối của story: mọi task phải đã tick, nếu không
+          # workflow archive sẽ bỏ qua change này và spec không bao giờ được archive.
+          if printf '%s' "$PR_BODY" | grep -qiE '(^|[^a-z])closes[[:space:]]+#[0-9]+'; then
+            change=$(printf '%s\n' "$PR_BODY" \
+              | grep -oE 'openspec/changes/[a-z0-9][a-z0-9-]*' \
+              | grep -v '/archive' | head -n 1 | sed 's#openspec/changes/##' || true)
+            if [[ -z "$change" ]]; then
+              echo "::error::PR ghi 'Closes #…' nhưng không có dòng 'OpenSpec change: openspec/changes/<id>'."
+              exit 1
+            fi
+            tasks=$(gh api "repos/$REPO/contents/openspec/changes/$change/tasks.md?ref=$HEAD_SHA" \
+              -H "Accept: application/vnd.github.raw" 2>/dev/null || true)
+            if [[ -z "$tasks" ]]; then
+              echo "::error::Không đọc được openspec/changes/$change/tasks.md ở nhánh PR."
+              exit 1
+            fi
+            if printf '%s\n' "$tasks" | grep -qE '^[[:space:]]*- \[ \]'; then
+              echo "::error::PR ghi 'Closes #…' nhưng tasks.md của $change còn task chưa tick. Tick task hoặc đổi thành 'Refs #…'."
+              exit 1
+            fi
+            echo "Mọi task của $change đã tick."
+          fi
 
   rerun-waiting-code-prs:
     name: Chạy lại cổng cho PR code đang chờ

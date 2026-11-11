@@ -39,6 +39,10 @@ Không có input thì hỏi người dùng muốn epic nào (kèm bảng "Tổng
 **Ranh giới (bắt buộc)**
 - Chỉ tạo artifact lập kế hoạch trong `openspec/changes/`. **Không sửa code**,
   không viết test, không bắt đầu apply.
-- Sau khi propose xong, **dừng chờ người dùng duyệt** rồi mới `/opsx:apply`.
+- Chạy trên nhánh `spec/s<epic>-<n>-<slug>` (mỗi story một nhánh, một PR spec). Đây là **pha Spec**
+  của CLAUDE.md §8: PR spec chỉ chứa `openspec/`, ghi `Spec PR: N/A`.
+- Sau khi propose xong, **dừng chờ PR spec được review và merge vào `main`**. Chỉ khi đó dev mới
+  cắt nhánh `feat/…` và `/opsx:apply` (PR code trỏ `Spec PR: #<số>`).
+- Không chạy `/opsx:archive`: workflow tự mở PR archive sau khi PR code merge.
 - Không rõ business rule hoặc AC mâu thuẫn thì ghi vào "câu hỏi mở", đừng tự quyết.
 - Không commit trừ khi người dùng yêu cầu.

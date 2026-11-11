@@ -63,7 +63,9 @@ cấu hình secret `ARCHIVE_PR_TOKEN` (PR tạo bằng `GITHUB_TOKEN` không kí
 
 PR code **bắt buộc** có dòng `Spec PR: #<số>` ở mục References, và PR đó phải ở trạng thái **merged**.
 Check `Spec PR đã merge` (`spec-gate-workflow.yml`) fail nếu thiếu dòng, số PR sai, hoặc PR spec chưa
-merge. Khi PR spec merge, workflow tự chạy lại check cho các PR code đang chờ. Dùng `Spec PR: N/A`
+merge. PR ghi `Closes #<story>` (PR cuối của story) còn phải có dòng `OpenSpec change:` và mọi task
+trong `tasks.md` đã tick, nếu không workflow archive sẽ bỏ qua change; PR một phần dùng `Refs #<story>`.
+Khi PR spec merge, workflow tự chạy lại check cho các PR code đang chờ. Dùng `Spec PR: N/A`
 cho PR không có spec đi kèm (docs, config, asset thuần) và cho chính PR spec và PR archive.
 
 PR spec chỉ merge được sau khi được duyệt, nên "merged" đồng nghĩa "đã review". Để cổng chặn thật,

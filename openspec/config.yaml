@@ -49,8 +49,12 @@ operations:
       - "For each GREEN task - write the minimum code in the correct layer (CLAUDE.md §1-§3) and run the test until it passes. Commit as feat(...) or fix(...)."
       - "Name every test with its Scenario ID so it can be found by grep."
       - "Exempt from test-first - docs-only, config-only and pure asset changes. State the exemption explicitly in the task."
+      - "Apply only on a branch cut from main AFTER the spec PR has merged. If the spec PR is not merged, stop and say so."
+      - "Do not edit proposal, specs or design in the code PR. If the spec is wrong or incomplete, stop and open a separate spec PR (spec/<id>-fix) for BA review."
+      - "Tick each task in tasks.md as it is finished. The PR line is 'Spec PR: #<number>'. Do NOT archive in the code PR."
       - "Before reporting done - run the project check commands from CLAUDE.md §8 and report real output, including failures."
   archive:
     guidance:
+      - "Normally archive is automatic: after the code PR merges, .github/workflows/archive-spec-workflow.yml opens the archive PR. Run archive by hand only if that workflow failed."
       - "Archive only after every Scenario has a passing test and the verification task is checked."
       - "Summarize the archive outcome and name the PR line to use - Closes #<issue> when all AC are done, otherwise Refs #<issue>."
