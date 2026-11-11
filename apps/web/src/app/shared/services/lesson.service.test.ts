@@ -1,6 +1,6 @@
 import type { Exercise } from '@csk/shared';
 
-import { LessonService } from './lesson.service';
+import { LessonService, type LessonSource } from './lesson.service';
 
 const EXERCISES: Exercise[] = [
   { id: 'e1', kind: 'tone-choice', wordId: '八' },
@@ -8,7 +8,16 @@ const EXERCISES: Exercise[] = [
   { id: 'e3', kind: 'tone-choice', wordId: '百' },
 ];
 
-const service = new LessonService();
+const makeContentService = (): LessonSource => ({
+  getLesson: vi.fn(async (id: string) => ({
+    id,
+    type: 'lesson' as const,
+    title: 'Bốn thanh điệu',
+    exercises: EXERCISES,
+  })),
+});
+
+const service = new LessonService(makeContentService());
 
 describe('LessonService — quy tắc phiên làm bài', () => {
   it('S3.2-AC1: should start at the first exercise, waiting for an answer', () => {
@@ -95,5 +104,24 @@ describe('LessonService — quy tắc phiên làm bài', () => {
     expect(
       service.shouldShowExplanation({ isCorrect: true, explanation: 'bā' }),
     ).toBe(false);
+  });
+
+  it('S3.2-AC1: should open a lesson at its first exercise', async () => {
+    const { lesson, session } = await service.openLesson('intro-01');
+
+    expect(lesson.id).toBe('intro-01');
+    expect(session).toMatchObject({ currentIndex: 0, phase: 'answering' });
+  });
+
+  it('S3.2-AC1: should fail with a clear message when the lesson cannot be opened', async () => {
+    const failing: LessonSource = {
+      getLesson: vi.fn(async () => {
+        throw new Error('Không mở được bài học.');
+      }),
+    };
+
+    await expect(new LessonService(failing).openLesson('x')).rejects.toThrow(
+      'Không mở được bài học.',
+    );
   });
 });

@@ -9,12 +9,12 @@ TDD bắt buộc (docs/05-standards/spec-driven.md §5): mỗi RED chạy test v
 
 ## 2. Quy tắc phiên làm bài (S3.2-AC1, AC2, AC3) — `shared/services/lesson.service.ts` Phần 2
 
-- [ ] 2.1 RED: test fail cho S3.2-AC1 "Bài mở ra ở câu đầu tiên", "Sang câu kế thì thanh tiến độ tăng", "Làm xong câu cuối" — Vitest thuần, `apps/web/src/app/shared/services/lesson.service.test.ts`; kiểm: `pnpm test:run lesson.service` fail vì chưa có `LessonService`
-- [ ] 2.2 GREEN: thêm `LessonSession`, `startSession`, `advance` (Phần 2, comment "Rule: …"); kiểm: test 2.1 pass
-- [ ] 2.3 RED: test S3.2-AC2 "Chưa trả lời thì chưa có kết quả", "Trả lời đúng được báo ngay", "Trả lời sai được báo ngay" (gồm bấm đúp bị bỏ qua, `advance` khi chưa chấm bị bỏ qua) — `lesson.service.test.ts`; kiểm: fail vì thiếu `submitResult`
-- [ ] 2.4 GREEN: thêm `submitResult` và chặn `advance` ngoài pha `feedback`; kiểm: test 2.3 pass
-- [ ] 2.5 RED: test S3.2-AC3 "Trả lời sai hiện giải thích", "Trả lời đúng thì không có giải thích" cho `shouldShowExplanation` — `lesson.service.test.ts`; kiểm: fail
-- [ ] 2.6 GREEN: thêm `shouldShowExplanation`; kiểm: test 2.5 pass
+- [x] 2.1 RED: test fail cho S3.2-AC1 "Bài mở ra ở câu đầu tiên", "Sang câu kế thì thanh tiến độ tăng", "Làm xong câu cuối" — Vitest thuần, `apps/web/src/app/shared/services/lesson.service.test.ts`; kiểm: `pnpm test:run lesson.service` fail vì chưa có `LessonService`
+- [x] 2.2 GREEN: thêm `LessonSession`, `startSession`, `advance` (Phần 2, comment "Rule: …"); kiểm: test 2.1 pass
+- [x] 2.3 RED: test S3.2-AC2 "Chưa trả lời thì chưa có kết quả", "Trả lời đúng được báo ngay", "Trả lời sai được báo ngay" (gồm bấm đúp bị bỏ qua, `advance` khi chưa chấm bị bỏ qua) — `lesson.service.test.ts`; kiểm: fail vì thiếu `submitResult`
+- [x] 2.4 GREEN: thêm `submitResult` và chặn `advance` ngoài pha `feedback`; kiểm: test 2.3 pass
+- [x] 2.5 RED: test S3.2-AC3 "Trả lời sai hiện giải thích", "Trả lời đúng thì không có giải thích" cho `shouldShowExplanation` — `lesson.service.test.ts`; kiểm: fail
+- [x] 2.6 GREEN: thêm `shouldShowExplanation`; kiểm: test 2.5 pass
 
 ## 3. Nạp bài (S3.2-AC1 "Không mở được bài") — `shared/services` Phần 1 + 3
 

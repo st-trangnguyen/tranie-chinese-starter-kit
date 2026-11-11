@@ -58,4 +58,22 @@ describe('ContentService — use cases', () => {
       'Không tải được lộ trình học.',
     );
   });
+
+  it('S3.2-AC1: should return the requested lesson', async () => {
+    const service = new ContentService(makeSource());
+
+    const lesson = await service.getLesson('l2');
+
+    expect(lesson).toEqual(makeLesson('l2'));
+  });
+
+  it('S3.2-AC1: should fail with a clear message when the lesson cannot be loaded', async () => {
+    const source = makeSource();
+    vi.mocked(source.getLesson).mockRejectedValueOnce(new Error('404'));
+    const service = new ContentService(source);
+
+    await expect(service.getLesson('missing')).rejects.toThrow(
+      'Không mở được bài học.',
+    );
+  });
 });
