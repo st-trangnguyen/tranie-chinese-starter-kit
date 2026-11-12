@@ -28,30 +28,11 @@ export class ContentService {
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
-  async getPathMap(): Promise<PathMap> {
-    try {
-      const root = await this.readContentRoot();
-      const lessons = await Promise.all(
-        listLessonIdsInOrder(root.stages).map((lessonId) =>
-          this.readLesson(lessonId),
-        ),
-      );
-      return {
-        stages: root.stages,
-        lessonTitles: new Map(
-          lessons.map((lesson) => [lesson.id, lesson.title]),
-        ),
-      };
-    } catch (error) {
-      throw new Error('Không tải được lộ trình học.', { cause: error });
-    }
-  }
-
   /**
-   * Như getPathMap nhưng chịu lỗi từng bài: bài nạp lỗi chỉ thiếu tiêu đề (UI dùng id thay thế),
-   * bản đồ vẫn hiện. Chỉ lỗi đọc lộ trình mới làm hỏng cả bản đồ.
+   * Chịu lỗi từng bài: bài nạp lỗi chỉ thiếu tiêu đề (UI dùng id thay thế), bản đồ vẫn hiện.
+   * Chỉ lỗi đọc lộ trình mới làm hỏng cả bản đồ.
    */
-  async getPartialPathMap(): Promise<PathMap> {
+  async getPathMap(): Promise<PathMap> {
     try {
       const root = await this.readContentRoot();
       const results = await Promise.allSettled(
