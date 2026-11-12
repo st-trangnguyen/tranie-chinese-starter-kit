@@ -13,6 +13,7 @@
 @import "./components/_learning-path.css";
 @import "./components/_lesson.css";
 @import "./components/_onboarding.css";
+@import "./components/_tone-choice.css";
 @import "./components/_update-banner.css";
 
 @import "./themes/_dark.css";

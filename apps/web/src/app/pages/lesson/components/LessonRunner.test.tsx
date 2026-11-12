@@ -1,7 +1,11 @@
 import type { Exercise, Word } from '@csk/shared';
 
 import type { ExerciseContent } from '@shared/models/exercise.model';
-import type { ExerciseRegistry } from '@shared/components/exercises/exercise.registry';
+import {
+  exerciseRegistry,
+  type ExerciseRegistry,
+} from '@shared/components/exercises/exercise.registry';
+import { AudioSpeedProvider } from '@shared/contexts/AudioSpeedContext';
 import { renderWithProviders, screen } from '@test/render';
 import { LessonRunner } from './LessonRunner';
 
@@ -86,5 +90,41 @@ describe('LessonRunner', () => {
     rerender(renderAt(1));
     expect(screen.getByText('Nội dung: 爸爸')).toBeInTheDocument();
     expect(screen.queryByText('Nội dung: 八')).not.toBeInTheDocument();
+  });
+
+  it('S4.1-AC2: should render a tone-choice exercise from the real registry without the skip fallback', () => {
+    const word: Word = {
+      id: '八',
+      hanzi: '八',
+      pinyin: 'bā',
+      vi: ['tám'],
+      viReviewed: true,
+      hsk: 1,
+      audio: 'audio/0123456789abcdef.mp3',
+    };
+
+    renderWithProviders(
+      <AudioSpeedProvider>
+        <LessonRunner
+          view={{
+            exercise: EXERCISES[0] as Exercise,
+            content: { words: [word], sentences: [] },
+            current: 1,
+            total: EXERCISES.length,
+            feedback: null,
+          }}
+          registry={exerciseRegistry}
+          handlers={{ onResult: vi.fn(), onContinue: vi.fn(), onSkip: vi.fn() }}
+        />
+      </AudioSpeedProvider>,
+    );
+
+    expect(screen.getByRole('group').querySelectorAll('button')).toHaveLength(
+      5,
+    );
+    expect(screen.queryByText(/Dạng bài này chưa có/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Bỏ qua câu này' }),
+    ).not.toBeInTheDocument();
   });
 });

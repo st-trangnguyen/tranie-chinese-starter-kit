@@ -28,5 +28,24 @@
     "failed": "Chưa đạt, cần từ {{percent}}%",
     "restart": "Làm lại",
     "notSaved": "Chưa lưu được kết quả bài này"
+  },
+  "toneChoice": {
+    "groupLabel": "Chọn thanh của âm tiết vừa nghe",
+    "answerLabel": "Thanh đúng",
+    "options": {
+      "1": "Thanh 1",
+      "2": "Thanh 2",
+      "3": "Thanh 3",
+      "4": "Thanh 4",
+      "5": "Thanh nhẹ"
+    },
+    "tones": {
+      "1": "thanh 1",
+      "2": "thanh 2",
+      "3": "thanh 3",
+      "4": "thanh 4",
+      "5": "thanh nhẹ"
+    },
+    "explanation": "Đáp án đúng: {{tone}} · {{pinyin}}"
   }
 }

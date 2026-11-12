@@ -80,3 +80,34 @@ export function pinyinKey(pinyin: string): string {
     .toLowerCase()
     .replace(/[\s'’-]/g, '');
 }
+
+export type Tone = 1 | 2 | 3 | 4 | 5;
+
+const TONE_BY_MARK: ReadonlyMap<string, Tone> = new Map(
+  Object.values(TONE_MARKS).flatMap((marks) =>
+    marks.map((mark, index): [string, Tone] => [mark, (index + 1) as Tone]),
+  ),
+);
+
+/** Rule (S4.1 AC1): thanh của pinyin theo dấu thanh đầu tiên; không có dấu là thanh nhẹ (5). */
+export function toneOfPinyin(pinyin: string): Tone {
+  for (const char of pinyin.normalize('NFC').toLowerCase()) {
+    const tone = TONE_BY_MARK.get(char);
+    if (tone !== undefined) {
+      return tone;
+    }
+  }
+  return 5;
+}
+
+const VOWEL_CLUSTER = /[aeiouüāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]+/g;
+
+/**
+ * Rule (S4.1 AC1): số âm tiết của pinyin = số cụm nguyên âm liền nhau (`bàba` 2, `xiān` 1,
+ * `huār` 1). Khoảng trắng, `'` và `-` ngắt cụm.
+ */
+export function countPinyinSyllables(pinyin: string): number {
+  return (
+    pinyin.normalize('NFC').toLowerCase().match(VOWEL_CLUSTER)?.length ?? 0
+  );
+}

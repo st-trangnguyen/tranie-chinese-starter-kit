@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  countPinyinSyllables,
   isToneMarkedPinyin,
   numberedToToneMarks,
   pinyinKey,
+  toneOfPinyin,
 } from './pinyin.utils';
 
 describe('numberedToToneMarks', () => {
@@ -45,5 +47,31 @@ describe('pinyinKey', () => {
   it('ignores case, spaces, hyphens and apostrophes', () => {
     expect(pinyinKey("Xī'ān")).toBe(pinyinKey('xī ān'));
     expect(pinyinKey('bù kèqi')).toBe('bùkèqi');
+  });
+});
+
+describe('toneOfPinyin', () => {
+  it('S4.1-AC1: âm tiết không có dấu thanh là thanh nhẹ (5)', () => {
+    expect(toneOfPinyin('ma')).toBe(5);
+  });
+
+  it('S4.1-AC1: đọc thanh 1 đến 4 từ dấu thanh', () => {
+    expect(toneOfPinyin('bā')).toBe(1);
+    expect(toneOfPinyin('bái')).toBe(2);
+    expect(toneOfPinyin('bǎi')).toBe(3);
+    expect(toneOfPinyin('bà')).toBe(4);
+  });
+});
+
+describe('countPinyinSyllables', () => {
+  it('S4.1-AC1: từ một âm tiết đếm là 1', () => {
+    expect(countPinyinSyllables('nǐ')).toBe(1);
+    expect(countPinyinSyllables('xiān')).toBe(1);
+    expect(countPinyinSyllables('huār')).toBe(1);
+  });
+
+  it('S4.1-AC1: từ nhiều âm tiết đếm theo cụm nguyên âm, kể cả viết liền hay cách nhau', () => {
+    expect(countPinyinSyllables('bàba')).toBe(2);
+    expect(countPinyinSyllables('nǐ hǎo')).toBe(2);
   });
 });

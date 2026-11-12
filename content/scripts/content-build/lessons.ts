@@ -1,4 +1,9 @@
-import { lessonSchema, type Lesson } from '@csk/shared';
+import {
+  countPinyinSyllables,
+  lessonSchema,
+  type Lesson,
+  type Word,
+} from '@csk/shared';
 
 import type { ContentIssue } from '../content-check/checkRunner';
 import {
@@ -146,4 +151,41 @@ export function lessonRefIssues(
           ? `Từ "${ref.id}" không có trong từ điển`
           : `Câu "${ref.id}" chưa được khai báo trong mục sentences của bài nào`,
     }));
+}
+
+/**
+ * S4.1 AC1: câu `tone-choice` phải dùng từ một âm tiết. Từ nhiều âm tiết → lỗi file:dòng nêu
+ * id bài và id câu. Từ không có trong từ điển do `lessonRefIssues` báo, ở đây bỏ qua.
+ */
+export function lessonToneChoiceIssues(
+  parsed: ParsedLesson,
+  wordsById: ReadonlyMap<string, Word>,
+): ContentIssue[] {
+  const value = parsed.source.value;
+  const exercises =
+    isRecord(value) && Array.isArray(value.exercises) ? value.exercises : [];
+  const lessonId = rawLessonId(parsed) ?? parsed.source.file;
+  return exercises.flatMap((exercise: unknown, index): ContentIssue[] => {
+    if (
+      !isRecord(exercise) ||
+      exercise.kind !== 'tone-choice' ||
+      typeof exercise.wordId !== 'string'
+    ) {
+      return [];
+    }
+    const word = wordsById.get(exercise.wordId);
+    if (word === undefined || countPinyinSyllables(word.pinyin) <= 1) {
+      return [];
+    }
+    const exerciseId =
+      typeof exercise.id === 'string' ? exercise.id : `#${index + 1}`;
+    return [
+      {
+        level: 'error',
+        file: parsed.source.file,
+        line: parsed.source.lineOf(['exercises', index, 'wordId']),
+        message: `Bài "${lessonId}", câu "${exerciseId}": từ "${word.id}" (${word.pinyin}) có nhiều âm tiết, câu tone-choice chỉ nhận từ một âm tiết`,
+      },
+    ];
+  });
 }

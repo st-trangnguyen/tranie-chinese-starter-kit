@@ -1,0 +1,37 @@
+/* Dạng bài nghe chọn thanh — S4.1. Nút cao tối thiểu 44px, focus nhìn thấy. */
+
+@layer components {
+  .tone-choice-option {
+    @apply min-h-11 rounded-md border-2 border-line bg-surface px-md text-body font-semibold text-fg transition-colors;
+  }
+
+  .tone-choice-option:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .tone-choice-option:disabled {
+    @apply opacity-70;
+  }
+
+  .tone-choice-answer {
+    @apply rounded-md border-2 border-line bg-surface p-md text-body text-fg;
+  }
+
+  .tone-choice-answer.is-correct {
+    @apply border-accent;
+  }
+
+  .tone-choice-answer.is-incorrect {
+    @apply border-fg;
+  }
+
+  .tone-choice-answer-tone {
+    @apply font-semibold;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tone-choice-option {
+      @apply transition-none;
+    }
+  }
+}

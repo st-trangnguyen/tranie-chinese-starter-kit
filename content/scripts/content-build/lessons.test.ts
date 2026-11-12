@@ -1,4 +1,11 @@
-import { lessonRefIssues, parseLesson } from './lessons';
+import type { Word } from '@csk/shared';
+
+import { assembleContent } from './assemble';
+import {
+  lessonRefIssues,
+  lessonToneChoiceIssues,
+  parseLesson,
+} from './lessons';
 import { parseYamlFile } from '../lib/yamlFile';
 
 const FILE = 'content/authored/lessons/intro/01.yaml';
@@ -85,5 +92,65 @@ describe('lessonRefIssues', () => {
     const issues = lessonRefIssues(parse(VALID), new Set(['八']), new Set());
 
     expect(issues[0]).toMatchObject({ line: 11 });
+  });
+});
+
+describe('lessonToneChoiceIssues', () => {
+  const wordsById = (pinyin: string): Map<string, Word> =>
+    new Map([
+      [
+        '八',
+        {
+          id: '八',
+          hanzi: '八',
+          pinyin,
+          vi: ['tám'],
+          viReviewed: true,
+          hsk: 1,
+          audio: 'audio/八.mp3',
+        },
+      ],
+    ]);
+
+  it('S4.1-AC1: từ nhiều âm tiết trong câu tone-choice bị báo lỗi kèm file, dòng, bài và câu', () => {
+    const issues = lessonToneChoiceIssues(parse(VALID), wordsById('bàba'));
+
+    expect(issues).toEqual([
+      expect.objectContaining({ level: 'error', file: FILE, line: 10 }),
+    ]);
+    expect(issues[0]?.message).toContain('intro-01');
+    expect(issues[0]?.message).toContain('e1');
+  });
+
+  it('S4.1-AC1: từ một âm tiết thì không có lỗi', () => {
+    expect(lessonToneChoiceIssues(parse(VALID), wordsById('bā'))).toEqual([]);
+  });
+});
+
+describe('assembleContent', () => {
+  it('S4.1-AC1: lỗi từ nhiều âm tiết của câu tone-choice nằm trong lessonIssues', () => {
+    const result = assembleContent({
+      hskEntries: [{ id: '八', hanzi: '八', pinyin: 'bàba', en: 'eight' }],
+      meanings: { 八: { vi: ['tám'], reviewed: true } },
+      overrides: {},
+      path: parseYamlFile(
+        'content/authored/path.yaml',
+        [
+          'stages:',
+          '  - id: st1',
+          '    title: Nhập môn',
+          '    units:',
+          '      - id: u1',
+          '        title: Thanh điệu',
+          '        lessons: [intro-01]',
+        ].join('\n'),
+      ),
+      lessons: [parseYamlFile(FILE, VALID.join('\n'))],
+      strokeData: () => undefined,
+    });
+
+    expect(result.lessonIssues).toEqual([
+      expect.objectContaining({ level: 'error', file: FILE, line: 10 }),
+    ]);
   });
 });
