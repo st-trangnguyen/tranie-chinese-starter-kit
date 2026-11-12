@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  convertTypedPinyin,
   countPinyinSyllables,
   isToneMarkedPinyin,
   numberedToToneMarks,
@@ -73,5 +74,48 @@ describe('countPinyinSyllables', () => {
   it('S4.1-AC1: từ nhiều âm tiết đếm theo cụm nguyên âm, kể cả viết liền hay cách nhau', () => {
     expect(countPinyinSyllables('bàba')).toBe(2);
     expect(countPinyinSyllables('nǐ hǎo')).toBe(2);
+  });
+});
+
+describe('convertTypedPinyin', () => {
+  it('S4.3-AC1: gõ ni3 thì hiện nǐ', () => {
+    expect(convertTypedPinyin('ni3')).toBe('nǐ');
+  });
+
+  it('S4.3-AC1: gõ liền nhiều âm tiết thì đổi từng âm tiết', () => {
+    expect(convertTypedPinyin('ni3hao3')).toBe('nǐhǎo');
+    expect(convertTypedPinyin('ni3 hao3')).toBe('nǐ hǎo');
+  });
+
+  it('S4.3-AC1: gõ v hoặc u: thay cho ü', () => {
+    expect(convertTypedPinyin('lv4')).toBe('lǜ');
+    expect(convertTypedPinyin('lu:4')).toBe('lǜ');
+    expect(convertTypedPinyin('jv4')).toBe('jù');
+  });
+
+  it('S4.3-AC1: số 5 là thanh nhẹ nên không có dấu', () => {
+    expect(convertTypedPinyin('ma5')).toBe('ma');
+  });
+
+  it('S4.3-AC1: số đứng sai chỗ thì giữ nguyên', () => {
+    expect(convertTypedPinyin('3')).toBe('3');
+    expect(convertTypedPinyin('3ni')).toBe('3ni');
+    expect(convertTypedPinyin('ni 3')).toBe('ni 3');
+    expect(convertTypedPinyin('xyz3')).toBe('xyz3');
+  });
+
+  it('S4.3-AC1: chạy lại trên kết quả không đổi gì thêm', () => {
+    for (const input of [
+      'ni3',
+      'ni3hao3',
+      'ni3 hao3',
+      'lv4',
+      'ma5',
+      '3',
+      'xyz3',
+    ]) {
+      const once = convertTypedPinyin(input);
+      expect(convertTypedPinyin(once)).toBe(once);
+    }
   });
 });
