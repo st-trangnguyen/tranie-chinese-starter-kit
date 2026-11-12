@@ -1,8 +1,12 @@
 import {
   contentRootSchema,
   lessonSchema,
+  sentenceSchema,
+  wordSchema,
   type ContentRoot,
   type Lesson,
+  type Sentence,
+  type Word,
 } from '@csk/shared';
 
 /**
@@ -12,6 +16,8 @@ import {
 export interface ContentSource {
   getContentRoot(): Promise<ContentRoot>;
   getLesson(lessonId: string): Promise<Lesson>;
+  getWords(): Promise<Word[]>;
+  getSentences(): Promise<Sentence[]>;
 }
 
 const CONTENT_BASE_PATH = '/content';
@@ -31,6 +37,17 @@ export class FetchContentSource implements ContentSource {
     return this.load(
       `${CONTENT_BASE_PATH}/lessons/${encodeURIComponent(lessonId)}.json`,
       lessonSchema,
+    );
+  }
+
+  getWords(): Promise<Word[]> {
+    return this.load(`${CONTENT_BASE_PATH}/words.json`, wordSchema.array());
+  }
+
+  getSentences(): Promise<Sentence[]> {
+    return this.load(
+      `${CONTENT_BASE_PATH}/sentences.json`,
+      sentenceSchema.array(),
     );
   }
 

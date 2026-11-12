@@ -6,6 +6,7 @@ import {
   exerciseRegistry,
   type ExerciseRegistry,
 } from '@shared/components/exercises/exercise.registry';
+import { AudioSpeedProvider } from '@shared/contexts/AudioSpeedContext';
 import { LessonRunner } from '../components/LessonRunner';
 import { LessonSummary } from '../components/LessonSummary';
 import { useLessonRunner } from '../hooks/useLessonRunner';
@@ -31,6 +32,7 @@ const LessonRunnerContainer = ({
   const {
     lesson,
     session,
+    contents,
     feedback,
     summary,
     isSaved,
@@ -49,6 +51,7 @@ const LessonRunnerContainer = ({
     restart();
   };
   const exercise = lesson?.exercises[session?.currentIndex ?? 0];
+  const content = exercise ? contents.get(exercise.id) : undefined;
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-lg p-xl">
@@ -66,22 +69,25 @@ const LessonRunnerContainer = ({
           onRestart={handleRestart}
         />
       )}
-      {session && session.phase !== 'finished' && exercise && (
-        <LessonRunner
-          view={{
-            exercise,
-            current: session.currentIndex + 1,
-            total: session.exerciseIds.length,
-            feedback,
-          }}
-          registry={registry}
-          shouldFocusProgress={isRestarted}
-          handlers={{
-            onResult: submitResult,
-            onContinue: continueLesson,
-            onSkip: skipExercise,
-          }}
-        />
+      {session && session.phase !== 'finished' && exercise && content && (
+        <AudioSpeedProvider key={lessonId}>
+          <LessonRunner
+            view={{
+              exercise,
+              content,
+              current: session.currentIndex + 1,
+              total: session.exerciseIds.length,
+              feedback,
+            }}
+            registry={registry}
+            shouldFocusProgress={isRestarted}
+            handlers={{
+              onResult: submitResult,
+              onContinue: continueLesson,
+              onSkip: skipExercise,
+            }}
+          />
+        </AudioSpeedProvider>
       )}
     </main>
   );

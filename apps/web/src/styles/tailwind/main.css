@@ -8,6 +8,7 @@
 @import "./base/_fonts.css";
 @import "./base/_base.css";
 
+@import "./components/_audio.css";
 @import "./components/_button.css";
 @import "./components/_learning-path.css";
 @import "./components/_lesson.css";
