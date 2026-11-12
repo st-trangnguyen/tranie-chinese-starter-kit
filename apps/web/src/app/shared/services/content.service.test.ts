@@ -76,4 +76,37 @@ describe('ContentService — use cases', () => {
       'Không mở được bài học.',
     );
   });
+
+  it('S3.6-AC2: should return the lesson ids of the unit in order', async () => {
+    const service = new ContentService(makeSource());
+
+    await expect(service.getUnitLessonIds('intro-a')).resolves.toEqual([
+      'l1',
+      'l2',
+    ]);
+  });
+
+  it('S3.6-AC2: should fail when the unit does not exist', async () => {
+    const service = new ContentService(makeSource());
+
+    await expect(service.getUnitLessonIds('khong-co')).rejects.toThrow(
+      'Không tìm thấy chủ đề.',
+    );
+  });
+
+  it('S3.6-AC2: should map each lesson id to its type', async () => {
+    const source = makeSource();
+    vi.mocked(source.getLesson).mockImplementation(async (id: string) => ({
+      ...makeLesson(id),
+      type: id === 'l2' ? 'test' : 'lesson',
+    }));
+    const service = new ContentService(source);
+
+    const types = await service.getLessonTypes(['l1', 'l2']);
+
+    expect([...types]).toEqual([
+      ['l1', 'lesson'],
+      ['l2', 'test'],
+    ]);
+  });
 });

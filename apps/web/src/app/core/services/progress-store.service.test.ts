@@ -1,5 +1,9 @@
 import Dexie from 'dexie';
-import { DEFAULT_SETTINGS, type Settings } from '@csk/shared';
+import {
+  DEFAULT_SETTINGS,
+  type LessonProgress,
+  type Settings,
+} from '@csk/shared';
 
 import { createDatabase } from '@core/helpers/db.helper';
 import { DexieProgressStore } from './progress-store.service';
@@ -168,6 +172,44 @@ describe('DexieProgressStore — lesson progress', () => {
       ...DEFAULT_SETTINGS,
       dailyGoalMinutes: 60,
     });
+    await expect(store.getAllLessonProgress()).resolves.toEqual([]);
+  });
+});
+
+describe('DexieProgressStore — saveLessonProgressBatch', () => {
+  it('S3.6-AC2: should write every row of the batch', async () => {
+    const { store } = makeStore();
+
+    await store.saveLessonProgressBatch([
+      { lessonId: 'intro-01', status: 'completed' },
+      { lessonId: 'intro-02', status: 'completed' },
+      { lessonId: 'intro-03', status: 'completed' },
+    ]);
+
+    await expect(store.getAllLessonProgress()).resolves.toEqual([
+      { lessonId: 'intro-01', status: 'completed' },
+      { lessonId: 'intro-02', status: 'completed' },
+      { lessonId: 'intro-03', status: 'completed' },
+    ]);
+  });
+
+  it('S3.6-AC2: should write no row when one row fails (atomic)', async () => {
+    const { store } = makeStore();
+    // Hàm không structured-clone được → IndexedDB từ chối dòng này.
+    const unwritable = {
+      lessonId: 'intro-02',
+      status: 'completed',
+      cursor: () => 1,
+    } as unknown as LessonProgress;
+
+    await expect(
+      store.saveLessonProgressBatch([
+        { lessonId: 'intro-01', status: 'completed' },
+        unwritable,
+        { lessonId: 'intro-03', status: 'completed' },
+      ]),
+    ).rejects.toThrow();
+
     await expect(store.getAllLessonProgress()).resolves.toEqual([]);
   });
 });

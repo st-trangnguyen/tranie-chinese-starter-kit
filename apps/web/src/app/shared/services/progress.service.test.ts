@@ -23,6 +23,7 @@ const makeStore = (
       lessonProgress.find((progress) => progress.lessonId === lessonId),
     ),
     saveLessonProgress: vi.fn(async () => undefined),
+    saveLessonProgressBatch: vi.fn(async () => undefined),
   };
   return store;
 };
@@ -102,6 +103,85 @@ describe('ProgressService — lesson status rule', () => {
 
   it('S3.1-AC2: should ignore completed ids that are not in the path', () => {
     expect(statusesOf(['unknown'])).toMatchObject({ l1: 'open', l2: 'locked' });
+  });
+});
+
+describe('ProgressService — placement test rule', () => {
+  const service = new ProgressService(makeStore());
+
+  const STAGES: Stage[] = [
+    {
+      id: 'hsk1',
+      title: 'hsk1',
+      units: [
+        { id: 'u1', title: 'u1', lessonIds: ['a1', 'a2', 'a-test'] },
+        {
+          id: 'u2',
+          title: 'u2',
+          lessonIds: ['b1', 'b-test-1', 'b2', 'b-test-2'],
+        },
+        { id: 'u3', title: 'u3', lessonIds: ['c1', 'c2'] },
+      ],
+    },
+  ];
+  const unitOf = (unitId: string) => {
+    const found = STAGES.flatMap((stage) => stage.units).find(
+      (unit) => unit.id === unitId,
+    );
+    if (!found) {
+      throw new Error(`missing unit ${unitId}`);
+    }
+    return found;
+  };
+  const statusesOf = (completed: string[]) =>
+    new Map(service.deriveLessonStatuses(STAGES, new Set(completed)));
+  const lessonTypes = new Map<string, 'lesson' | 'test'>([
+    ['a1', 'lesson'],
+    ['a2', 'lesson'],
+    ['a-test', 'test'],
+    ['b1', 'lesson'],
+    ['b-test-1', 'test'],
+    ['b2', 'lesson'],
+    ['b-test-2', 'test'],
+    ['c1', 'lesson'],
+    ['c2', 'lesson'],
+  ]);
+
+  it('S3.6-AC1: should return the last test lesson when the unit is fully locked', () => {
+    expect(
+      service.getPlacementTestLessonId(
+        unitOf('u2'),
+        statusesOf([]),
+        lessonTypes,
+      ),
+    ).toBe('b-test-2');
+  });
+
+  it('S3.6-AC1: should return no test lesson when the unit has an open lesson', () => {
+    expect(
+      service.getPlacementTestLessonId(
+        unitOf('u1'),
+        statusesOf([]),
+        lessonTypes,
+      ),
+    ).toBeUndefined();
+  });
+
+  it('S3.6-AC1: should return no test lesson when the unit is completed', () => {
+    const statuses = statusesOf(['a1', 'a2', 'a-test']);
+    expect(
+      service.getPlacementTestLessonId(unitOf('u1'), statuses, lessonTypes),
+    ).toBeUndefined();
+  });
+
+  it('S3.6-AC1: should return no test lesson when a locked unit has no test lesson', () => {
+    expect(
+      service.getPlacementTestLessonId(
+        unitOf('u3'),
+        statusesOf([]),
+        lessonTypes,
+      ),
+    ).toBeUndefined();
   });
 });
 
