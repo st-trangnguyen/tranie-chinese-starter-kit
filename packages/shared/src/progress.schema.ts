@@ -38,11 +38,13 @@ export const LESSON_PROGRESS_STATUSES = ['in-progress', 'completed'] as const;
 
 /**
  * Tiến độ một bài lưu trong bảng `lessonProgress` (docs/03-architecture.md §6.2).
- * `bestScore` (S3.4) và `cursor` (S3.3) thêm khi tới story đó.
+ * `cursor` (S3.3) là chỉ số câu 0-based; giá trị hỏng thành `undefined` để không mất cả dòng.
+ * `bestScore` (S3.4) thêm khi tới story đó.
  */
 export const lessonProgressSchema = z.object({
   lessonId: z.string().trim().min(1),
   status: z.enum(LESSON_PROGRESS_STATUSES),
+  cursor: z.number().int().min(0).optional().catch(undefined),
 });
 export type LessonProgress = z.infer<typeof lessonProgressSchema>;
 

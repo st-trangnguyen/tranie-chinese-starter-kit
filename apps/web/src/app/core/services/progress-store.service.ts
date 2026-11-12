@@ -16,6 +16,10 @@ export interface ProgressStore {
   saveSettings(settings: Settings): Promise<void>;
   /** Mọi tiến độ bài hợp lệ; dòng hỏng bị bỏ qua (S3.1 AC2). */
   getAllLessonProgress(): Promise<LessonProgress[]>;
+  /** Tiến độ một bài; không có dòng hoặc dòng hỏng thì `undefined` (S3.3). */
+  getLessonProgress(lessonId: string): Promise<LessonProgress | undefined>;
+  /** Ghi đè dòng cùng `lessonId`, không đụng bài khác. */
+  saveLessonProgress(progress: LessonProgress): Promise<void>;
 }
 
 export class DexieProgressStore implements ProgressStore {
@@ -41,6 +45,18 @@ export class DexieProgressStore implements ProgressStore {
       const result = lessonProgressSchema.safeParse(row);
       return result.success ? [result.data] : [];
     });
+  }
+
+  async getLessonProgress(
+    lessonId: string,
+  ): Promise<LessonProgress | undefined> {
+    const row = await this.db.lessonProgress.get(lessonId);
+    const result = lessonProgressSchema.safeParse(row);
+    return result.success ? result.data : undefined;
+  }
+
+  async saveLessonProgress(progress: LessonProgress): Promise<void> {
+    await this.db.lessonProgress.put(progress);
   }
 }
 
