@@ -64,7 +64,7 @@ Tầng test theo [spec-driven.md](../../../docs/05-standards/spec-driven.md) §4
 
 ## 10. REFACTOR
 
-- [ ] Dọn khi đã xanh: file < 300 dòng, không lặp, tự review theo CLAUDE.md §0, §2, §6, §7 (không `any`, không utility visual trong
+- [x] Dọn khi đã xanh: file < 300 dòng, không lặp, tự review theo CLAUDE.md §0, §2, §6, §7 (không `any`, không utility visual trong
   `className`, focus nhìn thấy, 44px, không `useEffect` đồng bộ).
 
 ## 11. Verify
