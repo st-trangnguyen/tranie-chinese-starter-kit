@@ -6,6 +6,7 @@ import type {
   ExerciseProps,
   ExerciseResult,
 } from './exercise.types';
+import { SoundPairExercise } from './SoundPairExercise';
 import { ToneChoiceExercise } from './ToneChoiceExercise';
 
 /** Map `kind` → component dạng bài. Dạng nào chưa có thì chưa đăng ký. */
@@ -16,6 +17,7 @@ export type ExerciseRegistry = Partial<{
 /** E4–E6 (rồi E10) đăng ký dần vào đây. */
 export const exerciseRegistry: ExerciseRegistry = {
   'tone-choice': ToneChoiceExercise,
+  'sound-pair': SoundPairExercise,
 };
 
 type AnyExerciseComponent = ComponentType<{
