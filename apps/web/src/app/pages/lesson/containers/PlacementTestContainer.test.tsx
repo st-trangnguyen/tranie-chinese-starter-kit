@@ -34,13 +34,20 @@ const testLessonOf = (id: string, words: readonly string[]) => ({
   })),
 });
 
+const regularLessonOf = (id: string) => ({
+  id,
+  type: 'lesson',
+  title: `Bài ${id}`,
+  exercises: [{ id: `${id}-e1`, kind: 'tone-choice', wordId: id }],
+});
+
 const LESSONS: Record<string, unknown> = {
-  a1: { id: 'a1', type: 'lesson', title: 'Bài a1', exercises: [] },
+  a1: regularLessonOf('a1'),
   'test-a': testLessonOf('test-a', ['甲', '乙']),
-  b1: { id: 'b1', type: 'lesson', title: 'Bài b1', exercises: [] },
-  b2: { id: 'b2', type: 'lesson', title: 'Bài b2', exercises: [] },
+  b1: regularLessonOf('b1'),
+  b2: regularLessonOf('b2'),
   'test-b': testLessonOf('test-b', ['八', '白', '百', '爸', '吧']),
-  c1: { id: 'c1', type: 'lesson', title: 'Bài c1', exercises: [] },
+  c1: regularLessonOf('c1'),
 };
 
 /** Dạng bài giả: hai nút để người học trả lời đúng hoặc sai. */

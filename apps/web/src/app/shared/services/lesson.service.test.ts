@@ -1523,4 +1523,40 @@ describe('LessonService — kết thúc bài kiểm tra vượt cấp (S3.6)', (
       await expect(store.getLessonProgress(lessonId)).resolves.toBeUndefined();
     }
   });
+
+  it('S3.6-AC2: should write only the finished test like a regular lesson when the real last test of the unit fails to load', async () => {
+    const store = new DexieProgressStore(
+      createDatabase(`test-${crypto.randomUUID()}`),
+    );
+    const source: LessonSource = {
+      getLesson: vi.fn(async (id: string) => {
+        if (id === 'u2-test') {
+          throw new Error('load failed');
+        }
+        return {
+          id,
+          type: id.endsWith('-test') ? ('test' as const) : ('lesson' as const),
+          title: id,
+          exercises: EXERCISES,
+        };
+      }),
+    };
+    const stored = new LessonService(source, store);
+    await completeUnits(store, 1);
+    const lessonIds = ['u2-1', 'u2-mid-test', 'u2-2', 'u2-test'];
+
+    const result = await stored.finishLesson(
+      'u2-mid-test',
+      passedSession(stored),
+      { lessonIds },
+    );
+
+    expect(result.isSaved).toBe(true);
+    await expect(store.getLessonProgress('u2-mid-test')).resolves.toMatchObject(
+      { status: 'completed' },
+    );
+    for (const lessonId of ['u2-1', 'u2-2', 'u2-test']) {
+      await expect(store.getLessonProgress(lessonId)).resolves.toBeUndefined();
+    }
+  });
 });
