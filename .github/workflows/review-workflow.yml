@@ -108,9 +108,9 @@ jobs:
               {"verdict": "pass" | "changes-requested", "summary": "<tóm tắt ngắn, kèm bảng
               độ phủ Scenario dạng markdown>", "blocking": <số finding blocker + major>}.
               `verdict` là `changes-requested` khi và chỉ khi còn blocker hoặc major.
-            - Không sửa file nào của repo, không commit, không push.
+            - Chỉ được ghi đúng file verdict. Không sửa file nào khác của repo, không commit, không push.
           claude_args: >-
-            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(pnpm typecheck),Bash(pnpm lint),Bash(pnpm --filter @csk/web exec vitest run:*),Write(${{ env.VERDICT_FILE }}),mcp__github_inline_comment__create_inline_comment"
+            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(pnpm typecheck),Bash(pnpm lint),Bash(pnpm --filter @csk/web exec vitest run:*),Write,mcp__github_inline_comment__create_inline_comment"
 
       - name: Đăng tóm tắt và chốt kết quả
         if: steps.scope.outputs.needed == 'true'
