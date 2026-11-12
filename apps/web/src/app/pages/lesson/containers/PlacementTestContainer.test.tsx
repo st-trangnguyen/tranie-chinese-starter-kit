@@ -5,6 +5,7 @@ import { render } from '@testing-library/react';
 import { createDatabase } from '@core/helpers/db.helper';
 import type { ExerciseRegistry } from '@shared/components/exercises/exercise.registry';
 import testI18n from '@test/i18n';
+import { mockContentFetch } from '@test/mocks/content-fetch';
 import { screen, userEvent, waitFor } from '@test/render';
 import PlacementTestContainer from './PlacementTestContainer';
 
@@ -91,17 +92,19 @@ beforeEach(async () => {
   const db = createDatabase();
   await db.lessonProgress.clear();
   db.close();
-  vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
-    const url = String(input);
-    if (url === '/content/content.json') {
-      return Response.json(CONTENT_ROOT);
-    }
-    const id = /\/content\/lessons\/(.+)\.json$/.exec(url)?.[1] ?? '';
-    const lesson = LESSONS[id];
-    return lesson === undefined
-      ? new Response('', { status: 404 })
-      : Response.json(lesson);
-  });
+  vi.spyOn(globalThis, 'fetch').mockImplementation(
+    mockContentFetch(async (input) => {
+      const url = String(input);
+      if (url === '/content/content.json') {
+        return Response.json(CONTENT_ROOT);
+      }
+      const id = /\/content\/lessons\/(.+)\.json$/.exec(url)?.[1] ?? '';
+      const lesson = LESSONS[id];
+      return lesson === undefined
+        ? new Response('', { status: 404 })
+        : Response.json(lesson);
+    }),
+  );
 });
 
 afterEach(() => {
