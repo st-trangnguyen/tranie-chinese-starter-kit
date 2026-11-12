@@ -20,6 +20,8 @@ interface LessonRunnerProps {
   view: LessonRunnerView;
   registry: ExerciseRegistry;
   handlers: LessonRunnerHandlers;
+  /** Focus dòng "Câu k / n" khi hiện, sau khi làm lại bài (S3.5). */
+  shouldFocusProgress?: boolean;
 }
 
 /** Hiện câu hiện tại của bài qua registry, kèm thanh tiến độ và kết quả (S3.2). */
@@ -27,6 +29,7 @@ export const LessonRunner = ({
   view,
   registry,
   handlers,
+  shouldFocusProgress = false,
 }: LessonRunnerProps) => {
   const { t } = useTranslation('lesson');
   const { exercise, current, total, feedback } = view;
@@ -34,7 +37,11 @@ export const LessonRunner = ({
 
   return (
     <div className="flex flex-col gap-lg">
-      <LessonProgressBar current={current} total={total} />
+      <LessonProgressBar
+        current={current}
+        total={total}
+        shouldFocusOnMount={shouldFocusProgress}
+      />
       {ExerciseComponent ? (
         <ExerciseComponent
           key={exercise.id}

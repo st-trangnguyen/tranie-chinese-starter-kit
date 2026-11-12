@@ -17,6 +17,8 @@ export interface LessonSession {
   correctCount: number;
   /** Số câu đã trả lời sai (S3.4). */
   wrongCount: number;
+  /** ID các câu đã trả lời sai, theo thứ tự làm bài; không gồm câu bỏ qua (S3.5). */
+  wrongExerciseIds: readonly string[];
   /** Mốc bắt đầu (ms epoch). */
   startedAt: number;
   /** Mốc kết thúc (ms epoch); null khi chưa xong bài. */
@@ -32,6 +34,8 @@ export interface LessonSummary {
   wrongCount: number;
   skippedCount: number;
   elapsedSeconds: number;
+  /** null với bài thường; với bài kiểm tra: đạt ngưỡng hay chưa (S3.5). */
+  isPassed: boolean | null;
   isComplete: boolean;
 }
 

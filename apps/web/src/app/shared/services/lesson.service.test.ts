@@ -6,7 +6,11 @@ import {
   type ProgressStore,
 } from '@core/services/progress-store.service';
 import { ProgressService } from './progress.service';
-import { LessonService, type LessonSource } from './lesson.service';
+import {
+  LessonService,
+  type LessonSource,
+  type WrongAnswerSink,
+} from './lesson.service';
 
 const EXERCISES: Exercise[] = [
   { id: 'e1', kind: 'tone-choice', wordId: '八' },
@@ -424,7 +428,7 @@ describe('LessonService — tổng kết bài (S3.4)', () => {
     ]);
 
     expect(session.phase).toBe('finished');
-    expect(service.summarize(session)).toMatchObject({
+    expect(service.summarize(session, 'lesson')).toMatchObject({
       scorePercent: 80,
       correctCount: 4,
       answeredCount: 5,
@@ -444,7 +448,7 @@ describe('LessonService — tổng kết bài (S3.4)', () => {
   it('S3.4-AC1: should score 100% with 0 wrong when all answers are correct', () => {
     const session = answerAll(makeExercises(5), [true, true, true, true, true]);
 
-    expect(service.summarize(session)).toMatchObject({
+    expect(service.summarize(session, 'lesson')).toMatchObject({
       scorePercent: 100,
       wrongCount: 0,
     });
@@ -459,7 +463,7 @@ describe('LessonService — tổng kết bài (S3.4)', () => {
       false,
     ]);
 
-    expect(service.summarize(session)).toMatchObject({
+    expect(service.summarize(session, 'lesson')).toMatchObject({
       scorePercent: 0,
       wrongCount: 5,
     });
@@ -468,7 +472,7 @@ describe('LessonService — tổng kết bài (S3.4)', () => {
   it('S3.4-AC1: should round the score to an integer, 2 of 3 is 67%', () => {
     const session = answerAll(makeExercises(3), [true, false, true]);
 
-    expect(service.summarize(session).scorePercent).toBe(67);
+    expect(service.summarize(session, 'lesson').scorePercent).toBe(67);
   });
 
   it('S3.4-AC1: should score only answered exercises and mark the lesson incomplete when one is skipped', () => {
@@ -484,7 +488,7 @@ describe('LessonService — tổng kết bài (S3.4)', () => {
     );
 
     expect(session.phase).toBe('finished');
-    expect(service.summarize(session)).toMatchObject({
+    expect(service.summarize(session, 'lesson')).toMatchObject({
       scorePercent: 100,
       answeredCount: 2,
       wrongCount: 0,
@@ -496,13 +500,13 @@ describe('LessonService — tổng kết bài (S3.4)', () => {
   it('S3.4-AC1: should be complete when finished with nothing skipped', () => {
     const session = answerAll(makeExercises(2), [true, false]);
 
-    expect(service.summarize(session).isComplete).toBe(true);
+    expect(service.summarize(session, 'lesson').isComplete).toBe(true);
   });
 
   it('S3.4-AC1: should not be complete before the last exercise is done', () => {
     const session = service.startSession(makeExercises(3), 0, START);
 
-    expect(service.summarize(session).isComplete).toBe(false);
+    expect(service.summarize(session, 'lesson').isComplete).toBe(false);
   });
 
   it('S3.4-AC1: should start counters at 0 and time from the opening moment when resuming mid-lesson', () => {
@@ -520,7 +524,7 @@ describe('LessonService — tổng kết bài (S3.4)', () => {
       START + 9_000,
     );
 
-    expect(service.summarize(session)).toMatchObject({
+    expect(service.summarize(session, 'lesson')).toMatchObject({
       scorePercent: 100,
       answeredCount: 1,
       wrongCount: 0,
@@ -535,7 +539,7 @@ describe('LessonService — tổng kết bài (S3.4)', () => {
       START + 125_000,
     );
 
-    expect(service.summarize(session).elapsedSeconds).toBe(125);
+    expect(service.summarize(session, 'lesson').elapsedSeconds).toBe(125);
   });
 
   it('S3.4-AC1: should never report negative elapsed time when the clock goes backwards', () => {
@@ -545,7 +549,7 @@ describe('LessonService — tổng kết bài (S3.4)', () => {
       START - 5_000,
     );
 
-    expect(service.summarize(session).elapsedSeconds).toBe(0);
+    expect(service.summarize(session, 'lesson').elapsedSeconds).toBe(0);
   });
 });
 
@@ -753,5 +757,541 @@ describe('LessonService — ghi tiến độ lỗi khi xong bài (S3.4)', () => 
       isComplete: true,
       isSaved: false,
     });
+  });
+});
+
+describe('LessonService — ngưỡng đạt của bài kiểm tra (S3.5)', () => {
+  it('S3.5-AC1: should pass a test at exactly 80%, 4 of 5 correct', () => {
+    expect(service.isTestPassed(4, 5)).toBe(true);
+  });
+
+  it('S3.5-AC1: should pass a test above 80%, 5 of 5 correct', () => {
+    expect(service.isTestPassed(5, 5)).toBe(true);
+  });
+
+  it('S3.5-AC1: should not pass a test below 80%, 23 of 30 correct', () => {
+    expect(service.isTestPassed(23, 30)).toBe(false);
+  });
+
+  it('S3.5-AC1: should not pass a test just under 80%, 39 of 49 correct', () => {
+    expect(service.isTestPassed(39, 49)).toBe(false);
+  });
+});
+
+describe('LessonService — tổng kết theo loại bài (S3.5)', () => {
+  const START = 1_000_000;
+
+  const makeExercises = (count: number): Exercise[] =>
+    Array.from({ length: count }, (_value, index) => ({
+      id: `x${index}`,
+      kind: 'tone-choice' as const,
+      wordId: '八',
+    }));
+
+  // outcome: true/false = trả lời đúng/sai, 'skip' = bỏ qua câu.
+  const playThrough = (
+    outcomes: readonly (boolean | 'skip')[],
+  ): ReturnType<LessonService['startSession']> => {
+    let session = service.startSession(
+      makeExercises(outcomes.length),
+      0,
+      START,
+    );
+    outcomes.forEach((outcome) => {
+      session =
+        outcome === 'skip'
+          ? service.skip(session, START)
+          : service.advance(
+              service.submitResult(session, { isCorrect: outcome }),
+              START,
+            );
+    });
+    return session;
+  };
+
+  it('S3.5-AC1: should not pass a test with a skipped question even when all answered are correct', () => {
+    const session = playThrough([true, true, true, true, 'skip']);
+
+    expect(session.phase).toBe('finished');
+    expect(service.summarize(session, 'test')).toMatchObject({
+      skippedCount: 1,
+      isPassed: true,
+      isComplete: false,
+    });
+  });
+
+  it('S3.5-AC1: should complete a test finished at 80% with nothing skipped', () => {
+    const session = playThrough([true, true, true, true, false]);
+
+    expect(service.summarize(session, 'test')).toMatchObject({
+      isPassed: true,
+      isComplete: true,
+    });
+  });
+
+  it('S3.5-AC1: should not complete a test finished below 80%', () => {
+    const session = playThrough([true, true, false, false, false]);
+
+    expect(service.summarize(session, 'test')).toMatchObject({
+      isPassed: false,
+      isComplete: false,
+    });
+  });
+
+  it('S3.5-AC1: should complete a regular lesson with all answers wrong, without a minimum score', () => {
+    const session = playThrough([false, false, false, false, false]);
+
+    expect(service.summarize(session, 'lesson')).toMatchObject({
+      scorePercent: 0,
+      isPassed: null,
+      isComplete: true,
+    });
+  });
+});
+
+describe('LessonService — danh sách câu sai của phiên (S3.5)', () => {
+  const START = 1_000_000;
+
+  const makeExercises = (count: number): Exercise[] =>
+    Array.from({ length: count }, (_value, index) => ({
+      id: `x${index}`,
+      kind: 'tone-choice' as const,
+      wordId: '八',
+    }));
+
+  it('S3.5-AC2: should start a new session with no wrong exercises', () => {
+    const session = service.startSession(makeExercises(3), 0, START);
+
+    expect(session.wrongExerciseIds).toEqual([]);
+  });
+
+  it('S3.5-AC2: should record the id of the current exercise when answered wrong', () => {
+    const session = service.submitResult(
+      service.startSession(makeExercises(3), 0, START),
+      { isCorrect: false },
+    );
+
+    expect(session.wrongExerciseIds).toEqual(['x0']);
+  });
+
+  it('S3.5-AC2: should not record an exercise answered correctly', () => {
+    const session = service.submitResult(
+      service.startSession(makeExercises(3), 0, START),
+      { isCorrect: true },
+    );
+
+    expect(session.wrongExerciseIds).toEqual([]);
+  });
+
+  it('S3.5-AC2: should not record the same wrong exercise twice on a double submit', () => {
+    const start = service.startSession(makeExercises(3), 0, START);
+    const once = service.submitResult(start, { isCorrect: false });
+    const twice = service.submitResult(once, { isCorrect: false });
+
+    expect(twice.wrongExerciseIds).toEqual(['x0']);
+  });
+
+  it('S3.5-AC2: should collect wrong ids in order across the session, ignoring correct and skipped ones', () => {
+    let session = service.startSession(makeExercises(4), 0, START);
+    session = service.advance(
+      service.submitResult(session, { isCorrect: false }),
+      START,
+    );
+    session = service.advance(
+      service.submitResult(session, { isCorrect: true }),
+      START,
+    );
+    session = service.skip(session, START);
+    session = service.submitResult(session, { isCorrect: false });
+
+    expect(session.wrongExerciseIds).toEqual(['x0', 'x3']);
+  });
+
+  it('S3.5-AC2: should not carry wrong ids from a previous attempt into a retry session', () => {
+    const exercises = makeExercises(2);
+    const first = service.submitResult(
+      service.startSession(exercises, 0, START),
+      { isCorrect: false },
+    );
+    const retry = service.startSession(exercises, 0, START);
+
+    expect(first.wrongExerciseIds).toEqual(['x0']);
+    expect(retry.wrongExerciseIds).toEqual([]);
+    expect(
+      service.submitResult(retry, { isCorrect: true }).wrongExerciseIds,
+    ).toEqual([]);
+  });
+});
+
+describe('LessonService — kết thúc bài kiểm tra cuối chủ đề (S3.5)', () => {
+  const NOW = 1_000_000;
+
+  const STAGES: Stage[] = [
+    {
+      id: 'intro',
+      title: 'intro',
+      units: [
+        { id: 'intro-a', title: 'a', lessonIds: ['a1', 'a-test'] },
+        { id: 'intro-b', title: 'b', lessonIds: ['b1'] },
+      ],
+    },
+  ];
+
+  const makeTestService = () => {
+    const store = new DexieProgressStore(
+      createDatabase(`test-${crypto.randomUUID()}`),
+    );
+    const source: LessonSource = {
+      getLesson: vi.fn(async (id: string) => ({
+        id,
+        type: id === 'a-test' ? ('test' as const) : ('lesson' as const),
+        title: id,
+        exercises: EXERCISES,
+      })),
+    };
+    return { store, stored: new LessonService(source, store) };
+  };
+
+  // outcome: true/false = trả lời đúng/sai, 'skip' = bỏ qua câu.
+  const finishedSession = (
+    stored: LessonService,
+    outcomes: readonly (boolean | 'skip')[],
+  ) => {
+    const exercises: Exercise[] = outcomes.map((_outcome, index) => ({
+      id: `x${index}`,
+      kind: 'tone-choice' as const,
+      wordId: '八',
+    }));
+    let session = stored.startSession(exercises, 0, NOW);
+    outcomes.forEach((outcome) => {
+      session =
+        outcome === 'skip'
+          ? stored.skip(session, NOW)
+          : stored.advance(
+              stored.submitResult(session, { isCorrect: outcome }),
+              NOW,
+            );
+    });
+    return session;
+  };
+
+  const mapStatuses = async (store: DexieProgressStore) => {
+    const progress = new ProgressService(store);
+    const completed = await progress.getCompletedLessonIds();
+    return Object.fromEntries(progress.deriveLessonStatuses(STAGES, completed));
+  };
+
+  const passFirstLesson = (store: DexieProgressStore) =>
+    store.saveLessonProgress({ lessonId: 'a1', status: 'completed' });
+
+  it('S3.5-AC1: should complete the test and open the next topic when finished at exactly 80%', async () => {
+    const { store, stored } = makeTestService();
+    await passFirstLesson(store);
+
+    await stored.finishLesson(
+      'a-test',
+      finishedSession(stored, [true, true, true, true, false]),
+    );
+
+    await expect(mapStatuses(store)).resolves.toEqual({
+      a1: 'completed',
+      'a-test': 'completed',
+      b1: 'open',
+    });
+  });
+
+  it('S3.5-AC1: should keep the next topic locked when the test is finished below 80%', async () => {
+    const { store, stored } = makeTestService();
+    await passFirstLesson(store);
+
+    await stored.finishLesson(
+      'a-test',
+      finishedSession(stored, [true, true, false, false, false]),
+    );
+
+    await expect(mapStatuses(store)).resolves.toEqual({
+      a1: 'completed',
+      'a-test': 'open',
+      b1: 'locked',
+    });
+  });
+
+  it('S3.5-AC1: should keep the next topic locked when the test has a skipped question, even if all answered are correct', async () => {
+    const { store, stored } = makeTestService();
+    await passFirstLesson(store);
+
+    await stored.finishLesson(
+      'a-test',
+      finishedSession(stored, [true, true, true, true, 'skip']),
+    );
+
+    await expect(mapStatuses(store)).resolves.toMatchObject({
+      'a-test': 'open',
+      b1: 'locked',
+    });
+  });
+
+  it('S3.5-AC1: should keep a passed test completed when a retry scores lower', async () => {
+    const { store, stored } = makeTestService();
+    await passFirstLesson(store);
+    await stored.finishLesson(
+      'a-test',
+      finishedSession(stored, [true, true, true, true, true]),
+    );
+
+    await stored.finishLesson(
+      'a-test',
+      finishedSession(stored, [true, true, false, false, false]),
+    );
+
+    await expect(mapStatuses(store)).resolves.toMatchObject({
+      'a-test': 'completed',
+      b1: 'open',
+    });
+  });
+
+  it('S3.5-AC1: should report a failed test as not passed in the returned summary', async () => {
+    const { stored } = makeTestService();
+
+    const result = await stored.finishLesson(
+      'a-test',
+      finishedSession(stored, [true, true, false, false, false]),
+    );
+
+    expect(result).toMatchObject({ isPassed: false, isComplete: false });
+  });
+
+  const makeSinkService = () => {
+    const { store } = makeTestService();
+    const record = vi.fn<WrongAnswerSink['record']>(async () => undefined);
+    const source: LessonSource = {
+      getLesson: vi.fn(async (id: string) => ({
+        id,
+        type: id === 'a-test' ? ('test' as const) : ('lesson' as const),
+        title: id,
+        exercises: EXERCISES,
+      })),
+    };
+    return {
+      store,
+      record,
+      stored: new LessonService(source, store, { record }),
+    };
+  };
+
+  it('S3.5-AC2: should hand the wrong questions to the review sink when the test is not passed', async () => {
+    const { stored, record } = makeSinkService();
+
+    await stored.finishLesson(
+      'a-test',
+      finishedSession(stored, [true, true, false, false, false]),
+    );
+
+    expect(record).toHaveBeenCalledExactlyOnceWith('a-test', [
+      'x2',
+      'x3',
+      'x4',
+    ]);
+  });
+
+  it('S3.5-AC2: should still hand over the wrong questions when the test is passed with some wrong', async () => {
+    const { stored, record } = makeSinkService();
+
+    await stored.finishLesson(
+      'a-test',
+      finishedSession(stored, [true, true, true, true, false]),
+    );
+
+    expect(record).toHaveBeenCalledExactlyOnceWith('a-test', ['x4']);
+  });
+
+  it('S3.5-AC2: should hand over nothing when the test has no wrong question', async () => {
+    const { stored, record } = makeSinkService();
+
+    await stored.finishLesson(
+      'a-test',
+      finishedSession(stored, [true, true, true, true, true]),
+    );
+
+    expect(record).not.toHaveBeenCalled();
+  });
+
+  it('S3.5-AC2: should not call the review sink for a regular lesson even with wrong answers', async () => {
+    const { stored, record } = makeSinkService();
+
+    await stored.finishLesson(
+      'b1',
+      finishedSession(stored, [true, false, false]),
+    );
+
+    expect(record).not.toHaveBeenCalled();
+  });
+
+  it('S3.5-AC2: should report isSaved false when the review sink fails, and still return the summary', async () => {
+    const { store } = makeTestService();
+    const record = vi.fn(async () => {
+      throw new Error('sink down');
+    });
+    const source: LessonSource = {
+      getLesson: vi.fn(async (id: string) => ({
+        id,
+        type: 'test' as const,
+        title: id,
+        exercises: EXERCISES,
+      })),
+    };
+    const stored = new LessonService(source, store, { record });
+
+    const result = await stored.finishLesson(
+      'a-test',
+      finishedSession(stored, [true, true, false, false, false]),
+    );
+
+    expect(record).toHaveBeenCalled();
+    expect(result).toMatchObject({ isSaved: false, isPassed: false });
+  });
+
+  it('S3.5-AC1: should report isSaved false and write nothing when the lesson cannot be read', async () => {
+    const { store } = makeTestService();
+    const source: LessonSource = {
+      getLesson: vi.fn(async () => {
+        throw new Error('content missing');
+      }),
+    };
+    const stored = new LessonService(source, store);
+
+    const result = await stored.finishLesson(
+      'a-test',
+      finishedSession(stored, [true, true, true, true, true]),
+    );
+
+    expect(result.isSaved).toBe(false);
+    await expect(store.getLessonProgress('a-test')).resolves.toBeUndefined();
+  });
+});
+
+describe('LessonService — mở lại bài kiểm tra đang làm dở (S3.5)', () => {
+  const makeTestService = () => {
+    const store = new DexieProgressStore(
+      createDatabase(`test-${crypto.randomUUID()}`),
+    );
+    const source: LessonSource = {
+      getLesson: vi.fn(async (id: string) => ({
+        id,
+        type: id === 'a-test' ? ('test' as const) : ('lesson' as const),
+        title: id,
+        exercises: EXERCISES,
+      })),
+    };
+    return { store, stored: new LessonService(source, store) };
+  };
+
+  it('S3.5-X1: should open a test at the first question even when a position was saved', async () => {
+    const { store, stored } = makeTestService();
+    await store.saveLessonProgress({
+      lessonId: 'a-test',
+      status: 'in-progress',
+      cursor: 2,
+    });
+
+    const { session } = await stored.openLesson('a-test');
+
+    expect(session).toMatchObject({ currentIndex: 0, phase: 'answering' });
+  });
+
+  it('S3.5-X1: should not save a position when the learner leaves a test mid-way', async () => {
+    const { store, stored } = makeTestService();
+
+    await stored.saveCursor('a-test', stored.startSession(EXERCISES, 2));
+
+    await expect(store.getLessonProgress('a-test')).resolves.toBeUndefined();
+  });
+
+  it('S3.5-X1: should leave an existing test progress row unchanged when the learner leaves mid-way', async () => {
+    const { store, stored } = makeTestService();
+    await store.saveLessonProgress({ lessonId: 'a-test', status: 'completed' });
+
+    await stored.saveCursor('a-test', stored.startSession(EXERCISES, 1));
+
+    await expect(store.getLessonProgress('a-test')).resolves.toEqual({
+      lessonId: 'a-test',
+      status: 'completed',
+    });
+  });
+
+  it('S3.5-X1: should still save the position for a regular lesson', async () => {
+    const { store, stored } = makeTestService();
+
+    await stored.saveCursor('a1', stored.startSession(EXERCISES, 2));
+
+    await expect(store.getLessonProgress('a1')).resolves.toEqual({
+      lessonId: 'a1',
+      status: 'in-progress',
+      cursor: 2,
+    });
+  });
+});
+
+describe('LessonService — nguồn nội dung lỗi lúc kết thúc bài (S3.5)', () => {
+  const NOW = 1_000_000;
+
+  // Nguồn đọc được lúc mở bài rồi lỗi từ lần đọc kế tiếp (mất mạng giữa chừng).
+  const makeFlakySetup = (type: 'lesson' | 'test') => {
+    const store = new DexieProgressStore(
+      createDatabase(`test-${crypto.randomUUID()}`),
+    );
+    const getLesson = vi
+      .fn<LessonSource['getLesson']>()
+      .mockResolvedValueOnce({
+        id: 'l1',
+        type,
+        title: 'l1',
+        exercises: EXERCISES,
+      })
+      .mockRejectedValue(new Error('mất mạng'));
+    return { store, stored: new LessonService({ getLesson }, store) };
+  };
+
+  const finishedWith = (
+    stored: LessonService,
+    outcomes: readonly boolean[],
+  ) => {
+    let session = stored.startSession(EXERCISES, 0, NOW);
+    outcomes.forEach((isCorrect) => {
+      session = stored.advance(
+        stored.submitResult(session, { isCorrect }),
+        NOW,
+      );
+    });
+    return session;
+  };
+
+  it('S3.5-AC1: should still mark a regular lesson completed and saved when the content source fails at finish', async () => {
+    const { store, stored } = makeFlakySetup('lesson');
+    await stored.openLesson('l1');
+
+    const outcome = await stored.finishLesson(
+      'l1',
+      finishedWith(stored, [true, true, true]),
+    );
+
+    expect(outcome.isSaved).toBe(true);
+    await expect(store.getLessonProgress('l1')).resolves.toEqual({
+      lessonId: 'l1',
+      status: 'completed',
+    });
+  });
+
+  it('S3.5-AC1: should still score an opened test at 80% when the content source fails at finish', async () => {
+    const { store, stored } = makeFlakySetup('test');
+    await stored.openLesson('l1');
+
+    const outcome = await stored.finishLesson(
+      'l1',
+      finishedWith(stored, [true, false, false]),
+    );
+
+    expect(outcome).toMatchObject({ isPassed: false, isComplete: false });
+    await expect(store.getLessonProgress('l1')).resolves.toBeUndefined();
   });
 });

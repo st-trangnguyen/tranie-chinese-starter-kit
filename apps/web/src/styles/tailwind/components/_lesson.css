@@ -70,6 +70,18 @@
     @apply text-body text-fg;
   }
 
+  .lesson-summary-verdict {
+    @apply rounded-md border-2 p-md text-body font-semibold;
+  }
+
+  .lesson-summary-verdict.is-passed {
+    @apply border-success bg-success-soft text-success-text;
+  }
+
+  .lesson-summary-verdict.is-failed {
+    @apply border-danger bg-danger-soft text-danger-text;
+  }
+
   .lesson-summary-warning {
     @apply rounded-md border-2 border-danger bg-danger-soft text-body-sm font-semibold text-danger-text;
   }

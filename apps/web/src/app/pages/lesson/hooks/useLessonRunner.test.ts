@@ -3,6 +3,23 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { progressStore } from '@core/services/progress-store.service';
 import { useLessonRunner } from './useLessonRunner';
 
+// Ranh giới ngoài của hook là cổng WrongAnswerSink (hook tự tạo LessonService nên không tiêm
+// được qua props): thay lớp LessonService bằng bản con luôn dùng cổng giả, logic còn lại là thật.
+const sink = vi.hoisted(() => ({
+  record: vi.fn<(lessonId: string, ids: readonly string[]) => Promise<void>>(),
+}));
+
+vi.mock('@shared/services/lesson.service', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@shared/services/lesson.service')>();
+  class LessonServiceWithSink extends actual.LessonService {
+    constructor() {
+      super(undefined, undefined, sink);
+    }
+  }
+  return { ...actual, LessonService: LessonServiceWithSink };
+});
+
 const lessonOf = (id: string) => ({
   id,
   type: 'lesson',
@@ -319,4 +336,38 @@ describe('useLessonRunner — lưu vị trí câu', () => {
       expect(save).not.toHaveBeenCalled();
     },
   );
+});
+
+describe('useLessonRunner — làm lại bài kiểm tra (S3.5)', () => {
+  const answerAll = async (
+    result: { current: ReturnType<typeof useLessonRunner> },
+    outcomes: readonly boolean[],
+  ) => {
+    for (const isCorrect of outcomes) {
+      act(() => result.current.submitResult({ isCorrect }));
+      act(() => result.current.continueLesson());
+    }
+    await act(async () => undefined);
+  };
+
+  it('S3.5-AC2: should record only the wrong ids of the retry attempt, not those of the first one', async () => {
+    sink.record.mockReset().mockResolvedValue(undefined);
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () =>
+      Response.json({ ...threeExerciseLesson('t'), type: 'test' }),
+    );
+    vi.spyOn(progressStore, 'getLessonProgress').mockResolvedValue(undefined);
+    vi.spyOn(progressStore, 'saveLessonProgress').mockResolvedValue(undefined);
+    const { result } = renderHook(() => useLessonRunner('t'));
+    await waitFor(() => expect(result.current.session).not.toBeNull());
+
+    await answerAll(result, [false, true, true]);
+    await waitFor(() => expect(sink.record).toHaveBeenCalledTimes(1));
+    expect(sink.record).toHaveBeenLastCalledWith('t', ['t-e1']);
+
+    act(() => result.current.restart());
+    await answerAll(result, [true, false, false]);
+
+    await waitFor(() => expect(sink.record).toHaveBeenCalledTimes(2));
+    expect(sink.record).toHaveBeenLastCalledWith('t', ['t-e2', 't-e3']);
+  });
 });

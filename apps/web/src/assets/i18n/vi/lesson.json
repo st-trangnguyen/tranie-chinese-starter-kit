@@ -19,6 +19,9 @@
     "time": "Thời gian",
     "wrongLabel": "Số câu sai",
     "wrong": "Sai {{count}} câu",
+    "passed": "Bạn đã đạt",
+    "failed": "Chưa đạt, cần từ {{percent}}%",
+    "restart": "Làm lại",
     "notSaved": "Chưa lưu được kết quả bài này"
   }
 }

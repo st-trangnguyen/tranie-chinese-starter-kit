@@ -1,7 +1,12 @@
+import { I18nextProvider } from 'react-i18next';
+import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
+import { render } from '@testing-library/react';
+
 import { createDatabase } from '@core/helpers/db.helper';
 import { DexieProgressStore } from '@core/services/progress-store.service';
 import type { ExerciseRegistry } from '@shared/components/exercises/exercise.registry';
-import { renderWithProviders, screen, waitFor } from '@test/render';
+import testI18n from '@test/i18n';
+import { renderWithProviders, screen, userEvent, waitFor } from '@test/render';
 import LessonRunnerContainer from './LessonRunnerContainer';
 
 const LESSON = {
@@ -526,5 +531,209 @@ describe('LessonRunnerContainer — tổng kết bài (S3.4)', () => {
     expect(screen.getByText('67%')).toBeInTheDocument();
     expect(screen.getByText('Đúng 2 / 3 câu')).toBeInTheDocument();
     expect(screen.getByText('Sai 1 câu')).toBeInTheDocument();
+  });
+});
+
+describe('LessonRunnerContainer — bài kiểm tra cuối chủ đề (S3.5)', () => {
+  type Answer = 'Chọn đúng' | 'Chọn sai';
+
+  const TEST_LESSON = {
+    ...LESSON,
+    id: 'topic-test',
+    type: 'test',
+    title: 'Kiểm tra chủ đề',
+    exercises: ['八', '白', '百', '爸', '吧'].map((wordId, index) => ({
+      id: `e${index + 1}`,
+      kind: 'tone-choice',
+      wordId,
+    })),
+  };
+
+  const mockTestLesson = (): void => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) =>
+      /\/content\/lessons\/.+\.json$/.test(String(input))
+        ? Response.json(TEST_LESSON)
+        : new Response('', { status: 404 }),
+    );
+  };
+
+  const answerAll = async (
+    user: ReturnType<typeof renderRunner>['user'],
+    answers: readonly Answer[],
+  ): Promise<void> => {
+    for (const answer of answers) {
+      await user.click(await screen.findByRole('button', { name: answer }));
+      await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+    }
+  };
+
+  const PASSED: readonly Answer[] = [
+    'Chọn đúng',
+    'Chọn đúng',
+    'Chọn đúng',
+    'Chọn đúng',
+    'Chọn đúng',
+  ];
+  const FAILED: readonly Answer[] = [
+    'Chọn đúng',
+    'Chọn sai',
+    'Chọn đúng',
+    'Chọn sai',
+    'Chọn sai',
+  ];
+
+  beforeEach(() => {
+    mockTestLesson();
+  });
+
+  it('S3.5-AC2: should show "Chưa đạt, cần từ 80%" and a "Làm lại" button when the test is not passed', async () => {
+    const { user } = renderRunner();
+
+    await answerAll(user, FAILED);
+
+    expect(screen.getByText('Chưa đạt, cần từ 80%')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Làm lại' })).toBeVisible();
+  });
+
+  it('S3.5-AC2: should show "Bạn đã đạt" and no "Làm lại" button when the test is passed', async () => {
+    const { user } = renderRunner();
+
+    await answerAll(user, PASSED);
+
+    expect(screen.getByText('Bạn đã đạt')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Làm lại' }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Chưa đạt/)).not.toBeInTheDocument();
+  });
+
+  it('S3.5-AC2: should show no pass line and no "Làm lại" button for a regular lesson', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) =>
+      /\/content\/lessons\/.+\.json$/.test(String(input))
+        ? Response.json(LESSON)
+        : new Response('', { status: 404 }),
+    );
+    const { user } = renderRunner();
+
+    await answerAll(user, ['Chọn sai', 'Chọn sai', 'Chọn sai']);
+
+    expect(screen.getByText('0%')).toBeInTheDocument();
+    expect(screen.queryByText(/Chưa đạt/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Bạn đã đạt')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Làm lại' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('S3.5-AC2: should restart at "Câu 1 / 5" with the focus on that line when "Làm lại" is pressed', async () => {
+    const { user } = renderRunner();
+    await answerAll(user, FAILED);
+
+    await user.click(screen.getByRole('button', { name: 'Làm lại' }));
+
+    expect(screen.getByText('Câu về 八')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toHaveAccessibleName('Câu 1 / 5');
+    expect(screen.getByText('Câu 1 / 5')).toHaveFocus();
+    expect(screen.queryByText('Chưa đạt, cần từ 80%')).not.toBeInTheDocument();
+  });
+
+  it('S3.5-AC2: should score the retry from scratch, not adding the previous attempt', async () => {
+    let clock = 1_000_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => clock);
+    const { user } = renderRunner();
+    await screen.findByText('Câu về 八');
+    clock += 90_000;
+    await answerAll(user, FAILED);
+    expect(screen.getByText('1:30')).toBeInTheDocument();
+    expect(screen.getByText('Sai 3 câu')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Làm lại' }));
+    clock += 5_000;
+    await answerAll(user, PASSED);
+
+    expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.getByText('Đúng 5 / 5 câu')).toBeInTheDocument();
+    expect(screen.getByText('Sai 0 câu')).toBeInTheDocument();
+    expect(screen.getByText('0:05')).toBeInTheDocument();
+    expect(screen.getByText('Bạn đã đạt')).toBeInTheDocument();
+  });
+
+  it('S3.5-AC2: should show "Làm lại" again when the second attempt is still not passed', async () => {
+    const { user } = renderRunner();
+    await answerAll(user, FAILED);
+    await user.click(screen.getByRole('button', { name: 'Làm lại' }));
+
+    await answerAll(user, FAILED);
+
+    expect(screen.getByText('Chưa đạt, cần từ 80%')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Làm lại' })).toBeVisible();
+  });
+
+  it('S3.5-X1: should reopen an interrupted test at "Câu 1 / 5", not at the saved position', async () => {
+    const db = createDatabase();
+    await db.lessonProgress.put({
+      lessonId: ':lessonId',
+      status: 'in-progress',
+      cursor: 2,
+    });
+    db.close();
+
+    renderRunner();
+
+    expect(await screen.findByText('Câu về 八')).toBeInTheDocument();
+    expect(screen.queryByText('Câu về 百')).not.toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toHaveAccessibleName('Câu 1 / 5');
+  });
+});
+
+describe('LessonRunnerContainer — đổi bài sau khi làm lại (S3.5)', () => {
+  const testLessonOf = (id: string) => ({
+    id,
+    type: 'test',
+    title: `Kiểm tra ${id}`,
+    exercises: ['八', '白'].map((wordId, index) => ({
+      id: `${id}-e${index + 1}`,
+      kind: 'tone-choice',
+      wordId,
+    })),
+  });
+
+  const renderWithLinkToB = () =>
+    render(
+      <I18nextProvider i18n={testI18n}>
+        <MemoryRouter initialEntries={['/lessons/a']}>
+          <Link to="/lessons/b">Sang bài B</Link>
+          <Routes>
+            <Route
+              path="/lessons/:lessonId"
+              element={<LessonRunnerContainer registry={registry} />}
+            />
+          </Routes>
+        </MemoryRouter>
+      </I18nextProvider>,
+    );
+
+  it('S3.5-AC2: should not move focus to the progress line of another test opened after "Làm lại"', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const id = /\/content\/lessons\/(.+)\.json$/.exec(String(input))?.[1];
+      return id === undefined
+        ? new Response('', { status: 404 })
+        : Response.json(testLessonOf(id));
+    });
+    const user = userEvent.setup();
+    renderWithLinkToB();
+    for (const answer of ['Chọn sai', 'Chọn sai']) {
+      await user.click(await screen.findByRole('button', { name: answer }));
+      await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+    }
+    await user.click(screen.getByRole('button', { name: 'Làm lại' }));
+    expect(screen.getByText('Câu 1 / 2')).toHaveFocus();
+
+    await user.click(screen.getByRole('link', { name: 'Sang bài B' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Kiểm tra b' }),
+    ).toBeVisible();
+    expect(await screen.findByText('Câu 1 / 2')).not.toHaveFocus();
   });
 });

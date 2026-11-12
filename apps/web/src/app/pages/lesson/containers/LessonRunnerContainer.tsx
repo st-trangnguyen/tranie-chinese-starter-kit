@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
@@ -30,7 +31,16 @@ const LessonRunnerContainer = ({
     submitResult,
     continueLesson,
     skipExercise,
+    restart,
   } = useLessonRunner(lessonId);
+  const [restartedLessonId, setRestartedLessonId] = useState<string | null>(
+    null,
+  );
+  const isRestarted = restartedLessonId === lessonId;
+  const handleRestart = () => {
+    setRestartedLessonId(lessonId);
+    restart();
+  };
   const exercise = lesson?.exercises[session?.currentIndex ?? 0];
 
   return (
@@ -42,7 +52,13 @@ const LessonRunnerContainer = ({
         </p>
       )}
       {!lesson && !hasError && <p>{t('loading')}</p>}
-      {summary && <LessonSummary summary={summary} isSaved={isSaved} />}
+      {summary && (
+        <LessonSummary
+          summary={summary}
+          isSaved={isSaved}
+          onRestart={handleRestart}
+        />
+      )}
       {session && session.phase !== 'finished' && exercise && (
         <LessonRunner
           view={{
@@ -52,6 +68,7 @@ const LessonRunnerContainer = ({
             feedback,
           }}
           registry={registry}
+          shouldFocusProgress={isRestarted}
           handlers={{
             onResult: submitResult,
             onContinue: continueLesson,
