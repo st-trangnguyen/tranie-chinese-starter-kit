@@ -1,5 +1,9 @@
-import type { Exercise, Lesson } from '@csk/shared';
+import type { Exercise, Lesson, LessonProgress } from '@csk/shared';
 
+import {
+  progressStore,
+  type ProgressStore,
+} from '@core/services/progress-store.service';
 import type { ExerciseResult } from '@shared/models/exercise.model';
 import type { LessonSession } from '@shared/models/lesson-session.model';
 import { ContentService } from './content.service';
@@ -12,22 +16,48 @@ export interface OpenedLesson {
 }
 
 export class LessonService {
-  constructor(private readonly source: LessonSource = new ContentService()) {}
+  constructor(
+    private readonly source: LessonSource = new ContentService(),
+    private readonly store: ProgressStore = progressStore,
+  ) {}
 
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
-  // Phiên làm bài chỉ nằm trong bộ nhớ (S3.3 sẽ lưu vị trí câu).
 
   private readLesson(lessonId: string): Promise<Lesson> {
     return this.source.getLesson(lessonId);
   }
 
+  private readCursor(lessonId: string): Promise<LessonProgress | undefined> {
+    return this.store.getLessonProgress(lessonId);
+  }
+
+  private writeCursor(progress: LessonProgress): Promise<void> {
+    return this.store.saveLessonProgress(progress);
+  }
+
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
-  // Rule: bài bắt đầu ở câu đầu tiên và chờ người học trả lời.
-  startSession(exercises: readonly Exercise[]): LessonSession {
+  // Rule: chỉ nối lại ở vị trí đã lưu khi nó là số nguyên nằm trong bài; ngược lại bắt đầu từ đầu.
+  resolveStartIndex(
+    savedCursor: number | undefined,
+    exerciseCount: number,
+  ): number {
+    if (
+      savedCursor !== undefined &&
+      Number.isInteger(savedCursor) &&
+      savedCursor >= 0 &&
+      savedCursor < exerciseCount
+    ) {
+      return savedCursor;
+    }
+    return 0;
+  }
+
+  // Rule: bài bắt đầu ở vị trí chỉ định (mặc định câu đầu) và chờ người học trả lời.
+  startSession(exercises: readonly Exercise[], startIndex = 0): LessonSession {
     return {
       exerciseIds: exercises.map((exercise) => exercise.id),
-      currentIndex: 0,
+      currentIndex: this.resolveStartIndex(startIndex, exercises.length),
       phase: 'answering',
       lastResult: null,
       skippedCount: 0,
@@ -77,10 +107,46 @@ export class LessonService {
     return !result.isCorrect && result.explanation !== undefined;
   }
 
+  // Rule: thoát giữa chừng không làm bài đã hoàn thành mất trạng thái; luôn ghi vị trí mới.
+  nextProgress(
+    existing: LessonProgress | undefined,
+    lessonId: string,
+    cursor: number,
+  ): LessonProgress {
+    const status =
+      existing?.status === 'completed' ? 'completed' : 'in-progress';
+    return { lessonId, status, cursor };
+  }
+
+  // Rule: học xong bài thì không còn vị trí để nối lại; trạng thái hoàn thành được giữ nguyên.
+  finishedProgress(
+    existing: LessonProgress | undefined,
+    lessonId: string,
+  ): LessonProgress {
+    const status =
+      existing?.status === 'completed' ? 'completed' : 'in-progress';
+    return { lessonId, status };
+  }
+
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
   async openLesson(lessonId: string): Promise<OpenedLesson> {
     const lesson = await this.readLesson(lessonId);
-    return { lesson, session: this.startSession(lesson.exercises) };
+    // Đọc tiến độ lỗi thì coi như không có vị trí, mở ở câu 1.
+    const progress = await this.readCursor(lessonId).catch(() => undefined);
+    const startIndex = this.resolveStartIndex(
+      progress?.cursor,
+      lesson.exercises.length,
+    );
+    return { lesson, session: this.startSession(lesson.exercises, startIndex) };
+  }
+
+  async saveCursor(lessonId: string, session: LessonSession): Promise<void> {
+    const existing = await this.readCursor(lessonId);
+    await this.writeCursor(
+      session.phase === 'finished'
+        ? this.finishedProgress(existing, lessonId)
+        : this.nextProgress(existing, lessonId, session.currentIndex),
+    );
   }
 }

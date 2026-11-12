@@ -63,4 +63,55 @@ describe('lessonProgressSchema', () => {
         .success,
     ).toBe(false);
   });
+
+  it('S3.3-AC2: should keep a valid cursor on the row', () => {
+    expect(
+      lessonProgressSchema.parse({
+        lessonId: 'intro-01',
+        status: 'in-progress',
+        cursor: 3,
+      }),
+    ).toEqual({ lessonId: 'intro-01', status: 'in-progress', cursor: 3 });
+    expect(
+      lessonProgressSchema.parse({
+        lessonId: 'intro-01',
+        status: 'in-progress',
+        cursor: 0,
+      }).cursor,
+    ).toBe(0);
+  });
+
+  it.each([
+    ['negative', -1],
+    ['non-integer', 1.5],
+    ['string', '2'],
+    ['null', null],
+    ['object', { index: 2 }],
+  ])(
+    'S3.3-AC2: should drop a %s cursor but keep the row valid',
+    (_label, cursor) => {
+      const result = lessonProgressSchema.safeParse({
+        lessonId: 'intro-01',
+        status: 'in-progress',
+        cursor,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data?.lessonId).toBe('intro-01');
+      expect(result.data?.status).toBe('in-progress');
+      expect(result.data?.cursor).toBeUndefined();
+    },
+  );
+
+  it('S3.3-X2: should keep a completed status when its cursor is corrupt', () => {
+    const result = lessonProgressSchema.safeParse({
+      lessonId: 'intro-01',
+      status: 'completed',
+      cursor: -4,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.status).toBe('completed');
+    expect(result.data?.cursor).toBeUndefined();
+  });
 });
