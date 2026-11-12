@@ -2,15 +2,22 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { LessonSummary as LessonSummaryData } from '@shared/models/lesson-session.model';
+import { TEST_PASS_PERCENT } from '@core/constants/lesson.constants';
 import { formatDuration } from '@shared/utils/duration.utils';
 
 interface LessonSummaryProps {
   summary: LessonSummaryData;
   isSaved: boolean;
+  /** Làm lại bài kiểm tra chưa đạt (S3.5). */
+  onRestart: () => void;
 }
 
 /** Màn tổng kết bài (S3.4-AC1): thay màn hết bài của S3.2, tiêu đề vẫn nhận focus. */
-export const LessonSummary = ({ summary, isSaved }: LessonSummaryProps) => {
+export const LessonSummary = ({
+  summary,
+  isSaved,
+  onRestart,
+}: LessonSummaryProps) => {
   const { t } = useTranslation('lesson');
   const headingRef = useRef<HTMLHeadingElement>(null);
 
@@ -49,6 +56,22 @@ export const LessonSummary = ({ summary, isSaved }: LessonSummaryProps) => {
           </dd>
         </div>
       </dl>
+      {summary.isPassed !== null && (
+        <p
+          className={`lesson-summary-verdict ${
+            summary.isPassed ? 'is-passed' : 'is-failed'
+          }`}
+        >
+          {summary.isPassed
+            ? t('summary.passed')
+            : t('summary.failed', { percent: TEST_PASS_PERCENT })}
+        </p>
+      )}
+      {summary.isPassed === false && (
+        <button type="button" className="btn btn-primary" onClick={onRestart}>
+          {t('summary.restart')}
+        </button>
+      )}
       {!isSaved && (
         <p role="alert" className="lesson-summary-warning p-md">
           {t('summary.notSaved')}
