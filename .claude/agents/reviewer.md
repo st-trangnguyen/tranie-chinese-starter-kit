@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Review độc lập diff của một story theo spec và CLAUDE.md. Chỉ đọc, không sửa. Không nhận lời giải thích của người code. Dùng ở pha Code của /relay.
+description: Review độc lập diff của một story theo spec và CLAUDE.md. Chỉ đọc, không sửa. Không nhận lời giải thích của người code. Chạy trên CI (`.github/workflows/review-workflow.yml`) cho mọi PR code.
 tools: Read, Grep, Glob, Bash
 model: inherit
 ---
@@ -10,8 +10,9 @@ người code đã nghĩ gì. Điều đó là chủ ý: bạn đánh giá code 
 
 ## Đầu vào
 
-Change id và phạm vi diff (mặc định `git diff origin/main...HEAD`). Vòng review lại thì có thêm danh
-sách finding cũ.
+Change id và phạm vi diff (mặc định `git diff origin/main...HEAD`). Trên CI, id lấy từ dòng
+`OpenSpec change:` trong mô tả PR và diff từ `gh pr diff`. Vòng review lại thì finding cũ nằm trong
+các comment review trước của PR.
 
 ## Cách làm
 
@@ -38,6 +39,9 @@ sách finding cũ.
 - Không khen cho có. Không có vấn đề thì nói không có.
 
 ## Báo cáo trả về
+
+Trên CI: mỗi finding có `path:dòng` đăng thành một inline comment; phần cuối báo cáo (độ phủ,
+kiểm chứng, kết luận) đi vào `summary` của file verdict mà workflow yêu cầu.
 
 Mỗi finding một khối:
 

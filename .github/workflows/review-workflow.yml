@@ -1,0 +1,151 @@
+# Review độc lập trên CI cho mọi PR có thay đổi ngoài openspec/ và docs/.
+# Quy trình: docs/05-standards/spec-driven.md §7. Tiêu chí review: .claude/agents/reviewer.md.
+#
+# Reviewer chỉ đọc. Nó đăng inline comment cho từng finding và ghi verdict ra file; bước cuối
+# đăng tóm tắt và làm job fail khi còn blocker/major, để check "Review" chặn được merge.
+# Để chặn thật: đặt check "Review" làm required trong branch protection của `main`
+# và thêm secret ANTHROPIC_API_KEY (Settings → Secrets and variables → Actions).
+name: Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+# Số lần review tối đa có thể fail. Sau đó chỉ comment, người quyết (spec-driven §7).
+env:
+  MAX_BLOCKING_ROUNDS: '2'
+  SUMMARY_MARKER: '<!-- csk-review-summary -->'
+  VERDICT_FILE: /tmp/review-verdict.json
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  review:
+    name: Review
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # PR chỉ đổi openspec/ hoặc docs/ (PR spec, PR archive, docs thuần) không cần review code.
+      # Job vẫn chạy và pass để check bắt buộc không treo ở trạng thái pending.
+      - name: Xác định PR có cần review
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.fork }}
+        run: |
+          set -euo pipefail
+          if [[ "$IS_FORK" == "true" ]]; then
+            echo "PR từ fork không có secret; bỏ qua review tự động."
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          other=$(gh pr diff "$PR_NUMBER" --name-only | grep -vE '^(openspec|docs)/' || true)
+          if [[ -z "$other" ]]; then
+            echo "PR chỉ đổi openspec/ hoặc docs/; không cần review code."
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Đếm vòng review đã fail trước đó
+        id: rounds
+        if: steps.scope.outputs.needed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          count=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
+            --jq "[.[] | select(.body | contains(\"$SUMMARY_MARKER\")) | select(.body | contains(\"changes-requested\"))] | length")
+          echo "previous=$count" >> "$GITHUB_OUTPUT"
+
+      - uses: pnpm/action-setup@v4
+        if: steps.scope.outputs.needed == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.scope.outputs.needed == 'true'
+        with:
+          node-version: 24.22.1
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+        if: steps.scope.outputs.needed == 'true'
+
+      - name: Reviewer độc lập
+        if: steps.scope.outputs.needed == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            Số vòng review đã yêu cầu sửa trước đó: ${{ steps.rounds.outputs.previous }}
+
+            Bạn là reviewer. Làm đúng theo `.claude/agents/reviewer.md` (đọc file đó trước).
+            Khác biệt khi chạy ở CI:
+            - Phạm vi diff là `git diff origin/${{ github.base_ref }}...HEAD`, hoặc `gh pr diff`.
+            - Change id lấy từ dòng `OpenSpec change: openspec/changes/<id>` trong mô tả PR
+              (`gh pr view`). PR không có dòng này (config, asset thuần) thì chỉ kiểm §0, §2, §6, §7.
+            - Nếu số vòng trước đó lớn hơn 0, đây là vòng review lại: chỉ kiểm finding cũ (đọc
+              các comment review trước của PR) đã xử lý chưa và bản sửa có sinh lỗi mới không.
+            - Mỗi finding có `file:dòng` thì đăng một inline comment. Thân comment theo định dạng
+              khối finding trong reviewer.md, mở đầu bằng `R<n> · <severity> · <loại>`.
+            - Cuối cùng ghi file `${{ env.VERDICT_FILE }}` là JSON:
+              {"verdict": "pass" | "changes-requested", "summary": "<tóm tắt ngắn, kèm bảng
+              độ phủ Scenario dạng markdown>", "blocking": <số finding blocker + major>}.
+              `verdict` là `changes-requested` khi và chỉ khi còn blocker hoặc major.
+            - Không sửa file nào của repo, không commit, không push.
+          claude_args: >-
+            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh api:*),Bash(pnpm typecheck),Bash(pnpm lint),Bash(pnpm --filter @csk/web exec vitest run:*),Write(${{ env.VERDICT_FILE }}),mcp__github_inline_comment__create_inline_comment"
+
+      - name: Đăng tóm tắt và chốt kết quả
+        if: steps.scope.outputs.needed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PREVIOUS: ${{ steps.rounds.outputs.previous }}
+        run: |
+          set -euo pipefail
+          if [[ ! -s "$VERDICT_FILE" ]]; then
+            echo "::error::Reviewer không ghi verdict. Chạy lại job hoặc review tay."
+            exit 1
+          fi
+          verdict=$(jq -r '.verdict' "$VERDICT_FILE")
+          summary=$(jq -r '.summary' "$VERDICT_FILE")
+          blocking=$(jq -r '.blocking' "$VERDICT_FILE")
+
+          if [[ "$verdict" != "pass" && "$verdict" != "changes-requested" ]]; then
+            echo "::error::Verdict không hợp lệ: $verdict"
+            exit 1
+          fi
+
+          {
+            echo "$SUMMARY_MARKER"
+            echo "## Review: $verdict"
+            echo
+            echo "$summary"
+          } > /tmp/review-summary.md
+          gh pr comment "$PR_NUMBER" --body-file /tmp/review-summary.md
+
+          if [[ "$verdict" == "changes-requested" ]]; then
+            if (( PREVIOUS >= MAX_BLOCKING_ROUNDS )); then
+              echo "::warning::Đã quá $MAX_BLOCKING_ROUNDS vòng yêu cầu sửa, còn $blocking blocker/major. Dừng để người quyết."
+              exit 0
+            fi
+            echo "::error::Còn $blocking blocker/major. Xem inline comment của PR."
+            exit 1
+          fi

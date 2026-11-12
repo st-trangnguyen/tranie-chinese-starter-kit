@@ -184,16 +184,21 @@ việc là một agent mới, thông tin đi qua file và git diff.
 | `planner` | B1a | `design.md`, `tasks.md` (không sửa spec) | số task, layer, file dự kiến, vấn đề với spec |
 | `test-writer` | B2 (RED) | file test | test + output fail đúng lý do |
 | `implementer` | B3–B4 (GREEN, REFACTOR), sửa finding | code production, không file test | file đã đổi + output pass |
-| `reviewer` | trước B6 | không gì cả | finding theo mức độ + độ phủ Scenario |
+| `reviewer` | trên CI sau khi PR mở (check "Review") | không gì cả | inline comment theo finding + độ phủ Scenario |
 
 Tách `test-writer` khỏi `implementer` để người viết code không sửa test cho dễ pass. `reviewer` không
 nhận lời giải thích của `implementer`, chỉ nhận diff, spec và `CLAUDE.md`.
 
 - **Vùng ghi:** subagent không giới hạn được đường dẫn bằng cấu hình, nên sau mỗi agent điều phối
   kiểm `git status`. Agent ghi sai vùng thì điều phối dừng và báo người dùng.
-- **Vòng review:** `blocker`/`major` đi qua tối đa 2 vòng sửa, mỗi vòng reviewer là agent mới chỉ kiểm
-  finding cũ và bản sửa. Finding loại `spec` dừng ngay để mở PR spec fix. Hết 2 vòng mà còn
-  `blocker`/`major` thì dừng hẳn và báo người dùng, không tự chạy vòng 3, không hạ mức độ finding.
-- **Sửa theo feedback:** trong vòng tự động dùng subagent mới. Comment PR đến muộn thì mở phiên mới
-  và chạy `/relay fix <id>`; trạng thái nằm ở nhánh, `tasks.md` và comment PR.
+- **Review trên CI:** `.github/workflows/review-workflow.yml` chạy `reviewer` mỗi lần push vào PR có
+  đổi ngoài `openspec/` và `docs/`. Finding thành inline comment; job fail khi còn `blocker`/`major`,
+  nên check "Review" đặt được làm required. Cần secret `ANTHROPIC_API_KEY`.
+- **Vòng review:** `blocker`/`major` đi qua tối đa 2 vòng sửa; từ lần review thứ 3 CI chỉ comment, không
+  fail. Finding loại `spec` dừng ngay: agent soạn patch spec ở nhánh `spec/<id>-fix`, BA duyệt qua PR
+  spec. Hết 2 vòng mà còn `blocker`/`major` thì dừng hẳn và báo người dùng, không tự chạy vòng 3,
+  không hạ mức độ finding.
+- **Sửa theo feedback:** sau khi mở PR, phiên gắn PR (`bind_pr`, `set_monitor`); có review comment
+  hoặc CI đỏ thì app đánh thức agent chạy `/relay fix <id>` (subagent mới cho mỗi việc). Phiên mới vẫn
+  chạy được: trạng thái nằm ở nhánh, `tasks.md` và comment PR.
 - `/relay` dừng trước khi commit/mở PR; người dùng quyết.

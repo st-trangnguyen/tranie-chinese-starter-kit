@@ -212,7 +212,9 @@ Mỗi story đi qua **ba pha, hai PR**: **Spec** (BA, PR spec) → **Code** (dev
 7. Chạy typecheck / lint / test. **Không nói "đã xong" khi chưa chạy và chưa
    thấy kết quả pass.** Tick các task đã làm trong `tasks.md`.
 8. Mở PR code, ghi `Spec PR: #<số PR spec>`. PR code **không merge được** khi PR spec chưa
-   review + merge (check `Spec PR đã merge`). **Không archive trong PR code.**
+   review + merge (check `Spec PR đã merge`) và check `Review` (CI reviewer độc lập, xem bên dưới)
+   phải pass. Sau khi mở PR, agent theo dõi PR và chạy `/relay fix` khi có finding. **Không archive
+   trong PR code.**
 
 **Pha C — Archive (tự động):** sau khi PR code merge, workflow `archive-spec-workflow.yml` mở PR
 `docs(openspec): archive <id>` nếu mọi task đã tick. Spec sai hoặc thiếu khi đang code: mở PR spec
@@ -221,7 +223,7 @@ mới cho BA duyệt, đừng sửa spec trong PR code.
 Việc không có Scenario (docs, config, asset thuần) bỏ qua Pha A, bước 4–5 và Pha C, ghi `Spec PR: N/A`.
 
 **Chạy bằng agent:** `/relay <spec|plan|code|fix> <change-id>` chạy các pha trên bằng subagent tách
-context (`spec-writer`, `planner`, `test-writer`, `implementer`, `reviewer` trong `.claude/agents/`). Chi tiết:
+context (`spec-writer`, `planner`, `test-writer`, `implementer`, `reviewer` trong `.claude/agents/`; `reviewer` chạy trên CI, không chạy local). Chi tiết:
 `docs/05-standards/spec-driven.md` §7.
 
 ### Lệnh kiểm tra chuẩn
@@ -239,7 +241,8 @@ Không dùng `pnpm test` (watch mode, không tự thoát).
 
 Hàng rào tự động (L5): hook `.claude/hooks/` lint file vừa sửa và chạy typecheck · lint ·
 test · `content:check` trước khi agent kết thúc lượt; CI (`.github/workflows/ci-workflow.yml`)
-chạy lại cùng bộ đó kèm build + `check:fonts` cho mọi PR. Dependency Rule §2 được lint bằng
+chạy lại cùng bộ đó kèm build + `check:fonts` cho mọi PR; `review-workflow.yml` chạy reviewer độc lập
+trên PR có đổi ngoài `openspec/` và `docs/` (check `Review`, fail khi còn blocker/major). Dependency Rule §2 được lint bằng
 `no-restricted-imports` trong `eslint.config.mjs`.
 
 ### Pull request
