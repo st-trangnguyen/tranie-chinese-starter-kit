@@ -5,6 +5,7 @@ import type { ContentRoot, Lesson, Sentence, Stage } from '@csk/shared';
 import { audioJob, type AudioJob } from './audio';
 import {
   lessonRefIssues,
+  lessonToneChoiceIssues,
   parseLesson,
   rawLessonId,
   referencedIds,
@@ -139,6 +140,7 @@ export function assembleContent(inputs: BuildInputs): BuildResult {
   );
   const wordIds = new Set(words.map((word) => word.id));
   const sentenceIds = new Set(sentences.map((sentence) => sentence.id));
+  const wordById = new Map(words.map((word) => [word.id, word]));
   const lessonIds = new Set(
     parsedLessons.flatMap((parsed) => rawLessonId(parsed) ?? []),
   );
@@ -164,6 +166,9 @@ export function assembleContent(inputs: BuildInputs): BuildResult {
     ...parsedLessons.flatMap((parsed) => parsed.issues),
     ...parsedLessons.flatMap((parsed) =>
       lessonRefIssues(parsed, wordIds, sentenceIds),
+    ),
+    ...parsedLessons.flatMap((parsed) =>
+      lessonToneChoiceIssues(parsed, wordById),
     ),
     ...duplicateIssues(
       sentenceEntries.map(({ sentence, file, line }) => ({
@@ -192,7 +197,6 @@ export function assembleContent(inputs: BuildInputs): BuildResult {
   ];
 
   // S2.5 AC1: chỉ lấy nét chữ cho chữ thực sự xuất hiện trong bài (từ được tham chiếu + câu).
-  const wordById = new Map(words.map((word) => [word.id, word]));
   const sentenceById = new Map(sentences.map((s) => [s.id, s]));
   const usedText = lessons.flatMap((lesson) => {
     const refs = referencedIds(lesson);

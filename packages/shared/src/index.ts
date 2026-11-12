@@ -16,10 +16,13 @@ export type {
   Settings,
 } from './progress.schema';
 export {
+  countPinyinSyllables,
   isToneMarkedPinyin,
   numberedToToneMarks,
   pinyinKey,
+  toneOfPinyin,
 } from './pinyin.utils';
+export type { Tone } from './pinyin.utils';
 export {
   LESSON_TYPES,
   VOICES,
