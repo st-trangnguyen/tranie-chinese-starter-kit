@@ -90,5 +90,5 @@ Test: `shared/components/exercises/PinyinTypeExercise.test.tsx` (Vitest + Testin
 - [x] 8.2 Verify: `pnpm typecheck && pnpm lint && pnpm test:run`
 - [x] 8.3 Verify: `pnpm content:check` (không đổi nội dung, chạy để chắc không vỡ) và `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts`
   (có CSS mới), `pnpm e2e` (bài mẫu `intro-01` vẫn chạy được)
-- [ ] 8.4 Xem UI ở preview `web-dev` cả sáng/tối, mobile (375×812)/desktop (1280×800) để chụp screenshot cho PR; tick hết task; PR ghi
+- [x] 8.4 Xem UI ở preview `web-dev` cả sáng/tối, mobile (375×812)/desktop (1280×800) để chụp screenshot cho PR; tick hết task; PR ghi
   `Spec PR: #<số>` và `Refs #28` hoặc `Closes #28` khi đủ AC. Không archive trong PR này
