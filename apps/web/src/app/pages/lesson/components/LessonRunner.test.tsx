@@ -127,4 +127,41 @@ describe('LessonRunner', () => {
       screen.queryByRole('button', { name: 'Bỏ qua câu này' }),
     ).not.toBeInTheDocument();
   });
+
+  it('S4.3-AC2: Câu gõ pinyin không còn bị bỏ qua - should render a pinyin-type exercise from the real registry without the skip fallback', () => {
+    const word: Word = {
+      id: '爸爸',
+      hanzi: '爸爸',
+      pinyin: 'bàba',
+      vi: ['bố'],
+      viReviewed: true,
+      hsk: 1,
+      audio: 'audio/0123456789abcdef.mp3',
+    };
+
+    renderWithProviders(
+      <AudioSpeedProvider>
+        <LessonRunner
+          view={{
+            exercise: EXERCISES[1] as Exercise,
+            content: { words: [word], sentences: [] },
+            current: 2,
+            total: EXERCISES.length,
+            feedback: null,
+          }}
+          registry={exerciseRegistry}
+          handlers={{ onResult: vi.fn(), onContinue: vi.fn(), onSkip: vi.fn() }}
+        />
+      </AudioSpeedProvider>,
+    );
+
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Kiểm tra' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Dạng bài này chưa có/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Bỏ qua câu này' }),
+    ).not.toBeInTheDocument();
+  });
 });
