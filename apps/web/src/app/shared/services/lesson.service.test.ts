@@ -1465,4 +1465,42 @@ describe('LessonService — kết thúc bài kiểm tra vượt cấp (S3.6)', (
     const statuses = await mapStatuses(store);
     expect(statuses).toMatchObject({ 'u2-1': 'open', 'u3-1': 'locked' });
   });
+
+  it('S3.6-AC2: should write a regular lesson like any lesson, without completing the whole unit, when a placement is passed along', async () => {
+    const { store, stored } = makeSetup();
+    await completeUnits(store, 1);
+
+    const result = await stored.finishLesson(
+      'u2-1',
+      passedSession(stored),
+      placementOf(2),
+    );
+
+    expect(result.isSaved).toBe(true);
+    const statuses = await mapStatuses(store);
+    expect(statuses).toMatchObject({
+      'u2-1': 'completed',
+      'u2-2': 'open',
+      'u2-test': 'locked',
+      'u3-1': 'locked',
+    });
+  });
+
+  it('S3.6-AC2: should complete only the test itself and open the next lesson because the previous one is done, not because of the placement', async () => {
+    const { store, stored } = makeSetup();
+    await completeUnits(store, 1);
+
+    await stored.finishLesson('u2-test', passedSession(stored), placementOf(3));
+
+    const statuses = await mapStatuses(store);
+    expect(statuses).toMatchObject({
+      'u2-test': 'completed',
+      'u3-1': 'open',
+      'u3-2': 'locked',
+      'u3-test': 'locked',
+    });
+    for (const lessonId of ['u3-1', 'u3-2', 'u3-test']) {
+      await expect(store.getLessonProgress(lessonId)).resolves.toBeUndefined();
+    }
+  });
 });

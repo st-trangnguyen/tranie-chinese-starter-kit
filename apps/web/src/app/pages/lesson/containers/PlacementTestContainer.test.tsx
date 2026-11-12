@@ -212,4 +212,14 @@ describe('PlacementTestContainer', () => {
       db.close();
     }
   });
+
+  it('S3.6-AC1: should announce the loading state with role="status" while the lesson is loading', () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      () => new Promise<Response>(() => undefined),
+    );
+    renderPlacement('unit-b');
+
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
 });

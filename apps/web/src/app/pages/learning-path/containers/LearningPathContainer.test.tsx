@@ -201,4 +201,62 @@ describe('LearningPathContainer placement test button', () => {
       screen.queryByRole('link', { name: /Bài b1/ }),
     ).not.toBeInTheDocument();
   });
+
+  it('S3.6-AC1: should keep the button on other locked units when one unit has a lesson that fails to load', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === '/content/content.json') {
+        return Response.json({
+          contentVersion: '0123456789ab',
+          stages: [
+            {
+              id: 'hsk1',
+              title: 'HSK 1',
+              units: [
+                { id: 'unit-a', title: 'Chủ đề A', lessonIds: ['a1'] },
+                {
+                  id: 'unit-b',
+                  title: 'Chủ đề B',
+                  lessonIds: ['b1', 'b-test'],
+                },
+                {
+                  id: 'unit-c',
+                  title: 'Chủ đề C',
+                  lessonIds: ['c1', 'c-test'],
+                },
+                {
+                  id: 'unit-d',
+                  title: 'Chủ đề D',
+                  lessonIds: ['d1', 'd-test'],
+                },
+              ],
+            },
+          ],
+        });
+      }
+      const lessonId = /\/content\/lessons\/(.+)\.json$/.exec(url)?.[1] ?? '';
+      if (lessonId === 'c1') {
+        return new Response('', { status: 404 });
+      }
+      return Response.json({
+        id: lessonId,
+        type: lessonId.endsWith('-test') ? 'test' : 'lesson',
+        title: `Bài ${lessonId}`,
+        exercises: [{ id: 'e1', kind: 'tone-choice', wordId: '八' }],
+      });
+    });
+    renderPath();
+
+    const buttons = await screen.findAllByRole('link', {
+      name: 'Kiểm tra vượt cấp',
+    });
+    expect(buttons.map((button) => button.getAttribute('href'))).toEqual([
+      '/units/unit-b/placement-test',
+      '/units/unit-d/placement-test',
+    ]);
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Lộ trình học' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Bài a1')).toBeInTheDocument();
+  });
 });
