@@ -13,6 +13,26 @@ export interface LessonSession {
   lastResult: ExerciseResult | null;
   /** Số câu đã bỏ qua vì dạng bài chưa được hỗ trợ. */
   skippedCount: number;
+  /** Số câu đã trả lời đúng (S3.4). */
+  correctCount: number;
+  /** Số câu đã trả lời sai (S3.4). */
+  wrongCount: number;
+  /** Mốc bắt đầu (ms epoch). */
+  startedAt: number;
+  /** Mốc kết thúc (ms epoch); null khi chưa xong bài. */
+  finishedAt: number | null;
+}
+
+/** Tổng kết một lượt làm bài (S3.4). */
+export interface LessonSummary {
+  /** Phần trăm làm tròn nguyên; 0 khi chưa trả lời câu nào. */
+  scorePercent: number;
+  correctCount: number;
+  answeredCount: number;
+  wrongCount: number;
+  skippedCount: number;
+  elapsedSeconds: number;
+  isComplete: boolean;
 }
 
 /** Kết quả hiện sau khi trả lời. */
