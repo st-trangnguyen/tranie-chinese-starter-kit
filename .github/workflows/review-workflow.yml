@@ -4,7 +4,7 @@
 # Reviewer chỉ đọc. Nó đăng inline comment cho từng finding và ghi verdict ra file; bước cuối
 # đăng tóm tắt và làm job fail khi còn blocker/major, để check "Review" chặn được merge.
 # Để chặn thật: đặt check "Review" làm required trong branch protection của `main`
-# và thêm secret ANTHROPIC_API_KEY (Settings → Secrets and variables → Actions).
+# và thêm secret CLAUDE_CODE_OAUTH_TOKEN (lấy bằng `claude setup-token`) (Settings → Secrets and variables → Actions).
 name: Review
 
 on:
@@ -88,7 +88,7 @@ jobs:
         if: steps.scope.outputs.needed == 'true'
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
           prompt: |
             REPO: ${{ github.repository }}

@@ -193,7 +193,7 @@ nhận lời giải thích của `implementer`, chỉ nhận diff, spec và `CLA
   kiểm `git status`. Agent ghi sai vùng thì điều phối dừng và báo người dùng.
 - **Review trên CI:** `.github/workflows/review-workflow.yml` chạy `reviewer` mỗi lần push vào PR có
   đổi ngoài `openspec/` và `docs/`. Finding thành inline comment; job fail khi còn `blocker`/`major`,
-  nên check "Review" đặt được làm required. Cần secret `ANTHROPIC_API_KEY`.
+  nên check "Review" đặt được làm required. Cần secret `CLAUDE_CODE_OAUTH_TOKEN` (từ `claude setup-token`).
 - **Vòng review:** `blocker`/`major` đi qua tối đa 2 vòng sửa; từ lần review thứ 3 CI chỉ comment, không
   fail. Finding loại `spec` dừng ngay: agent soạn patch spec ở nhánh `spec/<id>-fix`, BA duyệt qua PR
   spec. Hết 2 vòng mà còn `blocker`/`major` thì dừng hẳn và báo người dùng, không tự chạy vòng 3,
