@@ -1,0 +1,25 @@
+/* Dạng bài phân biệt cặp âm — S4.2. Nút cao tối thiểu 44px, focus nhìn thấy. */
+
+@layer components {
+  .sound-pair-option {
+    @apply min-h-11 rounded-md border-2 border-line bg-surface px-md text-body font-semibold text-fg transition-colors;
+  }
+
+  .sound-pair-compare {
+    @apply rounded-md border border-line bg-surface;
+  }
+
+  .sound-pair-option:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .sound-pair-option:disabled {
+    @apply opacity-70;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sound-pair-option {
+      @apply transition-none;
+    }
+  }
+}

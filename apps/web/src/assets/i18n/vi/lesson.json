@@ -29,6 +29,12 @@
     "restart": "Làm lại",
     "notSaved": "Chưa lưu được kết quả bài này"
   },
+  "soundPair": {
+    "groupLabel": "Chọn âm vừa nghe",
+    "listenWord": "Nghe {{pinyin}}",
+    "answerLabel": "Âm đúng",
+    "explanation": "Đáp án đúng: {{pinyin}}"
+  },
   "toneChoice": {
     "groupLabel": "Chọn thanh của âm tiết vừa nghe",
     "answerLabel": "Thanh đúng",
