@@ -34,7 +34,7 @@ Chỉ làm sau khi PR spec đã merge **và** code S3.5 (kéo theo S3.4, S3.3) �
 - [x] 5.0 Cập nhật `docs/03-architecture.md` (route vượt cấp, `saveLessonProgressBatch`) — ngoại lệ test-first: docs thuần; kiểm: đọc lại diff
 - [x] 5.1 Refactor + self-review theo CLAUDE.md §0, §2, §7 (không `any`, dependency một chiều, file < 300 dòng); kiểm: `pnpm lint` sạch
 - [x] 5.2 Chạy `pnpm typecheck && pnpm lint && pnpm test:run` và ghi kết quả thật; kiểm: toàn bộ pass. e2e chưa có (Câu hỏi mở 4), nêu rõ trong PR
-- [ ] 5.3 Chụp screenshot bản đồ có nút và màn tổng kết vượt cấp mobile 375×812 và desktop 1280×800, sáng và tối cho PR; kiểm: có file ảnh
+- [x] 5.3 Chụp screenshot bản đồ có nút và màn tổng kết vượt cấp mobile 375×812 và desktop 1280×800, sáng và tối cho PR; kiểm: có file ảnh
 
 ## Workflow follow-up
 
