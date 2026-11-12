@@ -1,6 +1,6 @@
 ---
 name: "Relay"
-description: "Điều phối một story qua các agent tách context: spec, test (RED), implement (GREEN), review"
+description: "Điều phối một story qua các agent tách context: spec, test (RED), implement (GREEN); review chạy trên CI"
 argument-hint: "<spec|plan|code|fix> <change-id>"
 category: "Workflow"
 tags: ["workflow", "agents", "tdd"]
@@ -32,7 +32,6 @@ cách chạy chúng bằng agent.
   | `planner` | `openspec/changes/<id>/design.md`, `tasks.md` | `proposal.md`, `specs/**`, code, test |
   | `test-writer` | `*.test.ts(x)`, `apps/web/e2e/**`, `apps/web/src/test/**` | code production, `openspec/` |
   | `implementer` | code production | file test (kể cả e2e, helper test), `openspec/` |
-  | `reviewer` | không gì cả | mọi thay đổi |
 
   Vi phạm: **dừng và báo người dùng** file nào bị đổi sai vùng, bởi agent nào. Không tự hoàn tác và
   không tự gọi lại; người dùng quyết định.
@@ -76,38 +75,38 @@ cách chạy chúng bằng agent.
       đó và xác nhận nó pass.
    3. Tick task tương ứng trong `tasks.md`.
    Không viết hết test rồi mới code. Một Scenario xong hẳn mới sang Scenario kế.
-3. **Review** (khi mọi Scenario xong): gọi `reviewer` với id và `git diff origin/main...HEAD`.
-   Chỉ truyền id và phạm vi diff, **không** truyền lời giải thích hay tóm tắt của implementer.
-4. **Vòng sửa** theo báo cáo reviewer, tối đa **2 vòng**:
-   - Không còn `blocker`/`major` → sang bước 5.
-   - Phân loại từng finding:
-     - `code` → `implementer` (chế độ FIX, chỉ danh sách finding).
-     - `test` (thiếu hoặc yếu) → `test-writer` bổ sung RED, rồi `implementer` làm xanh.
-     - `spec` → **dừng ngay**, không tính vòng: báo cần mở PR spec fix
-       (`spec/<id>-fix`) cho BA duyệt (spec-driven §2).
-     - `minor`/`nit` → gom vào báo cáo cuối, không tốn vòng.
-   - Sau khi sửa, chạy lại test liên quan rồi gọi `reviewer` **mới** với diff hiện tại và danh sách
-     finding cũ. Nó chỉ kiểm finding cũ đã xử lý chưa và bản sửa có sinh lỗi mới không.
-   - Hết 2 vòng mà còn `blocker`/`major`: **dừng hẳn**. Không chạy vòng 3, không tự hạ mức độ, không
-     mở PR. Báo: finding còn lại, đã thử gì ở mỗi vòng, vì sao chưa xong, và để người dùng chọn (sửa
-     tay / `/relay fix` thêm vòng / chấp nhận ngoại lệ có ghi lý do vào PR).
-5. **Verify:** chạy `pnpm typecheck && pnpm lint && pnpm test:run`, cộng `pnpm content:check` hoặc
+3. **Verify:** chạy `pnpm typecheck && pnpm lint && pnpm test:run`, cộng `pnpm content:check` hoặc
    `pnpm e2e` nếu `CLAUDE.md` §8 yêu cầu cho loại thay đổi này. Không nói "xong" khi chưa thấy pass.
-6. **Dừng trước PR.** Báo cáo: Scenario đã xong, kết quả review (số vòng, finding còn lại), kết quả
-   verify, task đã tick, và gợi ý nội dung PR (`Spec PR: #<số>`, `Closes`/`Refs #<story>`). Hỏi người
-   dùng có muốn commit và mở PR không.
+4. **Dừng trước PR.** Review không chạy ở đây: CI (`.github/workflows/review-workflow.yml`) review
+   độc lập sau khi PR mở. Báo cáo: Scenario đã xong, kết quả verify, task đã tick, và gợi ý nội dung
+   PR (`Spec PR: #<số>`, `Closes`/`Refs #<story>`). Hỏi người dùng có muốn commit và mở PR không.
+5. **Sau khi mở PR:** gắn PR vào phiên (`mcp__ccd_pr__get_status`, chưa có thì `bind_pr`) và bật theo
+   dõi (`set_monitor`) để app đánh thức bạn khi CI review có comment mới hoặc CI đỏ. Mỗi lần được
+   đánh thức, chạy pha `fix`. Không tự poll CI.
 
 ## Pha `fix`
 
-Dùng khi có feedback mới sau PR (comment reviewer người, CI) hoặc muốn chạy thêm vòng sau khi `code`
-dừng. Có thể chạy trong phiên mới: trạng thái nằm ở nhánh, `tasks.md` và comment PR.
+Xử lý feedback sau PR: finding của CI review (check "Review"), comment của người, CI đỏ. Có thể chạy
+trong phiên mới: trạng thái nằm ở nhánh, `tasks.md` và comment PR.
 
-1. Lấy feedback: đọc phần người dùng dán vào tin nhắn, hoặc comment PR qua `gh pr view --comments`
-   nếu người dùng chỉ định PR.
-2. Phân loại từng mục giống bước 4 của pha `code` (`code` / `test` / `spec` / không đồng ý).
-3. Gọi agent đúng chủ với **chỉ** danh sách mục đó, kiểm vùng ghi, chạy lại test.
-4. Gọi `reviewer` mới (diff hiện tại + danh sách mục cũ) để xác nhận, tối đa 2 vòng như trên.
-5. Verify như bước 5 của pha `code`, rồi dừng và báo cáo.
+1. Lấy feedback: inline comment và tóm tắt của CI review qua `gh pr view <n> --comments` và
+   `gh api repos/<owner>/<repo>/pulls/<n>/comments`; hoặc phần người dùng dán vào tin nhắn. Chỉ lấy
+   finding chưa được xử lý (nhìn commit sau comment đó).
+2. Phân loại từng mục:
+   - `code` → `implementer` (chế độ FIX, chỉ danh sách finding).
+   - `test` (thiếu hoặc yếu) → `test-writer` bổ sung RED, rồi `implementer` làm xanh.
+   - `spec` → **dừng**, không sửa spec trong PR code. Soạn patch spec ở nhánh `spec/<id>-fix` cho
+     BA duyệt (spec-driven §2): gọi `spec-writer` với finding, kiểm vùng ghi, chạy
+     `pnpm exec openspec validate --all --strict`, mở PR spec fix (cần người dùng đồng ý), rồi báo.
+   - `minor`/`nit` → sửa nếu rẻ, không thì ghi lại trong báo cáo.
+   - Không đồng ý với finding → không sửa, trả lời comment kèm lý do và báo người dùng.
+3. Gọi agent đúng chủ với **chỉ** danh sách mục đó, kiểm vùng ghi, chạy lại test liên quan.
+4. Verify như bước 3 của pha `code`. Khi người dùng đồng ý, commit và push; push sẽ chạy lại CI
+   review. Không gọi reviewer local.
+5. **Giới hạn:** tối đa **2 vòng** push sửa theo finding blocker/major của CI review. CI review sau
+   vòng thứ 2 chỉ còn comment, không fail check. Hết 2 vòng mà vẫn còn `blocker`/`major`: **dừng hẳn**,
+   không chạy vòng 3, không tự hạ mức độ. Báo: finding còn lại, đã thử gì ở mỗi vòng, và để người
+   dùng chọn (sửa tay / thêm vòng / chấp nhận ngoại lệ có ghi lý do vào PR).
 
 ## Báo cáo cho người dùng
 
