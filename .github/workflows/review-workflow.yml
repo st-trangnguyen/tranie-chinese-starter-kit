@@ -109,6 +109,9 @@ jobs:
               độ phủ Scenario dạng markdown>", "blocking": <số finding blocker + major>}.
               `verdict` là `changes-requested` khi và chỉ khi còn blocker hoặc major.
             - Chỉ được ghi đúng file verdict. Không sửa file nào khác của repo, không commit, không push.
+          # `Write` không giới hạn đường dẫn: `Write(review-verdict.json)` bị action từ chối (đã thử).
+          # Việc chỉ ghi file verdict chỉ được giữ bằng prompt; runner tạm thời, token chỉ có
+          # contents: read nên không đẩy được thay đổi lên repo.
           claude_args: >-
             --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(pnpm typecheck),Bash(pnpm lint),Bash(pnpm --filter @csk/web exec vitest run:*),Write,mcp__github_inline_comment__create_inline_comment"
 
