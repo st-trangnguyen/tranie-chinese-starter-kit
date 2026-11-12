@@ -12,5 +12,13 @@
     "skip": "Bỏ qua câu này"
   },
   "finished": "Bạn đã làm xong các câu của bài này.",
-  "finishedWithSkipped": "Bạn đã bỏ qua {{count}} câu vì dạng bài chưa có, bài chưa hoàn thành."
+  "finishedWithSkipped": "Bạn đã bỏ qua {{count}} câu vì dạng bài chưa có, bài chưa hoàn thành.",
+  "summary": {
+    "score": "Điểm",
+    "correct": "Đúng {{correct}} / {{answered}} câu",
+    "time": "Thời gian",
+    "wrongLabel": "Số câu sai",
+    "wrong": "Sai {{count}} câu",
+    "notSaved": "Chưa lưu được kết quả bài này"
+  }
 }
