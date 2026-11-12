@@ -77,4 +77,4 @@ Tầng test theo [spec-driven.md](../../../docs/05-standards/spec-driven.md) §4
 - [x] Chạy `pnpm content:check` (đụng rule nội dung; 3 câu `tone-choice` của `intro-01` phải vẫn pass).
 - [x] Chạy `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts` (có CSS mới) và `pnpm e2e` (chạy bài); xem UI ở
   preview `web-dev` cả sáng/tối, mobile/desktop để chụp screenshot cho PR.
-- [ ] Tick hết task; PR ghi `Spec PR: #<số>` và `Refs #26` hoặc `Closes #26` khi đủ AC. Không archive trong PR này.
+- [x] Tick hết task; PR ghi `Spec PR: #<số>` và `Refs #26` hoặc `Closes #26` khi đủ AC. Không archive trong PR này.
