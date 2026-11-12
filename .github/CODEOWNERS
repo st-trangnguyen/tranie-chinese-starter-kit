@@ -4,6 +4,7 @@
 # Mặc định: dev review code.
 *                     @st-trangnguyen
 
-# Spec do BA giữ: PR spec và PR archive tự xin BA review.
-# /openspec/          @<ba-github-handle>
-# /docs/02-design/    @<ba-github-handle>
+# /openspec/                          @<ba-github-handle>
+# /docs/02-design/                     @<ba-github-handle>
+# /openspec/changes/*/design.md        @st-trangnguyen
+# /openspec/changes/*/tasks.md         @st-trangnguyen
