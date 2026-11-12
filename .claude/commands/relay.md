@@ -40,9 +40,17 @@ cách chạy chúng bằng agent.
 - Bạn không sửa code để "cho nhanh". Việc gì có chủ thì giao cho chủ đó. Việc duy nhất bạn được tự
   sửa là tick checkbox trong `tasks.md`.
 
+## Nhánh và worktree
+
+Phiên trong worktree do app tạo có nhánh `claude/<tên>` (cắt từ `main`). Đừng chặn vì tên nhánh:
+điều kiện thật là nhánh chứa `origin/main`. Tên chỉ cần đúng quy ước **trước lần push đầu tiên**:
+khi người dùng đồng ý commit/push/mở PR, chạy `git branch -m <spec|feat>/<id>` nếu tên hiện tại chưa
+khớp (nhánh chưa push nên an toàn), rồi mới push. Nhánh đã push thì không đổi tên, hỏi người dùng.
+
 ## Pha `spec`
 
-1. Xác nhận đang ở nhánh `spec/<id>`. Nếu không, hỏi người dùng có muốn tạo nhánh đó từ `main` không.
+1. Xác nhận nhánh làm việc cắt từ `main` mới nhất (xem "Nhánh và worktree"); tên `spec/<id>` đặt
+   trước lần push đầu. Nếu đang ở `main` hoặc nhánh của việc khác, hỏi người dùng trước khi tạo nhánh.
 2. Gọi `spec-writer` với story/id. Kiểm vùng ghi.
 3. Nếu có "Câu hỏi mở": dừng, đưa câu hỏi cho người dùng, rồi gọi lại `spec-writer` với câu trả lời.
 4. Chạy `pnpm exec openspec validate --all --strict`. Fail thì gọi lại `spec-writer` với output lỗi.
@@ -53,8 +61,9 @@ cách chạy chúng bằng agent.
 
 1. **Cổng spec:** PR spec phải đã merge. Kiểm `openspec/changes/<id>/specs` có trên `origin/main`
    (`git fetch origin main` rồi `git cat-file -e origin/main:openspec/changes/<id>/proposal.md`).
-   Không có thì dừng và nói cần merge PR spec trước. Phải đang ở nhánh `feat/<id>` cắt từ `main`;
-   nếu không, hỏi người dùng trước khi tạo.
+   Không có thì dừng và nói cần merge PR spec trước. Nhánh làm việc phải chứa `origin/main`
+   (`git merge-base --is-ancestor origin/main HEAD`); nếu không, hỏi người dùng có muốn rebase không.
+   Tên nhánh chưa cần là `feat/<id>` (xem "Nhánh và worktree").
 2. Gọi `planner` với change id. Kiểm vùng ghi.
 3. Nếu báo cáo có "Vấn đề với spec": **dừng**, không tự sửa spec. Báo cần mở PR spec fix
    (`spec/<id>-fix`) cho BA duyệt (spec-driven §2), rồi rebase nhánh này.
@@ -66,8 +75,8 @@ cách chạy chúng bằng agent.
 ## Pha `code`
 
 1. **Cổng kế hoạch:** PR spec đã merge (như pha `plan`) **và** `openspec/changes/<id>/tasks.md` +
-   `design.md` đã có ở nhánh hiện tại. Thiếu thì dừng và bảo chạy `/relay plan <id>` trước. Phải đang
-   ở nhánh `feat/<id>` cắt từ `main`.
+   `design.md` đã có ở nhánh hiện tại. Thiếu thì dừng và bảo chạy `/relay plan <id>` trước. Nhánh làm việc
+   phải chứa `origin/main` (như pha `plan`).
 2. Đọc `tasks.md` để lấy danh sách Scenario theo thứ tự. Với **mỗi** Scenario chưa xong, lần lượt:
    1. **RED:** gọi `test-writer` (id + đúng một Scenario). Kiểm vùng ghi. Báo cáo phải có output
       test fail đúng lý do; không có thì gọi lại. Chạy lại test đó và tự xác nhận nó fail.
