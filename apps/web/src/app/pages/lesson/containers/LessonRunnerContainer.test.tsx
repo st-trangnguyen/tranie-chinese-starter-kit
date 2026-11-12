@@ -1,7 +1,15 @@
+import { I18nextProvider } from 'react-i18next';
+import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
+
 import { createDatabase } from '@core/helpers/db.helper';
 import { DexieProgressStore } from '@core/services/progress-store.service';
 import type { ExerciseRegistry } from '@shared/components/exercises/exercise.registry';
-import { renderWithProviders, screen, waitFor } from '@test/render';
+import { ListenButton } from '@shared/components/ListenButton';
+import { SlowToggle } from '@shared/components/SlowToggle';
+import { mockContentFetch } from '@test/mocks/content-fetch';
+import testI18n from '@test/i18n';
+import { renderWithProviders, screen, userEvent, waitFor } from '@test/render';
+import { render } from '@testing-library/react';
 import LessonRunnerContainer from './LessonRunnerContainer';
 
 const LESSON = {
@@ -54,10 +62,12 @@ const resetSavedProgress = async (): Promise<void> => {
 
 beforeEach(async () => {
   await resetSavedProgress();
-  vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) =>
-    /\/content\/lessons\/.+\.json$/.test(String(input))
-      ? Response.json(LESSON)
-      : new Response('', { status: 404 }),
+  vi.spyOn(globalThis, 'fetch').mockImplementation(
+    mockContentFetch(async (input) =>
+      /\/content\/lessons\/.+\.json$/.test(String(input))
+        ? Response.json(LESSON)
+        : new Response('', { status: 404 }),
+    ),
   );
 });
 
@@ -180,17 +190,19 @@ describe('LessonRunnerContainer', () => {
   });
 
   it('S3.2-X1: should count a skipped exercise in the middle of a lesson that was otherwise answered', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) =>
-      /\/content\/lessons\/.+\.json$/.test(String(input))
-        ? Response.json({
-            ...LESSON,
-            exercises: [
-              LESSON.exercises[0],
-              { id: 'e2', kind: 'pinyin-type', wordId: '爸爸' },
-              LESSON.exercises[2],
-            ],
-          })
-        : new Response('', { status: 404 }),
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      mockContentFetch(async (input) =>
+        /\/content\/lessons\/.+\.json$/.test(String(input))
+          ? Response.json({
+              ...LESSON,
+              exercises: [
+                LESSON.exercises[0],
+                { id: 'e2', kind: 'pinyin-type', wordId: '爸爸' },
+                LESSON.exercises[2],
+              ],
+            })
+          : new Response('', { status: 404 }),
+      ),
     );
     const { user } = renderRunner();
     await user.click(await screen.findByRole('button', { name: 'Chọn đúng' }));
@@ -280,10 +292,12 @@ describe('LessonRunnerContainer', () => {
     };
 
     beforeEach(() => {
-      vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) =>
-        /\/content\/lessons\/.+\.json$/.test(String(input))
-          ? Response.json(FIVE_EXERCISES)
-          : new Response('', { status: 404 }),
+      vi.spyOn(globalThis, 'fetch').mockImplementation(
+        mockContentFetch(async (input) =>
+          /\/content\/lessons\/.+\.json$/.test(String(input))
+            ? Response.json(FIVE_EXERCISES)
+            : new Response('', { status: 404 }),
+        ),
       );
     });
 
@@ -499,17 +513,21 @@ describe('LessonRunnerContainer — tổng kết bài (S3.4)', () => {
   });
 
   it('S3.4-AC1: should score only the exercises answered after reopening a 5-exercise lesson at the third (67%, "Đúng 2 / 3 câu", "Sai 1 câu")', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) =>
-      /\/content\/lessons\/.+\.json$/.test(String(input))
-        ? Response.json({
-            ...LESSON,
-            exercises: ['八', '白', '百', '爸', '吧'].map((wordId, index) => ({
-              id: `e${index + 1}`,
-              kind: 'tone-choice',
-              wordId,
-            })),
-          })
-        : new Response('', { status: 404 }),
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      mockContentFetch(async (input) =>
+        /\/content\/lessons\/.+\.json$/.test(String(input))
+          ? Response.json({
+              ...LESSON,
+              exercises: ['八', '白', '百', '爸', '吧'].map(
+                (wordId, index) => ({
+                  id: `e${index + 1}`,
+                  kind: 'tone-choice',
+                  wordId,
+                }),
+              ),
+            })
+          : new Response('', { status: 404 }),
+      ),
     );
     const db = createDatabase();
     await db.lessonProgress.put({
@@ -526,5 +544,131 @@ describe('LessonRunnerContainer — tổng kết bài (S3.4)', () => {
     expect(screen.getByText('67%')).toBeInTheDocument();
     expect(screen.getByText('Đúng 2 / 3 câu')).toBeInTheDocument();
     expect(screen.getByText('Sai 1 câu')).toBeInTheDocument();
+  });
+});
+
+describe('LessonRunnerContainer — nghe lại (S4.4)', () => {
+  /** Audio giả ở ranh giới: ghi lại số lần phát và dừng. */
+  class FakeAudio extends EventTarget {
+    src = '';
+    currentTime = 0;
+    playbackRate = 1;
+    playCount = 0;
+    pauseCount = 0;
+
+    play(): Promise<void> {
+      this.playCount += 1;
+      return Promise.resolve();
+    }
+
+    pause(): void {
+      this.pauseCount += 1;
+    }
+  }
+
+  // AudioService giữ một element cho cả vòng đời module, nên dùng đúng một FakeAudio.
+  const fakeAudio = new FakeAudio();
+
+  const listenRegistry: ExerciseRegistry = {
+    'tone-choice': ({ content, onResult, isLocked }) => (
+      <div>
+        <ListenButton audioPath={content.words[0]?.audio ?? ''} />
+        <SlowToggle />
+        <button
+          type="button"
+          disabled={isLocked}
+          onClick={() => onResult({ isCorrect: true })}
+        >
+          Chọn đúng
+        </button>
+      </div>
+    ),
+  };
+
+  beforeEach(() => {
+    fakeAudio.src = '';
+    fakeAudio.currentTime = 0;
+    fakeAudio.playbackRate = 1;
+    fakeAudio.playCount = 0;
+    fakeAudio.pauseCount = 0;
+    vi.stubGlobal('Audio', function FakeAudioConstructor() {
+      return fakeAudio;
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  const renderListenRunner = () =>
+    renderWithProviders(<LessonRunnerContainer registry={listenRegistry} />, {
+      route: '/lessons/:lessonId',
+    });
+
+  it('S4.4-AC1: nghe lại sau khi đã chấm thì nút Nghe vẫn bấm được và phát lại', async () => {
+    const { user } = renderListenRunner();
+    await user.click(await screen.findByRole('button', { name: 'Nghe' }));
+    expect(fakeAudio.playCount).toBe(1);
+
+    await user.click(screen.getByRole('button', { name: 'Chọn đúng' }));
+
+    expect(screen.getByRole('button', { name: 'Chọn đúng' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Nghe' })).toBeEnabled();
+    await user.click(screen.getByRole('button', { name: 'Nghe' }));
+    expect(fakeAudio.playCount).toBe(2);
+  });
+
+  it('S4.4-AC1: sang câu khác thì dừng audio đang phát', async () => {
+    const { user } = renderListenRunner();
+    await user.click(await screen.findByRole('button', { name: 'Nghe' }));
+    await user.click(screen.getByRole('button', { name: 'Chọn đúng' }));
+    const pausesBefore = fakeAudio.pauseCount;
+
+    await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+
+    expect(screen.getByText('Câu 2 / 3')).toBeInTheDocument();
+    expect(fakeAudio.pauseCount).toBeGreaterThan(pausesBefore);
+  });
+
+  it('S4.4-AC2: bật Nghe chậm ở câu 1 thì sang câu 2 công tắc vẫn bật và phát 0.75x', async () => {
+    const { user } = renderListenRunner();
+    await user.click(await screen.findByRole('switch'));
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
+    await user.click(screen.getByRole('button', { name: 'Chọn đúng' }));
+
+    await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+
+    expect(screen.getByText('Câu 2 / 3')).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
+    await user.click(screen.getByRole('button', { name: 'Nghe' }));
+    expect(fakeAudio.playbackRate).toBe(0.75);
+  });
+
+  it('S4.4-AC2: mở bài khác thì công tắc Nghe chậm tắt và phát tốc độ thường', async () => {
+    const OpenLessons = () => (
+      <>
+        <Link to="/lessons/l2">Bài khác</Link>
+        <LessonRunnerContainer registry={listenRegistry} />
+      </>
+    );
+    const user = userEvent.setup();
+    render(
+      <I18nextProvider i18n={testI18n}>
+        <MemoryRouter initialEntries={['/lessons/l1']}>
+          <Routes>
+            <Route path="/lessons/:lessonId" element={<OpenLessons />} />
+          </Routes>
+        </MemoryRouter>
+      </I18nextProvider>,
+    );
+    await user.click(await screen.findByRole('switch'));
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
+
+    await user.click(screen.getByRole('link', { name: 'Bài khác' }));
+
+    expect(await screen.findByText('Câu 1 / 3')).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false');
+    await user.click(screen.getByRole('button', { name: 'Nghe' }));
+    expect(fakeAudio.playbackRate).toBe(1);
   });
 });

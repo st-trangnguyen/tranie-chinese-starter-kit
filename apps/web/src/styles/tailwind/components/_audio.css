@@ -1,0 +1,35 @@
+/* Nghe lại + chế độ chậm — S4.4. Cao tối thiểu 44px; focus dùng :focus-visible toàn cục (_base.css). */
+
+@layer components {
+  .audio-listen-button {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-xl text-body font-semibold text-on-accent transition-colors;
+  }
+
+  .audio-listen-button:hover {
+    @apply bg-accent-hover;
+  }
+
+  .audio-slow-toggle {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full border-2 border-line-strong bg-transparent px-lg text-body-sm font-semibold text-fg transition-colors;
+  }
+
+  .audio-slow-toggle:hover {
+    @apply bg-accent-soft;
+  }
+
+  .audio-slow-toggle[aria-checked="true"],
+  .audio-slow-toggle.is-active {
+    @apply border-accent bg-accent-soft text-accent;
+  }
+
+  .audio-listen-error {
+    @apply rounded-md border-2 border-danger bg-danger-soft px-md py-sm text-body-sm font-semibold text-danger-text;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .audio-listen-button,
+    .audio-slow-toggle {
+      @apply transition-none;
+    }
+  }
+}
