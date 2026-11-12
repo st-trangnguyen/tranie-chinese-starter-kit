@@ -14,6 +14,8 @@ import { ContentService } from './content.service';
 
 export type LessonSource = Pick<ContentService, 'getLesson'>;
 
+export type PlacementContext = { lessonIds: readonly string[] };
+
 /** Cổng nhận các câu làm sai của bài kiểm tra (S3.5); bên ngoài quyết định lưu ở đâu. */
 export interface WrongAnswerSink {
   record(lessonId: string, exerciseIds: readonly string[]): Promise<void>;
@@ -50,6 +52,12 @@ export class LessonService {
 
   private writeCursor(progress: LessonProgress): Promise<void> {
     return this.store.saveLessonProgress(progress);
+  }
+
+  private writeCompletedBatch(lessonIds: readonly string[]): Promise<void> {
+    return this.store.saveLessonProgressBatch(
+      lessonIds.map((lessonId) => ({ lessonId, status: 'completed' as const })),
+    );
   }
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
@@ -260,6 +268,7 @@ export class LessonService {
   async finishLesson(
     lessonId: string,
     session: LessonSession,
+    placement?: PlacementContext,
   ): Promise<LessonSummary & { isSaved: boolean }> {
     const lessonType = await this.resolveLessonType(lessonId);
     if (lessonType === undefined) {
@@ -282,7 +291,9 @@ export class LessonService {
       return { ...summary, isSaved };
     }
     try {
-      await this.writeCursor({ lessonId, status: 'completed' });
+      await (placement === undefined
+        ? this.writeCursor({ lessonId, status: 'completed' })
+        : this.writeCompletedBatch(placement.lessonIds));
     } catch {
       // Ghi tiến độ lỗi không được chặn tổng kết: báo cho UI qua isSaved: false.
       return { ...summary, isSaved: false };

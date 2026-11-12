@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { LessonStatus } from '@csk/shared';
+import type { Lesson, LessonStatus } from '@csk/shared';
 
 import type { PathMap } from '@shared/models/learning-path.model';
 import { ContentService } from '@shared/services/content.service';
@@ -9,9 +9,12 @@ export interface LearningPathState {
   /** null khi đang nạp. */
   pathMap: PathMap | null;
   statuses: ReadonlyMap<string, LessonStatus>;
+  /** Id chủ đề chưa mở có bài kiểm tra, tức có nút "Kiểm tra vượt cấp" (S3.6). */
+  placementTestUnitIds: ReadonlySet<string>;
   hasError: boolean;
 }
 
+const EMPTY_UNIT_IDS: ReadonlySet<string> = new Set();
 const EMPTY_STATUSES: ReadonlyMap<string, LessonStatus> = new Map();
 
 export const useLearningPath = (): LearningPathState => {
@@ -21,6 +24,9 @@ export const useLearningPath = (): LearningPathState => {
   const [completedIds, setCompletedIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
+  const [lessonTypes, setLessonTypes] = useState<
+    ReadonlyMap<string, Lesson['type']>
+  >(() => new Map());
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
@@ -56,5 +62,53 @@ export const useLearningPath = (): LearningPathState => {
     [pathMap, completedIds, progressService],
   );
 
-  return { pathMap, statuses, hasError };
+  const lockedUnitLessonIds = useMemo(
+    () =>
+      (pathMap?.stages ?? [])
+        .flatMap((stage) => stage.units)
+        .filter((unit) => progressService.isUnitLocked(unit, statuses))
+        .flatMap((unit) => unit.lessonIds),
+    [pathMap, statuses, progressService],
+  );
+
+  useEffect(() => {
+    if (lockedUnitLessonIds.length === 0) {
+      return undefined;
+    }
+    let isActive = true;
+    contentService
+      .getLessonTypes(lockedUnitLessonIds)
+      .then((loadedTypes) => {
+        if (isActive) {
+          setLessonTypes(loadedTypes);
+        }
+      })
+      .catch(() => {
+        // Không biết loại bài thì không hiện nút vượt cấp; bản đồ vẫn dùng được.
+      });
+    return () => {
+      isActive = false;
+    };
+  }, [contentService, lockedUnitLessonIds]);
+
+  const placementTestUnitIds = useMemo(() => {
+    if (!pathMap) {
+      return EMPTY_UNIT_IDS;
+    }
+    return new Set(
+      pathMap.stages
+        .flatMap((stage) => stage.units)
+        .filter(
+          (unit) =>
+            progressService.getPlacementTestLessonId(
+              unit,
+              statuses,
+              lessonTypes,
+            ) !== undefined,
+        )
+        .map((unit) => unit.id),
+    );
+  }, [pathMap, statuses, lessonTypes, progressService]);
+
+  return { pathMap, statuses, placementTestUnitIds, hasError };
 };

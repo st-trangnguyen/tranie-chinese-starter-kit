@@ -13,14 +13,21 @@ import { useLessonRunner } from '../hooks/useLessonRunner';
 interface LessonRunnerContainerProps {
   /** Mặc định là registry thật; test truyền registry giả. */
   registry?: ExerciseRegistry;
+  /** Bài cần chạy; mặc định lấy từ URL `lessons/:lessonId`. */
+  lessonId?: string;
+  /** Chủ đề đang vượt cấp (S3.6). */
+  placementUnitId?: string;
 }
 
 /** Màn chạy bài (S3.2): lần lượt từng câu, chấm ngay, giải thích khi sai. */
 const LessonRunnerContainer = ({
   registry = exerciseRegistry,
+  lessonId: lessonIdProp,
+  placementUnitId,
 }: LessonRunnerContainerProps) => {
   const { t } = useTranslation('lesson');
-  const { lessonId = '' } = useParams();
+  const { lessonId: lessonIdParam = '' } = useParams();
+  const lessonId = lessonIdProp ?? lessonIdParam;
   const {
     lesson,
     session,
@@ -32,7 +39,7 @@ const LessonRunnerContainer = ({
     continueLesson,
     skipExercise,
     restart,
-  } = useLessonRunner(lessonId);
+  } = useLessonRunner(lessonId, { placementUnitId });
   const [restartedLessonId, setRestartedLessonId] = useState<string | null>(
     null,
   );

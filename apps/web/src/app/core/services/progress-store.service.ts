@@ -20,6 +20,8 @@ export interface ProgressStore {
   getLessonProgress(lessonId: string): Promise<LessonProgress | undefined>;
   /** Ghi đè dòng cùng `lessonId`, không đụng bài khác. */
   saveLessonProgress(progress: LessonProgress): Promise<void>;
+  /** Ghi mọi dòng trong một transaction: một dòng lỗi thì không dòng nào được ghi (S3.6). */
+  saveLessonProgressBatch(rows: LessonProgress[]): Promise<void>;
 }
 
 export class DexieProgressStore implements ProgressStore {
@@ -57,6 +59,12 @@ export class DexieProgressStore implements ProgressStore {
 
   async saveLessonProgress(progress: LessonProgress): Promise<void> {
     await this.db.lessonProgress.put(progress);
+  }
+
+  async saveLessonProgressBatch(rows: LessonProgress[]): Promise<void> {
+    await this.db.transaction('rw', this.db.lessonProgress, async () => {
+      await this.db.lessonProgress.bulkPut(rows);
+    });
   }
 }
 

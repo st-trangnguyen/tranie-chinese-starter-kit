@@ -7,4 +7,5 @@ export const ROUTE_PATHS = {
   onboarding: '/onboarding',
   learningPaths: '/learning-paths',
   lesson: (lessonId: string): string => `/lessons/${lessonId}`,
+  placementTest: (unitId: string): string => `/units/${unitId}/placement-test`,
 } as const;

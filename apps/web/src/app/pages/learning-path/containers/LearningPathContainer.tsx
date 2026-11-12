@@ -7,7 +7,8 @@ import { useLearningPath } from '../hooks/useLearningPath';
 /** Màn bản đồ lộ trình (S3.1): giai đoạn → nhóm → bài theo thứ tự. */
 const LearningPathContainer = () => {
   const { t } = useTranslation('learning-path');
-  const { pathMap, statuses, hasError } = useLearningPath();
+  const { pathMap, statuses, placementTestUnitIds, hasError } =
+    useLearningPath();
 
   const renderLesson = (lessonId: string) => (
     <LearningPathLessonItem
@@ -32,6 +33,7 @@ const LearningPathContainer = () => {
           title={stage.title}
           units={stage.units}
           renderLesson={renderLesson}
+          placementTestUnitIds={placementTestUnitIds}
         />
       ))}
     </main>
