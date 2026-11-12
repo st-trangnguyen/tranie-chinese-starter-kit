@@ -5,6 +5,7 @@ import type { ExerciseResult } from '@shared/models/exercise.model';
 import type {
   LessonFeedbackView,
   LessonSession,
+  LessonSummary,
 } from '@shared/models/lesson-session.model';
 import { LessonService } from '@shared/services/lesson.service';
 
@@ -13,6 +14,10 @@ export interface LessonRunnerState {
   lesson: Lesson | null;
   session: LessonSession | null;
   feedback: LessonFeedbackView | null;
+  /** Tổng kết khi hết câu; null khi chưa xong bài (S3.4). */
+  summary: LessonSummary | null;
+  /** false khi ghi tiến độ "đã xong" lỗi (S3.4). */
+  isSaved: boolean;
   hasError: boolean;
   submitResult: (result: ExerciseResult) => void;
   continueLesson: () => void;
@@ -38,6 +43,8 @@ export const useLessonRunner = (lessonId: string): LessonRunnerState => {
   const service = useMemo(() => new LessonService(), []);
   const [opened, setOpened] = useState<OpenedState | null>(null);
   const [failedLessonId, setFailedLessonId] = useState<string | null>(null);
+  const [unsavedLessonId, setUnsavedLessonId] = useState<string | null>(null);
+  const finishedLessonIdRef = useRef<string | null>(null);
   const savedMarkRef = useRef<SavedMark | null>(null);
 
   useEffect(() => {
@@ -123,6 +130,36 @@ export const useLessonRunner = (lessonId: string): LessonRunnerState => {
       .catch(() => undefined);
   }, [service, openedLessonId, currentIndex, isFinished]);
 
+  // Kết thúc bài đúng một lần khi hết câu (S3.4). Cờ chỉ được gỡ khi bài đó được làm lại
+  // (session đang trả lời), nên session cũ còn sót lúc đổi bài không ghi lần hai. Kết quả
+  // gắn với lessonId nên bài cũ không đè lên bài mới.
+  useEffect(() => {
+    if (openedLessonId === null) {
+      return;
+    }
+    if (!isFinished) {
+      finishedLessonIdRef.current = null;
+      return;
+    }
+    const latest = latestSessionRef.current;
+    if (!latest || finishedLessonIdRef.current === openedLessonId) {
+      return;
+    }
+    finishedLessonIdRef.current = openedLessonId;
+    // Xếp sau lần lưu vị trí trong cùng hàng đợi: ghi "completed" luôn đến sau ghi "in-progress".
+    saveQueueRef.current = saveQueueRef.current
+      .then(() => service.finishLesson(openedLessonId, latest))
+      .then((outcome) =>
+        setUnsavedLessonId(outcome.isSaved ? null : openedLessonId),
+      )
+      .catch(() => setUnsavedLessonId(openedLessonId));
+  }, [service, openedLessonId, isFinished]);
+
+  const summary = useMemo(
+    () => (session?.phase === 'finished' ? service.summarize(session) : null),
+    [service, session],
+  );
+
   const result = session?.lastResult ?? null;
   const feedback: LessonFeedbackView | null =
     session?.phase === 'feedback' && result
@@ -138,6 +175,8 @@ export const useLessonRunner = (lessonId: string): LessonRunnerState => {
     lesson: current?.lesson ?? null,
     session,
     feedback,
+    summary,
+    isSaved: unsavedLessonId !== lessonId,
     hasError: failedLessonId === lessonId,
     submitResult,
     continueLesson,

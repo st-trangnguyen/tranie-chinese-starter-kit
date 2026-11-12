@@ -45,6 +45,35 @@
     @apply text-body;
   }
 
+  /* Màn tổng kết — S3.4. Cảnh báo chưa lưu có viền + chữ, không chỉ dựa vào màu. */
+  .lesson-summary-title {
+    @apply text-title text-fg;
+  }
+
+  .lesson-summary-title:focus-visible {
+    @apply rounded-sm outline-2 outline-offset-2 outline-accent;
+  }
+
+  .lesson-summary-item {
+    @apply rounded-lg border border-line bg-surface p-md;
+  }
+
+  .lesson-summary-label {
+    @apply text-caption text-fg-muted;
+  }
+
+  .lesson-summary-score {
+    @apply text-title-lg text-accent;
+  }
+
+  .lesson-summary-value {
+    @apply text-body text-fg;
+  }
+
+  .lesson-summary-warning {
+    @apply rounded-md border-2 border-danger bg-danger-soft text-body-sm font-semibold text-danger-text;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .lesson-progress-fill {
       @apply transition-none;

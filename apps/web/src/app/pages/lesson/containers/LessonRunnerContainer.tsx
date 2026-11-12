@@ -5,8 +5,8 @@ import {
   exerciseRegistry,
   type ExerciseRegistry,
 } from '@shared/components/exercises/exercise.registry';
-import { LessonFinished } from '../components/LessonFinished';
 import { LessonRunner } from '../components/LessonRunner';
+import { LessonSummary } from '../components/LessonSummary';
 import { useLessonRunner } from '../hooks/useLessonRunner';
 
 interface LessonRunnerContainerProps {
@@ -24,6 +24,8 @@ const LessonRunnerContainer = ({
     lesson,
     session,
     feedback,
+    summary,
+    isSaved,
     hasError,
     submitResult,
     continueLesson,
@@ -40,9 +42,7 @@ const LessonRunnerContainer = ({
         </p>
       )}
       {!lesson && !hasError && <p>{t('loading')}</p>}
-      {session?.phase === 'finished' && (
-        <LessonFinished skippedCount={session.skippedCount} />
-      )}
+      {summary && <LessonSummary summary={summary} isSaved={isSaved} />}
       {session && session.phase !== 'finished' && exercise && (
         <LessonRunner
           view={{

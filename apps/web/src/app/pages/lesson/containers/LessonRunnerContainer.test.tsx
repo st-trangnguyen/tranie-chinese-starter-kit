@@ -1,6 +1,7 @@
 import { createDatabase } from '@core/helpers/db.helper';
+import { DexieProgressStore } from '@core/services/progress-store.service';
 import type { ExerciseRegistry } from '@shared/components/exercises/exercise.registry';
-import { renderWithProviders, screen } from '@test/render';
+import { renderWithProviders, screen, waitFor } from '@test/render';
 import LessonRunnerContainer from './LessonRunnerContainer';
 
 const LESSON = {
@@ -314,5 +315,216 @@ describe('LessonRunnerContainer', () => {
       ).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Chọn đúng' })).toBeEnabled();
     });
+  });
+});
+
+describe('LessonRunnerContainer — tổng kết bài (S3.4)', () => {
+  type Answer = 'Chọn đúng' | 'Chọn sai';
+
+  /** Trả lời lần lượt các câu rồi bấm "Tiếp tục" sau mỗi câu. */
+  const answerAll = async (
+    user: ReturnType<typeof renderRunner>['user'],
+    answers: readonly Answer[],
+  ): Promise<void> => {
+    for (const answer of answers) {
+      await user.click(await screen.findByRole('button', { name: answer }));
+      await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+    }
+  };
+
+  it('S3.4-AC1: should show the score, correct count and wrong count with the finished message after the last exercise', async () => {
+    const { user } = renderRunner();
+
+    await answerAll(user, ['Chọn đúng', 'Chọn đúng', 'Chọn sai']);
+
+    expect(
+      screen.getByText('Bạn đã làm xong các câu của bài này.'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('67%')).toBeInTheDocument();
+    expect(screen.getByText('Đúng 2 / 3 câu')).toBeInTheDocument();
+    expect(screen.getByText('Sai 1 câu')).toBeInTheDocument();
+  });
+
+  it('S3.4-AC1: should show 100% and "Sai 0 câu" when every answer is correct', async () => {
+    const { user } = renderRunner();
+
+    await answerAll(user, ['Chọn đúng', 'Chọn đúng', 'Chọn đúng']);
+
+    expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.getByText('Sai 0 câu')).toBeInTheDocument();
+  });
+
+  it('S3.4-AC1: should show 0% and "Sai 3 câu" when every answer is wrong', async () => {
+    const { user } = renderRunner();
+
+    await answerAll(user, ['Chọn sai', 'Chọn sai', 'Chọn sai']);
+
+    expect(screen.getByText('0%')).toBeInTheDocument();
+    expect(screen.getByText('Sai 3 câu')).toBeInTheDocument();
+  });
+
+  it('S3.4-AC1: should list score, time and wrong count in a description list, with time as m:ss', async () => {
+    const { user } = renderRunner();
+
+    await answerAll(user, ['Chọn đúng', 'Chọn đúng', 'Chọn sai']);
+
+    const list = screen.getByText('67%').closest('dl');
+    expect(list).not.toBeNull();
+    expect(list).toHaveTextContent(/\b\d+:\d{2}\b/);
+    expect(list).toHaveTextContent('Sai 1 câu');
+  });
+
+  it('S3.4-AC1: should show the summary under the skipped-exercises message when exercises were skipped', async () => {
+    const { user } = renderWithProviders(
+      <LessonRunnerContainer registry={{}} />,
+      { route: '/lessons/:lessonId' },
+    );
+    for (let step = 0; step < 3; step += 1) {
+      await user.click(
+        await screen.findByRole('button', { name: 'Bỏ qua câu này' }),
+      );
+    }
+
+    expect(
+      screen.getByText(/Bạn đã bỏ qua 3 câu.*chưa hoàn thành/),
+    ).toBeInTheDocument();
+    expect(screen.getByText('0%')).toBeInTheDocument();
+    expect(screen.getByText('Sai 0 câu')).toBeInTheDocument();
+  });
+
+  it('S3.4-AC1: should show no score, time or wrong count while the lesson is in progress', async () => {
+    const { user } = renderRunner();
+    await user.click(await screen.findByRole('button', { name: 'Chọn sai' }));
+    await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+
+    expect(screen.getByText('Câu về 白')).toBeInTheDocument();
+    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Sai \d+ câu$/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^\d+:\d{2}$/)).not.toBeInTheDocument();
+    expect(document.querySelector('dl')).toBeNull();
+  });
+
+  it('S3.4-AC1: should show no save warning when the result was saved', async () => {
+    const { user } = renderRunner();
+
+    await answerAll(user, ['Chọn đúng', 'Chọn đúng', 'Chọn đúng']);
+
+    expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('S3.4-AC1: should still show the summary and warn "Chưa lưu được kết quả bài này" when saving fails', async () => {
+    const save = DexieProgressStore.prototype.saveLessonProgress;
+    vi.spyOn(
+      DexieProgressStore.prototype,
+      'saveLessonProgress',
+    ).mockImplementation(async function (this: DexieProgressStore, progress) {
+      if (progress.status === 'completed') {
+        throw new Error('IndexedDB write failed');
+      }
+      return save.call(this, progress);
+    });
+    const { user } = renderRunner();
+
+    await answerAll(user, ['Chọn đúng', 'Chọn đúng', 'Chọn sai']);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Chưa lưu được kết quả bài này',
+    );
+    expect(screen.getByText('67%')).toBeInTheDocument();
+    expect(screen.getByText('Đúng 2 / 3 câu')).toBeInTheDocument();
+    expect(screen.getByText('Sai 1 câu')).toBeInTheDocument();
+  });
+
+  /** Đọc tiến độ đã ghi của bài đang mở (route dùng nguyên văn ':lessonId'). */
+  const readSavedProgress = async (): Promise<
+    Awaited<ReturnType<DexieProgressStore['getLessonProgress']>>
+  > => {
+    const db = createDatabase();
+    try {
+      return await new DexieProgressStore(db).getLessonProgress(':lessonId');
+    } finally {
+      db.close();
+    }
+  };
+
+  /** Dựng thứ tự ghi xấu: lần lưu vị trí khi hết câu đến sau lần ghi "completed". */
+  const delayFinishedPositionWrite = (): void => {
+    const save = DexieProgressStore.prototype.saveLessonProgress;
+    vi.spyOn(
+      DexieProgressStore.prototype,
+      'saveLessonProgress',
+    ).mockImplementation(async function (this: DexieProgressStore, progress) {
+      // Lần lưu vị trí đã đọc trạng thái cũ ("in-progress") trước khi "completed" được ghi,
+      // rồi ghi muộn hơn: thứ tự đến cuối cùng là completed -> in-progress.
+      if (progress.status === 'completed') {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      } else if (progress.cursor === undefined) {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
+      return save.call(this, progress);
+    });
+  };
+
+  it('S3.4-AC2: should end with status "completed" and no cursor after finishing, even when the position save lands late', async () => {
+    delayFinishedPositionWrite();
+    const { user } = renderRunner();
+
+    await answerAll(user, ['Chọn đúng', 'Chọn đúng', 'Chọn sai']);
+
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await waitFor(async () => {
+      const progress = await readSavedProgress();
+      expect(progress?.status).toBe('completed');
+    });
+    const progress = await readSavedProgress();
+    expect(progress?.cursor).toBeUndefined();
+  });
+
+  it('S3.4-AC2: should not mark the lesson "completed" when an exercise was skipped', async () => {
+    delayFinishedPositionWrite();
+    const { user } = renderWithProviders(
+      <LessonRunnerContainer registry={{}} />,
+      { route: '/lessons/:lessonId' },
+    );
+    for (let step = 0; step < 3; step += 1) {
+      await user.click(
+        await screen.findByRole('button', { name: 'Bỏ qua câu này' }),
+      );
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    const progress = await readSavedProgress();
+    expect(progress?.status).not.toBe('completed');
+  });
+
+  it('S3.4-AC1: should score only the exercises answered after reopening a 5-exercise lesson at the third (67%, "Đúng 2 / 3 câu", "Sai 1 câu")', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) =>
+      /\/content\/lessons\/.+\.json$/.test(String(input))
+        ? Response.json({
+            ...LESSON,
+            exercises: ['八', '白', '百', '爸', '吧'].map((wordId, index) => ({
+              id: `e${index + 1}`,
+              kind: 'tone-choice',
+              wordId,
+            })),
+          })
+        : new Response('', { status: 404 }),
+    );
+    const db = createDatabase();
+    await db.lessonProgress.put({
+      lessonId: ':lessonId',
+      status: 'in-progress',
+      cursor: 2,
+    });
+    db.close();
+    const { user } = renderRunner();
+    expect(await screen.findByText('Câu về 百')).toBeInTheDocument();
+
+    await answerAll(user, ['Chọn đúng', 'Chọn đúng', 'Chọn sai']);
+
+    expect(screen.getByText('67%')).toBeInTheDocument();
+    expect(screen.getByText('Đúng 2 / 3 câu')).toBeInTheDocument();
+    expect(screen.getByText('Sai 1 câu')).toBeInTheDocument();
   });
 });
