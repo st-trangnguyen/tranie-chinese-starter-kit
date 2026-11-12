@@ -29,7 +29,7 @@ Chỉ làm sau khi PR spec đã merge **và** code S3.3 đã merge vào `main` (
 
 - [x] 4.1 RED: test S3.4-AC1 "Tổng kết sau câu cuối", "Chưa hết bài thì chưa có tổng kết", "Ghi tiến độ lỗi", và các Scenario S3.2 về thông báo đã làm xong/focus vẫn pass — Vitest + Testing Library, `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.test.tsx`, registry giả, store `fake-indexeddb`; kiểm: fail vì chưa có màn tổng kết
 - [x] 4.2 GREEN: `useLessonRunner` gọi `finishLesson` một lần khi hết câu (effect có cờ và cleanup), thêm `LessonSummary` thay `LessonFinished` (tiêu đề giữ chữ cũ, `dl` điểm/thời gian/số câu sai, `role="alert"` khi chưa lưu), i18n `lesson.json`; kiểm: test 4.1 pass
-- [ ] 4.3 Style BEM màn tổng kết trong `apps/web/src/styles/tailwind/` (JSX chỉ layout/spacing, contrast ≥ 4.5:1, focus thấy được, sáng + tối, `prefers-reduced-motion`) — ngoại lệ test-first: CSS thuần; kiểm: xem preview `web-dev` ở 375px sáng/tối
+- [x] 4.3 Style BEM màn tổng kết trong `apps/web/src/styles/tailwind/` (JSX chỉ layout/spacing, contrast ≥ 4.5:1, focus thấy được, sáng + tối, `prefers-reduced-motion`) — ngoại lệ test-first: CSS thuần; kiểm: xem preview `web-dev` ở 375px sáng/tối
 - [x] 4.4 Xoá `LessonFinished.tsx` và test cũ; kiểm: `pnpm test:run` pass
 
 ## 5. Kiểm tra
@@ -37,7 +37,7 @@ Chỉ làm sau khi PR spec đã merge **và** code S3.3 đã merge vào `main` (
 - [x] 5.0 Cập nhật `docs/03-architecture.md` (vòng đời bài: xong → `completed`, `LessonService.finishLesson`) — ngoại lệ test-first: docs thuần; kiểm: đọc lại diff
 - [x] 5.1 Refactor + self-review theo CLAUDE.md §0, §2, §7 (không `any`, dependency một chiều, file < 300 dòng); kiểm: `pnpm lint` sạch
 - [x] 5.2 Chạy `pnpm typecheck && pnpm lint && pnpm test:run` và ghi kết quả thật; kiểm: toàn bộ pass. e2e chưa có (Câu hỏi mở 5), nêu rõ trong PR
-- [ ] 5.3 Chụp screenshot màn tổng kết mobile 375×812 và desktop 1280×800, sáng và tối cho PR; kiểm: có file ảnh
+- [x] 5.3 Chụp screenshot màn tổng kết mobile 375×812 và desktop 1280×800, sáng và tối cho PR; kiểm: có file ảnh
 
 ## Workflow follow-up
 
