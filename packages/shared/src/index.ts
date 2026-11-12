@@ -15,7 +15,14 @@ export type {
   LessonStatus,
   Settings,
 } from './progress.schema';
+export { comparePinyin, parsePinyin } from './pinyin.compare';
+export type {
+  PinyinComparison,
+  PinyinSyllable,
+  PinyinSyllableDiff,
+} from './pinyin.compare';
 export {
+  convertTypedPinyin,
   countPinyinSyllables,
   isToneMarkedPinyin,
   numberedToToneMarks,

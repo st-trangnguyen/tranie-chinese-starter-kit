@@ -1,4 +1,5 @@
 import { findUnsupportedPinyinChars } from './pinyin.charset';
+import { PINYIN_SYLLABLES, splitPinyinSyllables } from './pinyin.syllables';
 
 const TONE_MARKS: Readonly<Record<string, readonly string[]>> = {
   a: ['ā', 'á', 'ǎ', 'à'],
@@ -109,5 +110,39 @@ const VOWEL_CLUSTER = /[aeiouüāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]
 export function countPinyinSyllables(pinyin: string): number {
   return (
     pinyin.normalize('NFC').toLowerCase().match(VOWEL_CLUSTER)?.length ?? 0
+  );
+}
+
+const TYPED_SYLLABLE_RUN = /([a-zA-ZüÜ:]+)([1-5])/g;
+
+function isKnownSyllable(piece: string): boolean {
+  return (
+    PINYIN_SYLLABLES.has(piece) ||
+    (piece.length > 1 &&
+      piece.endsWith('r') &&
+      PINYIN_SYLLABLES.has(piece.slice(0, -1)))
+  );
+}
+
+/**
+ * Rule (S4.3 AC1): chữ số 1-5 đứng ngay sau một đoạn chữ cái thì đổi thanh cho âm tiết cuối của
+ * đoạn (`v`/`u:` → `ü`, `ü` sau j/q/x/y → `u`, số 5 → không dấu) và bỏ chữ số. Số đứng sai chỗ
+ * hoặc đoạn không tách được thành âm tiết hợp lệ thì giữ nguyên. Chạy lại trên kết quả không đổi.
+ */
+export function convertTypedPinyin(input: string): string {
+  return input.replace(
+    TYPED_SYLLABLE_RUN,
+    (match, run: string, digit: string) => {
+      const letters = run
+        .toLowerCase()
+        .replace(/u:|v/g, 'ü')
+        .replace(/([jqxy])ü/g, '$1u');
+      const pieces = splitPinyinSyllables(letters);
+      const last = pieces[pieces.length - 1];
+      if (last === undefined || !pieces.every(isKnownSyllable)) {
+        return match;
+      }
+      return [...pieces.slice(0, -1), applyTone(last, Number(digit))].join('');
+    },
   );
 }

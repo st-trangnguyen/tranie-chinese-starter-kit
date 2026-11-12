@@ -6,6 +6,7 @@ import type {
   ExerciseProps,
   ExerciseResult,
 } from './exercise.types';
+import { PinyinTypeExercise } from './PinyinTypeExercise';
 import { SoundPairExercise } from './SoundPairExercise';
 import { ToneChoiceExercise } from './ToneChoiceExercise';
 
@@ -17,6 +18,7 @@ export type ExerciseRegistry = Partial<{
 /** E4–E6 (rồi E10) đăng ký dần vào đây. */
 export const exerciseRegistry: ExerciseRegistry = {
   'tone-choice': ToneChoiceExercise,
+  'pinyin-type': PinyinTypeExercise,
   'sound-pair': SoundPairExercise,
 };
 

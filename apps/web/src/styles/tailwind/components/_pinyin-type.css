@@ -1,0 +1,62 @@
+/* Dạng bài nghe gõ pinyin — S4.3. Ô nhập và nút cao tối thiểu 44px, focus nhìn thấy.
+   Phần sai có viền trái + nhãn chữ, không chỉ dựa vào màu. */
+
+@layer components {
+  .pinyin-type-label {
+    @apply text-body font-semibold text-fg;
+  }
+
+  .pinyin-type-input {
+    @apply min-h-11 rounded-md border-2 border-line-strong bg-surface px-md text-body font-normal text-fg;
+  }
+
+  .pinyin-type-input:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .pinyin-type-input:disabled {
+    @apply opacity-70;
+  }
+
+  .pinyin-type-submit {
+    @apply min-h-11 rounded-md bg-accent px-md text-body font-semibold text-on-accent transition-colors;
+  }
+
+  .pinyin-type-submit:hover:not(:disabled) {
+    @apply bg-accent-hover;
+  }
+
+  .pinyin-type-submit:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .pinyin-type-submit:disabled {
+    @apply opacity-70;
+  }
+
+  .pinyin-type-answer {
+    @apply rounded-md border-2 border-line bg-surface p-md text-body text-fg;
+  }
+
+  .pinyin-type-syllables {
+    @apply list-none;
+  }
+
+  .pinyin-type-syllable {
+    @apply rounded-md bg-sunken p-sm;
+  }
+
+  .pinyin-type-part {
+    @apply rounded-sm border-l-4 border-line-strong px-sm text-body-sm text-fg;
+  }
+
+  .pinyin-type-part.is-wrong {
+    @apply border-danger bg-danger-soft font-semibold text-danger-text;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pinyin-type-submit {
+      @apply transition-none;
+    }
+  }
+}

@@ -53,5 +53,18 @@
       "5": "thanh nhẹ"
     },
     "explanation": "Đáp án đúng: {{tone}} · {{pinyin}}"
+  },
+  "pinyinType": {
+    "inputLabel": "Gõ pinyin của âm vừa nghe",
+    "submit": "Kiểm tra",
+    "answerLabel": "Pinyin đúng",
+    "wrongListLabel": "Phần gõ sai",
+    "missing": "—",
+    "parts": {
+      "initial": "Thanh mẫu",
+      "final": "Vận mẫu",
+      "tone": "Thanh điệu"
+    },
+    "explanation": "Đáp án đúng: {{pinyin}}"
   }
 }
