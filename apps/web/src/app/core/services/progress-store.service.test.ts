@@ -61,6 +61,100 @@ describe('DexieProgressStore — lesson progress', () => {
     ]);
   });
 
+  it('S3.3-AC2: should return the saved lesson progress including cursor', async () => {
+    const { db, store } = makeStore();
+    await db.lessonProgress.put({
+      lessonId: 'intro-01',
+      status: 'in-progress',
+      cursor: 2,
+    });
+
+    await expect(store.getLessonProgress('intro-01')).resolves.toEqual({
+      lessonId: 'intro-01',
+      status: 'in-progress',
+      cursor: 2,
+    });
+  });
+
+  it('S3.3-AC2: should return undefined when the lesson has no progress row', async () => {
+    const { db, store } = makeStore();
+    await db.lessonProgress.put({
+      lessonId: 'intro-02',
+      status: 'in-progress',
+      cursor: 1,
+    });
+
+    await expect(store.getLessonProgress('intro-01')).resolves.toBeUndefined();
+  });
+
+  it('S3.3-AC2: should return undefined when the lesson progress row is corrupted', async () => {
+    const { db, store } = makeStore();
+    await db.lessonProgress.put({
+      lessonId: 'intro-01',
+      status: 'done',
+      cursor: 1,
+    });
+
+    await expect(store.getLessonProgress('intro-01')).resolves.toBeUndefined();
+  });
+
+  it('S3.3-X2: should keep completed status when the stored cursor is corrupted', async () => {
+    const { db, store } = makeStore();
+    await db.lessonProgress.put({
+      lessonId: 'intro-01',
+      status: 'completed',
+      cursor: -3,
+    });
+
+    await expect(store.getLessonProgress('intro-01')).resolves.toEqual({
+      lessonId: 'intro-01',
+      status: 'completed',
+    });
+  });
+
+  it('S3.3-AC1: should read back lesson progress after saving it', async () => {
+    const { store } = makeStore();
+
+    await store.saveLessonProgress({
+      lessonId: 'intro-01',
+      status: 'in-progress',
+      cursor: 3,
+    });
+
+    await expect(store.getLessonProgress('intro-01')).resolves.toEqual({
+      lessonId: 'intro-01',
+      status: 'in-progress',
+      cursor: 3,
+    });
+  });
+
+  it('S3.3-AC1: should overwrite the row of the same lesson and leave other lessons alone', async () => {
+    const { store } = makeStore();
+    await store.saveLessonProgress({
+      lessonId: 'intro-01',
+      status: 'in-progress',
+      cursor: 1,
+    });
+    await store.saveLessonProgress({
+      lessonId: 'intro-02',
+      status: 'in-progress',
+      cursor: 4,
+    });
+
+    await store.saveLessonProgress({
+      lessonId: 'intro-01',
+      status: 'in-progress',
+      cursor: 2,
+    });
+
+    await expect(store.getLessonProgress('intro-01')).resolves.toMatchObject({
+      cursor: 2,
+    });
+    await expect(store.getLessonProgress('intro-02')).resolves.toMatchObject({
+      cursor: 4,
+    });
+  });
+
   it('should keep settings when upgrading a version 1 database', async () => {
     const name = `test-${crypto.randomUUID()}`;
     const legacy = new Dexie(name);

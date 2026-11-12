@@ -1,5 +1,11 @@
 import type { Exercise } from '@csk/shared';
 
+import { createDatabase } from '@core/helpers/db.helper';
+import {
+  DexieProgressStore,
+  type ProgressStore,
+} from '@core/services/progress-store.service';
+import { ProgressService } from './progress.service';
 import { LessonService, type LessonSource } from './lesson.service';
 
 const EXERCISES: Exercise[] = [
@@ -145,5 +151,241 @@ describe('LessonService — quy tắc phiên làm bài', () => {
       phase: 'answering',
       lastResult: null,
     });
+  });
+});
+
+describe('LessonService — vị trí bắt đầu khi mở lại bài (S3.3)', () => {
+  it('S3.3-AC2: should resume at the saved exercise when it is within the lesson', () => {
+    expect(service.resolveStartIndex(2, 3)).toBe(2);
+    expect(service.resolveStartIndex(0, 3)).toBe(0);
+  });
+
+  it('S3.3-AC2: should open a session at the saved position, waiting for an answer', () => {
+    const session = service.startSession(EXERCISES, 2);
+
+    expect(session).toMatchObject({
+      exerciseIds: ['e1', 'e2', 'e3'],
+      currentIndex: 2,
+      phase: 'answering',
+      lastResult: null,
+    });
+  });
+
+  it('S3.3-AC2: should start at the first exercise when the lesson was never studied', () => {
+    expect(service.resolveStartIndex(undefined, 3)).toBe(0);
+    expect(service.startSession(EXERCISES).currentIndex).toBe(0);
+  });
+
+  it.each([
+    ['not a number', Number.NaN],
+    ['negative', -1],
+    ['fractional', 1.5],
+    ['infinite', Number.POSITIVE_INFINITY],
+  ])(
+    'S3.3-AC2: should start at the first exercise when the saved position is unusable (%s)',
+    (_label, saved) => {
+      expect(service.resolveStartIndex(saved, 3)).toBe(0);
+    },
+  );
+
+  it('S3.3-AC2: should start at the first exercise when the lesson lost exercises', () => {
+    expect(service.resolveStartIndex(5, 3)).toBe(0);
+    expect(service.resolveStartIndex(3, 3)).toBe(0);
+  });
+
+  it('S3.3-AC2: should start at the first exercise when the lesson has no exercises', () => {
+    expect(service.resolveStartIndex(0, 0)).toBe(0);
+  });
+
+  it('S3.3-AC2: should keep a start position outside the lesson from breaking the session', () => {
+    expect(service.startSession(EXERCISES, 6).currentIndex).toBe(0);
+  });
+});
+
+describe('LessonService — tiến độ khi thoát giữa chừng (S3.3)', () => {
+  it('S3.3-X2: should keep a completed lesson completed when the learner leaves mid-way', () => {
+    const next = service.nextProgress(
+      { lessonId: 'intro-01', status: 'completed' },
+      'intro-01',
+      1,
+    );
+
+    expect(next).toEqual({
+      lessonId: 'intro-01',
+      status: 'completed',
+      cursor: 1,
+    });
+  });
+
+  it.each([
+    ['never studied', undefined],
+    [
+      'in progress',
+      { lessonId: 'intro-01', status: 'in-progress' as const, cursor: 0 },
+    ],
+  ])(
+    'S3.3-X2: should mark a lesson in-progress when it is %s',
+    (_label, existing) => {
+      const next = service.nextProgress(existing, 'intro-01', 2);
+
+      expect(next).toEqual({
+        lessonId: 'intro-01',
+        status: 'in-progress',
+        cursor: 2,
+      });
+    },
+  );
+
+  it('S3.3-X2: should always write the new cursor over the old one', () => {
+    const next = service.nextProgress(
+      { lessonId: 'intro-01', status: 'in-progress', cursor: 1 },
+      'intro-01',
+      0,
+    );
+
+    expect(next.cursor).toBe(0);
+  });
+
+  it('S3.3-X2: should not mutate the existing progress', () => {
+    const existing = {
+      lessonId: 'intro-01',
+      status: 'completed' as const,
+      cursor: 0,
+    };
+
+    service.nextProgress(existing, 'intro-01', 2);
+
+    expect(existing).toEqual({
+      lessonId: 'intro-01',
+      status: 'completed',
+      cursor: 0,
+    });
+  });
+});
+
+const makeStoredService = () => {
+  const store = new DexieProgressStore(
+    createDatabase(`test-${crypto.randomUUID()}`),
+  );
+  return { store, stored: new LessonService(makeContentService(), store) };
+};
+
+describe('LessonService — lưu và mở lại vị trí (S3.3)', () => {
+  it('S3.3-AC1: should remember the second exercise after the learner moves on and leaves', async () => {
+    const { store, stored } = makeStoredService();
+    const answered = stored.submitResult(stored.startSession(EXERCISES), {
+      isCorrect: true,
+    });
+
+    await stored.saveCursor('intro-01', stored.advance(answered));
+
+    await expect(store.getLessonProgress('intro-01')).resolves.toEqual({
+      lessonId: 'intro-01',
+      status: 'in-progress',
+      cursor: 1,
+    });
+  });
+
+  it('S3.3-AC1: should remember the second exercise after the learner skips the first', async () => {
+    const { store, stored } = makeStoredService();
+
+    await stored.saveCursor(
+      'intro-01',
+      stored.skip(stored.startSession(EXERCISES)),
+    );
+
+    await expect(store.getLessonProgress('intro-01')).resolves.toMatchObject({
+      status: 'in-progress',
+      cursor: 1,
+    });
+  });
+
+  it('S3.3-AC1: should keep a separate position for each lesson', async () => {
+    const { store, stored } = makeStoredService();
+
+    await stored.saveCursor('lesson-a', stored.startSession(EXERCISES, 2));
+    await stored.saveCursor('lesson-b', stored.startSession(EXERCISES, 1));
+
+    await expect(store.getLessonProgress('lesson-a')).resolves.toMatchObject({
+      cursor: 2,
+    });
+    await expect(store.getLessonProgress('lesson-b')).resolves.toMatchObject({
+      cursor: 1,
+    });
+  });
+
+  it('S3.3-AC2: should reopen a lesson at the saved exercise, waiting for an answer', async () => {
+    const { stored } = makeStoredService();
+    await stored.saveCursor('intro-01', stored.startSession(EXERCISES, 2));
+
+    const { session } = await stored.openLesson('intro-01');
+
+    expect(session).toMatchObject({
+      currentIndex: 2,
+      phase: 'answering',
+      lastResult: null,
+    });
+  });
+
+  it('S3.3-X1: should reopen at the first exercise after the last one was finished', async () => {
+    const { stored } = makeStoredService();
+    let session = stored.startSession(EXERCISES, 2);
+    session = stored.advance(stored.submitResult(session, { isCorrect: true }));
+    expect(session.phase).toBe('finished');
+
+    await stored.saveCursor('intro-01', session);
+    const { session: reopened } = await stored.openLesson('intro-01');
+
+    expect(reopened).toMatchObject({ currentIndex: 0, phase: 'answering' });
+  });
+
+  it('S3.3-X1: should keep a completed lesson completed when its last exercise is finished again', async () => {
+    const { store, stored } = makeStoredService();
+    await store.saveLessonProgress({
+      lessonId: 'intro-01',
+      status: 'completed',
+    });
+    const finished = stored.advance(
+      stored.submitResult(stored.startSession(EXERCISES, 2), {
+        isCorrect: true,
+      }),
+    );
+
+    await stored.saveCursor('intro-01', finished);
+
+    const progress = await store.getLessonProgress('intro-01');
+    expect(progress?.status).toBe('completed');
+    expect(progress?.cursor).toBeUndefined();
+  });
+
+  it('S3.3-X2: should still show the lesson as completed on the map after the learner leaves a replay mid-way', async () => {
+    const { store, stored } = makeStoredService();
+    await store.saveLessonProgress({
+      lessonId: 'intro-01',
+      status: 'completed',
+    });
+
+    await stored.saveCursor('intro-01', stored.startSession(EXERCISES, 1));
+
+    const completed = await new ProgressService(store).getCompletedLessonIds();
+    expect(completed.has('intro-01')).toBe(true);
+  });
+
+  it('S3.3-AC2: should open at the first exercise, without failing, when the saved position cannot be read', async () => {
+    const unreadable: ProgressStore = {
+      ...new DexieProgressStore(createDatabase(`test-${crypto.randomUUID()}`)),
+      getSettings: vi.fn(),
+      saveSettings: vi.fn(),
+      getAllLessonProgress: vi.fn(),
+      saveLessonProgress: vi.fn(),
+      getLessonProgress: vi.fn(async () => {
+        throw new Error('IndexedDB unavailable');
+      }),
+    };
+    const reading = new LessonService(makeContentService(), unreadable);
+
+    const { session } = await reading.openLesson('intro-01');
+
+    expect(session).toMatchObject({ currentIndex: 0, phase: 'answering' });
   });
 });

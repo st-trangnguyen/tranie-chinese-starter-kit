@@ -1,3 +1,4 @@
+import { createDatabase } from '@core/helpers/db.helper';
 import type { ExerciseRegistry } from '@shared/components/exercises/exercise.registry';
 import { renderWithProviders, screen } from '@test/render';
 import LessonRunnerContainer from './LessonRunnerContainer';
@@ -43,7 +44,15 @@ const renderRunner = () =>
     route: '/lessons/:lessonId',
   });
 
-beforeEach(() => {
+/** Cô lập test: IndexedDB dùng chung giữa các test, xoá vị trí đã lưu của bài. */
+const resetSavedProgress = async (): Promise<void> => {
+  const db = createDatabase();
+  await db.lessonProgress.clear();
+  db.close();
+};
+
+beforeEach(async () => {
+  await resetSavedProgress();
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) =>
     /\/content\/lessons\/.+\.json$/.test(String(input))
       ? Response.json(LESSON)
@@ -246,5 +255,64 @@ describe('LessonRunnerContainer', () => {
     await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
 
     expect(screen.getByRole('button', { name: 'Chọn đúng' })).toBeEnabled();
+  });
+
+  describe('resume', () => {
+    const FIVE_EXERCISES = {
+      ...LESSON,
+      exercises: ['八', '白', '百', '爸', '吧'].map((wordId, index) => ({
+        id: `e${index + 1}`,
+        kind: 'tone-choice',
+        wordId,
+      })),
+    };
+
+    /** Ghi vị trí đã nhớ cho bài đang mở (route dùng nguyên văn ':lessonId'). */
+    const seedCursor = async (cursor: number): Promise<void> => {
+      const db = createDatabase();
+      await db.lessonProgress.put({
+        lessonId: ':lessonId',
+        status: 'in-progress',
+        cursor,
+      });
+      db.close();
+    };
+
+    beforeEach(() => {
+      vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) =>
+        /\/content\/lessons\/.+\.json$/.test(String(input))
+          ? Response.json(FIVE_EXERCISES)
+          : new Response('', { status: 404 }),
+      );
+    });
+
+    it('S3.3-AC2: should reopen a 5-exercise lesson at the saved third exercise with progress "Câu 3 / 5"', async () => {
+      await seedCursor(2);
+
+      renderRunner();
+
+      expect(await screen.findByText('Câu về 百')).toBeInTheDocument();
+      expect(screen.queryByText('Câu về 八')).not.toBeInTheDocument();
+      expect(screen.getByRole('progressbar')).toHaveAccessibleName('Câu 3 / 5');
+    });
+
+    it('S3.3-AC2: should reopen the interrupted exercise unanswered, without "Đúng" or "Sai"', async () => {
+      await seedCursor(2);
+      const first = renderRunner();
+      await first.user.click(
+        await screen.findByRole('button', { name: 'Chọn sai' }),
+      );
+      expect(screen.getByRole('status')).toHaveTextContent('Sai');
+      first.unmount();
+
+      renderRunner();
+
+      expect(await screen.findByText('Câu về 百')).toBeInTheDocument();
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'Tiếp tục' }),
+      ).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Chọn đúng' })).toBeEnabled();
+    });
   });
 });

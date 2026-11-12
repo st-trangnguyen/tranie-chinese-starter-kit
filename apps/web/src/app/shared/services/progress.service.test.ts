@@ -19,6 +19,10 @@ const makeStore = (
       saved = settings;
     }),
     getAllLessonProgress: vi.fn(async () => lessonProgress),
+    getLessonProgress: vi.fn(async (lessonId: string) =>
+      lessonProgress.find((progress) => progress.lessonId === lessonId),
+    ),
+    saveLessonProgress: vi.fn(async () => undefined),
   };
   return store;
 };
