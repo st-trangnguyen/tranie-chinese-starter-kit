@@ -4,9 +4,7 @@
 # Mặc định: dev review code.
 *                     @st-trangnguyen
 
-# Spec do BA giữ: PR spec và PR archive tự xin BA review. design.md và tasks.md là của dev (tạo ở
-# pha Plan, đi cùng PR code) nên dòng cuối trả chúng về dev, tránh kéo BA vào PR code.
-# /openspec/                           @<ba-github-handle>
+# /openspec/                          @<ba-github-handle>
 # /docs/02-design/                     @<ba-github-handle>
 # /openspec/changes/*/design.md        @st-trangnguyen
 # /openspec/changes/*/tasks.md         @st-trangnguyen
