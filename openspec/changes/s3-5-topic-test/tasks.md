@@ -34,7 +34,7 @@ Chỉ làm sau khi PR spec đã merge **và** code S3.4 (và S3.3) đã merge v�
 - [x] 4.0 Cập nhật `docs/03-architecture.md` (`type: test`, ngưỡng 80%, `WrongAnswerSink`) — ngoại lệ test-first: docs thuần; kiểm: đọc lại diff
 - [x] 4.1 Refactor + self-review theo CLAUDE.md §0, §2, §7 (không `any`, dependency một chiều, file < 300 dòng); kiểm: `pnpm lint` sạch
 - [x] 4.2 Chạy `pnpm typecheck && pnpm lint && pnpm test:run` và ghi kết quả thật; kiểm: toàn bộ pass. e2e chưa có (Câu hỏi mở 5), nêu rõ trong PR
-- [ ] 4.3 Chụp screenshot màn tổng kết bài kiểm tra (đạt, chưa đạt) mobile 375×812 và desktop 1280×800, sáng và tối cho PR; kiểm: có file ảnh
+- [x] 4.3 Chụp screenshot màn tổng kết bài kiểm tra (đạt, chưa đạt) mobile 375×812 và desktop 1280×800, sáng và tối cho PR; kiểm: có file ảnh
 
 ## Workflow follow-up
 
