@@ -97,7 +97,25 @@ jobs:
         env:
           CHANGE: ${{ steps.change.outputs.id }}
         run: |
+          set -euo pipefail
           pnpm exec openspec archive "$CHANGE" --yes
+
+          # Capability mới: archive chỉ ghi Purpose placeholder, mà validate --strict coi đó là lỗi.
+          # Lấy Purpose từ dòng "- `<capability>`: <mô tả>" ở mục "New Capabilities" của proposal.md.
+          proposal=$(ls openspec/changes/archive/*-"$CHANGE"/proposal.md | tail -n 1)
+          for spec in openspec/specs/*/spec.md; do
+            grep -q '^TBD - created by archiving change ' "$spec" || continue
+            cap=$(basename "$(dirname "$spec")")
+            purpose=$(grep -m1 -E "^- \`$cap\`: " "$proposal" | sed -E "s/^- \`$cap\`: *//" || true)
+            if [[ -z "$purpose" ]]; then
+              echo "::error::Proposal thiếu dòng \"- \`$cap\`: <mô tả>\" ở mục New Capabilities, không có Purpose cho $spec."
+              exit 1
+            fi
+            PURPOSE="$purpose" awk '/^TBD - created by archiving change / { print ENVIRON["PURPOSE"]; next } { print }' \
+              "$spec" > "$RUNNER_TEMP/spec.tmp"
+            mv "$RUNNER_TEMP/spec.tmp" "$spec"
+          done
+
           pnpm exec openspec validate --all --strict --no-interactive
 
       - name: Mở PR archive
