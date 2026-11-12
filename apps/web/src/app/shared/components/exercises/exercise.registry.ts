@@ -1,7 +1,11 @@
 import type { ComponentType } from 'react';
 import type { Exercise, ExerciseKind } from '@csk/shared';
 
-import type { ExerciseProps, ExerciseResult } from './exercise.types';
+import type {
+  ExerciseContent,
+  ExerciseProps,
+  ExerciseResult,
+} from './exercise.types';
 
 /** Map `kind` → component dạng bài. Dạng nào chưa có thì chưa đăng ký. */
 export type ExerciseRegistry = Partial<{
@@ -13,6 +17,7 @@ export const exerciseRegistry: ExerciseRegistry = {};
 
 type AnyExerciseComponent = ComponentType<{
   exercise: Exercise;
+  content: ExerciseContent;
   onResult: (result: ExerciseResult) => void;
   isLocked: boolean;
 }>;

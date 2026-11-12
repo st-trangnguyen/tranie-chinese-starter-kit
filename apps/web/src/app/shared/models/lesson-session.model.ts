@@ -1,6 +1,6 @@
 import type { Exercise } from '@csk/shared';
 
-import type { ExerciseResult } from './exercise.model';
+import type { ExerciseContent, ExerciseResult } from './exercise.model';
 
 export type LessonPhase = 'answering' | 'feedback' | 'finished';
 
@@ -49,6 +49,8 @@ export interface LessonFeedbackView {
 /** Những gì khung chạy bài cần để vẽ một câu (S3.2). */
 export interface LessonRunnerView {
   exercise: Exercise;
+  /** Từ/câu đã nạp của câu hiện tại (S4.4). */
+  content: ExerciseContent;
   /** Câu đang làm, tính từ 1. */
   current: number;
   total: number;

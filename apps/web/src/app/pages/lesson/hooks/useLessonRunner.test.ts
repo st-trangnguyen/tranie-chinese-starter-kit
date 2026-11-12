@@ -1,6 +1,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 
+import type { Word } from '@csk/shared';
 import { progressStore } from '@core/services/progress-store.service';
+import { mockContentFetch, wordOf } from '@test/mocks/content-fetch';
 import { useLessonRunner } from './useLessonRunner';
 
 // Ranh giới ngoài của hook là cổng WrongAnswerSink (hook tự tạo LessonService nên không tiêm
@@ -36,12 +38,14 @@ afterEach(() => {
 
 describe('useLessonRunner — đổi bài', () => {
   it('S3.2-AC1: should drop the previous lesson as soon as lessonId changes', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
-      const id = lessonIdOf(input);
-      return id === 'a'
-        ? Promise.resolve(Response.json(lessonOf('a')))
-        : new Promise<Response>(() => undefined);
-    });
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      mockContentFetch((input) => {
+        const id = lessonIdOf(input);
+        return id === 'a'
+          ? Promise.resolve(Response.json(lessonOf('a')))
+          : new Promise<Response>(() => undefined);
+      }),
+    );
     const { result, rerender } = renderHook(
       ({ lessonId }) => useLessonRunner(lessonId),
       { initialProps: { lessonId: 'a' } },
@@ -55,12 +59,14 @@ describe('useLessonRunner — đổi bài', () => {
   });
 
   it('S3.2-AC1: should not keep the error after moving to a lesson that opens', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
-      const id = lessonIdOf(input);
-      return id === 'ok'
-        ? Response.json(lessonOf('ok'))
-        : new Response('', { status: 404 });
-    });
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      mockContentFetch(async (input) => {
+        const id = lessonIdOf(input);
+        return id === 'ok'
+          ? Response.json(lessonOf('ok'))
+          : new Response('', { status: 404 });
+      }),
+    );
     const { result, rerender } = renderHook(
       ({ lessonId }) => useLessonRunner(lessonId),
       { initialProps: { lessonId: 'missing' } },
@@ -74,12 +80,14 @@ describe('useLessonRunner — đổi bài', () => {
   });
 
   it('S3.2-AC1: should not show the previous lesson when the next one fails', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
-      const id = lessonIdOf(input);
-      return id === 'a'
-        ? Response.json(lessonOf('a'))
-        : new Response('', { status: 404 });
-    });
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      mockContentFetch(async (input) => {
+        const id = lessonIdOf(input);
+        return id === 'a'
+          ? Response.json(lessonOf('a'))
+          : new Response('', { status: 404 });
+      }),
+    );
     const { result, rerender } = renderHook(
       ({ lessonId }) => useLessonRunner(lessonId),
       { initialProps: { lessonId: 'a' } },
@@ -105,8 +113,8 @@ const threeExerciseLesson = (id: string) => ({
 });
 
 const openThreeExerciseLesson = async (lessonId: string) => {
-  vi.spyOn(globalThis, 'fetch').mockImplementation(async () =>
-    Response.json(threeExerciseLesson(lessonId)),
+  vi.spyOn(globalThis, 'fetch').mockImplementation(
+    mockContentFetch(() => Response.json(threeExerciseLesson(lessonId))),
   );
   vi.spyOn(progressStore, 'getLessonProgress').mockResolvedValue(undefined);
   const { result } = renderHook(() => useLessonRunner(lessonId));
@@ -115,14 +123,16 @@ const openThreeExerciseLesson = async (lessonId: string) => {
 };
 
 const mockLessons = (pendingIds: readonly string[] = []) => {
-  vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
-    const raw = lessonIdOf(input);
-    const id = raw === undefined ? undefined : decodeURIComponent(raw);
-    if (id === undefined || pendingIds.includes(id)) {
-      return new Promise<Response>(() => undefined);
-    }
-    return Promise.resolve(Response.json(threeExerciseLesson(id)));
-  });
+  vi.spyOn(globalThis, 'fetch').mockImplementation(
+    mockContentFetch((input) => {
+      const raw = lessonIdOf(input);
+      const id = raw === undefined ? undefined : decodeURIComponent(raw);
+      if (id === undefined || pendingIds.includes(id)) {
+        return new Promise<Response>(() => undefined);
+      }
+      return Promise.resolve(Response.json(threeExerciseLesson(id)));
+    }),
+  );
   vi.spyOn(progressStore, 'getLessonProgress').mockResolvedValue(undefined);
 };
 
@@ -271,20 +281,22 @@ describe('useLessonRunner — lưu vị trí câu', () => {
       .mockResolvedValue(undefined);
     let fetchesOfA = 0;
     let finishSecondA: () => void = () => undefined;
-    vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
-      const id = lessonIdOf(input);
-      if (id === 'a') {
-        fetchesOfA += 1;
-        if (fetchesOfA === 1) {
-          return Promise.resolve(Response.json(threeExerciseLesson('a')));
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      mockContentFetch((input) => {
+        const id = lessonIdOf(input);
+        if (id === 'a') {
+          fetchesOfA += 1;
+          if (fetchesOfA === 1) {
+            return Promise.resolve(Response.json(threeExerciseLesson('a')));
+          }
+          return new Promise<Response>((resolve) => {
+            finishSecondA = () =>
+              resolve(Response.json(threeExerciseLesson('a')));
+          });
         }
-        return new Promise<Response>((resolve) => {
-          finishSecondA = () =>
-            resolve(Response.json(threeExerciseLesson('a')));
-        });
-      }
-      return new Promise<Response>(() => undefined);
-    });
+        return new Promise<Response>(() => undefined);
+      }),
+    );
     vi.spyOn(progressStore, 'getLessonProgress').mockResolvedValue(undefined);
     const { result, rerender } = renderHook(
       ({ lessonId }) => useLessonRunner(lessonId),
@@ -338,6 +350,46 @@ describe('useLessonRunner — lưu vị trí câu', () => {
   );
 });
 
+const mockContent = (
+  lesson: unknown,
+  options: { words?: Word[]; wordsStatus?: number } = {},
+) => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation(
+    mockContentFetch(() => Response.json(lesson), options),
+  );
+  vi.spyOn(progressStore, 'getLessonProgress').mockResolvedValue(undefined);
+};
+
+describe('useLessonRunner — nội dung của bài (S4.4)', () => {
+  it('S4.4-AC1: should return the contents of each exercise by exercise id once the lesson is open', async () => {
+    mockContent(lessonOf('a'));
+    const { result } = renderHook(() => useLessonRunner('a'));
+
+    await waitFor(() => expect(result.current.lesson?.id).toBe('a'));
+
+    const content = result.current.contents.get('a-e1');
+    expect(content?.words.map((word) => word.id)).toEqual(['八']);
+    expect(content?.sentences).toEqual([]);
+  });
+
+  it('S4.4-AC1: should report an error and not open the lesson when an exercise refers to a missing word', async () => {
+    mockContent(lessonOf('a'), { words: [wordOf('九')] });
+    const { result } = renderHook(() => useLessonRunner('a'));
+
+    await waitFor(() => expect(result.current.hasError).toBe(true));
+    expect(result.current.lesson).toBeNull();
+    expect(result.current.session).toBeNull();
+  });
+
+  it('S4.4-AC1: should report an error when words.json fails to load', async () => {
+    mockContent(lessonOf('a'), { wordsStatus: 500 });
+    const { result } = renderHook(() => useLessonRunner('a'));
+
+    await waitFor(() => expect(result.current.hasError).toBe(true));
+    expect(result.current.lesson).toBeNull();
+  });
+});
+
 describe('useLessonRunner — làm lại bài kiểm tra (S3.5)', () => {
   const answerAll = async (
     result: { current: ReturnType<typeof useLessonRunner> },
@@ -352,8 +404,10 @@ describe('useLessonRunner — làm lại bài kiểm tra (S3.5)', () => {
 
   it('S3.5-AC2: should record only the wrong ids of the retry attempt, not those of the first one', async () => {
     sink.record.mockReset().mockResolvedValue(undefined);
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async () =>
-      Response.json({ ...threeExerciseLesson('t'), type: 'test' }),
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      mockContentFetch(() =>
+        Response.json({ ...threeExerciseLesson('t'), type: 'test' }),
+      ),
     );
     vi.spyOn(progressStore, 'getLessonProgress').mockResolvedValue(undefined);
     vi.spyOn(progressStore, 'saveLessonProgress').mockResolvedValue(undefined);

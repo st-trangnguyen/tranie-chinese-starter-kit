@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Lesson } from '@csk/shared';
 
-import type { ExerciseResult } from '@shared/models/exercise.model';
+import type {
+  ExerciseContent,
+  ExerciseResult,
+} from '@shared/models/exercise.model';
 import type {
   LessonFeedbackView,
   LessonSession,
   LessonSummary,
 } from '@shared/models/lesson-session.model';
+import { ContentService } from '@shared/services/content.service';
 import { LessonService } from '@shared/services/lesson.service';
 
 export interface LessonRunnerState {
@@ -19,6 +23,8 @@ export interface LessonRunnerState {
   /** false khi ghi tiến độ "đã xong" lỗi (S3.4). */
   isSaved: boolean;
   hasError: boolean;
+  /** Từ/câu của từng câu bài tập theo exercise id; rỗng khi chưa mở bài (S4.4). */
+  contents: ReadonlyMap<string, ExerciseContent>;
   submitResult: (result: ExerciseResult) => void;
   continueLesson: () => void;
   skipExercise: () => void;
@@ -31,7 +37,10 @@ interface OpenedState {
   lessonId: string;
   lesson: Lesson;
   session: LessonSession;
+  contents: ReadonlyMap<string, ExerciseContent>;
 }
+
+const NO_CONTENTS: ReadonlyMap<string, ExerciseContent> = new Map();
 
 /** Mốc vị trí đã ghi nhận gần nhất của một bài. */
 interface SavedMark {
@@ -43,6 +52,7 @@ interface SavedMark {
 /** State của một lượt làm bài; quy tắc nằm ở `LessonService` (S3.2). */
 export const useLessonRunner = (lessonId: string): LessonRunnerState => {
   const service = useMemo(() => new LessonService(), []);
+  const contentService = useMemo(() => new ContentService(), []);
   const [opened, setOpened] = useState<OpenedState | null>(null);
   const [failedLessonId, setFailedLessonId] = useState<string | null>(null);
   const [unsavedLessonId, setUnsavedLessonId] = useState<string | null>(null);
@@ -53,6 +63,10 @@ export const useLessonRunner = (lessonId: string): LessonRunnerState => {
     let isActive = true;
     service
       .openLesson(lessonId)
+      .then(async (result) => ({
+        ...result,
+        contents: await contentService.getExerciseContents(result.lesson),
+      }))
       .then((result) => {
         if (isActive) {
           setFailedLessonId(null);
@@ -74,7 +88,7 @@ export const useLessonRunner = (lessonId: string): LessonRunnerState => {
     return () => {
       isActive = false;
     };
-  }, [service, lessonId]);
+  }, [service, contentService, lessonId]);
 
   const updateSession = useCallback(
     (change: (session: LessonSession) => LessonSession) =>
@@ -200,6 +214,7 @@ export const useLessonRunner = (lessonId: string): LessonRunnerState => {
     summary,
     isSaved: unsavedLessonId !== lessonId,
     hasError: failedLessonId === lessonId,
+    contents: current?.contents ?? NO_CONTENTS,
     submitResult,
     continueLesson,
     skipExercise,

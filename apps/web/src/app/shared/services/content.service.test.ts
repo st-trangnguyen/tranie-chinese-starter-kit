@@ -1,4 +1,10 @@
-import type { ContentRoot, Lesson } from '@csk/shared';
+import type {
+  ContentRoot,
+  Exercise,
+  Lesson,
+  Sentence,
+  Word,
+} from '@csk/shared';
 
 import type { ContentSource } from '@core/services/content-source.service';
 import { ContentService } from './content.service';
@@ -29,9 +35,33 @@ const makeLesson = (id: string): Lesson => ({
   exercises: [{ id: 'e1', kind: 'tone-choice', wordId: '八' }],
 });
 
+const makeWord = (id: string): Word => ({
+  id,
+  hanzi: '八',
+  pinyin: 'bā',
+  vi: ['tám'],
+  viReviewed: true,
+  hsk: 1,
+  audio: 'audio/0123456789abcdef.mp3',
+});
+
+const makeSentence = (id: string): Sentence => ({
+  id,
+  hanzi: '你好',
+  pinyin: 'nǐ hǎo',
+  vi: 'xin chào',
+  voice: 'female',
+  audio: 'audio/fedcba9876543210.mp3',
+});
+
+const WORDS: Word[] = ['w1', 'w2', 'w3'].map(makeWord);
+const SENTENCES: Sentence[] = ['s1', 's2'].map(makeSentence);
+
 const makeSource = (): ContentSource => ({
   getContentRoot: vi.fn(async () => ROOT),
   getLesson: vi.fn(async (lessonId: string) => makeLesson(lessonId)),
+  getWords: vi.fn(async () => WORDS),
+  getSentences: vi.fn(async () => SENTENCES),
 });
 
 describe('ContentService — use cases', () => {
@@ -75,5 +105,130 @@ describe('ContentService — use cases', () => {
     await expect(service.getLesson('missing')).rejects.toThrow(
       'Không mở được bài học.',
     );
+  });
+});
+
+describe('ContentService.collectContentIds — rules', () => {
+  const service = new ContentService(makeSource());
+
+  it.each<[string, Exercise, { wordIds: string[]; sentenceIds: string[] }]>([
+    [
+      'tone-choice',
+      { id: 'e1', kind: 'tone-choice', wordId: 'w1' },
+      { wordIds: ['w1'], sentenceIds: [] },
+    ],
+    [
+      'pinyin-type',
+      { id: 'e1', kind: 'pinyin-type', wordId: 'w2' },
+      { wordIds: ['w2'], sentenceIds: [] },
+    ],
+    [
+      'stroke-write',
+      { id: 'e1', kind: 'stroke-write', wordId: 'w3' },
+      { wordIds: ['w3'], sentenceIds: [] },
+    ],
+    [
+      'sound-pair',
+      {
+        id: 'e1',
+        kind: 'sound-pair',
+        wordIds: ['w2', 'w1'],
+        answerWordId: 'w1',
+      },
+      { wordIds: ['w2', 'w1'], sentenceIds: [] },
+    ],
+    [
+      'speak with word',
+      { id: 'e1', kind: 'speak', wordId: 'w1' },
+      { wordIds: ['w1'], sentenceIds: [] },
+    ],
+    [
+      'speak with sentence',
+      { id: 'e1', kind: 'speak', sentenceId: 's2' },
+      { wordIds: [], sentenceIds: ['s2'] },
+    ],
+  ])(
+    'S4.4-AC1: should collect ids of a %s exercise',
+    (_name, exercise, expected) => {
+      expect(service.collectContentIds(exercise)).toEqual(expected);
+    },
+  );
+});
+
+describe('ContentService.getExerciseContents — use case', () => {
+  const lesson: Lesson = {
+    id: 'l1',
+    type: 'lesson',
+    title: 'Bài l1',
+    exercises: [
+      {
+        id: 'e1',
+        kind: 'sound-pair',
+        wordIds: ['w3', 'w1'],
+        answerWordId: 'w1',
+      },
+      { id: 'e2', kind: 'speak', sentenceId: 's2' },
+      { id: 'e3', kind: 'tone-choice', wordId: 'w2' },
+    ],
+  };
+
+  it('S4.4-AC1: should map each exercise id to its words and sentences in id order', async () => {
+    const service = new ContentService(makeSource());
+
+    const contents = await service.getExerciseContents(lesson);
+
+    expect([...contents.keys()]).toEqual(['e1', 'e2', 'e3']);
+    expect(contents.get('e1')).toEqual({
+      words: [makeWord('w3'), makeWord('w1')],
+      sentences: [],
+    });
+    expect(contents.get('e2')).toEqual({
+      words: [],
+      sentences: [makeSentence('s2')],
+    });
+    expect(contents.get('e3')).toEqual({
+      words: [makeWord('w2')],
+      sentences: [],
+    });
+  });
+
+  it('S4.4-AC1: should fail with a clear message when a word id is missing', async () => {
+    const service = new ContentService(makeSource());
+    const broken: Lesson = {
+      ...lesson,
+      exercises: [{ id: 'e9', kind: 'tone-choice', wordId: 'nope' }],
+    };
+
+    await expect(service.getExerciseContents(broken)).rejects.toThrow(
+      'Không tìm thấy từ "nope" của câu "e9".',
+    );
+  });
+
+  it('S4.4-AC1: should fail naming the sentence when a sentence id is missing', async () => {
+    const service = new ContentService(makeSource());
+    const broken: Lesson = {
+      ...lesson,
+      exercises: [{ id: 'e8', kind: 'speak', sentenceId: 'gone' }],
+    };
+
+    await expect(service.getExerciseContents(broken)).rejects.toThrow(
+      /gone.*e8/,
+    );
+  });
+
+  it('S4.4-AC1: should wrap a load failure with a clear message and cause', async () => {
+    const source = makeSource();
+    const failure = new Error('404');
+    vi.mocked(source.getWords).mockRejectedValueOnce(failure);
+    const service = new ContentService(source);
+
+    const error = await service.getExerciseContents(lesson).then(
+      () => null,
+      (e: unknown) => e,
+    );
+
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).not.toBe('404');
+    expect((error as Error).cause).toBe(failure);
   });
 });

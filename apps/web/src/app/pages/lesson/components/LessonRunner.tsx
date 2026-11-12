@@ -32,7 +32,7 @@ export const LessonRunner = ({
   shouldFocusProgress = false,
 }: LessonRunnerProps) => {
   const { t } = useTranslation('lesson');
-  const { exercise, current, total, feedback } = view;
+  const { exercise, content, current, total, feedback } = view;
   const ExerciseComponent = resolveExerciseComponent(registry, exercise);
 
   return (
@@ -46,6 +46,7 @@ export const LessonRunner = ({
         <ExerciseComponent
           key={exercise.id}
           exercise={exercise}
+          content={content}
           onResult={handlers.onResult}
           isLocked={feedback !== null}
         />
