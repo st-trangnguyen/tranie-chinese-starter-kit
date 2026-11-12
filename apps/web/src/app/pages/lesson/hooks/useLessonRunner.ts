@@ -49,8 +49,17 @@ interface SavedMark {
   isFinished: boolean;
 }
 
+export interface LessonRunnerOptions {
+  /** Chủ đề đang vượt cấp (S3.6): đạt thì đánh dấu xong mọi bài của chủ đề. */
+  placementUnitId?: string;
+}
+
 /** State của một lượt làm bài; quy tắc nằm ở `LessonService` (S3.2). */
-export const useLessonRunner = (lessonId: string): LessonRunnerState => {
+export const useLessonRunner = (
+  lessonId: string,
+  options?: LessonRunnerOptions,
+): LessonRunnerState => {
+  const placementUnitId = options?.placementUnitId;
   const service = useMemo(() => new LessonService(), []);
   const contentService = useMemo(() => new ContentService(), []);
   const [opened, setOpened] = useState<OpenedState | null>(null);
@@ -181,12 +190,23 @@ export const useLessonRunner = (lessonId: string): LessonRunnerState => {
     finishedLessonIdRef.current = openedLessonId;
     // Xếp sau lần lưu vị trí trong cùng hàng đợi: ghi "completed" luôn đến sau ghi "in-progress".
     saveQueueRef.current = saveQueueRef.current
-      .then(() => service.finishLesson(openedLessonId, latest))
+      .then(async () =>
+        service.finishLesson(
+          openedLessonId,
+          latest,
+          placementUnitId === undefined
+            ? undefined
+            : {
+                lessonIds:
+                  await contentService.getUnitLessonIds(placementUnitId),
+              },
+        ),
+      )
       .then((outcome) =>
         setUnsavedLessonId(outcome.isSaved ? null : openedLessonId),
       )
       .catch(() => setUnsavedLessonId(openedLessonId));
-  }, [service, openedLessonId, isFinished]);
+  }, [service, contentService, placementUnitId, openedLessonId, isFinished]);
 
   const summary = useMemo(
     () =>

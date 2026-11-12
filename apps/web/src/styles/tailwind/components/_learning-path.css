@@ -45,6 +45,20 @@
     @apply text-caption;
   }
 
+  /* Nút "Kiểm tra vượt cấp" — S3.6. Chữ fg trên nền accent-soft (cặp đã dùng cho bài đang mở);
+     viền + gạch chân là tín hiệu ngoài màu. */
+  .unit-placement-link {
+    @apply min-h-11 rounded-lg border-2 border-accent bg-accent-soft text-body text-fg underline underline-offset-4 transition-colors;
+  }
+
+  .unit-placement-link:hover {
+    @apply bg-sunken;
+  }
+
+  .unit-placement-link:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
   .learning-path-lesson.is-open {
     @apply border-accent bg-accent-soft;
   }
@@ -58,7 +72,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .learning-path-lesson-link {
+    .learning-path-lesson-link,
+    .unit-placement-link {
       @apply transition-none;
     }
   }

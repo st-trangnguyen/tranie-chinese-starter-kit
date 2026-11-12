@@ -25,8 +25,15 @@ Theo chuẩn RESTful của dự án (tài nguyên số nhiều, kebab-case, tên
 `getPlacementTestLessonId(unit, statuses, lessonTypes): string | undefined`:
 - Rule: chủ đề **chưa mở** = mọi bài của chủ đề có trạng thái `locked`.
 - Rule: bài kiểm tra của chủ đề = bài **cuối** có `type: 'test'` trong `lessonIds` (Câu hỏi mở 6); không có → không có nút.
+  Chọn bằng hàm thuần `findPlacementTestLessonId(lessonIds, lessonTypes)` (duyệt từ bài cuối). Nút (D2, `getPlacementTestLessonId`) và `finishLesson` (D4)
+  không gọi thẳng hàm này mà gọi `findConfirmedPlacementTestLessonId` (cùng file `learning-path.utils.ts`): trả `undefined` nếu có bài thiếu loại, ngược lại gọi `findPlacementTestLessonId`.
+  `ContentService.getPlacementTest` gọi `findPlacementTestLessonId` trực tiếp trên map một phần (bài lỗi bị bỏ), nên vẫn duyệt từ bài cuối.
+- Rule (thận trọng): nếu có bài của chủ đề **chưa biết loại** (nạp lỗi, không có trong `lessonTypes`) thì chủ đề **không có nút**,
+  tránh mở nhầm cả chủ đề khi bài cuối không đọc được.
 - Trả `undefined` nghĩa là không hiện nút (đã mở/đã xong/không có bài kiểm tra).
 `lessonTypes` là `Map<lessonId, LessonType>` do `useLearningPath` nạp (qua `ContentService`), nên `ProgressService` vẫn thuần và không đọc nội dung.
+- Chịu lỗi từng bài: `getLessonTypes` bỏ bài nạp lỗi khỏi Map thay vì làm hỏng cả bản đồ; `ContentService.getPathMap` cũng chịu lỗi từng bài
+  (bài lỗi chỉ thiếu tiêu đề, UI rơi về id). Chỉ lỗi ở `content.json` gốc mới làm bản đồ lỗi.
 - *Đã cân nhắc:* thêm `type` vào `unitSchema`/`content.json` — bỏ vì đổi schema nội dung và pipeline E2; loại bài đã có trong từng bài.
   Nếu việc nạp từng bài chậm, đổi thành trường tóm tắt trong `content.json` ở story riêng (hỏi lại).
 
@@ -39,6 +46,11 @@ Theo chuẩn RESTful của dự án (tài nguyên số nhiều, kebab-case, tên
 ### D4. Kết thúc vượt cấp (Phần 3 `LessonService`)
 `finishLesson` nhận thêm ngữ cảnh `placement?: { lessonIds: readonly string[] }`:
 - Không đạt hoặc còn câu bỏ qua (rule `isComplete` của S3.5): **không ghi gì** cho các bài của chủ đề (Scenario "Chưa đạt thì chủ đề giữ nguyên khóa", "Còn câu bỏ qua thì chưa đạt").
+- Chỉ ghi hàng loạt khi bài đang xong **chính là** bài kiểm tra của chủ đề, tức `findConfirmedPlacementTestLessonId(placement.lessonIds, types)` (D2) trùng `lessonId` đang kết thúc.
+  `finishLesson` không có sẵn `lessonTypes`: nó tự dựng `types` bằng `resolveLessonTypes(placement.lessonIds)`, mỗi bài lấy từ cache `knownTypes`
+  (do `openLesson` điền), chưa có thì gọi `source.getLesson`; bài nạp lỗi bị bỏ khỏi map.
+  Rule (R11): `finishLesson` chỉ coi bài đang xong là bài kiểm tra của chủ đề khi **mọi** bài của chủ đề đều biết loại (`types` đủ cho mọi `lessonId` trong `placement.lessonIds`).
+  Có bài thiếu loại (nạp lỗi) thì không xét vượt cấp, ghi bài đang xong như bài thường (S3.4). Đồng bộ với D2: có bài chưa biết loại thì không có nút vượt cấp.
 - Đạt: ghi `{ status: 'completed' }` cho **mọi** `lessonId` của chủ đề **trong một transaction** (`saveLessonProgressBatch` ở `ProgressStore`, thêm cho S3.6),
   giữ nguyên bài đã `completed`, bỏ `cursor` đang dở. Một bài ghi hỏng thì cả lô không ghi (không để chủ đề xong nửa vời);
   `isSaved = false` như S3.4.

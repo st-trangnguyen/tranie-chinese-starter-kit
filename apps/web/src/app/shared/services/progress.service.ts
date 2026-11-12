@@ -1,17 +1,24 @@
 import {
   DAILY_GOAL_OPTIONS,
+  type LESSON_TYPES,
   type DailyGoalMinutes,
   type LessonProgress,
   type LessonStatus,
   type Settings,
   type Stage,
+  type Unit,
 } from '@csk/shared';
 
 import {
   progressStore,
   type ProgressStore,
 } from '@core/services/progress-store.service';
-import { listLessonIdsInOrder } from '@shared/utils/learning-path.utils';
+import {
+  findConfirmedPlacementTestLessonId,
+  listLessonIdsInOrder,
+} from '@shared/utils/learning-path.utils';
+
+type LessonType = (typeof LESSON_TYPES)[number];
 
 export class ProgressService {
   constructor(private readonly store: ProgressStore = progressStore) {}
@@ -62,6 +69,32 @@ export class ProgressService {
         return [lessonId, isOpen ? 'open' : 'locked'];
       }),
     );
+  }
+
+  /** Rule: chủ đề chưa mở = mọi bài của chủ đề đều khóa. */
+  isUnitLocked(
+    unit: Unit,
+    statuses: ReadonlyMap<string, LessonStatus>,
+  ): boolean {
+    return unit.lessonIds.every(
+      (lessonId) => statuses.get(lessonId) === 'locked',
+    );
+  }
+
+  /**
+   * Rule: nút "Kiểm tra vượt cấp" (S3.6 AC1) chỉ có ở chủ đề chưa mở (mọi bài đều khóa); bài kiểm tra
+   * của chủ đề là bài cuối có type `test`, không có thì không có nút.
+   */
+  getPlacementTestLessonId(
+    unit: Unit,
+    statuses: ReadonlyMap<string, LessonStatus>,
+    lessonTypes: ReadonlyMap<string, LessonType>,
+  ): string | undefined {
+    if (!this.isUnitLocked(unit, statuses)) {
+      return undefined;
+    }
+    // Có bài chưa biết loại (nạp lỗi) thì không có nút (rule trong findConfirmedPlacementTestLessonId).
+    return findConfirmedPlacementTestLessonId(unit.lessonIds, lessonTypes);
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────

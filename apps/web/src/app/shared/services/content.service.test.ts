@@ -79,9 +79,29 @@ describe('ContentService — use cases', () => {
     ]);
   });
 
-  it('should fail with a clear message when a lesson cannot be loaded', async () => {
+  it('S3.6-AC1: should still return the path map, only missing the title, when one lesson cannot be loaded', async () => {
     const source = makeSource();
-    vi.mocked(source.getLesson).mockRejectedValueOnce(new Error('404'));
+    vi.mocked(source.getLesson).mockImplementation(async (lessonId: string) => {
+      if (lessonId === 'l2') {
+        throw new Error('404');
+      }
+      return makeLesson(lessonId);
+    });
+    const service = new ContentService(source);
+
+    const pathMap = await service.getPathMap();
+
+    expect(pathMap.stages).toEqual(ROOT.stages);
+    expect([...pathMap.lessonTitles]).toEqual([
+      ['l1', 'Bài l1'],
+      ['l3', 'Bài l3'],
+      ['l4', 'Bài l4'],
+    ]);
+  });
+
+  it('S3.6-AC1: should fail with a clear message when the root content cannot be loaded', async () => {
+    const source = makeSource();
+    vi.mocked(source.getContentRoot).mockRejectedValueOnce(new Error('404'));
     const service = new ContentService(source);
 
     await expect(service.getPathMap()).rejects.toThrow(
@@ -105,6 +125,39 @@ describe('ContentService — use cases', () => {
     await expect(service.getLesson('missing')).rejects.toThrow(
       'Không mở được bài học.',
     );
+  });
+
+  it('S3.6-AC2: should return the lesson ids of the unit in order', async () => {
+    const service = new ContentService(makeSource());
+
+    await expect(service.getUnitLessonIds('intro-a')).resolves.toEqual([
+      'l1',
+      'l2',
+    ]);
+  });
+
+  it('S3.6-AC2: should fail when the unit does not exist', async () => {
+    const service = new ContentService(makeSource());
+
+    await expect(service.getUnitLessonIds('khong-co')).rejects.toThrow(
+      'Không tìm thấy chủ đề.',
+    );
+  });
+
+  it('S3.6-AC2: should map each lesson id to its type', async () => {
+    const source = makeSource();
+    vi.mocked(source.getLesson).mockImplementation(async (id: string) => ({
+      ...makeLesson(id),
+      type: id === 'l2' ? 'test' : 'lesson',
+    }));
+    const service = new ContentService(source);
+
+    const types = await service.getLessonTypes(['l1', 'l2']);
+
+    expect([...types]).toEqual([
+      ['l1', 'lesson'],
+      ['l2', 'test'],
+    ]);
   });
 });
 

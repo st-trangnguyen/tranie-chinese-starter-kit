@@ -382,6 +382,7 @@ describe('LessonService — lưu và mở lại vị trí (S3.3)', () => {
       saveSettings: vi.fn(),
       getAllLessonProgress: vi.fn(),
       saveLessonProgress: vi.fn(),
+      saveLessonProgressBatch: vi.fn(),
       getLessonProgress: vi.fn(async () => {
         throw new Error('IndexedDB unavailable');
       }),
@@ -736,6 +737,7 @@ describe('LessonService — ghi tiến độ lỗi khi xong bài (S3.4)', () => 
       saveSettings: vi.fn(),
       getAllLessonProgress: vi.fn(async () => []),
       getLessonProgress: vi.fn(async () => undefined),
+      saveLessonProgressBatch: vi.fn(),
       saveLessonProgress: vi.fn(async () => {
         throw new Error('IndexedDB write failed');
       }),
@@ -1293,5 +1295,268 @@ describe('LessonService — nguồn nội dung lỗi lúc kết thúc bài (S3.5
 
     expect(outcome).toMatchObject({ isPassed: false, isComplete: false });
     await expect(store.getLessonProgress('l1')).resolves.toBeUndefined();
+  });
+});
+
+describe('LessonService — kết thúc bài kiểm tra vượt cấp (S3.6)', () => {
+  const NOW = 1_000_000;
+
+  const unit = (n: number) => ({
+    id: `u${n}`,
+    title: `u${n}`,
+    lessonIds: [`u${n}-1`, `u${n}-2`, `u${n}-test`],
+  });
+
+  const STAGES: Stage[] = [
+    { id: 'main', title: 'main', units: [1, 2, 3, 4, 5, 6].map(unit) },
+  ];
+
+  const placementOf = (n: number) => ({ lessonIds: unit(n).lessonIds });
+
+  const makeSetup = () => {
+    const store = new DexieProgressStore(
+      createDatabase(`test-${crypto.randomUUID()}`),
+    );
+    const source: LessonSource = {
+      getLesson: vi.fn(async (id: string) => ({
+        id,
+        type: id.endsWith('-test') ? ('test' as const) : ('lesson' as const),
+        title: id,
+        exercises: EXERCISES,
+      })),
+    };
+    return { store, stored: new LessonService(source, store) };
+  };
+
+  const passedSession = (stored: LessonService) => {
+    let session = stored.startSession(EXERCISES, 0, NOW);
+    EXERCISES.forEach(() => {
+      session = stored.advance(
+        stored.submitResult(session, { isCorrect: true }),
+        NOW,
+      );
+    });
+    return session;
+  };
+
+  const completeUnits = async (store: DexieProgressStore, count: number) => {
+    for (const n of [1, 2, 3, 4, 5, 6].slice(0, count)) {
+      for (const lessonId of unit(n).lessonIds) {
+        await store.saveLessonProgress({ lessonId, status: 'completed' });
+      }
+    }
+  };
+
+  const mapStatuses = async (store: DexieProgressStore) => {
+    const progress = new ProgressService(store);
+    const completed = await progress.getCompletedLessonIds();
+    return Object.fromEntries(progress.deriveLessonStatuses(STAGES, completed));
+  };
+
+  it('S3.6-AC2: should complete every lesson of the unit and open the next unit when the placement test is passed', async () => {
+    const { store, stored } = makeSetup();
+    await completeUnits(store, 1);
+
+    const result = await stored.finishLesson(
+      'u2-test',
+      passedSession(stored),
+      placementOf(2),
+    );
+
+    expect(result.isSaved).toBe(true);
+    const statuses = await mapStatuses(store);
+    expect(statuses).toMatchObject({
+      'u2-1': 'completed',
+      'u2-2': 'completed',
+      'u2-test': 'completed',
+      'u3-1': 'open',
+      'u3-2': 'locked',
+    });
+  });
+
+  it('S3.6-AC2: should not open the units in between when a far unit is passed by placement', async () => {
+    const { store, stored } = makeSetup();
+    await completeUnits(store, 2);
+
+    await stored.finishLesson('u5-test', passedSession(stored), placementOf(5));
+
+    const statuses = await mapStatuses(store);
+    expect(statuses).toMatchObject({
+      'u3-1': 'open',
+      'u4-1': 'locked',
+      'u4-2': 'locked',
+      'u4-test': 'locked',
+      'u5-1': 'completed',
+      'u5-2': 'completed',
+      'u5-test': 'completed',
+      'u6-1': 'open',
+    });
+  });
+
+  it('S3.6-AC2: should keep the unit locked and the next unit unchanged when the placement test is not passed', async () => {
+    const { store, stored } = makeSetup();
+    await completeUnits(store, 1);
+    let session = stored.startSession(EXERCISES, 0, NOW);
+    for (const isCorrect of [true, false, false]) {
+      session = stored.advance(
+        stored.submitResult(session, { isCorrect }),
+        NOW,
+      );
+    }
+
+    const result = await stored.finishLesson(
+      'u2-test',
+      session,
+      placementOf(2),
+    );
+
+    expect(result).toMatchObject({ isPassed: false, isComplete: false });
+    const statuses = await mapStatuses(store);
+    expect(statuses).toMatchObject({
+      'u2-1': 'open',
+      'u2-2': 'locked',
+      'u2-test': 'locked',
+      'u3-1': 'locked',
+    });
+  });
+
+  it('S3.6-AC2: should keep the unit locked when the placement test still has a skipped exercise', async () => {
+    const { store, stored } = makeSetup();
+    await completeUnits(store, 1);
+    let session = stored.startSession(EXERCISES, 0, NOW);
+    session = stored.advance(stored.skip(session, NOW), NOW);
+    for (const isCorrect of [true, true]) {
+      session = stored.advance(
+        stored.submitResult(session, { isCorrect }),
+        NOW,
+      );
+    }
+
+    const result = await stored.finishLesson(
+      'u2-test',
+      session,
+      placementOf(2),
+    );
+
+    expect(result).toMatchObject({ isComplete: false });
+    const statuses = await mapStatuses(store);
+    expect(statuses).toMatchObject({
+      'u2-1': 'open',
+      'u2-2': 'locked',
+      'u2-test': 'locked',
+      'u3-1': 'locked',
+    });
+  });
+
+  it('S3.6-AC2: should report isSaved false and leave the unit locked when the batch write fails', async () => {
+    const { store, stored } = makeSetup();
+    await completeUnits(store, 1);
+    vi.spyOn(store, 'saveLessonProgressBatch').mockRejectedValue(
+      new Error('write failed'),
+    );
+
+    const result = await stored.finishLesson(
+      'u2-test',
+      passedSession(stored),
+      placementOf(2),
+    );
+
+    expect(result.isSaved).toBe(false);
+    const statuses = await mapStatuses(store);
+    expect(statuses).toMatchObject({ 'u2-1': 'open', 'u3-1': 'locked' });
+  });
+
+  it('S3.6-AC2: should write a regular lesson like any lesson, without completing the whole unit, when a placement is passed along', async () => {
+    const { store, stored } = makeSetup();
+    await completeUnits(store, 1);
+
+    const result = await stored.finishLesson(
+      'u2-1',
+      passedSession(stored),
+      placementOf(2),
+    );
+
+    expect(result.isSaved).toBe(true);
+    const statuses = await mapStatuses(store);
+    expect(statuses).toMatchObject({
+      'u2-1': 'completed',
+      'u2-2': 'open',
+      'u2-test': 'locked',
+      'u3-1': 'locked',
+    });
+  });
+
+  it('S3.6-AC2: should complete only the test itself and open the next lesson because the previous one is done, not because of the placement', async () => {
+    const { store, stored } = makeSetup();
+    await completeUnits(store, 1);
+
+    await stored.finishLesson('u2-test', passedSession(stored), placementOf(3));
+
+    const statuses = await mapStatuses(store);
+    expect(statuses).toMatchObject({
+      'u2-test': 'completed',
+      'u3-1': 'open',
+      'u3-2': 'locked',
+      'u3-test': 'locked',
+    });
+    for (const lessonId of ['u3-1', 'u3-2', 'u3-test']) {
+      await expect(store.getLessonProgress(lessonId)).resolves.toBeUndefined();
+    }
+  });
+
+  it('S3.6-AC2: should write a test that is not the last test of the unit like a regular lesson, without completing the whole unit', async () => {
+    const { store, stored } = makeSetup();
+    await completeUnits(store, 1);
+    const lessonIds = ['u2-1', 'u2-mid-test', 'u2-2', 'u2-test'];
+
+    const result = await stored.finishLesson(
+      'u2-mid-test',
+      passedSession(stored),
+      { lessonIds },
+    );
+
+    expect(result.isSaved).toBe(true);
+    await expect(store.getLessonProgress('u2-mid-test')).resolves.toMatchObject(
+      { status: 'completed' },
+    );
+    for (const lessonId of ['u2-1', 'u2-2', 'u2-test']) {
+      await expect(store.getLessonProgress(lessonId)).resolves.toBeUndefined();
+    }
+  });
+
+  it('S3.6-AC2: should write only the finished test like a regular lesson when the real last test of the unit fails to load', async () => {
+    const store = new DexieProgressStore(
+      createDatabase(`test-${crypto.randomUUID()}`),
+    );
+    const source: LessonSource = {
+      getLesson: vi.fn(async (id: string) => {
+        if (id === 'u2-test') {
+          throw new Error('load failed');
+        }
+        return {
+          id,
+          type: id.endsWith('-test') ? ('test' as const) : ('lesson' as const),
+          title: id,
+          exercises: EXERCISES,
+        };
+      }),
+    };
+    const stored = new LessonService(source, store);
+    await completeUnits(store, 1);
+    const lessonIds = ['u2-1', 'u2-mid-test', 'u2-2', 'u2-test'];
+
+    const result = await stored.finishLesson(
+      'u2-mid-test',
+      passedSession(stored),
+      { lessonIds },
+    );
+
+    expect(result.isSaved).toBe(true);
+    await expect(store.getLessonProgress('u2-mid-test')).resolves.toMatchObject(
+      { status: 'completed' },
+    );
+    for (const lessonId of ['u2-1', 'u2-2', 'u2-test']) {
+      await expect(store.getLessonProgress(lessonId)).resolves.toBeUndefined();
+    }
   });
 });

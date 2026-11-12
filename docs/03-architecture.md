@@ -189,7 +189,7 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
   - Service không import React hay router.
 - **Component bài tập** chỉ nhận dữ liệu qua props (`exercise`, `onResult`, `isLocked`). Audio và ghi âm lấy qua hook trong `core/hooks`, không import service trực tiếp.
 - **Route:** mỗi feature export `PageRoute[]` (container lazy-load) từ `<feature>.routes.ts`, gom về `pages/page.routes.ts` rồi về `app.routes.ts`.
-  - URL theo RESTful: danh từ tài nguyên, kebab-case, collection số nhiều, tên cụ thể (`/learning-paths`, `/lessons/:lessonId`). `ROUTE_PATHS` trong `core/constants/app.constants.ts` là nguồn duy nhất của URL.
+  - URL theo RESTful: danh từ tài nguyên, kebab-case, collection số nhiều, tên cụ thể (`/learning-paths`, `/lessons/:lessonId`, `/units/:unitId/placement-test`). `ROUTE_PATHS` trong `core/constants/app.constants.ts` là nguồn duy nhất của URL.
 - **i18n:** chuỗi giao diện đặt trong `apps/web/src/assets/i18n/vi/<namespace>.json`, dùng `useTranslation(namespace)`. Nội dung bài học không nằm trong i18n mà nằm trong JSON của pipeline.
 - **Alias:** trong `apps/web`, `aliases.ts` là nguồn duy nhất, giữ đồng bộ với `apps/web/tsconfig.json`. Sang package khác thì import bằng tên package (xem 3.1).
 
@@ -246,6 +246,7 @@ Cấu trúc `Stage → Unit → Lesson` dùng chung cho Nhập môn và mọi c�
 interface ProgressStore {
   getLessonProgress(lessonId): Promise<LessonProgress | undefined>;
   saveLessonProgress(progress): Promise<void>;
+  saveLessonProgressBatch(rows): Promise<void>;  // một transaction: một dòng lỗi thì không dòng nào được ghi
   getDueCards(now, limit): Promise<Card[]>;
   upsertCard(card): Promise<void>;
   logReview(log): Promise<void>;
@@ -271,6 +272,7 @@ Lesson runner, màn ôn tập và màn luyện tự do chỉ làm việc qua `ex
 - Vòng đời bài: làm hết câu thì `useLessonRunner` gọi `LessonService.finishLesson`, đặt `lessonProgress.status` thành `completed` (bài đã `completed` không bị hạ về `in-progress` khi học lại). Màn tổng kết lấy số liệu từ `LessonService.summarize(session, lessonType)` (điểm %, đúng/đã trả lời, thời gian, số câu sai, số câu bỏ qua, `isPassed`: `null` với bài thường, đạt/chưa đạt với bài kiểm tra).
 - Ghi tiến độ lỗi không chặn tổng kết: `finishLesson` trả `isSaved: false`, màn tổng kết hiện cảnh báo `role="alert"` rằng kết quả chưa được lưu.
 - Bài kiểm tra cuối chủ đề: `Lesson.type: 'test'`. Đạt khi điểm ≥ `TEST_PASS_PERCENT` (80%, `core/constants/lesson.constants.ts`), quy tắc nằm ở `LessonService.isTestPassed`. Bài kiểm tra luôn bắt đầu từ câu 1 và không lưu vị trí (`cursor`); màn tổng kết có nút "Làm lại".
+- Kiểm tra vượt cấp (S3.6): route `/units/:unitId/placement-test` chạy bài `test` cuối của chủ đề (`ContentService.getPlacementTest(unitId)` trả `lessonId` và `lessonIds` của chủ đề; `getUnitLessonIds`, `getLessonTypes` hỗ trợ). Nút "Kiểm tra vượt cấp" trên bản đồ chỉ hiện ở chủ đề chưa mở và có bài `test` (`ProgressService.getPlacementTestLessonId`). Đạt thì `LessonService.finishLesson` đánh dấu mọi bài của chủ đề `completed` qua `ProgressStore.saveLessonProgressBatch` (một transaction, giữ bài đã xong); chưa đạt hoặc còn câu bỏ qua thì không ghi gì.
 - `WrongAnswerSink` là cổng chuyển câu sai của bài kiểm tra sang ôn tập. Bản mặc định là no-op, S9.4 thay bằng bản thật; `LessonService.finishLesson` là nơi gọi cổng; `useLessonRunner` không biết cổng và phía sau nó.
 
 ## 7. PWA & cache

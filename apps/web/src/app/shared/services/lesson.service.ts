@@ -1,6 +1,5 @@
 import type { Exercise, Lesson, LessonProgress } from '@csk/shared';
 
-import { TEST_PASS_PERCENT } from '@core/constants/lesson.constants';
 import {
   progressStore,
   type ProgressStore,
@@ -10,9 +9,21 @@ import type {
   LessonSession,
   LessonSummary,
 } from '@shared/models/lesson-session.model';
+import { findConfirmedPlacementTestLessonId } from '@shared/utils/learning-path.utils';
+import {
+  applyResult,
+  finishedProgress,
+  isTestPassed,
+  moveToNext,
+  nextProgress,
+  resolveStartIndex,
+  summarizeSession,
+} from '@shared/utils/lesson-session.utils';
 import { ContentService } from './content.service';
 
 export type LessonSource = Pick<ContentService, 'getLesson'>;
+
+export type PlacementContext = { lessonIds: readonly string[] };
 
 /** Cổng nhận các câu làm sai của bài kiểm tra (S3.5); bên ngoài quyết định lưu ở đâu. */
 export interface WrongAnswerSink {
@@ -29,7 +40,7 @@ export interface OpenedLesson {
 }
 
 export class LessonService {
-  // Loại bài đã biết từ lần mở gần nhất, để saveCursor không phải nạp lại nội dung bài mỗi lần lưu.
+  // Loại bài đã biết từ lần mở gần nhất, để saveCursor khỏi nạp lại bài.
   private readonly knownTypes = new Map<string, Lesson['type']>();
 
   constructor(
@@ -52,6 +63,12 @@ export class LessonService {
     return this.store.saveLessonProgress(progress);
   }
 
+  private writeCompletedBatch(lessonIds: readonly string[]): Promise<void> {
+    return this.store.saveLessonProgressBatch(
+      lessonIds.map((lessonId) => ({ lessonId, status: 'completed' as const })),
+    );
+  }
+
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
   // Rule: chỉ nối lại ở vị trí đã lưu khi nó là số nguyên nằm trong bài; ngược lại bắt đầu từ đầu.
@@ -59,15 +76,7 @@ export class LessonService {
     savedCursor: number | undefined,
     exerciseCount: number,
   ): number {
-    if (
-      savedCursor !== undefined &&
-      Number.isInteger(savedCursor) &&
-      savedCursor >= 0 &&
-      savedCursor < exerciseCount
-    ) {
-      return savedCursor;
-    }
-    return 0;
+    return resolveStartIndex(savedCursor, exerciseCount);
   }
 
   // Rule: bài bắt đầu ở vị trí chỉ định (mặc định câu đầu) và chờ người học trả lời.
@@ -78,7 +87,7 @@ export class LessonService {
   ): LessonSession {
     return {
       exerciseIds: exercises.map((exercise) => exercise.id),
-      currentIndex: this.resolveStartIndex(startIndex, exercises.length),
+      currentIndex: resolveStartIndex(startIndex, exercises.length),
       phase: 'answering',
       lastResult: null,
       skippedCount: 0,
@@ -92,30 +101,12 @@ export class LessonService {
 
   // Rule: trả lời xong thì chấm ngay, hiện kết quả trước khi sang câu kế.
   submitResult(session: LessonSession, result: ExerciseResult): LessonSession {
-    // Bấm đúp hoặc trả lời lặp thì giữ nguyên kết quả đầu.
-    if (session.phase !== 'answering') {
-      return session;
-    }
-    return {
-      ...session,
-      phase: 'feedback',
-      lastResult: result,
-      correctCount: session.correctCount + (result.isCorrect ? 1 : 0),
-      wrongCount: session.wrongCount + (result.isCorrect ? 0 : 1),
-      wrongExerciseIds: result.isCorrect
-        ? session.wrongExerciseIds
-        : [
-            ...session.wrongExerciseIds,
-            session.exerciseIds[session.currentIndex],
-          ],
-    };
+    return applyResult(session, result);
   }
 
   // Rule: sang câu kế sau khi đã xem kết quả; hết câu cuối thì kết thúc bài.
   advance(session: LessonSession, now: number = Date.now()): LessonSession {
-    return session.phase === 'feedback'
-      ? this.moveToNext(session, now)
-      : session;
+    return session.phase === 'feedback' ? moveToNext(session, now) : session;
   }
 
   // Rule: câu có dạng bài chưa được hỗ trợ thì được bỏ qua (có đếm), không có kết quả đúng/sai.
@@ -123,62 +114,18 @@ export class LessonService {
     if (session.phase !== 'answering') {
       return session;
     }
-    return this.moveToNext(
+    return moveToNext(
       { ...session, skippedCount: session.skippedCount + 1 },
       now,
     );
   }
 
-  private moveToNext(session: LessonSession, now: number): LessonSession {
-    const nextIndex = session.currentIndex + 1;
-    if (nextIndex >= session.exerciseIds.length) {
-      return {
-        ...session,
-        phase: 'finished',
-        lastResult: null,
-        finishedAt: now,
-      };
-    }
-    return {
-      ...session,
-      currentIndex: nextIndex,
-      phase: 'answering',
-      lastResult: null,
-    };
-  }
-
-  // Rule: điểm = đúng / đã trả lời, làm tròn nguyên; chưa trả lời câu nào thì 0.
-  // Bài thường trọn vẹn khi xong và không bỏ câu nào (không có điểm tối thiểu, isPassed = null).
-  // Bài kiểm tra (test) có isPassed theo ngưỡng đạt, và chỉ trọn vẹn khi xong, không bỏ câu nào và đạt.
+  // Rule: điểm và trạng thái hoàn thành (chi tiết ở lesson-session.utils).
   summarize(
     session: LessonSession,
     lessonType: 'lesson' | 'test',
   ): LessonSummary {
-    const answeredCount = session.correctCount + session.wrongCount;
-    const elapsedMs =
-      session.finishedAt === null ? 0 : session.finishedAt - session.startedAt;
-    const isPassed =
-      lessonType === 'test'
-        ? this.isTestPassed(session.correctCount, answeredCount)
-        : null;
-    const isFinishedWithoutSkips =
-      session.phase === 'finished' && session.skippedCount === 0;
-    return {
-      scorePercent:
-        answeredCount === 0
-          ? 0
-          : Math.round((session.correctCount / answeredCount) * 100),
-      correctCount: session.correctCount,
-      answeredCount,
-      wrongCount: session.wrongCount,
-      skippedCount: session.skippedCount,
-      elapsedSeconds: Math.max(0, Math.round(elapsedMs / 1000)),
-      isPassed,
-      isComplete:
-        lessonType === 'test'
-          ? isFinishedWithoutSkips && isPassed === true
-          : isFinishedWithoutSkips,
-    };
+    return summarizeSession(session, lessonType);
   }
 
   // Rule: chỉ giải thích khi trả lời sai; câu đúng không cần giải thích.
@@ -192,9 +139,7 @@ export class LessonService {
     lessonId: string,
     cursor: number,
   ): LessonProgress {
-    const status =
-      existing?.status === 'completed' ? 'completed' : 'in-progress';
-    return { lessonId, status, cursor };
+    return nextProgress(existing, lessonId, cursor);
   }
 
   // Rule: học xong bài thì không còn vị trí để nối lại; trạng thái hoàn thành được giữ nguyên.
@@ -202,16 +147,12 @@ export class LessonService {
     existing: LessonProgress | undefined,
     lessonId: string,
   ): LessonProgress {
-    const status =
-      existing?.status === 'completed' ? 'completed' : 'in-progress';
-    return { lessonId, status };
+    return finishedProgress(existing, lessonId);
   }
 
-  // Rule: bài kiểm tra đạt khi đúng ít nhất TEST_PASS_PERCENT% số câu; so sánh số nguyên, không float.
+  // Rule: bài kiểm tra đạt khi đúng ít nhất TEST_PASS_PERCENT% số câu.
   isTestPassed(correctCount: number, totalCount: number): boolean {
-    return (
-      totalCount > 0 && correctCount * 100 >= TEST_PASS_PERCENT * totalCount
-    );
+    return isTestPassed(correctCount, totalCount);
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
@@ -230,17 +171,15 @@ export class LessonService {
   }
 
   async saveCursor(lessonId: string, session: LessonSession): Promise<void> {
-    // Bài kiểm tra không lưu vị trí (kể cả khi đã xong: finishLesson lo việc ghi completed).
-    // Đọc bài lỗi thì không biết loại bài: giữ hành vi cũ là vẫn lưu vị trí. Cách này an toàn vì
-    // openLesson bỏ qua vị trí của bài kiểm tra và nextProgress giữ nguyên trạng thái completed.
+    // Bài kiểm tra không lưu vị trí; không biết loại bài thì vẫn lưu (openLesson bỏ qua vị trí của test).
     if ((await this.resolveLessonType(lessonId)) === 'test') {
       return;
     }
     const existing = await this.readCursor(lessonId);
     await this.writeCursor(
       session.phase === 'finished'
-        ? this.finishedProgress(existing, lessonId)
-        : this.nextProgress(existing, lessonId, session.currentIndex),
+        ? finishedProgress(existing, lessonId)
+        : nextProgress(existing, lessonId, session.currentIndex),
     );
   }
 
@@ -257,32 +196,57 @@ export class LessonService {
     );
   }
 
+  // Loại các bài của chủ đề; bài nạp lỗi bị bỏ (không làm hỏng cả lô).
+  private async resolveLessonTypes(
+    lessonIds: readonly string[],
+  ): Promise<Map<string, Lesson['type']>> {
+    const entries = await Promise.all(
+      lessonIds.map(
+        async (id) => [id, await this.resolveLessonType(id)] as const,
+      ),
+    );
+    return new Map(
+      entries.flatMap(([id, type]) => (type === undefined ? [] : [[id, type]])),
+    );
+  }
+
   async finishLesson(
     lessonId: string,
     session: LessonSession,
+    placement?: PlacementContext,
   ): Promise<LessonSummary & { isSaved: boolean }> {
     const lessonType = await this.resolveLessonType(lessonId);
     if (lessonType === undefined) {
-      // Không biết loại bài thì không thể xét đạt/hoàn thành, nên không ghi gì (tránh đánh dấu
-      // nhầm bài kiểm tra chưa đạt); vẫn trả tổng kết và báo UI qua isSaved: false.
+      // Không biết loại bài thì không xét đạt/hoàn thành, không ghi gì; báo UI qua isSaved: false.
       return { ...this.summarize(session, 'lesson'), isSaved: false };
     }
     const summary = this.summarize(session, lessonType);
     let isSaved = true;
-    // Bài kiểm tra: đạt hay không đều chuyển các câu sai sang cổng ôn tập.
+    // Bài kiểm tra: đạt hay không đều chuyển câu sai sang cổng ôn tập; lỗi cổng chỉ báo isSaved: false.
     if (lessonType === 'test' && session.wrongExerciseIds.length > 0) {
-      try {
-        await this.wrongAnswerSink.record(lessonId, session.wrongExerciseIds);
-      } catch {
-        // Lỗi cổng không chặn tổng kết hay ghi hoàn thành: báo UI qua isSaved: false.
-        isSaved = false;
-      }
+      isSaved = await this.wrongAnswerSink
+        .record(lessonId, session.wrongExerciseIds)
+        .then(
+          () => true,
+          () => false,
+        );
     }
     if (!summary.isComplete) {
       return { ...summary, isSaved };
     }
     try {
-      await this.writeCursor({ lessonId, status: 'completed' });
+      // Rule: chỉ bài test CUỐI của chủ đề mới hoàn thành cả chủ đề; test khác ghi như bài thường;
+      // có bài thiếu loại (nạp lỗi) thì không chắc bài cuối nên ghi như bài thường.
+      const isUnitFinalTest =
+        lessonType === 'test' &&
+        placement !== undefined &&
+        findConfirmedPlacementTestLessonId(
+          placement.lessonIds,
+          await this.resolveLessonTypes(placement.lessonIds),
+        ) === lessonId;
+      await (isUnitFinalTest && placement !== undefined
+        ? this.writeCompletedBatch(placement.lessonIds)
+        : this.writeCursor({ lessonId, status: 'completed' }));
     } catch {
       // Ghi tiến độ lỗi không được chặn tổng kết: báo cho UI qua isSaved: false.
       return { ...summary, isSaved: false };

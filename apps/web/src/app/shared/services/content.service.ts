@@ -12,7 +12,10 @@ import {
 } from '@core/services/content-source.service';
 import type { ExerciseContent } from '@shared/models/exercise.model';
 import type { PathMap } from '@shared/models/learning-path.model';
-import { listLessonIdsInOrder } from '@shared/utils/learning-path.utils';
+import {
+  findPlacementTestLessonId,
+  listLessonIdsInOrder,
+} from '@shared/utils/learning-path.utils';
 
 export class ContentService {
   constructor(private readonly source: ContentSource = contentSource) {}
@@ -57,10 +60,14 @@ export class ContentService {
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
+  /**
+   * Chịu lỗi từng bài: bài nạp lỗi chỉ thiếu tiêu đề (UI dùng id thay thế), bản đồ vẫn hiện.
+   * Chỉ lỗi đọc lộ trình mới làm hỏng cả bản đồ.
+   */
   async getPathMap(): Promise<PathMap> {
     try {
       const root = await this.readContentRoot();
-      const lessons = await Promise.all(
+      const results = await Promise.allSettled(
         listLessonIdsInOrder(root.stages).map((lessonId) =>
           this.readLesson(lessonId),
         ),
@@ -68,12 +75,67 @@ export class ContentService {
       return {
         stages: root.stages,
         lessonTitles: new Map(
-          lessons.map((lesson) => [lesson.id, lesson.title]),
+          results.flatMap((result) =>
+            result.status === 'fulfilled'
+              ? [[result.value.id, result.value.title] as const]
+              : [],
+          ),
         ),
       };
     } catch (error) {
       throw new Error('Không tải được lộ trình học.', { cause: error });
     }
+  }
+
+  /** Bài nạp lỗi bị bỏ khỏi kết quả (không làm hỏng cả lô); người gọi tự xử lý bài thiếu. */
+  async getLessonTypes(
+    lessonIds: readonly string[],
+  ): Promise<Map<string, Lesson['type']>> {
+    const results = await Promise.allSettled(
+      lessonIds.map((lessonId) => this.readLesson(lessonId)),
+    );
+    return new Map(
+      results.flatMap((result) =>
+        result.status === 'fulfilled'
+          ? [[result.value.id, result.value.type] as const]
+          : [],
+      ),
+    );
+  }
+
+  /**
+   * Rule: bài kiểm tra vượt cấp của chủ đề là bài cuối có type `test` (S3.6); không có chủ đề
+   * hoặc không có bài kiểm tra thì lỗi, không rơi sang bài khác.
+   */
+  async getPlacementTest(
+    unitId: string,
+  ): Promise<{ lessonId: string; lessonIds: readonly string[] }> {
+    const lessonIds = await this.getUnitLessonIds(unitId);
+    const types = new Map<string, Lesson['type']>();
+    // Duyệt từ bài cuối, nạp dần và dừng khi đã thấy bài `test`: không nạp thừa các bài phía trước.
+    for (let index = lessonIds.length - 1; index >= 0; index -= 1) {
+      const candidate = lessonIds[index];
+      if (candidate === undefined) {
+        continue;
+      }
+      types.set(candidate, (await this.getLesson(candidate)).type);
+      const lessonId = findPlacementTestLessonId(lessonIds, types);
+      if (lessonId !== undefined) {
+        return { lessonId, lessonIds };
+      }
+    }
+    throw new Error('Chủ đề không có bài kiểm tra.');
+  }
+
+  async getUnitLessonIds(unitId: string): Promise<readonly string[]> {
+    const root = await this.readContentRoot();
+    const unit = root.stages
+      .flatMap((stage) => stage.units)
+      .find((candidate) => candidate.id === unitId);
+    if (unit === undefined) {
+      throw new Error('Không tìm thấy chủ đề.');
+    }
+    return unit.lessonIds;
   }
 
   async getLesson(lessonId: string): Promise<Lesson> {

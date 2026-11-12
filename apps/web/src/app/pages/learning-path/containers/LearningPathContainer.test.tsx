@@ -124,3 +124,139 @@ describe('LearningPathContainer', () => {
     expect(screen.getByTestId('location')).toHaveTextContent('/lessons/l1');
   });
 });
+
+describe('LearningPathContainer placement test button', () => {
+  const mockContent = (
+    units: { id: string; title: string; lessonIds: string[] }[],
+    testLessonIds: string[],
+  ): void => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === '/content/content.json') {
+        return Response.json({
+          contentVersion: '0123456789ab',
+          stages: [{ id: 'hsk1', title: 'HSK 1', units }],
+        });
+      }
+      const lessonId = /\/content\/lessons\/(.+)\.json$/.exec(url)?.[1] ?? '';
+      return Response.json({
+        id: lessonId,
+        type: testLessonIds.includes(lessonId) ? 'test' : 'lesson',
+        title: `Bài ${lessonId}`,
+        exercises: [{ id: 'e1', kind: 'tone-choice', wordId: '八' }],
+      });
+    });
+  };
+
+  it('S3.6-AC1: should show the placement test button on a locked unit that has a test', async () => {
+    mockContent(
+      [
+        { id: 'unit-a', title: 'Chủ đề A', lessonIds: ['a1', 'a-test'] },
+        { id: 'unit-b', title: 'Chủ đề B', lessonIds: ['b1', 'b-test'] },
+      ],
+      ['a-test', 'b-test'],
+    );
+    renderPath();
+
+    const buttons = await screen.findAllByRole('link', {
+      name: 'Kiểm tra vượt cấp',
+    });
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0]).toHaveAttribute('href', '/units/unit-b/placement-test');
+  });
+
+  it('S3.6-AC1: should not show the placement test button on an open unit', async () => {
+    mockContent(
+      [{ id: 'unit-a', title: 'Chủ đề A', lessonIds: ['a1', 'a-test'] }],
+      ['a-test'],
+    );
+    renderPath();
+
+    expect(await screen.findByText('Bài a1')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Kiểm tra vượt cấp' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('S3.6-AC1: should keep locked lessons of a unit with the button unreachable', async () => {
+    mockContent(
+      [
+        { id: 'unit-a', title: 'Chủ đề A', lessonIds: ['a1'] },
+        { id: 'unit-b', title: 'Chủ đề B', lessonIds: ['b1', 'b-test'] },
+      ],
+      ['b-test'],
+    );
+    const { user } = renderPath();
+
+    expect(
+      await screen.findByRole('link', { name: 'Kiểm tra vượt cấp' }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByText('Bài b1'));
+
+    expect(screen.queryByTestId('location')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Lộ trình học' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: /Bài b1/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('S3.6-AC1: should keep the button on other locked units when one unit has a lesson that fails to load', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = String(input);
+      if (url === '/content/content.json') {
+        return Response.json({
+          contentVersion: '0123456789ab',
+          stages: [
+            {
+              id: 'hsk1',
+              title: 'HSK 1',
+              units: [
+                { id: 'unit-a', title: 'Chủ đề A', lessonIds: ['a1'] },
+                {
+                  id: 'unit-b',
+                  title: 'Chủ đề B',
+                  lessonIds: ['b1', 'b-test'],
+                },
+                {
+                  id: 'unit-c',
+                  title: 'Chủ đề C',
+                  lessonIds: ['c1', 'c-test'],
+                },
+                {
+                  id: 'unit-d',
+                  title: 'Chủ đề D',
+                  lessonIds: ['d1', 'd-test'],
+                },
+              ],
+            },
+          ],
+        });
+      }
+      const lessonId = /\/content\/lessons\/(.+)\.json$/.exec(url)?.[1] ?? '';
+      if (lessonId === 'c1') {
+        return new Response('', { status: 404 });
+      }
+      return Response.json({
+        id: lessonId,
+        type: lessonId.endsWith('-test') ? 'test' : 'lesson',
+        title: `Bài ${lessonId}`,
+        exercises: [{ id: 'e1', kind: 'tone-choice', wordId: '八' }],
+      });
+    });
+    renderPath();
+
+    const buttons = await screen.findAllByRole('link', {
+      name: 'Kiểm tra vượt cấp',
+    });
+    expect(buttons.map((button) => button.getAttribute('href'))).toEqual([
+      '/units/unit-b/placement-test',
+      '/units/unit-d/placement-test',
+    ]);
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Lộ trình học' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Bài a1')).toBeInTheDocument();
+  });
+});
