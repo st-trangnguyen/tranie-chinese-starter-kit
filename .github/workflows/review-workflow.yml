@@ -69,7 +69,7 @@ jobs:
         run: |
           set -euo pipefail
           count=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
-            --jq "[.[] | select(.body | contains(\"$SUMMARY_MARKER\")) | select(.body | contains(\"changes-requested\"))] | length")
+            --jq "[.[] | select(.body | contains(\"$SUMMARY_MARKER\")) | select(.body | contains(\"## Review: changes-requested\"))] | length")
           echo "previous=$count" >> "$GITHUB_OUTPUT"
 
       - uses: pnpm/action-setup@v4
@@ -101,7 +101,7 @@ jobs:
             - Change id lấy từ dòng `OpenSpec change: openspec/changes/<id>` trong mô tả PR
               (`gh pr view`). PR không có dòng này (config, asset thuần) thì chỉ kiểm §0, §2, §6, §7.
             - Nếu số vòng trước đó lớn hơn 0, đây là vòng review lại: chỉ kiểm finding cũ (đọc
-              các comment review trước của PR) đã xử lý chưa và bản sửa có sinh lỗi mới không.
+              các comment review trước của PR qua `gh pr view --comments`) đã xử lý chưa và bản sửa có sinh lỗi mới không.
             - Mỗi finding có `file:dòng` thì đăng một inline comment. Thân comment theo định dạng
               khối finding trong reviewer.md, mở đầu bằng `R<n> · <severity> · <loại>`.
             - Cuối cùng ghi file `${{ env.VERDICT_FILE }}` là JSON:
@@ -110,7 +110,7 @@ jobs:
               `verdict` là `changes-requested` khi và chỉ khi còn blocker hoặc major.
             - Không sửa file nào của repo, không commit, không push.
           claude_args: >-
-            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh api:*),Bash(pnpm typecheck),Bash(pnpm lint),Bash(pnpm --filter @csk/web exec vitest run:*),Write(${{ env.VERDICT_FILE }}),mcp__github_inline_comment__create_inline_comment"
+            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(pnpm typecheck),Bash(pnpm lint),Bash(pnpm --filter @csk/web exec vitest run:*),Write(${{ env.VERDICT_FILE }}),mcp__github_inline_comment__create_inline_comment"
 
       # Khi reviewer không ghi được verdict, in các lần bị từ chối quyền để chỉnh allowedTools.
       - name: Chẩn đoán lần bị từ chối quyền
