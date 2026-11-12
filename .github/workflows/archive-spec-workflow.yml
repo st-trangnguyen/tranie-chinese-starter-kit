@@ -106,7 +106,14 @@ jobs:
           for spec in openspec/specs/*/spec.md; do
             grep -q '^TBD - created by archiving change ' "$spec" || continue
             cap=$(basename "$(dirname "$spec")")
-            purpose=$(grep -m1 -E "^- \`$cap\`: " "$proposal" | sed -E "s/^- \`$cap\`: *//" || true)
+            # Mô tả có thể xuống dòng: gom các dòng thụt tiếp theo, dừng ở dòng trống hoặc dòng "- " kế tiếp.
+            purpose=$(CAP="$cap" awk '
+              BEGIN { head = "- `" ENVIRON["CAP"] "`:" }
+              found && /^[[:space:]]+[^[:space:]]/ { sub(/^[[:space:]]+/, ""); out = out " " $0; next }
+              found { exit }
+              index($0, head) == 1 { found = 1; out = substr($0, length(head) + 1); sub(/^[[:space:]]+/, "", out) }
+              END { print out }
+            ' "$proposal")
             if [[ -z "$purpose" ]]; then
               echo "::error::Proposal thiếu dòng \"- \`$cap\`: <mô tả>\" ở mục New Capabilities, không có Purpose cho $spec."
               exit 1
