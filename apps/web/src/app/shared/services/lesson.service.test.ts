@@ -1503,4 +1503,24 @@ describe('LessonService — kết thúc bài kiểm tra vượt cấp (S3.6)', (
       await expect(store.getLessonProgress(lessonId)).resolves.toBeUndefined();
     }
   });
+
+  it('S3.6-AC2: should write a test that is not the last test of the unit like a regular lesson, without completing the whole unit', async () => {
+    const { store, stored } = makeSetup();
+    await completeUnits(store, 1);
+    const lessonIds = ['u2-1', 'u2-mid-test', 'u2-2', 'u2-test'];
+
+    const result = await stored.finishLesson(
+      'u2-mid-test',
+      passedSession(stored),
+      { lessonIds },
+    );
+
+    expect(result.isSaved).toBe(true);
+    await expect(store.getLessonProgress('u2-mid-test')).resolves.toMatchObject(
+      { status: 'completed' },
+    );
+    for (const lessonId of ['u2-1', 'u2-2', 'u2-test']) {
+      await expect(store.getLessonProgress(lessonId)).resolves.toBeUndefined();
+    }
+  });
 });
