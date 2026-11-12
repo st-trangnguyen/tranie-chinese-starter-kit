@@ -5,6 +5,8 @@ interface LessonProgressBarProps {
   /** Câu đang làm, tính từ 1. */
   current: number;
   total: number;
+  /** Focus dòng chữ ngay khi hiện, dùng sau khi làm lại bài (S3.5). */
+  shouldFocusOnMount?: boolean;
 }
 
 /**
@@ -15,12 +17,15 @@ interface LessonProgressBarProps {
 export const LessonProgressBar = ({
   current,
   total,
+  shouldFocusOnMount = false,
 }: LessonProgressBarProps) => {
   const { t } = useTranslation('lesson');
   const label = t('progress', { current, total });
   const finished = Math.max(current - 1, 0);
   const labelRef = useRef<HTMLParagraphElement>(null);
-  const shownCurrent = useRef(current);
+  const shownCurrent = useRef<number | null>(
+    shouldFocusOnMount ? null : current,
+  );
 
   useEffect(() => {
     if (shownCurrent.current !== current) {

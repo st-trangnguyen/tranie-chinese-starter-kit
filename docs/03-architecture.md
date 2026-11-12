@@ -268,8 +268,10 @@ Lesson runner, màn ôn tập và màn luyện tự do chỉ làm việc qua `ex
 - `ExerciseResult = { isCorrect: boolean; explanation?: string }`. Component dạng bài tự soạn `explanation` từ từ/câu của nó; runner chỉ hiện khi trả lời sai (`LessonService.shouldShowExplanation`).
 - `exerciseRegistry` là `Partial<Record<kind, component>>`, rỗng cho tới khi E4–E6 đăng ký. `kind` chưa đăng ký thì runner hiện "Dạng bài này chưa có" kèm nút bỏ qua.
 - `LessonService` (`shared/services`) giữ quy tắc phiên làm bài (`LessonSession`: câu hiện tại, pha `answering`/`feedback`/`finished`); `useLessonRunner` chỉ giữ state và gọi service.
-- Vòng đời bài: làm hết câu thì `useLessonRunner` gọi `LessonService.finishLesson`, đặt `lessonProgress.status` thành `completed` (bài đã `completed` không bị hạ về `in-progress` khi học lại). Màn tổng kết lấy số liệu từ `LessonService.summarize(session)` (điểm %, đúng/đã trả lời, thời gian, số câu sai, số câu bỏ qua).
+- Vòng đời bài: làm hết câu thì `useLessonRunner` gọi `LessonService.finishLesson`, đặt `lessonProgress.status` thành `completed` (bài đã `completed` không bị hạ về `in-progress` khi học lại). Màn tổng kết lấy số liệu từ `LessonService.summarize(session, lessonType)` (điểm %, đúng/đã trả lời, thời gian, số câu sai, số câu bỏ qua, `isPassed`: `null` với bài thường, đạt/chưa đạt với bài kiểm tra).
 - Ghi tiến độ lỗi không chặn tổng kết: `finishLesson` trả `isSaved: false`, màn tổng kết hiện cảnh báo `role="alert"` rằng kết quả chưa được lưu.
+- Bài kiểm tra cuối chủ đề: `Lesson.type: 'test'`. Đạt khi điểm ≥ `TEST_PASS_PERCENT` (80%, `core/constants/lesson.constants.ts`), quy tắc nằm ở `LessonService.isTestPassed`. Bài kiểm tra luôn bắt đầu từ câu 1 và không lưu vị trí (`cursor`); màn tổng kết có nút "Làm lại".
+- `WrongAnswerSink` là cổng chuyển câu sai của bài kiểm tra sang ôn tập. Bản mặc định là no-op, S9.4 thay bằng bản thật; `LessonService.finishLesson` là nơi gọi cổng; `useLessonRunner` không biết cổng và phía sau nó.
 
 ## 7. PWA & cache
 

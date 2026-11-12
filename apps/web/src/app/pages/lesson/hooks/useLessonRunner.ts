@@ -28,6 +28,8 @@ export interface LessonRunnerState {
   submitResult: (result: ExerciseResult) => void;
   continueLesson: () => void;
   skipExercise: () => void;
+  /** Làm lại bài kiểm tra từ câu 1, không nạp lại nội dung (S3.5). */
+  restart: () => void;
 }
 
 /** Bài đã nạp, gắn với `lessonId` để đổi bài thì không lẫn sang bài cũ. */
@@ -109,8 +111,25 @@ export const useLessonRunner = (lessonId: string): LessonRunnerState => {
     [service, updateSession],
   );
 
+  const restart = useCallback(() => {
+    // Phiên mới là lượt đầu mới: gỡ cờ đã kết thúc và đặt mốc vị trí về câu 1 để việc ghi
+    // và chuyển câu sai diễn ra đúng như lượt đầu.
+    finishedLessonIdRef.current = null;
+    savedMarkRef.current = { lessonId, index: 0, isFinished: false };
+    setUnsavedLessonId(null);
+    setOpened((current) =>
+      current && current.lessonId === lessonId
+        ? {
+            ...current,
+            session: service.startSession(current.lesson.exercises, 0),
+          }
+        : current,
+    );
+  }, [service, lessonId]);
+
   const current = opened?.lessonId === lessonId ? opened : null;
   const session = current?.session ?? null;
+  const lessonType = current?.lesson.type ?? null;
 
   // Lưu vị trí khi đổi câu hoặc kết thúc bài (D4); không lưu khi chỉ xem kết quả.
   const latestSessionRef = useRef<LessonSession | null>(null);
@@ -170,8 +189,11 @@ export const useLessonRunner = (lessonId: string): LessonRunnerState => {
   }, [service, openedLessonId, isFinished]);
 
   const summary = useMemo(
-    () => (session?.phase === 'finished' ? service.summarize(session) : null),
-    [service, session],
+    () =>
+      session?.phase === 'finished' && lessonType
+        ? service.summarize(session, lessonType)
+        : null,
+    [service, session, lessonType],
   );
 
   const result = session?.lastResult ?? null;
@@ -196,5 +218,6 @@ export const useLessonRunner = (lessonId: string): LessonRunnerState => {
     submitResult,
     continueLesson,
     skipExercise,
+    restart,
   };
 };
