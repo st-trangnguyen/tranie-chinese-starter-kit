@@ -9,7 +9,7 @@ import type {
   LessonSession,
   LessonSummary,
 } from '@shared/models/lesson-session.model';
-import { findPlacementTestLessonId } from '@shared/utils/learning-path.utils';
+import { findConfirmedPlacementTestLessonId } from '@shared/utils/learning-path.utils';
 import {
   applyResult,
   finishedProgress,
@@ -235,11 +235,12 @@ export class LessonService {
       return { ...summary, isSaved };
     }
     try {
-      // Rule: chỉ bài test CUỐI của chủ đề mới hoàn thành cả chủ đề; test khác ghi như bài thường.
+      // Rule: chỉ bài test CUỐI của chủ đề mới hoàn thành cả chủ đề; test khác ghi như bài thường;
+      // có bài thiếu loại (nạp lỗi) thì không chắc bài cuối nên ghi như bài thường.
       const isUnitFinalTest =
         lessonType === 'test' &&
         placement !== undefined &&
-        findPlacementTestLessonId(
+        findConfirmedPlacementTestLessonId(
           placement.lessonIds,
           await this.resolveLessonTypes(placement.lessonIds),
         ) === lessonId;

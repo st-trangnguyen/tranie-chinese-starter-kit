@@ -14,7 +14,7 @@ import {
   type ProgressStore,
 } from '@core/services/progress-store.service';
 import {
-  findPlacementTestLessonId,
+  findConfirmedPlacementTestLessonId,
   listLessonIdsInOrder,
 } from '@shared/utils/learning-path.utils';
 
@@ -93,11 +93,8 @@ export class ProgressService {
     if (!this.isUnitLocked(unit, statuses)) {
       return undefined;
     }
-    // Rule: có bài chưa biết loại (nạp lỗi) thì không chắc bài kiểm tra là bài nào: không có nút.
-    if (unit.lessonIds.some((lessonId) => !lessonTypes.has(lessonId))) {
-      return undefined;
-    }
-    return findPlacementTestLessonId(unit.lessonIds, lessonTypes);
+    // Có bài chưa biết loại (nạp lỗi) thì không có nút (rule trong findConfirmedPlacementTestLessonId).
+    return findConfirmedPlacementTestLessonId(unit.lessonIds, lessonTypes);
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
