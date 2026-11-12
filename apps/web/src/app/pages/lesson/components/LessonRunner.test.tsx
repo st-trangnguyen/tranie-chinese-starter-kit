@@ -164,4 +164,52 @@ describe('LessonRunner', () => {
       screen.queryByRole('button', { name: 'Bỏ qua câu này' }),
     ).not.toBeInTheDocument();
   });
+
+  it('S4.2-AC2: should render a sound-pair exercise from the real registry without the skip fallback', () => {
+    const makeWord = (id: string, hanzi: string, pinyin: string): Word => ({
+      id,
+      hanzi,
+      pinyin,
+      vi: ['nghĩa'],
+      viReviewed: true,
+      hsk: 1,
+      audio: `audio/${id.padEnd(16, '0')}.mp3`,
+    });
+    const exercise: Exercise = {
+      id: 'e3',
+      kind: 'sound-pair',
+      wordIds: ['w-si', 'w-shi'],
+      answerWordId: 'w-si',
+    };
+
+    renderWithProviders(
+      <AudioSpeedProvider>
+        <LessonRunner
+          view={{
+            exercise,
+            content: {
+              words: [
+                makeWord('w-si', '四', 'sì'),
+                makeWord('w-shi', '十', 'shì'),
+              ],
+              sentences: [],
+            },
+            current: 1,
+            total: 1,
+            feedback: null,
+          }}
+          registry={exerciseRegistry}
+          handlers={{ onResult: vi.fn(), onContinue: vi.fn(), onSkip: vi.fn() }}
+        />
+      </AudioSpeedProvider>,
+    );
+
+    expect(screen.getByRole('group').querySelectorAll('button')).toHaveLength(
+      2,
+    );
+    expect(screen.queryByText(/Dạng bài này chưa có/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Bỏ qua câu này' }),
+    ).not.toBeInTheDocument();
+  });
 });

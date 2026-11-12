@@ -42,7 +42,7 @@ Là người học, tôi muốn nghe một âm rồi chọn thanh điệu để 
 ## Capabilities
 
 ### New Capabilities
-- `tone-choice`: dạng bài nghe một âm rồi chọn thanh điệu.
+- `tone-choice`: nghe một âm rồi chọn đúng thanh điệu trong các lựa chọn, chấm ngay sau khi chọn.
 
 ### Modified Capabilities
 - (không có)

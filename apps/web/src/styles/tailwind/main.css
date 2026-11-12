@@ -15,6 +15,7 @@
 @import "./components/_onboarding.css";
 @import "./components/_pinyin-type.css";
 @import "./components/_tone-choice.css";
+@import "./components/_sound-pair.css";
 @import "./components/_update-banner.css";
 
 @import "./themes/_dark.css";
