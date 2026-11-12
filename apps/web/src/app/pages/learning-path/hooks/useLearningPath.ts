@@ -32,7 +32,7 @@ export const useLearningPath = (): LearningPathState => {
   useEffect(() => {
     let isActive = true;
     Promise.all([
-      contentService.getPathMap(),
+      contentService.getPartialPathMap(),
       // Không đọc được IndexedDB (ví dụ chế độ riêng tư): coi như chưa xong bài nào.
       progressService
         .getCompletedLessonIds()

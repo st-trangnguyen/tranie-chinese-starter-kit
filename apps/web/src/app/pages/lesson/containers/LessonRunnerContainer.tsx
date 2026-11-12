@@ -58,7 +58,7 @@ const LessonRunnerContainer = ({
           {t('loadError')}
         </p>
       )}
-      {!lesson && !hasError && <p>{t('loading')}</p>}
+      {!lesson && !hasError && <p role="status">{t('loading')}</p>}
       {summary && (
         <LessonSummary
           summary={summary}

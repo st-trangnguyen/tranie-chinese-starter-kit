@@ -31,7 +31,7 @@ export interface OpenedLesson {
 }
 
 export class LessonService {
-  // Loại bài đã biết từ lần mở gần nhất, để saveCursor không phải nạp lại nội dung bài mỗi lần lưu.
+  // Loại bài đã biết từ lần mở gần nhất, để saveCursor khỏi nạp lại bài.
   private readonly knownTypes = new Map<string, Lesson['type']>();
 
   constructor(
@@ -156,8 +156,7 @@ export class LessonService {
   }
 
   // Rule: điểm = đúng / đã trả lời, làm tròn nguyên; chưa trả lời câu nào thì 0.
-  // Bài thường trọn vẹn khi xong và không bỏ câu nào (không có điểm tối thiểu, isPassed = null).
-  // Bài kiểm tra (test) có isPassed theo ngưỡng đạt, và chỉ trọn vẹn khi xong, không bỏ câu nào và đạt.
+  // Bài thường trọn vẹn khi xong, không bỏ câu nào (isPassed = null); bài kiểm tra còn phải đạt ngưỡng.
   summarize(
     session: LessonSession,
     lessonType: 'lesson' | 'test',
@@ -238,9 +237,7 @@ export class LessonService {
   }
 
   async saveCursor(lessonId: string, session: LessonSession): Promise<void> {
-    // Bài kiểm tra không lưu vị trí (kể cả khi đã xong: finishLesson lo việc ghi completed).
-    // Đọc bài lỗi thì không biết loại bài: giữ hành vi cũ là vẫn lưu vị trí. Cách này an toàn vì
-    // openLesson bỏ qua vị trí của bài kiểm tra và nextProgress giữ nguyên trạng thái completed.
+    // Bài kiểm tra không lưu vị trí; không biết loại bài thì vẫn lưu (openLesson bỏ qua vị trí của test).
     if ((await this.resolveLessonType(lessonId)) === 'test') {
       return;
     }
@@ -272,28 +269,27 @@ export class LessonService {
   ): Promise<LessonSummary & { isSaved: boolean }> {
     const lessonType = await this.resolveLessonType(lessonId);
     if (lessonType === undefined) {
-      // Không biết loại bài thì không thể xét đạt/hoàn thành, nên không ghi gì (tránh đánh dấu
-      // nhầm bài kiểm tra chưa đạt); vẫn trả tổng kết và báo UI qua isSaved: false.
+      // Không biết loại bài thì không xét đạt/hoàn thành, không ghi gì; báo UI qua isSaved: false.
       return { ...this.summarize(session, 'lesson'), isSaved: false };
     }
     const summary = this.summarize(session, lessonType);
     let isSaved = true;
-    // Bài kiểm tra: đạt hay không đều chuyển các câu sai sang cổng ôn tập.
+    // Bài kiểm tra: đạt hay không đều chuyển câu sai sang cổng ôn tập; lỗi cổng chỉ báo isSaved: false.
     if (lessonType === 'test' && session.wrongExerciseIds.length > 0) {
-      try {
-        await this.wrongAnswerSink.record(lessonId, session.wrongExerciseIds);
-      } catch {
-        // Lỗi cổng không chặn tổng kết hay ghi hoàn thành: báo UI qua isSaved: false.
-        isSaved = false;
-      }
+      isSaved = await this.wrongAnswerSink
+        .record(lessonId, session.wrongExerciseIds)
+        .then(
+          () => true,
+          () => false,
+        );
     }
     if (!summary.isComplete) {
       return { ...summary, isSaved };
     }
     try {
-      await (placement === undefined
-        ? this.writeCursor({ lessonId, status: 'completed' })
-        : this.writeCompletedBatch(placement.lessonIds));
+      await (lessonType === 'test' && placement?.lessonIds.includes(lessonId)
+        ? this.writeCompletedBatch(placement.lessonIds)
+        : this.writeCursor({ lessonId, status: 'completed' }));
     } catch {
       // Ghi tiến độ lỗi không được chặn tổng kết: báo cho UI qua isSaved: false.
       return { ...summary, isSaved: false };

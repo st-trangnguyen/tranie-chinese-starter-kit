@@ -13,7 +13,10 @@ import {
   progressStore,
   type ProgressStore,
 } from '@core/services/progress-store.service';
-import { listLessonIdsInOrder } from '@shared/utils/learning-path.utils';
+import {
+  findPlacementTestLessonId,
+  listLessonIdsInOrder,
+} from '@shared/utils/learning-path.utils';
 
 type LessonType = (typeof LESSON_TYPES)[number];
 
@@ -90,9 +93,11 @@ export class ProgressService {
     if (!this.isUnitLocked(unit, statuses)) {
       return undefined;
     }
-    return unit.lessonIds.findLast(
-      (lessonId) => lessonTypes.get(lessonId) === 'test',
-    );
+    // Rule: có bài chưa biết loại (nạp lỗi) thì không chắc bài kiểm tra là bài nào: không có nút.
+    if (unit.lessonIds.some((lessonId) => !lessonTypes.has(lessonId))) {
+      return undefined;
+    }
+    return findPlacementTestLessonId(unit.lessonIds, lessonTypes);
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────

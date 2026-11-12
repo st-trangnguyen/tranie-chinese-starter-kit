@@ -37,7 +37,7 @@ const PlacementTestContainer = ({
           {t('loadError')}
         </p>
       ) : (
-        <p>{t('loading')}</p>
+        <p role="status">{t('loading')}</p>
       )}
     </main>
   );

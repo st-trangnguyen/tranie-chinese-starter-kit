@@ -5,7 +5,10 @@ import {
   type ContentSource,
 } from '@core/services/content-source.service';
 import type { PathMap } from '@shared/models/learning-path.model';
-import { listLessonIdsInOrder } from '@shared/utils/learning-path.utils';
+import {
+  findPlacementTestLessonId,
+  listLessonIdsInOrder,
+} from '@shared/utils/learning-path.utils';
 
 export class ContentService {
   constructor(private readonly source: ContentSource = contentSource) {}
@@ -44,17 +47,47 @@ export class ContentService {
     }
   }
 
+  /**
+   * Như getPathMap nhưng chịu lỗi từng bài: bài nạp lỗi chỉ thiếu tiêu đề (UI dùng id thay thế),
+   * bản đồ vẫn hiện. Chỉ lỗi đọc lộ trình mới làm hỏng cả bản đồ.
+   */
+  async getPartialPathMap(): Promise<PathMap> {
+    try {
+      const root = await this.readContentRoot();
+      const results = await Promise.allSettled(
+        listLessonIdsInOrder(root.stages).map((lessonId) =>
+          this.readLesson(lessonId),
+        ),
+      );
+      return {
+        stages: root.stages,
+        lessonTitles: new Map(
+          results.flatMap((result) =>
+            result.status === 'fulfilled'
+              ? [[result.value.id, result.value.title] as const]
+              : [],
+          ),
+        ),
+      };
+    } catch (error) {
+      throw new Error('Không tải được lộ trình học.', { cause: error });
+    }
+  }
+
+  /** Bài nạp lỗi bị bỏ khỏi kết quả (không làm hỏng cả lô); người gọi tự xử lý bài thiếu. */
   async getLessonTypes(
     lessonIds: readonly string[],
   ): Promise<Map<string, Lesson['type']>> {
-    try {
-      const lessons = await Promise.all(
-        lessonIds.map((lessonId) => this.readLesson(lessonId)),
-      );
-      return new Map(lessons.map((lesson) => [lesson.id, lesson.type]));
-    } catch (error) {
-      throw new Error('Không tải được loại bài học.', { cause: error });
-    }
+    const results = await Promise.allSettled(
+      lessonIds.map((lessonId) => this.readLesson(lessonId)),
+    );
+    return new Map(
+      results.flatMap((result) =>
+        result.status === 'fulfilled'
+          ? [[result.value.id, result.value.type] as const]
+          : [],
+      ),
+    );
   }
 
   /**
@@ -65,11 +98,17 @@ export class ContentService {
     unitId: string,
   ): Promise<{ lessonId: string; lessonIds: readonly string[] }> {
     const lessonIds = await this.getUnitLessonIds(unitId);
-    // Duyệt từ bài cuối và dừng ở bài `test` đầu tiên: không nạp thừa các bài phía trước.
-    for (const candidate of [...lessonIds].reverse()) {
-      const lesson = await this.getLesson(candidate);
-      if (lesson.type === 'test') {
-        return { lessonId: candidate, lessonIds };
+    const types = new Map<string, Lesson['type']>();
+    // Duyệt từ bài cuối, nạp dần và dừng khi đã thấy bài `test`: không nạp thừa các bài phía trước.
+    for (let index = lessonIds.length - 1; index >= 0; index -= 1) {
+      const candidate = lessonIds[index];
+      if (candidate === undefined) {
+        continue;
+      }
+      types.set(candidate, (await this.getLesson(candidate)).type);
+      const lessonId = findPlacementTestLessonId(lessonIds, types);
+      if (lessonId !== undefined) {
+        return { lessonId, lessonIds };
       }
     }
     throw new Error('Chủ đề không có bài kiểm tra.');
