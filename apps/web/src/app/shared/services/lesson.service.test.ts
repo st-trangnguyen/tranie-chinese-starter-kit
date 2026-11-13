@@ -5,6 +5,10 @@ import {
   DexieProgressStore,
   type ProgressStore,
 } from '@core/services/progress-store.service';
+import {
+  isRatingCorrect,
+  type SpeakRating,
+} from '@shared/utils/speak-rating.utils';
 import { ProgressService } from './progress.service';
 import {
   LessonService,
@@ -1558,5 +1562,36 @@ describe('LessonService — kết thúc bài kiểm tra vượt cấp (S3.6)', (
     for (const lessonId of ['u2-1', 'u2-2', 'u2-test']) {
       await expect(store.getLessonProgress(lessonId)).resolves.toBeUndefined();
     }
+  });
+});
+
+describe('LessonService — bài kiểm tra có câu nói (S5.2)', () => {
+  it('S5.2-AC2: should score a 5-question test at 80% and complete it when 4 speak answers are "correct" and 1 is "close"', () => {
+    const ratings: SpeakRating[] = [
+      'correct',
+      'correct',
+      'correct',
+      'correct',
+      'close',
+    ];
+    const exercises: Exercise[] = ratings.map((_rating, index) => ({
+      id: `sp${index}`,
+      kind: 'speak' as const,
+      sentenceId: 's-nihao',
+    }));
+    let session = service.startSession(exercises, 0, 0);
+    ratings.forEach((rating) => {
+      session = service.advance(
+        service.submitResult(session, { isCorrect: isRatingCorrect(rating) }),
+        0,
+      );
+    });
+
+    expect(session.phase).toBe('finished');
+    expect(service.summarize(session, 'test')).toMatchObject({
+      scorePercent: 80,
+      isPassed: true,
+      isComplete: true,
+    });
   });
 });
