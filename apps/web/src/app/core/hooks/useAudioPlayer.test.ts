@@ -234,4 +234,104 @@ describe('useAudioPlayer', () => {
     expect(hookA.result.current.isPlaying).toBe(false);
     expect(hookB.result.current.isPlaying).toBe(false);
   });
+
+  it('S5.1-AC2: nghe bản ghi thì phát đúng src blob một lần từ đầu', async () => {
+    const { result } = renderHook(() => useAudioPlayer());
+    fakeAudio.currentTime = 2;
+
+    await act(async () => {
+      void result.current.playUrl('blob:http://localhost/rec-1', false);
+    });
+
+    expect(fakeAudio.src).toBe('blob:http://localhost/rec-1');
+    expect(fakeAudio.playCount).toBe(1);
+    expect(fakeAudio.currentTime).toBe(0);
+    expect(result.current.isPlaying).toBe(true);
+
+    await act(async () => {
+      fakeAudio.finish();
+    });
+    expect(result.current.isPlaying).toBe(false);
+    expect(fakeAudio.playCount).toBe(1);
+  });
+
+  it('S5.1-AC2: nghe bản ghi rồi nghe mẫu thì luồng bản ghi bị ngắt và chỉ một element phát mẫu từ đầu', async () => {
+    const recordingHook = renderHook(() => useAudioPlayer());
+    const sampleHook = renderHook(() => useAudioPlayer());
+
+    await act(async () => {
+      void recordingHook.result.current.playUrl(
+        'blob:http://localhost/rec-1',
+        false,
+      );
+    });
+    expect(recordingHook.result.current.isPlaying).toBe(true);
+    fakeAudio.currentTime = 1.2;
+
+    await act(async () => {
+      void sampleHook.result.current.play('audio/0123456789abcdef.mp3', false);
+    });
+
+    // Cùng một element: src đổi sang bản mẫu, phát lại từ đầu, không có luồng thứ hai.
+    expect(fakeAudio.src).toBe('/audio/0123456789abcdef.mp3');
+    expect(fakeAudio.currentTime).toBe(0);
+    expect(fakeAudio.playCount).toBe(2);
+    expect(recordingHook.result.current.isPlaying).toBe(false);
+    expect(sampleHook.result.current.isPlaying).toBe(true);
+
+    await act(async () => {
+      fakeAudio.finish();
+    });
+    expect(sampleHook.result.current.isPlaying).toBe(false);
+  });
+
+  it('S5.1-AC2: nghe bản ghi 5 lần, mỗi lần sau khi lần trước phát xong thì phát đủ 5 lần và vẫn gọi được', async () => {
+    const { result } = renderHook(() => useAudioPlayer());
+
+    for (let index = 0; index < 5; index += 1) {
+      await act(async () => {
+        void result.current.playUrl('blob:http://localhost/rec-1', false);
+      });
+      expect(result.current.isPlaying).toBe(true);
+      expect(fakeAudio.playCount).toBe(index + 1);
+      expect(fakeAudio.src).toBe('blob:http://localhost/rec-1');
+
+      await act(async () => {
+        fakeAudio.finish();
+      });
+      expect(result.current.isPlaying).toBe(false);
+    }
+
+    expect(fakeAudio.playCount).toBe(5);
+    expect(result.current.hasError).toBe(false);
+  });
+
+  it('S5.1-AC2: bản ghi không phát được thì hasError true, nghe mẫu vẫn chạy sau đó và xóa lỗi', async () => {
+    const { result } = renderHook(() => useAudioPlayer());
+
+    await act(async () => {
+      void result.current.playUrl('blob:http://localhost/rec-hong', false);
+    });
+    await act(async () => {
+      fakeAudio.fail();
+    });
+
+    expect(result.current.hasError).toBe(true);
+    expect(result.current.isPlaying).toBe(false);
+
+    await act(async () => {
+      void result.current.play('audio/0123456789abcdef.mp3', false);
+    });
+
+    expect(fakeAudio.src).toBe('/audio/0123456789abcdef.mp3');
+    expect(fakeAudio.playCount).toBe(2);
+    expect(result.current.hasError).toBe(false);
+    expect(result.current.isPlaying).toBe(true);
+
+    await act(async () => {
+      fakeAudio.finish();
+    });
+    expect(result.current.isPlaying).toBe(false);
+    expect(result.current.hasError).toBe(false);
+  });
 });
