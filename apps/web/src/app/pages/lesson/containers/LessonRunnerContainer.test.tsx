@@ -6,8 +6,13 @@ import { createDatabase } from '@core/helpers/db.helper';
 import { DexieProgressStore } from '@core/services/progress-store.service';
 import type { ExerciseRegistry } from '@shared/components/exercises/exercise.registry';
 import { ListenButton } from '@shared/components/ListenButton';
+import { AudioSpeedProvider } from '@shared/contexts/AudioSpeedContext';
 import { SlowToggle } from '@shared/components/SlowToggle';
 import { mockContentFetch } from '@test/mocks/content-fetch';
+import {
+  installRecordingEnvironment,
+  restoreRecordingEnvironment,
+} from '@test/record-compare.helpers';
 import testI18n from '@test/i18n';
 import { renderWithProviders, screen, userEvent, waitFor } from '@test/render';
 import LessonRunnerContainer from './LessonRunnerContainer';
@@ -880,5 +885,118 @@ describe('LessonRunnerContainer — đổi bài sau khi làm lại (S3.5)', () =
       await screen.findByRole('heading', { name: 'Kiểm tra b' }),
     ).toBeVisible();
     expect(await screen.findByText('Câu 1 / 2')).not.toHaveFocus();
+  });
+});
+
+describe('LessonRunnerContainer — câu nói tự đánh giá (S5.2)', () => {
+  const SPEAK_LESSON = {
+    id: 'speak-lesson',
+    type: 'lesson',
+    title: 'Luyện nói',
+    exercises: [{ id: 'e1', kind: 'speak', sentenceId: 's1' }],
+  };
+
+  beforeEach(() => {
+    installRecordingEnvironment();
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      mockContentFetch((input) =>
+        /\/content\/lessons\/.+\.json$/.test(String(input))
+          ? Response.json(SPEAK_LESSON)
+          : new Response('', { status: 404 }),
+      ),
+    );
+  });
+
+  afterEach(() => {
+    restoreRecordingEnvironment();
+  });
+
+  it('S5.2-AC2: chọn "Đúng" ở câu nói duy nhất thì không hiện giải thích, tổng kết 100% và "Sai 0 câu"', async () => {
+    const { user } = renderWithProviders(
+      <AudioSpeedProvider>
+        <LessonRunnerContainer />
+      </AudioSpeedProvider>,
+      { route: '/lessons/:lessonId' },
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Đúng' }));
+
+    expect(screen.queryByText(/Đáp án/)).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+    expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.getByText('Sai 0 câu')).toBeInTheDocument();
+  });
+
+  it('S5.2-AC2: chọn "Gần đúng" thì tính câu sai, hiện chữ, pinyin, nghĩa; tổng kết 0% và "Sai 1 câu"', async () => {
+    const { user } = renderWithProviders(
+      <AudioSpeedProvider>
+        <LessonRunnerContainer />
+      </AudioSpeedProvider>,
+      { route: '/lessons/:lessonId' },
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Gần đúng' }));
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Đáp án: 你好 · nǐ hǎo · xin chào',
+    );
+    await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+    expect(screen.getByText('0%')).toBeInTheDocument();
+    expect(screen.getByText('Sai 1 câu')).toBeInTheDocument();
+  });
+
+  it('S5.2-AC2: chọn "Chưa đúng" thì tính câu sai, hiện chữ, pinyin, nghĩa; tổng kết 0% và "Sai 1 câu"', async () => {
+    const { user } = renderWithProviders(
+      <AudioSpeedProvider>
+        <LessonRunnerContainer />
+      </AudioSpeedProvider>,
+      { route: '/lessons/:lessonId' },
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Chưa đúng' }));
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Đáp án: 你好 · nǐ hǎo · xin chào',
+    );
+    await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+    expect(screen.getByText('0%')).toBeInTheDocument();
+    expect(screen.getByText('Sai 1 câu')).toBeInTheDocument();
+  });
+
+  it('S5.2-AC2: bài 4 câu (2 câu thường đúng, "Đúng", "Chưa đúng") thì tổng kết 75%, "Đúng 3 / 4 câu" và "Sai 1 câu"', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      mockContentFetch((input) =>
+        /\/content\/lessons\/.+\.json$/.test(String(input))
+          ? Response.json({
+              ...SPEAK_LESSON,
+              exercises: [
+                { id: 'e1', kind: 'pinyin-type', wordId: '八' },
+                { id: 'e2', kind: 'pinyin-type', wordId: '八' },
+                { id: 'e3', kind: 'speak', sentenceId: 's1' },
+                { id: 'e4', kind: 'speak', sentenceId: 's1' },
+              ],
+            })
+          : new Response('', { status: 404 }),
+      ),
+    );
+    const { user } = renderWithProviders(
+      <AudioSpeedProvider>
+        <LessonRunnerContainer />
+      </AudioSpeedProvider>,
+      { route: '/lessons/:lessonId' },
+    );
+
+    for (let step = 0; step < 2; step += 1) {
+      await user.type(await screen.findByRole('textbox'), 'ba1{Enter}');
+      await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+    }
+    await user.click(await screen.findByRole('button', { name: 'Đúng' }));
+    await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+    await user.click(await screen.findByRole('button', { name: 'Chưa đúng' }));
+    await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+
+    expect(screen.getByText('75%')).toBeInTheDocument();
+    expect(screen.getByText('Đúng 3 / 4 câu')).toBeInTheDocument();
+    expect(screen.getByText('Sai 1 câu')).toBeInTheDocument();
   });
 });

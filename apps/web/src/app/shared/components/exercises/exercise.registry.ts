@@ -8,6 +8,7 @@ import type {
 } from './exercise.types';
 import { PinyinTypeExercise } from './PinyinTypeExercise';
 import { SoundPairExercise } from './SoundPairExercise';
+import { SpeakExercise } from './SpeakExercise';
 import { ToneChoiceExercise } from './ToneChoiceExercise';
 
 /** Map `kind` → component dạng bài. Dạng nào chưa có thì chưa đăng ký. */
@@ -20,6 +21,7 @@ export const exerciseRegistry: ExerciseRegistry = {
   'tone-choice': ToneChoiceExercise,
   'pinyin-type': PinyinTypeExercise,
   'sound-pair': SoundPairExercise,
+  speak: SpeakExercise,
 };
 
 type AnyExerciseComponent = ComponentType<{

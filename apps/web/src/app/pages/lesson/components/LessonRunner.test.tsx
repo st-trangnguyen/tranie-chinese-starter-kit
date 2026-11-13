@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import type { Exercise, Word } from '@csk/shared';
 
 import type { ExerciseContent } from '@shared/models/exercise.model';
+import type { LessonFeedbackView } from '@shared/models/lesson-session.model';
 import {
   exerciseRegistry,
   type ExerciseRegistry,
@@ -211,5 +213,88 @@ describe('LessonRunner', () => {
     expect(
       screen.queryByRole('button', { name: 'Bỏ qua câu này' }),
     ).not.toBeInTheDocument();
+  });
+  it('S5.2-AC1: Chưa chọn mức thì chưa chấm - should show no result and no continue button until a rating is chosen', () => {
+    const onResult = vi.fn();
+    const exercise: Exercise = { id: 'e4', kind: 'speak', wordId: '八' };
+    const word: Word = {
+      id: '八',
+      hanzi: '八',
+      pinyin: 'bā',
+      vi: ['tám'],
+      viReviewed: true,
+      hsk: 1,
+      audio: 'audio/0123456789abcdef.mp3',
+    };
+
+    renderWithProviders(
+      <AudioSpeedProvider>
+        <LessonRunner
+          view={{
+            exercise,
+            content: { words: [word], sentences: [] },
+            current: 1,
+            total: 1,
+            feedback: null,
+          }}
+          registry={exerciseRegistry}
+          handlers={{ onResult, onContinue: vi.fn(), onSkip: vi.fn() }}
+        />
+      </AudioSpeedProvider>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Đúng' })).toBeInTheDocument();
+    expect(onResult).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole('button', { name: 'Tiếp tục' }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Sai')).not.toBeInTheDocument();
+  });
+
+  it('S5.2-AC1: Chọn mức thì câu được chấm ngay - should report the result in words and show the continue button once a rating is chosen', async () => {
+    const exercise: Exercise = { id: 'e5', kind: 'speak', wordId: '八' };
+    const word: Word = {
+      id: '八',
+      hanzi: '八',
+      pinyin: 'bā',
+      vi: ['tám'],
+      viReviewed: true,
+      hsk: 1,
+      audio: 'audio/0123456789abcdef.mp3',
+    };
+
+    const Harness = () => {
+      const [feedback, setFeedback] = useState<LessonFeedbackView | null>(null);
+      return (
+        <LessonRunner
+          view={{
+            exercise,
+            content: { words: [word], sentences: [] },
+            current: 1,
+            total: 1,
+            feedback,
+          }}
+          registry={exerciseRegistry}
+          handlers={{
+            onResult: setFeedback,
+            onContinue: vi.fn(),
+            onSkip: vi.fn(),
+          }}
+        />
+      );
+    };
+
+    const { user } = renderWithProviders(
+      <AudioSpeedProvider>
+        <Harness />
+      </AudioSpeedProvider>,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Gần đúng' }));
+
+    expect(screen.getByRole('status')).toHaveTextContent('Sai');
+    expect(
+      screen.getByRole('button', { name: 'Tiếp tục' }),
+    ).toBeInTheDocument();
   });
 });
