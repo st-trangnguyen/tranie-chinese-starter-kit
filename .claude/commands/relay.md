@@ -14,7 +14,7 @@ trả về.
 **Input**: `$ARGUMENTS` = `<pha> <change-id>`, ví dụ `code s3-5-topic-test`. Thiếu pha hoặc id thì hỏi
 lại, đừng đoán. Pha hợp lệ: `spec`, `plan`, `code`, `fix`.
 
-Thứ tự và chủ: `spec` (BA, PR spec) → merge → `plan` → `code` (dev, cùng một PR code). `plan` tạo
+Thứ tự và chủ: `spec` (BA + QA + Dev, PR spec draft → approve đủ 3 vai → merge) → `plan` (PR code draft chỉ có plan, dev lead duyệt) → `code` (dev, cùng PR đó, rồi QA nghiệm thu). `plan` tạo
 `design.md` và `tasks.md` ở nhánh `feat/<id>`; hai file này không thuộc PR spec.
 
 Luật của dự án (`CLAUDE.md`, `docs/05-standards/spec-driven.md`) vẫn áp dụng nguyên. Lệnh này chỉ là
@@ -28,7 +28,8 @@ cách chạy chúng bằng agent.
 
   | Agent | Chỉ được đổi | Vi phạm khi đổi |
   |---|---|---|
-  | `spec-writer` | `openspec/changes/<id>/proposal.md`, `specs/**`, `.openspec.yaml` | `design.md`, `tasks.md`, mọi thứ khác |
+  | `spec-writer` | `openspec/changes/<id>/proposal.md`, `specs/**`, `.openspec.yaml` | `design.md`, `tasks.md`, `test-cases.md`, mọi thứ khác |
+  | `qa-writer` | `openspec/changes/<id>/test-cases.md` | mọi file khác |
   | `planner` | `openspec/changes/<id>/design.md`, `tasks.md` | `proposal.md`, `specs/**`, code, test |
   | `test-writer` | `*.test.ts(x)`, `apps/web/e2e/**`, `apps/web/src/test/**` | code production, `openspec/` |
   | `implementer` | code production | file test (kể cả e2e, helper test), `openspec/` |
@@ -52,10 +53,15 @@ khớp (nhánh chưa push nên an toàn), rồi mới push. Nhánh đã push th�
 1. Xác nhận nhánh làm việc cắt từ `main` mới nhất (xem "Nhánh và worktree"); tên `spec/<id>` đặt
    trước lần push đầu. Nếu đang ở `main` hoặc nhánh của việc khác, hỏi người dùng trước khi tạo nhánh.
 2. Gọi `spec-writer` với story/id. Kiểm vùng ghi.
-3. Nếu có "Câu hỏi mở": dừng, đưa câu hỏi cho người dùng, rồi gọi lại `spec-writer` với câu trả lời.
-4. Chạy `pnpm exec openspec validate --all --strict`. Fail thì gọi lại `spec-writer` với output lỗi.
-5. **Dừng.** Báo: spec (`proposal.md` + `specs/`) đã sẵn sàng, mở PR spec (`Spec PR: N/A`), chờ BA
-   review và merge, sau đó dev chạy `/relay plan` rồi `/relay code`. Không tạo `design.md`/`tasks.md`.
+3. Chạy `pnpm exec openspec validate --all --strict`. Fail thì gọi lại `spec-writer` với output lỗi.
+4. Gọi `qa-writer` với change id (đọc spec vừa viết). Kiểm vùng ghi.
+5. Nếu `spec-writer` hoặc `qa-writer` báo "Câu hỏi mở": đưa cho người dùng; câu nào chưa chốt thì để là
+   `- [ ]` trong `## Open Questions` của `proposal.md` (gọi lại `spec-writer` nếu cần), câu đã chốt thì gọi lại
+   agent tương ứng với câu trả lời.
+6. **Dừng.** Báo: spec (`proposal.md` + `specs/` + `test-cases.md`) đã sẵn sàng. Mở **PR spec ở dạng draft**
+   (`Spec PR: N/A`); BA, QA, Dev hỏi đáp trong comment, QA chỉnh `test-cases.md`; hết `- [ ]` thì chuyển
+   ready, cần approve của BA, QA và Dev rồi merge. Sau đó dev chạy `/relay plan` rồi `/relay code`.
+   Không tạo `design.md`/`tasks.md`.
 
 ## Pha `plan`
 
@@ -69,14 +75,19 @@ khớp (nhánh chưa push nên an toàn), rồi mới push. Nhánh đã push th�
    (`spec/<id>-fix`) cho BA duyệt (spec-driven §2), rồi rebase nhánh này.
 4. Nếu có "Câu hỏi mở": đưa cho người dùng, rồi gọi lại `planner` với câu trả lời.
 5. Chạy `pnpm exec openspec validate --all --strict`. Fail thì gọi lại `planner` với output lỗi.
-6. **Dừng.** Báo: `design.md` và `tasks.md` đã sẵn sàng (số task, layer đích, file dự kiến), người dùng
-   xem lại rồi chạy `/relay code`. Hai file này đi cùng PR code.
+6. **Dừng.** Báo: `design.md` và `tasks.md` đã sẵn sàng (số task, layer đích, file dự kiến). Mở **PR code ở
+   dạng draft chỉ chứa hai file này** (`Spec PR: #<số>`), chờ dev lead duyệt và gắn label `plan-approved`
+   (check `Plan đã duyệt`). Chỉ sau đó mới chạy `/relay code`. Hai file này đi cùng PR code.
 
 ## Pha `code`
 
 1. **Cổng kế hoạch:** PR spec đã merge (như pha `plan`) **và** `openspec/changes/<id>/tasks.md` +
    `design.md` đã có ở nhánh hiện tại. Thiếu thì dừng và bảo chạy `/relay plan <id>` trước. Nhánh làm việc
    phải chứa `origin/main` (như pha `plan`).
+   **Cổng duyệt plan:** PR của nhánh phải có label `plan-approved`
+   (`gh pr view --json labels --jq '.labels[].name'`). Chưa có PR hoặc chưa có label thì **dừng** và nói cần mở
+   PR draft chỉ có plan rồi chờ dev lead duyệt; không gọi `test-writer` hay `implementer`. Ngoại lệ có tên:
+   change không có Scenario (docs, config, asset thuần) bỏ cổng này.
 2. Đọc `tasks.md` để lấy danh sách Scenario theo thứ tự. Với **mỗi** Scenario chưa xong, lần lượt:
    1. **RED:** gọi `test-writer` (id + đúng một Scenario). Kiểm vùng ghi. Báo cáo phải có output
       test fail đúng lý do; không có thì gọi lại. Chạy lại test đó và tự xác nhận nó fail.
@@ -88,7 +99,9 @@ khớp (nhánh chưa push nên an toàn), rồi mới push. Nhánh đã push th�
    `pnpm e2e` nếu `CLAUDE.md` §8 yêu cầu cho loại thay đổi này. Không nói "xong" khi chưa thấy pass.
 4. **Dừng trước PR.** Review không chạy ở đây: CI (`.github/workflows/review-workflow.yml`) review
    độc lập sau khi PR mở. Báo cáo: Scenario đã xong, kết quả verify, task đã tick, và gợi ý nội dung
-   PR (`Spec PR: #<số>`, `Closes`/`Refs #<story>`). Hỏi người dùng có muốn commit và mở PR không.
+   PR (`Spec PR: #<số>`, `Closes`/`Refs #<story>`). Nhắc: khi CI xanh thì chuyển PR sang ready, **QA nghiệm
+   thu** theo `test-cases.md` trên artifact `web-dist` và gắn `qa-approved`. Hỏi người dùng có muốn commit và
+   mở PR không.
 5. **Sau khi mở PR:** gắn PR vào phiên (`mcp__ccd_pr__get_status`, chưa có thì `bind_pr`) và bật theo
    dõi (`set_monitor`) để app đánh thức bạn khi CI review có comment mới hoặc CI đỏ. Mỗi lần được
    đánh thức, chạy pha `fix`. Không tự poll CI.
@@ -107,6 +120,9 @@ trong phiên mới: trạng thái nằm ở nhánh, `tasks.md` và comment PR.
    - `spec` → **dừng**, không sửa spec trong PR code. Soạn patch spec ở nhánh `spec/<id>-fix` cho
      BA duyệt (spec-driven §2): gọi `spec-writer` với finding, kiểm vùng ghi, chạy
      `pnpm exec openspec validate --all --strict`, mở PR spec fix (cần người dùng đồng ý), rồi báo.
+   - `qa` (case Fail trong comment kết quả của QA) → xử lý như `code`/`test` theo bản chất lỗi; case có Tự động =
+     `e2e` thì `test-writer` bổ sung test mang ID `TC-…` trước. Sau khi push, báo QA chạy lại đúng case fail (push
+     code gỡ label `qa-approved`).
    - `minor`/`nit` → sửa nếu rẻ, không thì ghi lại trong báo cáo.
    - Không đồng ý với finding → không sửa, trả lời comment kèm lý do và báo người dùng.
 3. Gọi agent đúng chủ với **chỉ** danh sách mục đó, kiểm vùng ghi, chạy lại test liên quan.

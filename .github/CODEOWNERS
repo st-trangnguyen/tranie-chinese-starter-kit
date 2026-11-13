@@ -1,10 +1,20 @@
-# Người review mặc định. Quy trình spec/code tách riêng: docs/05-standards/spec-driven.md §2.
-# Dòng sau thắng dòng trước. Điền handle thật rồi bỏ dấu # ở dòng BA.
+# Người review mặc định. Quy trình spec/plan/QA/code: docs/05-standards/spec-driven.md §2.
+# Dòng sau thắng dòng trước, nên các dòng cụ thể đặt ở dưới.
+# Điền handle thật rồi bỏ dấu # ở các dòng bên dưới (handle không tồn tại làm CODEOWNERS báo lỗi).
 
 # Mặc định: dev review code.
-*                     @st-trangnguyen
+*                                      @st-trangnguyen
 
-# /openspec/                          @<ba-github-handle>
-# /docs/02-design/                     @<ba-github-handle>
-# /openspec/changes/*/design.md        @st-trangnguyen
-# /openspec/changes/*/tasks.md         @st-trangnguyen
+# Spec do BA viết, QA và Dev cùng duyệt (một dòng nhiều owner = xin review tất cả).
+# /openspec/                           @<ba-handle> @<qa-handle> @<dev-handle>
+# /docs/02-design/                     @<ba-handle>
+
+# Test case do QA giữ.
+# /openspec/changes/*/test-cases.md    @<qa-handle>
+
+# Plan do dev lead duyệt.
+# /openspec/changes/*/design.md        @<dev-lead-handle>
+# /openspec/changes/*/tasks.md         @<dev-lead-handle>
+
+# Workflow là cổng chặn merge: PR sửa workflow phải do dev lead duyệt (cần bật "Require review from Code Owners").
+# /.github/                            @<dev-lead-handle>

@@ -187,23 +187,27 @@ BEM dùng dấu gạch ngang, **không phải BEM truyền thống**:
 
 ## 8. Quy trình làm task
 
-Mỗi story đi qua **ba pha, hai PR**: **Spec** (BA, PR spec) → **Code** (dev, PR code) →
+Mỗi story đi qua **ba pha, hai PR**: **Spec** (BA + QA + Dev, PR spec) → **Code** (dev, PR code) →
 **Archive** (workflow tự mở PR). Chi tiết, định dạng spec và bảng Scenario → tầng test:
 `docs/05-standards/spec-driven.md`.
 
 **Pha A — Spec (nhánh `spec/s<epic>-<n>-<slug>`, chỉ docs, không code):**
 
 1. Xác định layer đích theo bảng §1, **nói ra trước khi viết spec**.
-2. **Propose**: `/relay spec s<epic>-<n>-<slug>` tạo `openspec/changes/<id>/` với **chỉ** `proposal.md`
-   và `specs/` (phần BA/QA đọc). AC của story chép nguyên văn thành Requirement + Scenario
-   (ID `S<epic>.<n>-AC<k>`). `design.md` và `tasks.md` là của dev, **không** nằm trong PR spec. Mở PR
-   spec (`Spec PR: N/A`) và **dừng chờ review + merge** trước khi viết bất kỳ code nào.
+2. **Propose**: `/relay spec s<epic>-<n>-<slug>` tạo `openspec/changes/<id>/` với **chỉ** `proposal.md`,
+   `specs/` và `test-cases.md` (phần BA/QA đọc). AC của story chép nguyên văn thành Requirement + Scenario
+   (ID `S<epic>.<n>-AC<k>`). `design.md` và `tasks.md` là của dev, **không** nằm trong PR spec.
+   **Q&A**: mở PR spec ở dạng **draft** (`Spec PR: N/A`). BA, QA, Dev hỏi đáp trong comment, mỗi chỗ mơ hồ là
+   một `- [ ]` trong `## Open Questions` của `proposal.md`. QA hoàn thiện `test-cases.md` (case chức năng,
+   biên, a11y, mobile, sáng/tối, offline). Hết câu hỏi mở thì chuyển PR sang ready; cần approve của **BA, QA và
+   Dev** (check `Spec approvals`) rồi merge, và **dừng chờ merge** trước khi viết bất kỳ code nào.
 
 **Pha B — Code (nhánh `feat/s<epic>-<n>-<slug>` cắt từ `main` sau khi PR spec merge):**
 
 3. **Plan** rồi tìm pattern: tạo `design.md` và `tasks.md` (`/relay plan <id>`; hai file này đi cùng
-   PR code). Tìm code tương tự đã có trong repo và theo đúng pattern đó — nhất quán với
-   codebase hiện tại quan trọng hơn áp dụng máy móc ví dụ trong tài liệu.
+   PR code). Mở PR code ở dạng **draft chỉ chứa hai file này**; **dev lead duyệt và gắn label `plan-approved`
+   (check `Plan đã duyệt`) thì mới được code**. Tìm code tương tự đã có trong repo và theo đúng pattern đó —
+   nhất quán với codebase hiện tại quan trọng hơn áp dụng máy móc ví dụ trong tài liệu.
 4. **RED**: viết test cho một Scenario (tên test chứa ID), chạy, thấy nó fail vì thiếu hành vi.
    Commit `test(...)`.
 5. **GREEN**: code tối thiểu, đúng layer, đến khi test pass. Commit `feat(...)`. Lặp bước 4–5 cho
@@ -211,19 +215,20 @@ Mỗi story đi qua **ba pha, hai PR**: **Spec** (BA, PR spec) → **Code** (dev
 6. **REFACTOR** khi đã xanh, rồi self-review theo §0, §2, §7.
 7. Chạy typecheck / lint / test. **Không nói "đã xong" khi chưa chạy và chưa
    thấy kết quả pass.** Tick các task đã làm trong `tasks.md`.
-8. Mở PR code, ghi `Spec PR: #<số PR spec>`. PR code **không merge được** khi PR spec chưa
-   review + merge (check `Spec PR đã merge`) và check `Review` (CI reviewer độc lập, xem bên dưới)
-   phải pass. Sau khi mở PR, agent theo dõi PR và chạy `/relay fix` khi có finding. **Không archive
-   trong PR code.**
+8. Chuyển PR code sang ready, ghi `Spec PR: #<số PR spec>`. PR code **không merge được** khi PR spec chưa
+   review + merge (check `Spec PR đã merge`), plan chưa duyệt (`Plan đã duyệt`), **QA chưa nghiệm thu theo
+   `test-cases.md` trên bản build của CI và gắn `qa-approved`** (`QA sign-off`), và check `Review` (CI reviewer
+   độc lập, xem bên dưới) phải pass. Push code mới sau khi QA đã ký thì label bị gỡ, QA chạy lại case liên quan.
+   Sau khi mở PR, agent theo dõi PR và chạy `/relay fix` khi có finding. **Không archive trong PR code.**
 
 **Pha C — Archive (tự động):** sau khi PR code merge, workflow `archive-spec-workflow.yml` mở PR
 `docs(openspec): archive <id>` nếu mọi task đã tick. Spec sai hoặc thiếu khi đang code: mở PR spec
 mới cho BA duyệt, đừng sửa spec trong PR code.
 
-Việc không có Scenario (docs, config, asset thuần) bỏ qua Pha A, bước 4–5 và Pha C, ghi `Spec PR: N/A`.
+Việc không có Scenario (docs, config, asset thuần) bỏ qua Pha A, cổng plan/QA, bước 4–5 và Pha C, ghi `Spec PR: N/A`.
 
 **Chạy bằng agent:** `/relay <spec|plan|code|fix> <change-id>` chạy các pha trên bằng subagent tách
-context (`spec-writer`, `planner`, `test-writer`, `implementer`, `reviewer` trong `.claude/agents/`; `reviewer` chạy trên CI, không chạy local). Chi tiết:
+context (`spec-writer`, `planner`, `test-writer`, `qa-writer`, `implementer`, `reviewer` trong `.claude/agents/`; `reviewer` chạy trên CI, không chạy local). Chi tiết:
 `docs/05-standards/spec-driven.md` §7.
 
 ### Lệnh kiểm tra chuẩn
