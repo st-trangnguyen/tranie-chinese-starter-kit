@@ -10,6 +10,7 @@ export interface AudioPlayer {
   isPlaying: boolean;
   hasError: boolean;
   play: (audioPath: string, isSlow: boolean) => Promise<void>;
+  playUrl: (url: string, isSlow?: boolean) => Promise<void>;
   stop: () => void;
 }
 
@@ -34,18 +35,14 @@ export function useAudioPlayer(): AudioPlayer {
     };
   }, []);
 
-  const play = useCallback(
-    async (audioPath: string, isSlow: boolean): Promise<void> => {
-      const rate = isSlow ? PLAYBACK_RATES.slow : PLAYBACK_RATES.normal;
+  const start = useCallback(
+    async (src: string, rate: number): Promise<void> => {
       setHasError(false);
       setIsPlaying(true);
       const owner = ownerRef.current;
       activeOwner = owner;
       try {
-        const result = await audioService.play(
-          `${AUDIO_BASE_PATH}${audioPath}`,
-          rate,
-        );
+        const result = await audioService.play(src, rate);
         if (activeOwner === owner) {
           // Chính hook này còn giữ luồng: 'interrupted' = tự phát lại, giữ isPlaying.
           if (result === 'ended') {
@@ -71,6 +68,21 @@ export function useAudioPlayer(): AudioPlayer {
     [],
   );
 
+  const play = useCallback(
+    (audioPath: string, isSlow: boolean): Promise<void> =>
+      start(
+        `${AUDIO_BASE_PATH}${audioPath}`,
+        isSlow ? PLAYBACK_RATES.slow : PLAYBACK_RATES.normal,
+      ),
+    [start],
+  );
+
+  const playUrl = useCallback(
+    (url: string, isSlow = false): Promise<void> =>
+      start(url, isSlow ? PLAYBACK_RATES.slow : PLAYBACK_RATES.normal),
+    [start],
+  );
+
   const stop = useCallback((): void => {
     if (activeOwner === ownerRef.current) {
       activeOwner = null;
@@ -81,5 +93,5 @@ export function useAudioPlayer(): AudioPlayer {
     }
   }, []);
 
-  return { isPlaying, hasError, play, stop };
+  return { isPlaying, hasError, play, playUrl, stop };
 }
