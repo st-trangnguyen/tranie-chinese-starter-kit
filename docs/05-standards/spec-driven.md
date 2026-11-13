@@ -19,33 +19,33 @@ E1 và E2 đã xong trước khi có OpenSpec nên không migrate. Áp dụng t�
 
 ## 2. Vòng làm một story
 
-Mỗi story đi qua **ba pha, hai PR**, mỗi pha có chủ riêng. BA giữ spec, QA giữ test case và nghiệm thu, dev giữ code, dev lead giữ cổng plan.
+Mỗi story đi qua **ba pha, hai PR**, mỗi pha có chủ riêng. Ở pha Spec, ba vai BA/QA/Dev do **agent** đảm nhiệm và tự tranh luận; người thật duyệt cuối. QA nghiệm thu, dev giữ code, dev lead giữ cổng plan.
 
 | Pha | Chủ | PR | Kết thúc khi |
 |---|---|---|---|
-| A. Spec | BA + QA + Dev | **PR spec** (nhánh `spec/s<epic>-<n>-<slug>`) | PR spec được review và **merge vào `main`**; change vẫn nằm ở `openspec/changes/`, chỉ có `proposal.md` + `specs/` + `test-cases.md` |
+| A. Spec | Agent BA + QA + Dev, rồi người thật duyệt | **PR spec** (nhánh `spec/s<epic>-<n>-<slug>`) | PR spec được review và **merge vào `main`**; change vẫn nằm ở `openspec/changes/`, chỉ có `proposal.md` + `specs/` + `test-cases.md` |
 | B. Code | Dev, dev lead (plan), QA (nghiệm thu) | **PR code** (nhánh `feat/s<epic>-<n>-<slug>`, cắt từ `main` sau pha A) | plan được duyệt, QA nghiệm thu, PR code được review và merge; mọi task trong `tasks.md` đã tick |
 | C. Archive | Workflow | **PR archive** tự mở sau khi PR code merge | PR archive được merge |
 
-### Pha A: Spec (BA + QA + Dev)
+### Pha A: Spec (agent BA + QA + Dev, rồi người thật)
 
-BA giữ spec, QA giữ `test-cases.md`, Dev hỏi đáp để chốt chỗ mơ hồ. Cả ba cùng duyệt trước khi merge.
+Các vai do agent đảm nhiệm: `ba` viết spec (và sửa theo review), `qa` viết `test-cases.md` và duyệt spec, `dev-lead` duyệt spec. `qa` và `dev-lead` duyệt ở chế độ DUYỆT SPEC (agent mới, chỉ đọc) và tranh luận với `ba`/`qa` qua tối đa 3 vòng. Chỗ agent không quyết được (business rule) thành `- [ ]` cho người thật. Người thật chỉ review sau khi cả hai agent duyệt đã approve. Cả pha là một lệnh `/relay spec`. Thiết kế: `docs/04-specs/2026-11-13-agent-spec-review.md`.
 
 | # | Bước | Lệnh / việc | Cổng |
 |---|---|---|---|
 | A1 | Chọn story, tạo nhánh `spec/s<epic>-<n>-<slug>` | | |
-| A2 | **Propose** | `/relay spec s<epic>-<n>-<slug>`: `spec-writer` viết `proposal.md` + `specs/`, `qa-writer` soạn nháp `test-cases.md` (không `design.md`, `tasks.md`; nếu dùng `/opsx:propose` thì xoá hai file đó khỏi PR spec) | `pnpm exec openspec validate --all --strict` pass |
-| A3 | Mở **PR spec ở dạng draft** | Theo template, `Spec PR: N/A`, `Refs #<story>`, Screenshots `N/A`. Hỏi đáp trong comment PR; mỗi câu chốt xong thì sửa spec và tick câu hỏi trong `## Open Questions` | |
-| A4 | QA hoàn thiện `test-cases.md` | QA chỉnh nháp, bổ sung case biên, a11y, mobile, sáng/tối, offline (xem §3) | |
-| A5 | Chuyển PR sang **ready for review** | Chỉ khi `Open Questions` hết `- [ ]` và `test-cases.md` đã có | |
-| A6 | **Review và merge** | Cần approve của đủ ba vai: **BA, QA, Dev**. Không có code trong PR này | `Spec approvals` xanh |
+| A2 | **Propose** | `/relay spec s<epic>-<n>-<slug>`: `ba` viết `proposal.md` + `specs/`, `qa` soạn nháp `test-cases.md` (không `design.md`, `tasks.md`; nếu dùng `/opsx:propose` thì xoá hai file đó khỏi PR spec) | `pnpm exec openspec validate --all --strict` pass |
+| A3 | **Vòng tranh luận** | `qa` và `dev-lead` (chế độ DUYỆT SPEC) đọc spec, ra `VERDICT` + finding; `ba`/`qa` sửa; lặp tối đa 3 vòng. Mỗi finding để lại dấu vết `- [x] … → …` trong `## Open Questions`; câu cần người quyết để `- [ ]` | Cả hai agent `approve` |
+| A4 | Mở **PR spec** và đăng verdict | Theo template, `Spec PR: N/A`, `Refs #<story>`, Screenshots `N/A`. Đăng một comment có marker `<!-- csk-spec-agents sha=… qa=approve dev-lead=approve -->` (xem `/relay spec`) | |
+| A5 | Chuyển PR sang **ready for review** | Chỉ khi `qa` và `dev-lead` đã approve, `Open Questions` hết `- [ ]` và `test-cases.md` đã có | |
+| A6 | **Người thật review và merge** | Một người trong `SPEC_APPROVERS` approve, trả lời các `- [ ]` còn lại nếu có. Không có code trong PR này | `Spec approvals` xanh |
 
 ### Pha B: Code (dev)
 
 | # | Bước | Lệnh / việc | Cổng |
 |---|---|---|---|
 | B1 | Cắt nhánh `feat/s<epic>-<n>-<slug>` từ `main` đã có spec | | PR spec đã merge |
-| B1a | **Plan** | `/relay plan <id>`: tạo `design.md` (cách làm, layer, file) và `tasks.md` (cặp RED/GREEN cho mỗi Scenario). Mở **PR code ở dạng draft chỉ chứa hai file này**. Spec sai/thiếu thì dừng, mở PR spec fix | `openspec validate --all --strict` pass |
+| B1a | **Plan** | `/relay code <id>` (bước plan): `planner` tạo `design.md` (cách làm, layer, file) và `tasks.md` (cặp RED/GREEN cho mỗi Scenario). Mở **PR code ở dạng draft chỉ chứa hai file này**. Spec sai/thiếu thì dừng, mở PR spec fix | `openspec validate --all --strict` pass |
 | B1b | **Duyệt plan** | Dev lead review `design.md` + `tasks.md` rồi gắn label `plan-approved`. Chỉ người trong `PLAN_APPROVERS` được tính. Sửa `design.md` sau đó thì label bị gỡ và phải duyệt lại; chỉ tick `tasks.md` thì không | `Plan đã duyệt` xanh; **chưa có label thì chưa viết code** (`/relay code` từ chối chạy) |
 | B2 | **RED** | Viết test cho một Scenario, chạy, thấy fail đúng lý do. Commit `test(...)` | Phải có output fail |
 | B3 | **GREEN** | `/opsx:apply`: code tối thiểu, đúng layer (CLAUDE.md §1–§3). Commit `feat(...)` | Test pass |
@@ -71,7 +71,7 @@ cấu hình secret `ARCHIVE_PR_TOKEN` (PR tạo bằng `GITHUB_TOKEN` không kí
 
 | Check (bắt buộc) | Áp dụng cho | Fail khi |
 |---|---|---|
-| `Spec approvals` | PR spec (nhánh `spec/*`) | PR còn draft; `proposal.md` còn `- [ ]` trong `## Open Questions`; PR thêm `proposal.md` mới mà thiếu `test-cases.md`; thiếu approve của một trong ba vai BA / QA / Dev. Approve chỉ tính trên **commit đầu hiện tại**; tác giả PR được tính là đã duyệt cho vai của mình (GitHub không cho tự approve) |
+| `Spec approvals` | PR spec (nhánh `spec/*`) | PR còn draft; `proposal.md` còn `- [ ]` trong `## Open Questions`; PR thêm `proposal.md` mới mà thiếu `test-cases.md`; thiếu verdict `approve` của cả hai agent `qa` và `dev-lead` trong comment có marker đúng **commit đầu hiện tại** (comment của OWNER/MEMBER/COLLABORATOR, mới nhất); thiếu approve của một người trong `SPEC_APPROVERS` (cũng chỉ tính trên commit đầu hiện tại; tác giả PR được tính nếu nằm trong danh sách, vì GitHub không cho tự approve) |
 | `Spec PR đã merge` | PR code | Thiếu dòng `Spec PR:`, số PR sai, hoặc PR spec chưa merge (chi tiết bên dưới) |
 | `Plan đã duyệt` | PR đổi file dưới `apps/` hoặc `packages/` | Chưa có label `plan-approved`, hoặc người gắn không thuộc `PLAN_APPROVERS`, hoặc chính là tác giả PR |
 | `QA sign-off` | PR đổi file dưới `apps/` hoặc `packages/` | PR còn draft, chưa có label `qa-approved`, hoặc người gắn không thuộc `QA_APPROVERS`, hoặc chính là tác giả PR |
@@ -97,7 +97,7 @@ trong nhiều danh sách vẫn được tính đủ nhiều vai.
 
 1. Tạo label: `gh label create plan-approved --color 0E8A16` và `gh label create qa-approved --color 1D76DB`.
 2. Đặt repo variables (Settings → Secrets and variables → Actions → Variables), giá trị là handle GitHub cách nhau
-   dấu phẩy: `BA_APPROVERS`, `QA_APPROVERS`, `DEV_APPROVERS`, `PLAN_APPROVERS`.
+   dấu phẩy: `SPEC_APPROVERS` (người thật duyệt spec), `QA_APPROVERS`, `PLAN_APPROVERS`. (`BA_APPROVERS`, `DEV_APPROVERS` không còn dùng.) Giới hạn: verdict của agent là comment do tài khoản của người chạy `/relay spec` đăng, nên cổng chỉ chắc chắn rằng quy trình đã chạy, không chứng minh agent thật sự duyệt; vì thế người thật vẫn bắt buộc approve.
 3. Điền handle thật vào `.github/CODEOWNERS` (BA, QA, Dev, dev lead).
 4. Branch protection của `main`: bắt buộc approval và đặt `Spec PR đã merge`, `Spec approvals`,
    `Plan đã duyệt`, `QA sign-off`, `Review` làm required. Bật **Require review from Code Owners** và
@@ -141,13 +141,13 @@ Quy tắc:
 
 ### Open Questions trong proposal
 
-`proposal.md` có mục `## Open Questions`: mỗi chỗ mơ hồ là một dòng `- [ ]`. BA, QA, Dev hỏi và trả lời trong
-comment PR spec; chốt xong thì sửa spec rồi đổi thành `- [x]`. Không có câu hỏi thì ghi một dòng `Không có.`
+`proposal.md` có mục `## Open Questions`: mỗi chỗ mơ hồ là một dòng `- [ ]`. Agent duyệt hỏi, `ba` trả
+lời và sửa spec rồi đổi thành `- [x] <câu hỏi> → <xử lý>`; câu cần người quyết để `- [ ]` cho người thật trả lời trong comment PR. Không có câu hỏi thì ghi một dòng `Không có.`
 (không dùng `- [ ]`). Còn `- [ ]` thì check `Spec approvals` fail.
 
 ### Viết `test-cases.md`
 
-`openspec/changes/<id>/test-cases.md` do QA giữ (`qa-writer` soạn nháp, QA chỉnh), nằm trong PR spec. Chỉ dùng
+`openspec/changes/<id>/test-cases.md` do `qa` soạn, `dev-lead` duyệt cùng spec, QA người thật chỉnh khi nghiệm thu, nằm trong PR spec. Chỉ dùng
 thứ người học nhìn thấy, cùng luật với spec. Mỗi Scenario có ít nhất một case.
 
 ```markdown
@@ -235,25 +235,25 @@ Không bỏ qua bước propose.
 
 ## 7. Chạy bằng agent: `/relay`
 
-Lệnh `/relay <spec|plan|code|fix> <change-id>` chạy các pha trên bằng subagent tách context. Luật không đổi,
-chỉ có thêm cách chạy. Phiên chính là **người điều phối**: không tự viết spec/test/code, mỗi lần giao
-việc là một agent mới, thông tin đi qua file và git diff.
+Lệnh `/relay <spec|code> <change-id>` chạy các pha trên bằng subagent tách context. **Mỗi pha là một lệnh, chạy lại được**:
+lệnh nhận ra bước hiện tại từ nhánh, file, PR và label, làm tiếp từ đó, và dừng ở cổng của người thật. Luật không đổi, chỉ có thêm
+cách chạy. Phiên chính là **người điều phối**: không tự viết spec/test/code, mỗi lần giao việc là một agent mới, thông tin đi qua file và git diff.
 
-| Agent (`.claude/agents/`) | Pha | Được ghi | Trả về |
+| Vai | Agent (`.claude/agents/`) | Chế độ → được ghi | Trả về |
 |---|---|---|---|
-| `spec-writer` | A | `proposal.md`, `specs/` trong `openspec/changes/<id>/` | change id, Scenario, kết quả validate |
-| `qa-writer` | A | `test-cases.md` (bản nháp cho QA chỉnh) | số case, Scenario chưa có case, câu hỏi mở |
-| `planner` | B1a | `design.md`, `tasks.md` (không sửa spec) | số task, layer, file dự kiến, vấn đề với spec |
-| `test-writer` | B2 (RED) | file test | test + output fail đúng lý do |
-| `implementer` | B3–B4 (GREEN, REFACTOR), sửa finding | code production, không file test | file đã đổi + output pass |
-| `reviewer` | trên CI sau khi PR mở (check "Review") | không gì cả | inline comment theo finding + độ phủ Scenario |
+| BA | `ba` | VIẾT, SỬA → `proposal.md`, `specs/` | change id, Scenario, kết quả validate |
+| QA | `qa` | VIẾT, SỬA → `test-cases.md`; DUYỆT SPEC, NGHIỆM THU → không gì cả | số case, câu hỏi mở; hoặc `VERDICT` + finding; hoặc bảng `TC \| Pass/Fail \| Ghi chú` |
+| Dev lead | `dev-lead` | DUYỆT SPEC, DUYỆT CODE → không gì cả | `VERDICT: approve\|block` + finding; hoặc inline comment + độ phủ Scenario |
+| Dev | `planner` | → `design.md`, `tasks.md` (không sửa spec) | số task, layer, file dự kiến, vấn đề với spec |
+| Dev | `test-writer` | RED → file test | test + output fail đúng lý do |
+| Dev | `implementer` | GREEN, REFACTOR, sửa finding → code production, không file test | file đã đổi + output pass |
 
-Tách `test-writer` khỏi `implementer` để người viết code không sửa test cho dễ pass. `reviewer` không
+Tách `test-writer` khỏi `implementer` để người viết code không sửa test cho dễ pass. `dev-lead` không
 nhận lời giải thích của `implementer`, chỉ nhận diff, spec và `CLAUDE.md`.
 
 - **Vùng ghi:** subagent không giới hạn được đường dẫn bằng cấu hình, nên sau mỗi agent điều phối
   kiểm `git status`. Agent ghi sai vùng thì điều phối dừng và báo người dùng.
-- **Review trên CI:** `.github/workflows/review-workflow.yml` chạy `reviewer` mỗi lần push vào PR có
+- **Review trên CI:** `.github/workflows/review-workflow.yml` chạy `dev-lead` (chế độ DUYỆT CODE) mỗi lần push vào PR có
   đổi ngoài `openspec/` và `docs/`. Finding thành inline comment; job fail khi còn `blocker`/`major`,
   nên check "Review" đặt được làm required. Cần secret `CLAUDE_CODE_OAUTH_TOKEN` (từ `claude setup-token`).
 - **Vòng review:** `blocker`/`major` đi qua tối đa 2 vòng sửa; từ lần review thứ 3 CI chỉ comment, không
@@ -261,8 +261,9 @@ nhận lời giải thích của `implementer`, chỉ nhận diff, spec và `CLA
   spec. Hết 2 vòng mà còn `blocker`/`major` thì dừng hẳn và báo người dùng, không tự chạy vòng 3,
   không hạ mức độ finding.
 - **Sửa theo feedback:** sau khi mở PR, phiên gắn PR (`bind_pr`, `set_monitor`); có review comment
-  hoặc CI đỏ thì app đánh thức agent chạy `/relay fix <id>` (subagent mới cho mỗi việc). Phiên mới vẫn
+  hoặc CI đỏ thì app đánh thức agent chạy lại `/relay code <id>` (bước sửa theo review; subagent mới cho mỗi việc). Phiên mới vẫn
   chạy được: trạng thái nằm ở nhánh, `tasks.md` và comment PR.
-- **Cổng plan:** `/relay code` từ chối chạy khi PR của nhánh chưa có label `plan-approved` (trừ change không có
+- **Cổng plan:** `/relay code` dừng ở bước plan và từ chối code khi PR của nhánh chưa có label `plan-approved` (trừ change không có
   Scenario: docs, config, asset thuần).
+- **Nghiệm thu:** `qa` (chế độ NGHIỆM THU) chạy `test-cases.md` trên bản build và đăng bảng kết quả; label `qa-approved` vẫn do QA người thật gắn.
 - `/relay` dừng trước khi commit/mở PR; người dùng quyết.

@@ -1,5 +1,5 @@
 # Review độc lập trên CI cho mọi PR có thay đổi ngoài openspec/ và docs/.
-# Quy trình: docs/05-standards/spec-driven.md §7. Tiêu chí review: .claude/agents/reviewer.md.
+# Quy trình: docs/05-standards/spec-driven.md §7. Tiêu chí review: .claude/agents/dev-lead.md.
 #
 # Reviewer chỉ đọc. Nó đăng inline comment cho từng finding và ghi verdict ra file; bước cuối
 # đăng tóm tắt và làm job fail khi còn blocker/major, để check "Review" chặn được merge.
@@ -95,7 +95,7 @@ jobs:
             PR NUMBER: ${{ github.event.pull_request.number }}
             Số vòng review đã yêu cầu sửa trước đó: ${{ steps.rounds.outputs.previous }}
 
-            Bạn là reviewer. Làm đúng theo `.claude/agents/reviewer.md` (đọc file đó trước).
+            Bạn là agent dev-lead ở chế độ DUYỆT CODE. Làm đúng theo `.claude/agents/dev-lead.md` (đọc file đó trước).
             Khác biệt khi chạy ở CI:
             - Phạm vi diff là `git diff origin/${{ github.base_ref }}...HEAD`, hoặc `gh pr diff`.
             - Change id lấy từ dòng `OpenSpec change: openspec/changes/<id>` trong mô tả PR
@@ -103,7 +103,7 @@ jobs:
             - Nếu số vòng trước đó lớn hơn 0, đây là vòng review lại: chỉ kiểm finding cũ (đọc
               các comment review trước của PR qua `gh pr view --comments`) đã xử lý chưa và bản sửa có sinh lỗi mới không.
             - Mỗi finding có `file:dòng` thì đăng một inline comment. Thân comment theo định dạng
-              khối finding trong reviewer.md, mở đầu bằng `R<n> · <severity> · <loại>`.
+              khối finding trong dev-lead.md (chế độ DUYỆT CODE), mở đầu bằng `R<n> · <severity> · <loại>`.
             - Cuối cùng ghi file `${{ env.VERDICT_FILE }}` là JSON:
               {"verdict": "pass" | "changes-requested", "summary": "<tóm tắt ngắn, kèm bảng
               độ phủ Scenario dạng markdown>", "blocking": <số finding blocker + major>}.
