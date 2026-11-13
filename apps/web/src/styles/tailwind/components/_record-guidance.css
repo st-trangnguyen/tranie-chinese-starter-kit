@@ -1,0 +1,19 @@
+/* Hướng dẫn khi không ghi âm được — S5.4. Có viền trái dày, không chỉ dựa màu. */
+
+@layer components {
+  .record-guidance {
+    @apply rounded-md border border-l-4 border-warning-text bg-warning-soft p-md text-warning-text;
+  }
+
+  .record-guidance-title {
+    @apply text-body font-semibold text-warning-text;
+  }
+
+  .record-guidance-steps {
+    @apply list-decimal pl-lg text-body-sm text-warning-text;
+  }
+
+  .record-guidance-body {
+    @apply text-body-sm text-warning-text;
+  }
+}
