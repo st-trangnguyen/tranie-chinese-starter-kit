@@ -29,13 +29,13 @@ Mỗi story đi qua **ba pha, hai PR**, mỗi pha có chủ riêng. Ở pha Spec
 
 ### Pha A: Spec (agent BA + QA + Dev, rồi người thật)
 
-Ba agent đảm nhiệm ba vai: `spec-writer` giữ spec (BA), `qa-writer` giữ `test-cases.md` (QA); `ba-reviewer`, `qa-reviewer`, `dev-reviewer` review độc lập và tranh luận qua tối đa 3 vòng. Chỗ agent không quyết được (business rule) thành `- [ ]` cho người thật. Người thật chỉ review sau khi cả ba agent đã approve. Thiết kế: `docs/04-specs/2026-11-13-agent-spec-review.md`.
+Ba agent đảm nhiệm ba vai: `spec-ba` viết spec, `spec-qa` viết `test-cases.md`, `spec-dev` chỉ duyệt; cả ba duyệt chéo ở chế độ DUYỆT (agent mới, chỉ đọc) và tranh luận qua tối đa 3 vòng. Chỗ agent không quyết được (business rule) thành `- [ ]` cho người thật. Người thật chỉ review sau khi cả ba agent đã approve. Thiết kế: `docs/04-specs/2026-11-13-agent-spec-review.md`.
 
 | # | Bước | Lệnh / việc | Cổng |
 |---|---|---|---|
 | A1 | Chọn story, tạo nhánh `spec/s<epic>-<n>-<slug>` | | |
-| A2 | **Propose** | `/relay spec s<epic>-<n>-<slug>`: `spec-writer` viết `proposal.md` + `specs/`, `qa-writer` soạn nháp `test-cases.md` (không `design.md`, `tasks.md`; nếu dùng `/opsx:propose` thì xoá hai file đó khỏi PR spec) | `pnpm exec openspec validate --all --strict` pass |
-| A3 | **Vòng tranh luận** | Ba reviewer đọc spec, ra `VERDICT` + finding; `spec-writer`/`qa-writer` sửa; lặp tối đa 3 vòng. Mỗi finding để lại dấu vết `- [x] … → …` trong `## Open Questions`; câu cần người quyết để `- [ ]` | Cả ba agent `approve` |
+| A2 | **Propose** | `/relay spec s<epic>-<n>-<slug>`: `spec-ba` viết `proposal.md` + `specs/`, `spec-qa` soạn nháp `test-cases.md` (không `design.md`, `tasks.md`; nếu dùng `/opsx:propose` thì xoá hai file đó khỏi PR spec) | `pnpm exec openspec validate --all --strict` pass |
+| A3 | **Vòng tranh luận** | Ba agent (chế độ DUYỆT) đọc spec, ra `VERDICT` + finding; `spec-ba`/`spec-qa` sửa; lặp tối đa 3 vòng. Mỗi finding để lại dấu vết `- [x] … → …` trong `## Open Questions`; câu cần người quyết để `- [ ]` | Cả ba agent `approve` |
 | A4 | Mở **PR spec** và đăng verdict | Theo template, `Spec PR: N/A`, `Refs #<story>`, Screenshots `N/A`. Đăng một comment có marker `<!-- csk-spec-agents sha=… ba=approve qa=approve dev=approve -->` (xem `/relay spec`) | |
 | A5 | Chuyển PR sang **ready for review** | Chỉ khi ba agent đã approve, `Open Questions` hết `- [ ]` và `test-cases.md` đã có | |
 | A6 | **Người thật review và merge** | Một người trong `SPEC_APPROVERS` approve, trả lời các `- [ ]` còn lại nếu có. Không có code trong PR này | `Spec approvals` xanh |
@@ -141,13 +141,13 @@ Quy tắc:
 
 ### Open Questions trong proposal
 
-`proposal.md` có mục `## Open Questions`: mỗi chỗ mơ hồ là một dòng `- [ ]`. Agent reviewer hỏi, `spec-writer` trả
+`proposal.md` có mục `## Open Questions`: mỗi chỗ mơ hồ là một dòng `- [ ]`. Agent duyệt hỏi, `spec-ba` trả
 lời và sửa spec rồi đổi thành `- [x] <câu hỏi> → <xử lý>`; câu cần người quyết để `- [ ]` cho người thật trả lời trong comment PR. Không có câu hỏi thì ghi một dòng `Không có.`
 (không dùng `- [ ]`). Còn `- [ ]` thì check `Spec approvals` fail.
 
 ### Viết `test-cases.md`
 
-`openspec/changes/<id>/test-cases.md` do `qa-writer` soạn (agent QA), `qa-reviewer` duyệt, QA người thật chỉnh khi nghiệm thu, nằm trong PR spec. Chỉ dùng
+`openspec/changes/<id>/test-cases.md` do `spec-qa` soạn (agent QA), `spec-ba`/`spec-dev` duyệt, QA người thật chỉnh khi nghiệm thu, nằm trong PR spec. Chỉ dùng
 thứ người học nhìn thấy, cùng luật với spec. Mỗi Scenario có ít nhất một case.
 
 ```markdown
@@ -241,9 +241,9 @@ việc là một agent mới, thông tin đi qua file và git diff.
 
 | Agent (`.claude/agents/`) | Pha | Được ghi | Trả về |
 |---|---|---|---|
-| `spec-writer` | A | `proposal.md`, `specs/` trong `openspec/changes/<id>/` | change id, Scenario, kết quả validate |
-| `qa-writer` | A | `test-cases.md` (bản nháp cho QA chỉnh) | số case, Scenario chưa có case, câu hỏi mở |
-| `ba-reviewer`, `qa-reviewer`, `dev-reviewer` | A | không gì cả (chỉ đọc) | `VERDICT: approve\|block` + finding (`blocker`/`major`/`minor`/`human`) |
+| `spec-ba` | A | `proposal.md`, `specs/` trong `openspec/changes/<id>/` (chế độ VIẾT/SỬA); chế độ DUYỆT: không gì cả | change id, Scenario, kết quả validate; hoặc `VERDICT` + finding |
+| `spec-qa` | A | `test-cases.md` (bản nháp cho QA chỉnh; chế độ DUYỆT: không gì cả) | số case, Scenario chưa có case, câu hỏi mở; hoặc `VERDICT` + finding |
+| `spec-dev` | A | không gì cả (chỉ DUYỆT) | `VERDICT: approve\|block` + finding (`blocker`/`major`/`minor`/`human`) |
 | `planner` | B1a | `design.md`, `tasks.md` (không sửa spec) | số task, layer, file dự kiến, vấn đề với spec |
 | `test-writer` | B2 (RED) | file test | test + output fail đúng lý do |
 | `implementer` | B3–B4 (GREEN, REFACTOR), sửa finding | code production, không file test | file đã đổi + output pass |

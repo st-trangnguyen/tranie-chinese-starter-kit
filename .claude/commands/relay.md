@@ -28,9 +28,9 @@ cách chạy chúng bằng agent.
 
   | Agent | Chỉ được đổi | Vi phạm khi đổi |
   |---|---|---|
-  | `spec-writer` | `openspec/changes/<id>/proposal.md`, `specs/**`, `.openspec.yaml` | `design.md`, `tasks.md`, `test-cases.md`, mọi thứ khác |
-  | `qa-writer` | `openspec/changes/<id>/test-cases.md` | mọi file khác |
-  | `ba-reviewer`, `qa-reviewer`, `dev-reviewer` | không gì cả (chỉ đọc) | mọi thứ |
+  | `spec-ba` (VIẾT/SỬA) | `openspec/changes/<id>/proposal.md`, `specs/**`, `.openspec.yaml` | `design.md`, `tasks.md`, `test-cases.md`, mọi thứ khác |
+  | `spec-qa` (VIẾT/SỬA) | `openspec/changes/<id>/test-cases.md` | mọi file khác |
+  | `spec-ba`, `spec-qa`, `spec-dev` (DUYỆT) | không gì cả (chỉ đọc) | mọi thứ |
   | `planner` | `openspec/changes/<id>/design.md`, `tasks.md` | `proposal.md`, `specs/**`, code, test |
   | `test-writer` | `*.test.ts(x)`, `apps/web/e2e/**`, `apps/web/src/test/**` | code production, `openspec/` |
   | `implementer` | code production | file test (kể cả e2e, helper test), `openspec/` |
@@ -53,15 +53,15 @@ khớp (nhánh chưa push nên an toàn), rồi mới push. Nhánh đã push th�
 
 1. Xác nhận nhánh làm việc cắt từ `main` mới nhất (xem "Nhánh và worktree"); tên `spec/<id>` đặt
    trước lần push đầu. Nếu đang ở `main` hoặc nhánh của việc khác, hỏi người dùng trước khi tạo nhánh.
-2. Gọi `spec-writer` với story/id. Kiểm vùng ghi.
-3. Chạy `pnpm exec openspec validate --all --strict`. Fail thì gọi lại `spec-writer` với output lỗi.
-4. Gọi `qa-writer` với change id (đọc spec vừa viết). Kiểm vùng ghi.
+2. Gọi `spec-ba` (chế độ VIẾT) với story/id. Kiểm vùng ghi.
+3. Chạy `pnpm exec openspec validate --all --strict`. Fail thì gọi lại `spec-ba` với output lỗi.
+4. Gọi `spec-qa` (chế độ VIẾT) với change id (đọc spec vừa viết). Kiểm vùng ghi.
 5. **Vòng tranh luận** (tối đa **3 vòng**). Mỗi vòng:
-   1. Gọi **song song** `ba-reviewer`, `qa-reviewer`, `dev-reviewer` (mỗi lần là agent mới, chỉ nhận change id; vòng sau
+   1. Gọi **song song** `spec-ba`, `spec-qa`, `spec-dev` ở **chế độ DUYỆT** (mỗi lần là agent mới, chỉ nhận change id và chế độ; vòng sau
       nhận thêm finding vòng trước và cách đã xử lý). Kiểm `git status` sạch (reviewer không được ghi gì).
    2. Đọc `VERDICT` và `FINDINGS` của từng agent. Cả ba `approve` thì thoát vòng lặp.
-   3. Gom finding `blocker`/`major` về `spec-writer` (finding về `proposal.md`/`specs/`) và `qa-writer` (finding về
-      `test-cases.md`), mỗi agent chạy ở chế độ SỬA THEO FINDING. Kiểm vùng ghi, chạy
+   3. Gom finding `blocker`/`major` về `spec-ba` (finding về `proposal.md`/`specs/`) và `spec-qa` (finding về
+      `test-cases.md`), mỗi agent chạy ở chế độ SỬA THEO FINDING (finding về code/hạ tầng của `spec-dev` được `spec-ba` đọc và xử lý trong spec). Kiểm vùng ghi, chạy
       `pnpm exec openspec validate --all --strict`.
    4. Nếu đã có PR, đăng một comment tóm tắt vòng (bảng agent × verdict × finding chính) để người thật theo dõi.
    Finding `human` hoặc câu hỏi nghiệp vụ không đủ cơ sở quyết: **không tự quyết**, để thành `- [ ]` trong
@@ -143,7 +143,7 @@ trong phiên mới: trạng thái nằm ở nhánh, `tasks.md` và comment PR.
    - `code` → `implementer` (chế độ FIX, chỉ danh sách finding).
    - `test` (thiếu hoặc yếu) → `test-writer` bổ sung RED, rồi `implementer` làm xanh.
    - `spec` → **dừng**, không sửa spec trong PR code. Soạn patch spec ở nhánh `spec/<id>-fix` cho
-     BA duyệt (spec-driven §2): gọi `spec-writer` với finding, kiểm vùng ghi, chạy
+     BA duyệt (spec-driven §2): gọi `spec-ba` (chế độ SỬA) với finding, kiểm vùng ghi, chạy
      `pnpm exec openspec validate --all --strict`, mở PR spec fix (cần người dùng đồng ý), rồi báo.
    - `qa` (case Fail trong comment kết quả của QA) → xử lý như `code`/`test` theo bản chất lỗi; case có Tự động =
      `e2e` thì `test-writer` bổ sung test mang ID `TC-…` trước. Sau khi push, báo QA chạy lại đúng case fail (push

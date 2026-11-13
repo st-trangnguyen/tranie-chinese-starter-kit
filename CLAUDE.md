@@ -197,8 +197,8 @@ Mỗi story đi qua **ba pha, hai PR**: **Spec** (agent BA + QA + Dev → ngư�
 2. **Propose**: `/relay spec s<epic>-<n>-<slug>` tạo `openspec/changes/<id>/` với **chỉ** `proposal.md`,
    `specs/` và `test-cases.md` (phần BA/QA đọc). AC của story chép nguyên văn thành Requirement + Scenario
    (ID `S<epic>.<n>-AC<k>`). `design.md` và `tasks.md` là của dev, **không** nằm trong PR spec.
-   **Tranh luận bằng agent**: ba agent reviewer (BA, QA, Dev: `ba-reviewer`, `qa-reviewer`, `dev-reviewer`)
-   đọc spec độc lập, nêu finding; `spec-writer` và `qa-writer` sửa; tối đa 3 vòng. Mỗi chỗ mơ hồ là một dòng
+   **Tranh luận bằng agent**: ba agent `spec-ba`, `spec-qa`, `spec-dev` (BA viết spec, QA viết `test-cases.md`,
+   Dev chỉ duyệt) lần lượt viết rồi duyệt chéo ở chế độ DUYỆT (agent mới, chỉ đọc), nêu finding; BA và QA sửa; tối đa 3 vòng. Mỗi chỗ mơ hồ là một dòng
    trong `## Open Questions` của `proposal.md`: agent xử lý được thì `- [x] … → …`, business rule agent không
    quyết được thì để `- [ ]` cho người thật. Cả ba agent approve (comment có marker, đúng commit đầu) thì mở PR
    spec (`Spec PR: N/A`), chuyển ready; **người thật** (`SPEC_APPROVERS`) review và approve (check
@@ -230,7 +230,7 @@ mới cho BA duyệt, đừng sửa spec trong PR code.
 Việc không có Scenario (docs, config, asset thuần) bỏ qua Pha A, cổng plan/QA, bước 4–5 và Pha C, ghi `Spec PR: N/A`.
 
 **Chạy bằng agent:** `/relay <spec|plan|code|fix> <change-id>` chạy các pha trên bằng subagent tách
-context (`spec-writer`, `planner`, `test-writer`, `qa-writer`, `implementer`, `reviewer` trong `.claude/agents/`; `reviewer` chạy trên CI, không chạy local). Chi tiết:
+context (`spec-ba`, `spec-qa`, `spec-dev`, `planner`, `test-writer`, `implementer`, `reviewer` trong `.claude/agents/`; `reviewer` chạy trên CI, không chạy local). Chi tiết:
 `docs/05-standards/spec-driven.md` §7.
 
 ### Lệnh kiểm tra chuẩn

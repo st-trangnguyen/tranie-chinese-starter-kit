@@ -11,15 +11,18 @@ với nhau để dọn chỗ mơ hồ, và người thật chỉ xem bản đã 
 
 ## 2. Thiết kế
 
-| Vai | Viết | Review (agent mới, context sạch, chỉ đọc) |
-|---|---|---|
-| BA | `spec-writer`: `proposal.md`, `specs/` | `ba-reviewer`: AC nguyên văn, Scenario đủ, ngôn ngữ BA/QA, mâu thuẫn spec cũ |
-| QA | `qa-writer`: `test-cases.md` | `qa-reviewer`: kiểm tra được, độ phủ case, kết quả mong đợi cụ thể |
-| Dev | (không viết) | `dev-reviewer`: khả thi trong kiến trúc, layer, dependency, trùng/mâu thuẫn code |
+Ba agent, mỗi vai một agent (`.claude/agents/`). Mỗi agent có chế độ ghi và chế độ **DUYỆT** (chỉ đọc, agent mới
+mỗi vòng, context sạch). Duyệt chéo: agent không duyệt bản mình vừa viết trong cùng ngữ cảnh.
 
-**Vòng tranh luận** (`/relay spec`, tối đa 3 vòng): ba reviewer chạy song song → mỗi người ra
-`VERDICT: approve|block` + finding (`blocker`/`major`/`minor`/`human`) → `spec-writer` và `qa-writer` sửa theo finding →
-reviewer mới kiểm lại chỉ phần đã nêu. Finding được ghi vết trong `## Open Questions` của `proposal.md`.
+| Agent | Chế độ VIẾT / SỬA | Chế độ DUYỆT (trọng tâm) |
+|---|---|---|
+| `spec-ba` (BA) | `proposal.md`, `specs/` | AC nguyên văn, Scenario đủ, ngôn ngữ BA/QA, mâu thuẫn spec cũ; `test-cases.md` có khớp spec |
+| `spec-qa` (QA) | `test-cases.md` | Scenario kiểm tra được, độ phủ case, kết quả mong đợi cụ thể (tìm lỗi trong `specs/`) |
+| `spec-dev` (Dev) | (không viết) | khả thi trong kiến trúc, layer, dependency, trùng/mâu thuẫn code |
+
+**Vòng tranh luận** (`/relay spec`, tối đa 3 vòng): ba agent chạy song song ở chế độ DUYỆT → mỗi người ra
+`VERDICT: approve|block` + finding (`blocker`/`major`/`minor`/`human`) → `spec-ba` và `spec-qa` sửa theo finding →
+agent DUYỆT mới kiểm lại chỉ phần đã nêu. Finding được ghi vết trong `## Open Questions` của `proposal.md`.
 
 **Chỗ phải dồn lên người thật:** business rule mà story và spec không đủ cơ sở quyết (`human`), và trường hợp hết 3 vòng
 vẫn bất đồng. Chúng ở lại dạng `- [ ]`; cổng không cho merge khi còn `- [ ]`.
@@ -44,7 +47,7 @@ lại khi có comment mới hoặc bị sửa/xoá: run `issue_comment` chỉ ch
 
 ## 4. Thay đổi
 
-`.claude/agents/{ba,qa,dev}-reviewer.md` (mới), `spec-writer.md` và `qa-writer.md` (chế độ sửa theo finding),
+`.claude/agents/spec-{ba,qa,dev}.md` (gộp `spec-writer` và `qa-writer` cũ, thêm chế độ sửa theo finding và DUYỆT),
 `.claude/commands/relay.md` (pha `spec`), `.github/workflows/spec-approvals-workflow.yml`, `spec-driven.md`,
 `CLAUDE.md` §8.
 
