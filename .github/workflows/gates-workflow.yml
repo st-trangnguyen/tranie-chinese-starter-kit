@@ -1,0 +1,193 @@
+# Hai cổng của PR code: dev lead duyệt plan (label plan-approved) và QA nghiệm thu (label qa-approved).
+# Quy trình: docs/05-standards/spec-driven.md §2 (B1b, B6a) và "Các cổng".
+#
+# Phạm vi: cổng chỉ áp dụng khi PR đổi file dưới apps/ hoặc packages/. Phân loại theo FILE, không theo
+# nhánh hay dòng `Spec PR:` trong mô tả (hai thứ đó tự khai được).
+# Label chỉ hợp lệ khi người gắn gần nhất nằm trong repo variable tương ứng (handle GitHub, cách nhau dấu phẩy)
+# và KHÔNG phải tác giả PR:
+#   plan-approved → PLAN_APPROVERS      qa-approved → QA_APPROVERS
+# Push mới gỡ label khi kết quả duyệt không còn đúng:
+#   nội dung design.md của change trong PR đổi → gỡ plan-approved;  đổi file ngoài openspec/ và docs/ → gỡ qa-approved.
+#   Chỉ tick tasks.md thì không gỡ gì.
+# Để cổng chặn thật: đặt check "Plan đã duyệt" và "QA sign-off" làm required trong branch protection của `main`,
+# và bật "Require review from Code Owners" để PR không tự sửa được chính workflow này (CODEOWNERS: /.github/).
+# Chỉ dùng API của GitHub và payload sự kiện, không checkout hay chạy code từ nhánh PR.
+# Không dùng `concurrency`: GitHub huỷ run pending cũ trong cùng group, làm lần gỡ label của một push bị bỏ sót.
+name: Gates
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled, ready_for_review, converted_to_draft]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  invalidate:
+    name: Gỡ label khi kết quả duyệt không còn đúng
+    if: github.event.action == 'synchronize'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Gỡ plan-approved / qa-approved theo thay đổi vừa push
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+        run: |
+          set -euo pipefail
+
+          # Chỉ bỏ qua 404 (label không có); mọi lỗi khác (403, 5xx, rate limit) làm job fail, gate sẽ fail theo.
+          remove_label() {
+            local out
+            if ! out=$(gh api -X DELETE "repos/$REPO/issues/$PR_NUMBER/labels/$1" 2>&1); then
+              if printf '%s' "$out" | grep -qE '404|Not Found'; then return 0; fi
+              echo "::error::Không gỡ được label $1: $out"
+              exit 1
+            fi
+            echo "Đã gỡ label $1: $2"
+          }
+
+          # --- qa-approved: có file code mới ngoài openspec/ và docs/ ---
+          # Force-push có thể làm mất commit BEFORE: coi như có đổi (an toàn hơn).
+          if ! changed=$(gh api "repos/$REPO/compare/$BEFORE...$AFTER" --jq '.files[].filename' 2>/dev/null); then
+            changed="_unknown_"
+          fi
+          if grep -qvE '^(openspec|docs)/' <<<"$changed"; then
+            remove_label qa-approved "có code mới sau khi QA ký, QA chạy lại các case liên quan."
+          fi
+
+          # --- plan-approved: so NỘI DUNG design.md của đúng các change thuộc PR này ---
+          # (so blob, không so diff: rebase hoặc merge main không làm label bị gỡ oan.)
+          pr_files=$(gh api "repos/$REPO/pulls/$PR_NUMBER/files" --paginate --jq '.[].filename')
+          designs=$(grep -E '^openspec/changes/[a-z0-9][a-z0-9-]*/design\.md$' <<<"$pr_files" || true)
+          for f in $designs; do
+            raw() { gh api "repos/$REPO/contents/$f?ref=$1" -H "Accept: application/vnd.github.raw" 2>/dev/null || echo "__missing__$1"; }
+            if [[ "$(raw "$BEFORE")" != "$(raw "$AFTER")" ]]; then
+              remove_label plan-approved "$f đổi sau khi duyệt, dev lead duyệt lại."
+              break
+            fi
+          done
+
+  plan-gate:
+    name: Plan đã duyệt
+    needs: invalidate
+    # Luôn chạy (kể cả khi invalidate fail) để không fail-open: job bị skip do điều kiện được tính là xanh.
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Kiểm tra label plan-approved do dev lead (không phải tác giả) gắn
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          INVALIDATE_RESULT: ${{ needs.invalidate.result }}
+          LABEL: plan-approved
+          APPROVERS_VAR: PLAN_APPROVERS
+          APPROVERS: ${{ vars.PLAN_APPROVERS }}
+          ROLE: dev lead
+        run: |
+          set -euo pipefail
+
+          if [[ "$INVALIDATE_RESULT" == "failure" ]]; then
+            echo "::error::Bước gỡ label lỗi, không thể xác nhận label còn hợp lệ. Chạy lại workflow."
+            exit 1
+          fi
+
+          # Phạm vi theo FILE: chỉ PR đổi apps/ hoặc packages/ cần cổng này.
+          files=$(gh api "repos/$REPO/pulls/$PR_NUMBER/files" --paginate --jq '.[].filename')
+          if ! grep -qE '^(apps|packages)/' <<<"$files"; then
+            echo "PR không đổi apps/ hoặc packages/, bỏ qua."; exit 0
+          fi
+
+          labels=$(gh api "repos/$REPO/issues/$PR_NUMBER/labels" --jq '.[].name')
+          if ! grep -qxF "$LABEL" <<<"$labels"; then
+            echo "::error::Chưa có label $LABEL: $ROLE chưa duyệt."
+            exit 1
+          fi
+
+          if [[ -z "${APPROVERS// /}" ]]; then
+            echo "::error::Chưa cấu hình repo variable $APPROVERS_VAR."; exit 1
+          fi
+          actor=$(gh api "repos/$REPO/issues/$PR_NUMBER/events" --paginate \
+            | jq -rs --arg l "$LABEL" '[.[][] | select(.event == "labeled" and .label.name == $l)] | last | .actor.login // ""')
+          lower() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
+          list=$(lower "${APPROVERS// /}")
+          if [[ -z "$actor" ]]; then
+            echo "::error::Không xác định được người gắn label $LABEL."; exit 1
+          fi
+          if [[ "$(lower "$actor")" == "$(lower "$PR_AUTHOR")" ]]; then
+            echo "::error::Label $LABEL do chính tác giả PR ($actor) gắn. Cần người khác duyệt."; exit 1
+          fi
+          if [[ ",$list," != *",$(lower "$actor"),"* ]]; then
+            echo "::error::Label $LABEL do '$actor' gắn, không thuộc $APPROVERS_VAR ($ROLE)."; exit 1
+          fi
+          echo "$LABEL do $actor gắn."
+
+  qa-gate:
+    name: QA sign-off
+    needs: invalidate
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Kiểm tra label qa-approved do QA (không phải tác giả) gắn
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          INVALIDATE_RESULT: ${{ needs.invalidate.result }}
+          LABEL: qa-approved
+          APPROVERS_VAR: QA_APPROVERS
+          APPROVERS: ${{ vars.QA_APPROVERS }}
+          ROLE: QA
+        run: |
+          set -euo pipefail
+
+          if [[ "$INVALIDATE_RESULT" == "failure" ]]; then
+            echo "::error::Bước gỡ label lỗi, không thể xác nhận label còn hợp lệ. Chạy lại workflow."
+            exit 1
+          fi
+
+          files=$(gh api "repos/$REPO/pulls/$PR_NUMBER/files" --paginate --jq '.[].filename')
+          if ! grep -qE '^(apps|packages)/' <<<"$files"; then
+            echo "PR không đổi apps/ hoặc packages/, bỏ qua."; exit 0
+          fi
+
+          # Lấy trạng thái draft hiện tại từ API (payload của lần re-run có thể cũ).
+          is_draft=$(gh api "repos/$REPO/pulls/$PR_NUMBER" --jq '.draft')
+          if [[ "$is_draft" == "true" ]]; then
+            echo "::error::PR đang draft. Chuyển sang ready trước khi QA nghiệm thu."
+            exit 1
+          fi
+
+          labels=$(gh api "repos/$REPO/issues/$PR_NUMBER/labels" --jq '.[].name')
+          if ! grep -qxF "$LABEL" <<<"$labels"; then
+            echo "::error::Chưa có label $LABEL: $ROLE chưa nghiệm thu."
+            exit 1
+          fi
+
+          if [[ -z "${APPROVERS// /}" ]]; then
+            echo "::error::Chưa cấu hình repo variable $APPROVERS_VAR."; exit 1
+          fi
+          actor=$(gh api "repos/$REPO/issues/$PR_NUMBER/events" --paginate \
+            | jq -rs --arg l "$LABEL" '[.[][] | select(.event == "labeled" and .label.name == $l)] | last | .actor.login // ""')
+          lower() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
+          list=$(lower "${APPROVERS// /}")
+          if [[ -z "$actor" ]]; then
+            echo "::error::Không xác định được người gắn label $LABEL."; exit 1
+          fi
+          if [[ "$(lower "$actor")" == "$(lower "$PR_AUTHOR")" ]]; then
+            echo "::error::Label $LABEL do chính tác giả PR ($actor) gắn. Cần người khác nghiệm thu."; exit 1
+          fi
+          if [[ ",$list," != *",$(lower "$actor"),"* ]]; then
+            echo "::error::Label $LABEL do '$actor' gắn, không thuộc $APPROVERS_VAR ($ROLE)."; exit 1
+          fi
+          echo "$LABEL do $actor gắn."
