@@ -14,7 +14,7 @@ trả về.
 **Input**: `$ARGUMENTS` = `<pha> <change-id>`, ví dụ `code s3-5-topic-test`. Thiếu pha hoặc id thì hỏi
 lại, đừng đoán. Pha hợp lệ: `spec`, `plan`, `code`, `fix`.
 
-Thứ tự và chủ: `spec` (BA + QA + Dev, PR spec draft → approve đủ 3 vai → merge) → `plan` (PR code draft chỉ có plan, dev lead duyệt) → `code` (dev, cùng PR đó, rồi QA nghiệm thu). `plan` tạo
+Thứ tự và chủ: `spec` (agent BA + QA + Dev tranh luận trên PR spec draft → 3 agent approve → người thật approve → merge) → `plan` (PR code draft chỉ có plan, dev lead duyệt) → `code` (dev, cùng PR đó, rồi QA nghiệm thu). `plan` tạo
 `design.md` và `tasks.md` ở nhánh `feat/<id>`; hai file này không thuộc PR spec.
 
 Luật của dự án (`CLAUDE.md`, `docs/05-standards/spec-driven.md`) vẫn áp dụng nguyên. Lệnh này chỉ là
@@ -30,6 +30,7 @@ cách chạy chúng bằng agent.
   |---|---|---|
   | `spec-writer` | `openspec/changes/<id>/proposal.md`, `specs/**`, `.openspec.yaml` | `design.md`, `tasks.md`, `test-cases.md`, mọi thứ khác |
   | `qa-writer` | `openspec/changes/<id>/test-cases.md` | mọi file khác |
+  | `ba-reviewer`, `qa-reviewer`, `dev-reviewer` | không gì cả (chỉ đọc) | mọi thứ |
   | `planner` | `openspec/changes/<id>/design.md`, `tasks.md` | `proposal.md`, `specs/**`, code, test |
   | `test-writer` | `*.test.ts(x)`, `apps/web/e2e/**`, `apps/web/src/test/**` | code production, `openspec/` |
   | `implementer` | code production | file test (kể cả e2e, helper test), `openspec/` |
@@ -55,12 +56,36 @@ khớp (nhánh chưa push nên an toàn), rồi mới push. Nhánh đã push th�
 2. Gọi `spec-writer` với story/id. Kiểm vùng ghi.
 3. Chạy `pnpm exec openspec validate --all --strict`. Fail thì gọi lại `spec-writer` với output lỗi.
 4. Gọi `qa-writer` với change id (đọc spec vừa viết). Kiểm vùng ghi.
-5. Nếu `spec-writer` hoặc `qa-writer` báo "Câu hỏi mở": đưa cho người dùng; câu nào chưa chốt thì để là
-   `- [ ]` trong `## Open Questions` của `proposal.md` (gọi lại `spec-writer` nếu cần), câu đã chốt thì gọi lại
-   agent tương ứng với câu trả lời.
-6. **Dừng.** Báo: spec (`proposal.md` + `specs/` + `test-cases.md`) đã sẵn sàng. Mở **PR spec ở dạng draft**
-   (`Spec PR: N/A`); BA, QA, Dev hỏi đáp trong comment, QA chỉnh `test-cases.md`; hết `- [ ]` thì chuyển
-   ready, cần approve của BA, QA và Dev rồi merge. Sau đó dev chạy `/relay plan` rồi `/relay code`.
+5. **Vòng tranh luận** (tối đa **3 vòng**). Mỗi vòng:
+   1. Gọi **song song** `ba-reviewer`, `qa-reviewer`, `dev-reviewer` (mỗi lần là agent mới, chỉ nhận change id; vòng sau
+      nhận thêm finding vòng trước và cách đã xử lý). Kiểm `git status` sạch (reviewer không được ghi gì).
+   2. Đọc `VERDICT` và `FINDINGS` của từng agent. Cả ba `approve` thì thoát vòng lặp.
+   3. Gom finding `blocker`/`major` về `spec-writer` (finding về `proposal.md`/`specs/`) và `qa-writer` (finding về
+      `test-cases.md`), mỗi agent chạy ở chế độ SỬA THEO FINDING. Kiểm vùng ghi, chạy
+      `pnpm exec openspec validate --all --strict`.
+   4. Nếu đã có PR, đăng một comment tóm tắt vòng (bảng agent × verdict × finding chính) để người thật theo dõi.
+   Finding `human` hoặc câu hỏi nghiệp vụ không đủ cơ sở quyết: **không tự quyết**, để thành `- [ ]` trong
+   `## Open Questions` của `proposal.md`. Còn `- [ ]` thì chưa thể approve: dừng vòng lặp và đưa câu hỏi cho người dùng
+   (kèm đề xuất mặc định). Có câu trả lời thì sửa spec rồi chạy lại từ vòng 1.
+   Hết 3 vòng vẫn còn `blocker`/`major`: **dừng hẳn**, không hạ mức độ finding; báo finding còn lại và để người dùng quyết.
+6. **Khi cả ba agent approve** và `Open Questions` hết `- [ ]`: commit và push (khi người dùng đồng ý), mở hoặc
+   cập nhật **PR spec** (`Spec PR: N/A`), rồi đăng một comment duy nhất theo mẫu (sha = commit đầu PR **sau khi push**):
+
+   ```
+   <!-- csk-spec-agents sha=<HEAD_SHA> ba=approve qa=approve dev=approve -->
+   ## Duyệt spec bởi agent
+   | Vai | Verdict | Số vòng |
+   |---|---|---|
+   | BA | approve | … |
+   | QA | approve | … |
+   | Dev | approve | … |
+   Tóm tắt tranh luận và các quyết định: …
+   ```
+
+   Push thêm commit thì marker hết hiệu lực: chạy lại bước 5 và đăng lại. Chuyển PR sang ready; check
+   `Spec approvals` còn đợi **một người thật approve**.
+7. **Dừng.** Báo: spec (`proposal.md` + `specs/` + `test-cases.md`) đã được ba agent duyệt, số vòng, quyết định
+   chính, và việc còn lại của người thật (review, approve, merge). Sau đó dev chạy `/relay plan` rồi `/relay code`.
    Không tạo `design.md`/`tasks.md`.
 
 ## Pha `plan`

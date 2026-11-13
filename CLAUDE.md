@@ -187,7 +187,7 @@ BEM dùng dấu gạch ngang, **không phải BEM truyền thống**:
 
 ## 8. Quy trình làm task
 
-Mỗi story đi qua **ba pha, hai PR**: **Spec** (BA + QA + Dev, PR spec) → **Code** (dev, PR code) →
+Mỗi story đi qua **ba pha, hai PR**: **Spec** (agent BA + QA + Dev → người thật, PR spec) → **Code** (dev, PR code) →
 **Archive** (workflow tự mở PR). Chi tiết, định dạng spec và bảng Scenario → tầng test:
 `docs/05-standards/spec-driven.md`.
 
@@ -197,10 +197,12 @@ Mỗi story đi qua **ba pha, hai PR**: **Spec** (BA + QA + Dev, PR spec) → **
 2. **Propose**: `/relay spec s<epic>-<n>-<slug>` tạo `openspec/changes/<id>/` với **chỉ** `proposal.md`,
    `specs/` và `test-cases.md` (phần BA/QA đọc). AC của story chép nguyên văn thành Requirement + Scenario
    (ID `S<epic>.<n>-AC<k>`). `design.md` và `tasks.md` là của dev, **không** nằm trong PR spec.
-   **Q&A**: mở PR spec ở dạng **draft** (`Spec PR: N/A`). BA, QA, Dev hỏi đáp trong comment, mỗi chỗ mơ hồ là
-   một `- [ ]` trong `## Open Questions` của `proposal.md`. QA hoàn thiện `test-cases.md` (case chức năng,
-   biên, a11y, mobile, sáng/tối, offline). Hết câu hỏi mở thì chuyển PR sang ready; cần approve của **BA, QA và
-   Dev** (check `Spec approvals`) rồi merge, và **dừng chờ merge** trước khi viết bất kỳ code nào.
+   **Tranh luận bằng agent**: ba agent reviewer (BA, QA, Dev: `ba-reviewer`, `qa-reviewer`, `dev-reviewer`)
+   đọc spec độc lập, nêu finding; `spec-writer` và `qa-writer` sửa; tối đa 3 vòng. Mỗi chỗ mơ hồ là một dòng
+   trong `## Open Questions` của `proposal.md`: agent xử lý được thì `- [x] … → …`, business rule agent không
+   quyết được thì để `- [ ]` cho người thật. Cả ba agent approve (comment có marker, đúng commit đầu) thì mở PR
+   spec (`Spec PR: N/A`), chuyển ready; **người thật** (`SPEC_APPROVERS`) review và approve (check
+   `Spec approvals`) rồi merge, và **dừng chờ merge** trước khi viết bất kỳ code nào.
 
 **Pha B — Code (nhánh `feat/s<epic>-<n>-<slug>` cắt từ `main` sau khi PR spec merge):**
 

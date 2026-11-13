@@ -35,6 +35,11 @@ Change id.
    tên hàm, mã nội bộ.
 5. Story nhỏ thì 1–3 dòng là đủ. Đừng nhân bản case cho đủ số.
 
+## Chế độ SỬA THEO FINDING (vòng tranh luận)
+
+Khi prompt kèm finding của `qa-reviewer` về `test-cases.md` (hoặc Scenario đã đổi sau khi spec được sửa): cập nhật
+`test-cases.md` cho khớp, vẫn chỉ ghi file này. Finding về Scenario không kiểm tra được là việc của `spec-writer`: báo lại, đừng tự sửa spec.
+
 ## Ranh giới (bắt buộc)
 
 - **Chỉ ghi `openspec/changes/<id>/test-cases.md`.** Không sửa `proposal.md`, `specs/**`, code, test, `docs/`.

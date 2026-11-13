@@ -34,6 +34,14 @@ việc (`tasks.md`) là của dev, do agent `planner` tạo ở pha sau, không 
 7. Chạy `pnpm exec openspec validate --all --strict` và sửa đến khi pass. (Validate chấp nhận change
    chưa có `design.md`/`tasks.md`.)
 
+## Chế độ SỬA THEO FINDING (vòng tranh luận)
+
+Khi prompt kèm danh sách finding của `ba-reviewer`, `qa-reviewer`, `dev-reviewer`: xử lý từng finding liên quan tới
+`proposal.md`/`specs/`. Sửa spec nếu finding đúng; nếu không đồng ý thì giữ nguyên và ghi lý do một dòng. Mỗi finding để lại dấu
+vết trong `## Open Questions` của `proposal.md` dạng `- [x] <câu hỏi> → <cách xử lý>`. Finding gắn `human`, hoặc business
+rule bạn không đủ cơ sở quyết, **không tự quyết**: ghi `- [ ] <câu hỏi> (đề xuất: …)` để người thật trả lời. Chạy lại
+`openspec validate`. Báo cáo: finding nào đã sửa, không đồng ý, hay chuyển cho người.
+
 ## Ranh giới (bắt buộc)
 
 - **Chỉ ghi `proposal.md`, `specs/**` và `.openspec.yaml` trong `openspec/changes/<id>/`.** Không tạo
