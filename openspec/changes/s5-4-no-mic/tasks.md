@@ -65,4 +65,4 @@ Test: `SpeakExercise.no-mic.test.tsx` (mô phỏng runner bằng `rerender` vớ
 - [x] 5.2 Chạy `pnpm --filter @csk/web build` (đụng CSS/i18n) và thấy pass.
 - [ ] 5.3 Thử tay trên `web-dev` (:5173) với trình duyệt thật: chặn quyền micro rồi cấp lại và bấm "Thử lại"; rút/không có micro; trình duyệt không hỗ trợ nếu có; bàn phím + trình đọc màn hình (focus không về `body`).
   Ghi kết quả vào PR (design, Rủi ro).
-- [ ] 5.4 Xem UI: câu "nói" có hướng dẫn (3 lý do) và chế độ đọc to ở mobile 375×812 và desktop 1280×800, sáng và tối; chụp screenshot cho PR (CLAUDE.md §8).
+- [x] 5.4 Xem UI: câu "nói" có hướng dẫn (3 lý do) và chế độ đọc to ở mobile 375×812 và desktop 1280×800, sáng và tối; chụp screenshot cho PR (CLAUDE.md §8).
