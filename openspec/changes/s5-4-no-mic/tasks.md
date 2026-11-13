@@ -63,6 +63,7 @@ Test: `SpeakExercise.no-mic.test.tsx` (mô phỏng runner bằng `rerender` vớ
 - [x] 5.1 Chạy `pnpm typecheck && pnpm lint && pnpm test:run` và thấy pass; tự kiểm import của `recorder.service`, `useRecorder`, `RecordingModeContext`, `useRecordingMode`, `RecordCompare`, `RecordGuidance`,
   `SpeakExercise`, `LessonRunnerContainer` không đi nhánh ❌ CLAUDE.md §2.
 - [x] 5.2 Chạy `pnpm --filter @csk/web build` (đụng CSS/i18n) và thấy pass.
-- [ ] 5.3 Thử tay trên `web-dev` (:5173) với trình duyệt thật: chặn quyền micro rồi cấp lại và bấm "Thử lại"; rút/không có micro; trình duyệt không hỗ trợ nếu có; bàn phím + trình đọc màn hình (focus không về `body`).
+- [x] 5.3 Thử tay trên `web-dev` (:5173) với trình duyệt thật: chặn quyền micro rồi cấp lại và bấm "Thử lại"; rút/không có micro; trình duyệt không hỗ trợ nếu có; bàn phím + trình đọc màn hình (focus không về `body`).
+  Đã thử (web-dev, quyền mic bị chặn): hướng dẫn cấp quyền, nút "Thử lại" và "đọc to rồi tự chọn mức" hiện đúng; focus vào khung hướng dẫn, không về `body`; sáng/tối đều ổn. **Chưa thử**: cấp lại quyền rồi Thử lại, máy không có mic, trình duyệt không hỗ trợ, trình đọc màn hình.
   Ghi kết quả vào PR (design, Rủi ro).
 - [x] 5.4 Xem UI: câu "nói" có hướng dẫn (3 lý do) và chế độ đọc to ở mobile 375×812 và desktop 1280×800, sáng và tối; chụp screenshot cho PR (CLAUDE.md §8).

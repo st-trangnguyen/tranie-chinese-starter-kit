@@ -59,5 +59,5 @@ Dùng registry giả có `ListenButton` + `SlowToggle` + nút trả lời, `Audi
 - [x] 7.1 REFACTOR khi đã xanh; self-review §0, §2 (đặc biệt `shared/components` và `shared/components/exercises` không import `shared/services`), §6, §7 (a11y: `role="switch"`, focus nhìn thấy, `prefers-reduced-motion`)
 - [x] 7.2 Verify: `pnpm typecheck && pnpm lint && pnpm test:run`
 - [x] 7.3 Verify build: `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts` (đụng CSS, i18n)
-- [ ] 7.4 Xem UI trên preview `web-dev` (nút Nghe, công tắc, thông báo lỗi) sáng/tối, 375×812 và 1280×800 cho screenshot PR; chưa có dạng bài nghe nên dùng trang thử tạm, **không commit**
+- [x] 7.4 Xem UI trên preview `web-dev` (nút Nghe, công tắc, thông báo lỗi) sáng/tối, 375×812 và 1280×800 cho screenshot PR; chưa có dạng bài nghe nên dùng trang thử tạm, **không commit**
 - [x] 7.5 Tick mọi task; PR ghi `Spec PR: #<số>` và `Refs #29`

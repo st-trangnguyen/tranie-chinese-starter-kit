@@ -70,6 +70,6 @@ Tầng test theo [spec-driven.md](../../../docs/05-standards/spec-driven.md) §4
 ## 11. Verify
 
 - [x] Chạy `pnpm typecheck && pnpm lint && pnpm test:run`, xem kết quả thật.
-- [ ] Chạy `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts` (có CSS mới) và `pnpm e2e` (chắc không vỡ luồng cũ); xem UI ở
+- [x] Chạy `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts` (có CSS mới) và `pnpm e2e` (chắc không vỡ luồng cũ); xem UI ở
   preview `web-dev` cả sáng/tối, mobile/desktop để chụp screenshot cho PR. Không cần `content:check` (không đụng nội dung).
-- [ ] Tick hết task; PR ghi `Spec PR: #<số>` và `Closes #27` (hoặc `Refs #27` nếu thiếu AC). Không archive trong PR này.
+- [x] Tick hết task; PR ghi `Spec PR: #<số>` và `Closes #27` (hoặc `Refs #27` nếu thiếu AC). Không archive trong PR này.

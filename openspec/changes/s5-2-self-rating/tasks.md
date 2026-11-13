@@ -47,4 +47,4 @@ Test: `apps/web/src/app/shared/components/exercises/SpeakExercise.test.tsx` (Vit
 ## 4. Verify
 
 - [x] 4.1 Chạy `pnpm typecheck && pnpm lint && pnpm test:run` và thấy pass; tự kiểm import của `SpeakExercise` không đi nhánh ❌ CLAUDE.md §2.
-- [ ] 4.2 Xem UI ở `web-dev` (:5173): câu "nói" trên mobile 375×812 và desktop 1280×800, sáng và tối; chụp screenshot cho PR (CLAUDE.md §8).
+- [x] 4.2 Xem UI ở `web-dev` (:5173): câu "nói" trên mobile 375×812 và desktop 1280×800, sáng và tối; chụp screenshot cho PR (CLAUDE.md §8).
