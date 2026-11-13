@@ -213,6 +213,97 @@ describe('RecorderService', () => {
     expect(revokeObjectUrl).toHaveBeenCalledWith(previousUrl);
   });
 
+  it.each(['NotAllowedError', 'SecurityError'])(
+    'S5.4-AC1: getUserMedia ném %s thì start() ném lỗi có reason "blocked"',
+    async (name) => {
+      const original = new DOMException('denied', name);
+      const service = new RecorderService({
+        getUserMedia: () => Promise.reject(original),
+        createRecorder: () =>
+          new FakeRecorder('voice') as unknown as MediaRecorder,
+        createObjectUrl: vi.fn(() => 'blob:fake-1'),
+        revokeObjectUrl: vi.fn(),
+      });
+
+      const error: unknown = await service.start().then(
+        () => null,
+        (caught: unknown) => caught,
+      );
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error).toMatchObject({ reason: 'blocked' });
+      expect((error as Error).cause).toBe(original);
+    },
+  );
+
+  it.each(['NotFoundError', 'SomethingWeirdError'])(
+    'S5.4-AC1: getUserMedia ném %s thì start() ném lỗi có reason "no-device"',
+    async (name) => {
+      const original = new DOMException('no mic', name);
+      const service = new RecorderService({
+        getUserMedia: () => Promise.reject(original),
+        createRecorder: () =>
+          new FakeRecorder('voice') as unknown as MediaRecorder,
+        createObjectUrl: vi.fn(() => 'blob:fake-1'),
+        revokeObjectUrl: vi.fn(),
+      });
+
+      const error: unknown = await service.start().then(
+        () => null,
+        (caught: unknown) => caught,
+      );
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error).toMatchObject({ reason: 'no-device' });
+      expect((error as Error).cause).toBe(original);
+    },
+  );
+
+  it('S5.4-AC1: isSupported() false thì start() ném reason "unsupported" và không gọi getUserMedia', async () => {
+    const getUserMedia = vi.fn(() =>
+      Promise.resolve(new FakeStream() as unknown as MediaStream),
+    );
+    const createRecorder = vi.fn(
+      () => new FakeRecorder('voice') as unknown as MediaRecorder,
+    );
+    const service = new RecorderService({
+      isSupported: () => false,
+      getUserMedia,
+      createRecorder,
+      createObjectUrl: vi.fn(() => 'blob:fake-1'),
+      revokeObjectUrl: vi.fn(),
+    });
+
+    const error: unknown = await service.start().then(
+      () => null,
+      (caught: unknown) => caught,
+    );
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error).toMatchObject({ reason: 'unsupported' });
+    expect(getUserMedia).not.toHaveBeenCalled();
+    expect(createRecorder).not.toHaveBeenCalled();
+  });
+
+  it('S5.4-AC1: checkAvailability() thành công thì trả null, nhả mọi track và không tạo MediaRecorder', async () => {
+    const stream = new FakeStream();
+    const createRecorder = vi.fn(
+      () => new FakeRecorder('voice') as unknown as MediaRecorder,
+    );
+    const service = new RecorderService({
+      getUserMedia: () => Promise.resolve(stream as unknown as MediaStream),
+      createRecorder,
+      createObjectUrl: vi.fn(() => 'blob:fake-1'),
+      revokeObjectUrl: vi.fn(),
+    });
+
+    const result = await service.checkAvailability();
+
+    expect(result).toBeNull();
+    stream.tracks.forEach((track) => expect(track.stop).toHaveBeenCalled());
+    expect(createRecorder).not.toHaveBeenCalled();
+  });
+
   it('S5.1-AC1: createRecorderService dựng được service thật', () => {
     expect(createRecorderService()).toBeInstanceOf(RecorderService);
   });

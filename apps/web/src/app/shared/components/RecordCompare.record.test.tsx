@@ -124,7 +124,7 @@ describe('RecordCompare: ghi âm', () => {
     expect(stopTrack).toHaveBeenCalled();
   });
 
-  it('kỹ thuật, không có Scenario: micro không dùng được thì bấm Ghi âm không làm hỏng màn, các nút vẫn bấm được', async () => {
+  it('kỹ thuật, không có Scenario: micro bị chặn thì bấm Ghi âm không làm hỏng màn, hiện hướng dẫn và Nghe mẫu vẫn bấm được', async () => {
     const getUserMedia = vi.fn(() =>
       Promise.reject(new DOMException('Permission denied', 'NotAllowedError')),
     );
@@ -137,8 +137,9 @@ describe('RecordCompare: ghi âm', () => {
 
     expect(getUserMedia).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('Đang ghi âm')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Ghi âm' })).toBeEnabled();
+    expect(
+      await screen.findByText('Trình duyệt đang chặn micro'),
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Nghe mẫu' })).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Nghe bản ghi' })).toBeDisabled();
   });
 });

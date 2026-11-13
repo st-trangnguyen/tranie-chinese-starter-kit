@@ -7,6 +7,7 @@ import {
   type ExerciseRegistry,
 } from '@shared/components/exercises/exercise.registry';
 import { AudioSpeedProvider } from '@shared/contexts/AudioSpeedContext';
+import { RecordingModeProvider } from '@shared/contexts/RecordingModeContext';
 import { LessonRunner } from '../components/LessonRunner';
 import { LessonSummary } from '../components/LessonSummary';
 import { useLessonRunner } from '../hooks/useLessonRunner';
@@ -71,22 +72,24 @@ const LessonRunnerContainer = ({
       )}
       {session && session.phase !== 'finished' && exercise && content && (
         <AudioSpeedProvider key={lessonId}>
-          <LessonRunner
-            view={{
-              exercise,
-              content,
-              current: session.currentIndex + 1,
-              total: session.exerciseIds.length,
-              feedback,
-            }}
-            registry={registry}
-            shouldFocusProgress={isRestarted}
-            handlers={{
-              onResult: submitResult,
-              onContinue: continueLesson,
-              onSkip: skipExercise,
-            }}
-          />
+          <RecordingModeProvider key={lessonId}>
+            <LessonRunner
+              view={{
+                exercise,
+                content,
+                current: session.currentIndex + 1,
+                total: session.exerciseIds.length,
+                feedback,
+              }}
+              registry={registry}
+              shouldFocusProgress={isRestarted}
+              handlers={{
+                onResult: submitResult,
+                onContinue: continueLesson,
+                onSkip: skipExercise,
+              }}
+            />
+          </RecordingModeProvider>
         </AudioSpeedProvider>
       )}
     </main>

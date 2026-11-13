@@ -8,6 +8,12 @@ import {
   type ExerciseRegistry,
 } from '@shared/components/exercises/exercise.registry';
 import { AudioSpeedProvider } from '@shared/contexts/AudioSpeedContext';
+import { RecordingModeProvider } from '@shared/contexts/RecordingModeContext';
+import {
+  installRecordingEnvironment,
+  rejectGetUserMedia,
+  restoreRecordingEnvironment,
+} from '@test/record-compare.helpers';
 import { renderWithProviders, screen } from '@test/render';
 import { LessonRunner } from './LessonRunner';
 
@@ -296,5 +302,87 @@ describe('LessonRunner', () => {
     expect(
       screen.getByRole('button', { name: 'Tiếp tục' }),
     ).toBeInTheDocument();
+  });
+
+  describe('chế độ đọc to khi không ghi âm được', () => {
+    beforeEach(() => {
+      installRecordingEnvironment();
+      rejectGetUserMedia('NotAllowedError');
+    });
+
+    afterEach(() => {
+      restoreRecordingEnvironment();
+    });
+
+    it('S5.4-AC2: chọn Chưa đúng ở chế độ đọc to thì báo sai, hiện đáp án, có Tiếp tục và không chặn câu kế', async () => {
+      const makeWord = (id: string, hanzi: string, pinyin: string): Word => ({
+        id,
+        hanzi,
+        pinyin,
+        vi: ['nghĩa ' + hanzi],
+        viReviewed: true,
+        hsk: 1,
+        audio: `audio/${id.padEnd(16, '0')}.mp3`,
+      });
+      const words = [makeWord('w-a', '八', 'bā'), makeWord('w-b', '九', 'jiǔ')];
+      const exercises: Exercise[] = [
+        { id: 's1', kind: 'speak', wordId: 'w-a' },
+        { id: 's2', kind: 'speak', wordId: 'w-b' },
+      ];
+
+      const Harness = () => {
+        const [index, setIndex] = useState(0);
+        const [feedback, setFeedback] = useState<LessonFeedbackView | null>(
+          null,
+        );
+        return (
+          <LessonRunner
+            view={{
+              exercise: exercises[index] as Exercise,
+              content: { words, sentences: [] },
+              current: index + 1,
+              total: exercises.length,
+              feedback,
+            }}
+            registry={exerciseRegistry}
+            handlers={{
+              onResult: setFeedback,
+              onContinue: () => {
+                setFeedback(null);
+                setIndex((value) => value + 1);
+              },
+              onSkip: vi.fn(),
+            }}
+          />
+        );
+      };
+
+      const { user } = renderWithProviders(
+        <AudioSpeedProvider>
+          <RecordingModeProvider>
+            <Harness />
+          </RecordingModeProvider>
+        </AudioSpeedProvider>,
+      );
+      await user.click(screen.getByRole('button', { name: 'Ghi âm' }));
+      await screen.findByText(/đọc to chữ trên màn/i);
+
+      await user.click(screen.getByRole('button', { name: 'Chưa đúng' }));
+
+      const verdict = screen
+        .getAllByRole('status')
+        .find((node) => node.textContent?.includes('Sai'));
+      expect(verdict).toBeDefined();
+      expect(verdict).toHaveTextContent('Đáp án');
+      expect(verdict).toHaveTextContent('八');
+      expect(verdict).toHaveTextContent('bā');
+      expect(verdict).toHaveTextContent('nghĩa 八');
+
+      await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+
+      expect(screen.getByText('九')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Đúng' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Chưa đúng' })).toBeEnabled();
+    });
   });
 });

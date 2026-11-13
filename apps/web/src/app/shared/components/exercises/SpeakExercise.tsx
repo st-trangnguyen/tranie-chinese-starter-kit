@@ -10,6 +10,7 @@ import {
   SPEAK_RATINGS,
   type SpeakRating,
 } from '../../utils/speak-rating.utils';
+import { useRecordingMode } from '../../contexts/useRecordingMode';
 import { RecordCompare } from '../RecordCompare';
 import { SpeakAutoCheck } from './SpeakAutoCheck';
 
@@ -52,7 +53,8 @@ export function SpeakExercise({
   );
   const isOnline = useOnlineStatus();
   const speech = useSpeechRecognition();
-  const canAutoCheck = isOnline && speech.isSupported;
+  const { isReadAloud } = useRecordingMode();
+  const canAutoCheck = isOnline && speech.isSupported && !isReadAloud;
   const isRatingLocked = selectedRating !== null || isLocked;
   const target = resolveTarget(exercise, content);
 

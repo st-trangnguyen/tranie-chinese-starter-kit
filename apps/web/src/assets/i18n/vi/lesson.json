@@ -73,7 +73,28 @@
     "recording": "Đang ghi âm",
     "listenSample": "Nghe mẫu",
     "listenRecording": "Nghe bản ghi",
-    "playError": "Không phát được bản ghi."
+    "playError": "Không phát được bản ghi.",
+    "retry": "Thử lại",
+    "retryRecording": "Thử lại ghi âm",
+    "readAloud": "Hãy đọc to chữ trên màn rồi tự chọn mức bên dưới.",
+    "guidance": {
+      "blocked": {
+        "title": "Trình duyệt đang chặn micro",
+        "steps": {
+          "1": "Bấm biểu tượng ổ khóa hoặc cài đặt cạnh thanh địa chỉ.",
+          "2": "Chọn Micro rồi đổi sang Cho phép.",
+          "3": "Quay lại đây và bấm Thử lại ghi âm."
+        }
+      },
+      "noDevice": {
+        "title": "Không tìm thấy micro",
+        "body": "Hãy kiểm tra micro đã cắm chắc và đã bật chưa, rồi bấm Thử lại ghi âm."
+      },
+      "unsupported": {
+        "title": "Trình duyệt này không hỗ trợ ghi âm",
+        "body": "Hãy thử mở bằng trình duyệt khác như Chrome, Edge hoặc Safari bản mới."
+      }
+    }
   },
   "speak": {
     "groupLabel": "Tự đánh giá phát âm",

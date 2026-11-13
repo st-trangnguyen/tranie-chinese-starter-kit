@@ -1,4 +1,45 @@
+export type RecorderFailureReason = 'blocked' | 'no-device' | 'unsupported';
+
+export class RecorderError extends Error {
+  readonly reason: RecorderFailureReason;
+
+  constructor(
+    reason: RecorderFailureReason,
+    message: string,
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.name = 'RecorderError';
+    this.reason = reason;
+  }
+}
+
+const BLOCKED_ERROR_NAMES: readonly string[] = [
+  'NotAllowedError',
+  'SecurityError',
+];
+
+function readErrorName(error: unknown): string | null {
+  if (typeof error === 'object' && error !== null && 'name' in error) {
+    const { name } = error;
+    return typeof name === 'string' ? name : null;
+  }
+  return null;
+}
+
+// Lỗi getUserMedia là dữ liệu ngoài: chỉ đọc `name` qua type guard.
+function classifyFailure(error: unknown): RecorderFailureReason {
+  const name = readErrorName(error);
+  return name !== null && BLOCKED_ERROR_NAMES.includes(name)
+    ? 'blocked'
+    : 'no-device';
+}
+
+const OPEN_MIC_MESSAGE =
+  'Không mở được micro. Hãy kiểm tra quyền micro rồi thử lại.';
+
 export interface RecorderDeps {
+  isSupported?: () => boolean;
   getUserMedia: () => Promise<MediaStream>;
   createRecorder: (stream: MediaStream) => MediaRecorder;
   createObjectUrl: (blob: Blob) => string;
@@ -18,16 +59,16 @@ export class RecorderService {
     this.releaseStream();
     this.generation += 1;
     const generation = this.generation;
+    if (!this.isSupported()) {
+      throw new RecorderError('unsupported', OPEN_MIC_MESSAGE);
+    }
     let stream: MediaStream;
     try {
       stream = await this.deps.getUserMedia();
     } catch (error) {
-      throw new Error(
-        'Không mở được micro. Hãy kiểm tra quyền micro rồi thử lại.',
-        {
-          cause: error,
-        },
-      );
+      throw new RecorderError(classifyFailure(error), OPEN_MIC_MESSAGE, {
+        cause: error,
+      });
     }
     if (generation !== this.generation) {
       stream.getTracks().forEach((track) => track.stop());
@@ -44,6 +85,22 @@ export class RecorderService {
     this.stream = stream;
     this.recorder = recorder;
     recorder.start();
+  }
+
+  /** Kiểm tra mic dùng được mà không bắt đầu ghi (nhả stream ngay). */
+  async checkAvailability(): Promise<RecorderFailureReason | null> {
+    if (!this.isSupported()) {
+      return 'unsupported';
+    }
+    this.generation += 1;
+    const generation = this.generation;
+    try {
+      const stream = await this.deps.getUserMedia();
+      stream.getTracks().forEach((track) => track.stop());
+    } catch (error) {
+      return generation === this.generation ? classifyFailure(error) : null;
+    }
+    return null;
   }
 
   stop(): Promise<string> {
@@ -82,6 +139,10 @@ export class RecorderService {
     this.chunks = [];
   }
 
+  private isSupported(): boolean {
+    return this.deps.isSupported?.() ?? true;
+  }
+
   private releaseStream(): void {
     this.stream?.getTracks().forEach((track) => track.stop());
     this.stream = null;
@@ -98,6 +159,9 @@ export class RecorderService {
 
 export function createRecorderService(): RecorderService {
   return new RecorderService({
+    isSupported: () =>
+      typeof navigator.mediaDevices?.getUserMedia === 'function' &&
+      typeof MediaRecorder !== 'undefined',
     getUserMedia: () => navigator.mediaDevices.getUserMedia({ audio: true }),
     createRecorder: (stream) => new MediaRecorder(stream),
     createObjectUrl: (blob) => URL.createObjectURL(blob),
