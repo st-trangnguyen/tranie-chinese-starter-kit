@@ -352,6 +352,28 @@ describe('SpeakExercise chấm tự động', () => {
     );
   });
 
+  it('S5.3-AC3: sau lỗi network, ghi âm lại thì chạy nhận dạng lại và khu "Chấm tự động" cùng kết quả hiện lại', async () => {
+    vi.spyOn(FakeSpeechRecognition.prototype, 'stop').mockImplementationOnce(
+      function stopWithNetworkError(this: FakeSpeechRecognition): void {
+        this.emitError('network');
+      },
+    );
+    FakeSpeechRecognition.transcript = '你好';
+    const user = userEvent.setup();
+    renderSpeak();
+
+    await user.click(screen.getByRole('button', { name: 'Ghi âm' }));
+    await user.click(screen.getByRole('button', { name: 'Dừng' }));
+    await screen.findByRole('button', { name: 'Nghe bản ghi' });
+    expect(screen.queryByText('Chấm tự động')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Ghi âm' }));
+    await user.click(screen.getByRole('button', { name: 'Dừng' }));
+
+    expect(await screen.findByText('Khớp với câu đúng')).toBeInTheDocument();
+    expect(screen.getByText('Chấm tự động')).toBeInTheDocument();
+  });
+
   it('S5.3-AC3: nhận diện lỗi network giữa chừng thì ẩn khu "Chấm tự động", vẫn nghe lại và tự đánh giá được', async () => {
     vi.spyOn(FakeSpeechRecognition.prototype, 'stop').mockImplementation(
       function stopWithNetworkError(this: FakeSpeechRecognition): void {
