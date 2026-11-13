@@ -10,11 +10,14 @@ export class RecorderService {
   private recorder: MediaRecorder | null = null;
   private chunks: Blob[] = [];
   private currentUrl: string | null = null;
+  private generation = 0;
 
   constructor(private readonly deps: RecorderDeps) {}
 
   async start(): Promise<void> {
     this.releaseStream();
+    this.generation += 1;
+    const generation = this.generation;
     let stream: MediaStream;
     try {
       stream = await this.deps.getUserMedia();
@@ -25,6 +28,10 @@ export class RecorderService {
           cause: error,
         },
       );
+    }
+    if (generation !== this.generation) {
+      stream.getTracks().forEach((track) => track.stop());
+      return;
     }
     const recorder = this.deps.createRecorder(stream);
     this.chunks = [];
@@ -44,9 +51,14 @@ export class RecorderService {
     if (!recorder) {
       return Promise.reject(new Error('Chưa bắt đầu ghi âm.'));
     }
-    return new Promise<string>((resolve) => {
+    const generation = this.generation;
+    return new Promise<string>((resolve, reject) => {
       const handleStop = (): void => {
         recorder.removeEventListener('stop', handleStop);
+        if (generation !== this.generation) {
+          reject(new Error('Đã hủy ghi âm.'));
+          return;
+        }
         const blob = new Blob(this.chunks, { type: recorder.mimeType });
         this.chunks = [];
         this.revokeCurrentUrl();
@@ -61,6 +73,7 @@ export class RecorderService {
   }
 
   discard(): void {
+    this.generation += 1;
     if (this.recorder && this.recorder.state !== 'inactive') {
       this.recorder.stop();
     }
