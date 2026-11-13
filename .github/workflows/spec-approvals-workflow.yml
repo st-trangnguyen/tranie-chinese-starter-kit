@@ -1,11 +1,11 @@
-# Cổng duyệt spec: PR spec chỉ merge được khi (1) hết câu hỏi mở, (2) có test-cases.md, (3) ba agent
-# BA / QA / Dev đã approve đúng commit đầu hiện tại, (4) một người thật approve.
+# Cổng duyệt spec: PR spec chỉ merge được khi (1) hết câu hỏi mở, (2) có test-cases.md, (3) hai agent duyệt spec
+# (qa, dev-lead) đã approve đúng commit đầu hiện tại, (4) một người thật approve.
 # Quy trình: docs/05-standards/spec-driven.md §2 (Pha A) và "Các cổng"; thiết kế:
 # docs/04-specs/2026-11-13-agent-spec-review.md.
 #
 # Comment mới/sửa/xoá chỉ kích hoạt chạy lại check của PR (xem bước issue_comment bên dưới).
-# Verdict của ba agent ghi trong một comment PR có marker (do `/relay spec` đăng):
-#   <!-- csk-spec-agents sha=<commit> ba=approve qa=approve dev=approve -->
+# Verdict của hai agent ghi trong một comment PR có marker (do `/relay spec` đăng):
+#   <!-- csk-spec-agents sha=<commit> qa=approve dev-lead=approve -->
 # Chỉ tính comment của OWNER/MEMBER/COLLABORATOR, đúng sha đầu PR, comment mới nhất có marker.
 # Người thật: repo variable SPEC_APPROVERS (handle GitHub, cách nhau dấu phẩy).
 # Để cổng chặn thật: đặt check "Spec approvals" làm required trong branch protection của `main`.
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Kiểm tra Open Questions, test-cases.md và approve của ba vai
+      - name: Kiểm tra Open Questions, test-cases.md và approve của hai agent và người thật
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -112,23 +112,23 @@ jobs:
             fi
           done
 
-          # (3) Verdict của ba agent: comment mới nhất có marker, đúng sha đầu PR, do thành viên repo đăng.
+          # (3) Verdict của hai agent duyệt spec (qa, dev-lead): comment mới nhất có marker, đúng sha đầu PR, do thành viên repo đăng.
           marker=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
             | jq -rs '[.[][] | select(.author_association == "OWNER" or .author_association == "MEMBER" or .author_association == "COLLABORATOR")
                         | select(.body | test("<!-- csk-spec-agents "))] | last | .body // ""' \
             | grep -oE '<!-- csk-spec-agents [^>]*-->' | tail -1 || true)
           if [[ -z "$marker" ]]; then
-            fail "Chưa có verdict của agent BA / QA / Dev (chạy /relay spec và đăng kết quả lên PR)."
+            fail "Chưa có verdict của agent qa / dev-lead (chạy /relay spec và đăng kết quả lên PR)."
           else
             m_sha=$(sed -nE 's/.*sha=([0-9a-f]+).*/\1/p' <<<"$marker")
             if [[ "$m_sha" != "$HEAD_SHA" ]]; then
               fail "Verdict của agent chỉ áp dụng cho commit ${m_sha:-?}, PR đã có commit mới ($HEAD_SHA). Chạy lại /relay spec."
             fi
-            for role in ba qa dev; do
+            for role in qa dev-lead; do
               if grep -qE "[ ]$role=approve([ ]|$)" <<<"${marker% -->}"; then
-                echo "✓ Agent ${role^^} đã approve."
+                echo "✓ Agent $role đã approve."
               else
-                fail "Agent ${role^^} chưa approve."
+                fail "Agent $role chưa approve."
               fi
             done
           fi

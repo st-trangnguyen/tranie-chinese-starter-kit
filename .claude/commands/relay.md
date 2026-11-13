@@ -1,7 +1,7 @@
 ---
 name: "Relay"
-description: "Điều phối một story qua các agent tách context: spec, test (RED), implement (GREEN); review chạy trên CI"
-argument-hint: "<spec|plan|code|fix> <change-id>"
+description: "Điều phối một story qua các agent tách context. Hai pha, mỗi pha một lệnh: spec (viết, duyệt, sửa) và code (plan, RED/GREEN, sửa theo review)"
+argument-hint: "<spec|code> <change-id>"
 category: "Workflow"
 tags: ["workflow", "agents", "tdd"]
 ---
@@ -12,10 +12,20 @@ agent, thông tin đi qua file và git diff, không qua trí nhớ của bạn. 
 trả về.
 
 **Input**: `$ARGUMENTS` = `<pha> <change-id>`, ví dụ `code s3-5-topic-test`. Thiếu pha hoặc id thì hỏi
-lại, đừng đoán. Pha hợp lệ: `spec`, `plan`, `code`, `fix`.
+lại, đừng đoán. Pha hợp lệ: `spec`, `code`.
 
-Thứ tự và chủ: `spec` (agent BA + QA + Dev tranh luận trên PR spec draft → 3 agent approve → người thật approve → merge) → `plan` (PR code draft chỉ có plan, dev lead duyệt) → `code` (dev, cùng PR đó, rồi QA nghiệm thu). `plan` tạo
-`design.md` và `tasks.md` ở nhánh `feat/<id>`; hai file này không thuộc PR spec.
+**Mỗi pha là một lệnh duy nhất và chạy lại được.** Lệnh tự nhận ra đang ở bước nào (nhìn file, nhánh, PR, label)
+và làm tiếp từ đó; gặp cổng của người thật thì dừng và nói chờ gì. Chạy lại cùng lệnh sau khi người dùng trả lời hoặc
+cổng đã mở.
+
+Vai và agent (`.claude/agents/`):
+
+| Vai | Agent | Việc |
+|---|---|---|
+| BA | `ba` | viết spec, sửa spec theo review |
+| QA | `qa` | duyệt spec, viết test case (và sửa), nghiệm thu app |
+| Dev lead | `dev-lead` | duyệt spec, duyệt code (chạy trên CI, check `Review`) |
+| Dev | `planner`, `test-writer`, `implementer` | lập plan; RED; GREEN và sửa theo review |
 
 Luật của dự án (`CLAUDE.md`, `docs/05-standards/spec-driven.md`) vẫn áp dụng nguyên. Lệnh này chỉ là
 cách chạy chúng bằng agent.
@@ -26,11 +36,11 @@ cách chạy chúng bằng agent.
   khác, không dán suy nghĩ của bạn.
 - Sau **mỗi** agent, chạy `git status --short` rồi kiểm vùng ghi:
 
-  | Agent | Chỉ được đổi | Vi phạm khi đổi |
+  | Agent (chế độ) | Chỉ được đổi | Vi phạm khi đổi |
   |---|---|---|
-  | `spec-ba` (VIẾT/SỬA) | `openspec/changes/<id>/proposal.md`, `specs/**`, `.openspec.yaml` | `design.md`, `tasks.md`, `test-cases.md`, mọi thứ khác |
-  | `spec-qa` (VIẾT/SỬA) | `openspec/changes/<id>/test-cases.md` | mọi file khác |
-  | `spec-ba`, `spec-qa`, `spec-dev` (DUYỆT) | không gì cả (chỉ đọc) | mọi thứ |
+  | `ba` | `openspec/changes/<id>/proposal.md`, `specs/**`, `.openspec.yaml` | `design.md`, `tasks.md`, `test-cases.md`, mọi thứ khác |
+  | `qa` (VIẾT/SỬA) | `openspec/changes/<id>/test-cases.md` | mọi file khác |
+  | `qa` (DUYỆT SPEC, NGHIỆM THU), `dev-lead` | không gì cả (chỉ đọc) | mọi thứ |
   | `planner` | `openspec/changes/<id>/design.md`, `tasks.md` | `proposal.md`, `specs/**`, code, test |
   | `test-writer` | `*.test.ts(x)`, `apps/web/e2e/**`, `apps/web/src/test/**` | code production, `openspec/` |
   | `implementer` | code production | file test (kể cả e2e, helper test), `openspec/` |
@@ -49,114 +59,88 @@ Phiên trong worktree do app tạo có nhánh `claude/<tên>` (cắt từ `main`
 khi người dùng đồng ý commit/push/mở PR, chạy `git branch -m <spec|feat>/<id>` nếu tên hiện tại chưa
 khớp (nhánh chưa push nên an toàn), rồi mới push. Nhánh đã push thì không đổi tên, hỏi người dùng.
 
-## Pha `spec`
+## Pha `spec` (BA viết, QA + dev lead duyệt, BA/QA sửa)
 
-1. Xác nhận nhánh làm việc cắt từ `main` mới nhất (xem "Nhánh và worktree"); tên `spec/<id>` đặt
-   trước lần push đầu. Nếu đang ở `main` hoặc nhánh của việc khác, hỏi người dùng trước khi tạo nhánh.
-2. Gọi `spec-ba` (chế độ VIẾT) với story/id. Kiểm vùng ghi.
-3. Chạy `pnpm exec openspec validate --all --strict`. Fail thì gọi lại `spec-ba` với output lỗi.
-4. Gọi `spec-qa` (chế độ VIẾT) với change id (đọc spec vừa viết). Kiểm vùng ghi.
-5. **Vòng tranh luận** (tối đa **3 vòng**). Mỗi vòng:
-   1. Gọi **song song** `spec-ba`, `spec-qa`, `spec-dev` ở **chế độ DUYỆT** (mỗi lần là agent mới, chỉ nhận change id và chế độ; vòng sau
-      nhận thêm finding vòng trước và cách đã xử lý). Kiểm `git status` sạch (reviewer không được ghi gì).
-   2. Đọc `VERDICT` và `FINDINGS` của từng agent. Cả ba `approve` thì thoát vòng lặp.
-   3. Gom finding `blocker`/`major` về `spec-ba` (finding về `proposal.md`/`specs/`) và `spec-qa` (finding về
-      `test-cases.md`), mỗi agent chạy ở chế độ SỬA THEO FINDING (finding về code/hạ tầng của `spec-dev` được `spec-ba` đọc và xử lý trong spec). Kiểm vùng ghi, chạy
-      `pnpm exec openspec validate --all --strict`.
-   4. Nếu đã có PR, đăng một comment tóm tắt vòng (bảng agent × verdict × finding chính) để người thật theo dõi.
-   Finding `human` hoặc câu hỏi nghiệp vụ không đủ cơ sở quyết: **không tự quyết**, để thành `- [ ]` trong
-   `## Open Questions` của `proposal.md`. Còn `- [ ]` thì chưa thể approve: dừng vòng lặp và đưa câu hỏi cho người dùng
-   (kèm đề xuất mặc định). Có câu trả lời thì sửa spec rồi chạy lại từ vòng 1.
-   Hết 3 vòng vẫn còn `blocker`/`major`: **dừng hẳn**, không hạ mức độ finding; báo finding còn lại và để người dùng quyết.
-6. **Khi cả ba agent approve** và `Open Questions` hết `- [ ]`: commit và push (khi người dùng đồng ý), mở hoặc
-   cập nhật **PR spec** (`Spec PR: N/A`), rồi đăng một comment duy nhất theo mẫu (sha = commit đầu PR **sau khi push**):
+Nhánh `spec/<id>`, chỉ đụng `openspec/`. Chạy lần lượt, bỏ qua bước đã xong:
+
+1. Nhánh làm việc cắt từ `main` mới nhất (xem "Nhánh và worktree"). Đang ở `main` hoặc nhánh của việc khác thì hỏi trước khi tạo nhánh.
+2. **Viết:** chưa có `proposal.md`/`specs/` thì gọi `ba` (VIẾT). Chạy `pnpm exec openspec validate --all --strict`; fail thì gọi lại `ba` với output lỗi.
+   Chưa có `test-cases.md` thì gọi `qa` (VIẾT).
+3. **Vòng duyệt** (tối đa **3 vòng**). Mỗi vòng:
+   1. Gọi **song song** `qa` và `dev-lead` ở **chế độ DUYỆT SPEC** (agent mới, chỉ nhận change id và chế độ; vòng sau nhận
+      thêm finding vòng trước và cách đã xử lý). Kiểm `git status` sạch.
+   2. Đọc `VERDICT` và `FINDINGS`. Cả hai `approve` thì thoát vòng lặp.
+   3. Gom finding `blocker`/`major`: về `proposal.md`/`specs/` giao `ba` (SỬA); về `test-cases.md` giao `qa` (SỬA). Finding
+      của `dev-lead` về khả thi đi tới `ba` để xử lý trong spec. Kiểm vùng ghi, chạy `openspec validate`.
+   4. Nếu đã có PR, đăng một comment tóm tắt vòng (bảng agent × verdict × finding chính).
+   Finding `human` hoặc business rule không đủ cơ sở quyết: **không tự quyết**, để thành `- [ ]` trong `## Open Questions`
+   của `proposal.md`. Còn `- [ ]` thì chưa thể approve: dừng và đưa câu hỏi cho người dùng (kèm đề xuất mặc định); có câu
+   trả lời thì chạy lại lệnh. Hết 3 vòng vẫn còn `blocker`/`major`: **dừng hẳn**, không hạ mức độ, báo finding còn lại để người dùng quyết.
+4. **Khi cả hai agent approve** và `Open Questions` hết `- [ ]`: khi người dùng đồng ý, commit, push, mở hoặc cập nhật **PR spec**
+   (`Spec PR: N/A`), rồi đăng một comment duy nhất theo mẫu (sha = commit đầu PR **sau khi push**):
 
    ```
-   <!-- csk-spec-agents sha=<HEAD_SHA> ba=approve qa=approve dev=approve -->
+   <!-- csk-spec-agents sha=<HEAD_SHA> qa=approve dev-lead=approve -->
    ## Duyệt spec bởi agent
-   | Vai | Verdict | Số vòng |
+   | Agent | Verdict | Số vòng |
    |---|---|---|
-   | BA | approve | … |
-   | QA | approve | … |
-   | Dev | approve | … |
+   | qa | approve | … |
+   | dev-lead | approve | … |
    Tóm tắt tranh luận và các quyết định: …
    ```
 
-   Push thêm commit thì marker hết hiệu lực: chạy lại bước 5 và đăng lại. Chuyển PR sang ready; check
-   `Spec approvals` còn đợi **một người thật approve**.
-7. **Dừng.** Báo: spec (`proposal.md` + `specs/` + `test-cases.md`) đã được ba agent duyệt, số vòng, quyết định
-   chính, và việc còn lại của người thật (review, approve, merge). Sau đó dev chạy `/relay plan` rồi `/relay code`.
-   Không tạo `design.md`/`tasks.md`.
+   Push thêm commit thì marker hết hiệu lực: chạy lại bước 3 và đăng lại. Chuyển PR sang ready; check `Spec approvals`
+   còn đợi **một người thật approve**.
+5. **Dừng chờ người thật** (review, approve, merge). Không tạo `design.md`/`tasks.md`.
+   Sau khi PR spec merge, chạy `/relay code <id>`.
 
-## Pha `plan`
+## Pha `code` (dev plan và code, dev lead duyệt trên CI, QA nghiệm thu)
 
-1. **Cổng spec:** PR spec phải đã merge. Kiểm `openspec/changes/<id>/specs` có trên `origin/main`
-   (`git fetch origin main` rồi `git cat-file -e origin/main:openspec/changes/<id>/proposal.md`).
-   Không có thì dừng và nói cần merge PR spec trước. Nhánh làm việc phải chứa `origin/main`
-   (`git merge-base --is-ancestor origin/main HEAD`); nếu không, hỏi người dùng có muốn rebase không.
-   Tên nhánh chưa cần là `feat/<id>` (xem "Nhánh và worktree").
-2. Gọi `planner` với change id. Kiểm vùng ghi.
-3. Nếu báo cáo có "Vấn đề với spec": **dừng**, không tự sửa spec. Báo cần mở PR spec fix
-   (`spec/<id>-fix`) cho BA duyệt (spec-driven §2), rồi rebase nhánh này.
-4. Nếu có "Câu hỏi mở": đưa cho người dùng, rồi gọi lại `planner` với câu trả lời.
-5. Chạy `pnpm exec openspec validate --all --strict`. Fail thì gọi lại `planner` với output lỗi.
-6. **Dừng.** Báo: `design.md` và `tasks.md` đã sẵn sàng (số task, layer đích, file dự kiến). Mở **PR code ở
-   dạng draft chỉ chứa hai file này** (`Spec PR: #<số>`), chờ dev lead duyệt và gắn label `plan-approved`
-   (check `Plan đã duyệt`). Chỉ sau đó mới chạy `/relay code`. Hai file này đi cùng PR code.
+Chạy lại cùng lệnh để đi tiếp; mỗi lần chạy lấy trạng thái từ nhánh, `tasks.md` và PR rồi làm bước đầu tiên chưa xong:
 
-## Pha `code`
+**Cổng spec (luôn kiểm trước):** PR spec đã merge. Kiểm `openspec/changes/<id>/proposal.md` có trên `origin/main`
+(`git fetch origin main` rồi `git cat-file -e origin/main:openspec/changes/<id>/proposal.md`); không có thì dừng, nói cần merge PR spec.
+Nhánh làm việc phải chứa `origin/main` (`git merge-base --is-ancestor origin/main HEAD`); nếu không, hỏi người dùng có muốn rebase không. Tên nhánh
+chưa cần là `feat/<id>` (xem "Nhánh và worktree").
 
-1. **Cổng kế hoạch:** PR spec đã merge (như pha `plan`) **và** `openspec/changes/<id>/tasks.md` +
-   `design.md` đã có ở nhánh hiện tại. Thiếu thì dừng và bảo chạy `/relay plan <id>` trước. Nhánh làm việc
-   phải chứa `origin/main` (như pha `plan`).
-   **Cổng duyệt plan:** PR của nhánh phải có label `plan-approved`
-   (`gh pr view --json labels --jq '.labels[].name'`). Chưa có PR hoặc chưa có label thì **dừng** và nói cần mở
-   PR draft chỉ có plan rồi chờ dev lead duyệt; không gọi `test-writer` hay `implementer`. Ngoại lệ có tên:
-   change không có Scenario (docs, config, asset thuần) bỏ cổng này.
-2. Đọc `tasks.md` để lấy danh sách Scenario theo thứ tự. Với **mỗi** Scenario chưa xong, lần lượt:
-   1. **RED:** gọi `test-writer` (id + đúng một Scenario). Kiểm vùng ghi. Báo cáo phải có output
-      test fail đúng lý do; không có thì gọi lại. Chạy lại test đó và tự xác nhận nó fail.
-   2. **GREEN:** gọi `implementer` (id + Scenario + đường dẫn test). Kiểm vùng ghi. Chạy lại test
-      đó và xác nhận nó pass.
-   3. Tick task tương ứng trong `tasks.md`.
-   Không viết hết test rồi mới code. Một Scenario xong hẳn mới sang Scenario kế.
-3. **Verify:** chạy `pnpm typecheck && pnpm lint && pnpm test:run`, cộng `pnpm content:check` hoặc
-   `pnpm e2e` nếu `CLAUDE.md` §8 yêu cầu cho loại thay đổi này. Không nói "xong" khi chưa thấy pass.
-4. **Dừng trước PR.** Review không chạy ở đây: CI (`.github/workflows/review-workflow.yml`) review
-   độc lập sau khi PR mở. Báo cáo: Scenario đã xong, kết quả verify, task đã tick, và gợi ý nội dung
-   PR (`Spec PR: #<số>`, `Closes`/`Refs #<story>`). Nhắc: khi CI xanh thì chuyển PR sang ready, **QA nghiệm
-   thu** theo `test-cases.md` trên artifact `web-dist` và gắn `qa-approved`. Hỏi người dùng có muốn commit và
-   mở PR không.
-5. **Sau khi mở PR:** gắn PR vào phiên (`mcp__ccd_pr__get_status`, chưa có thì `bind_pr`) và bật theo
-   dõi (`set_monitor`) để app đánh thức bạn khi CI review có comment mới hoặc CI đỏ. Mỗi lần được
-   đánh thức, chạy pha `fix`. Không tự poll CI.
+1. **Plan** (chưa có `design.md` + `tasks.md`): gọi `planner`, kiểm vùng ghi. Báo cáo có "Vấn đề với spec" thì **dừng**, không tự
+   sửa spec; báo cần PR spec fix (`spec/<id>-fix`) cho BA duyệt, rồi rebase. Có "Câu hỏi mở" thì hỏi người dùng rồi gọi lại `planner`.
+   Chạy `openspec validate`. Rồi **dừng**: mở **PR code draft chỉ chứa hai file này** (`Spec PR: #<số>`) và chờ dev lead gắn label `plan-approved`.
+2. **Cổng duyệt plan:** PR của nhánh phải có label `plan-approved` (`gh pr view --json labels --jq '.labels[].name'`). Chưa có thì **dừng**; không gọi
+   `test-writer` hay `implementer`. Ngoại lệ có tên: change không có Scenario (docs, config, asset thuần) bỏ cổng này.
+3. **RED/GREEN từng Scenario** chưa xong trong `tasks.md`, theo thứ tự:
+   1. **RED:** gọi `test-writer` (id + đúng một Scenario). Kiểm vùng ghi. Báo cáo phải có output test fail đúng lý do; không có thì
+      gọi lại. Chạy lại test đó và tự xác nhận nó fail.
+   2. **GREEN:** gọi `implementer` (id + Scenario + đường dẫn test). Kiểm vùng ghi. Chạy lại test đó và xác nhận pass.
+   3. Tick task trong `tasks.md`.
+   Một Scenario xong hẳn mới sang Scenario kế.
+4. **Verify:** `pnpm typecheck && pnpm lint && pnpm test:run`, cộng `pnpm content:check` hoặc `pnpm e2e` nếu `CLAUDE.md` §8 yêu cầu cho loại
+   thay đổi này. Không nói "xong" khi chưa thấy pass.
+5. **Mở/cập nhật PR code** (khi người dùng đồng ý commit/push): theo template, `Spec PR: #<số>`, `Closes`/`Refs #<story>`. Gắn PR vào phiên
+   (`mcp__ccd_pr__get_status`, chưa có thì `bind_pr`) và bật theo dõi (`set_monitor`). Không tự poll CI.
+6. **Duyệt code:** `dev-lead` chạy trên CI (`review-workflow.yml`, check `Review`); bạn không gọi nó local. Khi app đánh thức vì finding
+   của `Review`, comment người hoặc CI đỏ, chạy bước **Sửa theo review** dưới đây.
+7. **Nghiệm thu:** khi CI xanh và PR ready, gọi `qa` (NGHIỆM THU) trên bản build; đăng bảng `TC | Pass/Fail | Ghi chú` thành một comment PR.
+   Case Fail: xử lý như finding. Label `qa-approved` do QA người thật gắn (push mới gỡ label, chạy nghiệm thu lại case liên quan).
 
-## Pha `fix`
+### Sửa theo review (một phần của pha `code`)
 
-Xử lý feedback sau PR: finding của CI review (check "Review"), comment của người, CI đỏ. Có thể chạy
-trong phiên mới: trạng thái nằm ở nhánh, `tasks.md` và comment PR.
+Xử lý finding của check `Review`, comment của người, CI đỏ, case QA Fail. Có thể chạy ở phiên mới: trạng thái nằm ở nhánh, `tasks.md` và comment PR.
 
-1. Lấy feedback: inline comment và tóm tắt của CI review qua `gh pr view <n> --comments` và
-   `gh api repos/<owner>/<repo>/pulls/<n>/comments`; hoặc phần người dùng dán vào tin nhắn. Chỉ lấy
-   finding chưa được xử lý (nhìn commit sau comment đó).
+1. Lấy feedback qua `gh pr view <n> --comments` và `gh api repos/<owner>/<repo>/pulls/<n>/comments`; hoặc phần người dùng dán. Chỉ lấy finding chưa xử lý (nhìn commit sau comment đó).
 2. Phân loại từng mục:
    - `code` → `implementer` (chế độ FIX, chỉ danh sách finding).
    - `test` (thiếu hoặc yếu) → `test-writer` bổ sung RED, rồi `implementer` làm xanh.
-   - `spec` → **dừng**, không sửa spec trong PR code. Soạn patch spec ở nhánh `spec/<id>-fix` cho
-     BA duyệt (spec-driven §2): gọi `spec-ba` (chế độ SỬA) với finding, kiểm vùng ghi, chạy
-     `pnpm exec openspec validate --all --strict`, mở PR spec fix (cần người dùng đồng ý), rồi báo.
-   - `qa` (case Fail trong comment kết quả của QA) → xử lý như `code`/`test` theo bản chất lỗi; case có Tự động =
-     `e2e` thì `test-writer` bổ sung test mang ID `TC-…` trước. Sau khi push, báo QA chạy lại đúng case fail (push
-     code gỡ label `qa-approved`).
+   - `spec` → **dừng**, không sửa spec trong PR code. Soạn patch ở nhánh `spec/<id>-fix`: gọi `ba` (SỬA) với finding, kiểm vùng ghi, chạy
+     `openspec validate`, mở PR spec fix (cần người dùng đồng ý) cho BA duyệt (spec-driven §2), rồi báo.
+   - `qa` (case Fail) → xử lý như `code`/`test`; case Tự động = `e2e` thì `test-writer` bổ sung test mang ID `TC-…` trước. Sau khi push báo `qa` chạy lại đúng case fail.
    - `minor`/`nit` → sửa nếu rẻ, không thì ghi lại trong báo cáo.
    - Không đồng ý với finding → không sửa, trả lời comment kèm lý do và báo người dùng.
 3. Gọi agent đúng chủ với **chỉ** danh sách mục đó, kiểm vùng ghi, chạy lại test liên quan.
-4. Verify như bước 3 của pha `code`. Khi người dùng đồng ý, commit và push; push sẽ chạy lại CI
-   review. Không gọi reviewer local.
-5. **Giới hạn:** tối đa **2 vòng** push sửa theo finding blocker/major của CI review. CI review sau
-   vòng thứ 2 chỉ còn comment, không fail check. Hết 2 vòng mà vẫn còn `blocker`/`major`: **dừng hẳn**,
-   không chạy vòng 3, không tự hạ mức độ. Báo: finding còn lại, đã thử gì ở mỗi vòng, và để người
-   dùng chọn (sửa tay / thêm vòng / chấp nhận ngoại lệ có ghi lý do vào PR).
+4. Verify như bước 4 của pha `code`. Khi người dùng đồng ý, commit và push (push chạy lại CI review). Không gọi `dev-lead` local.
+5. **Giới hạn:** tối đa **2 vòng** push sửa theo finding blocker/major của `Review`. Sau vòng thứ 2 CI chỉ còn comment, không fail check.
+   Hết 2 vòng mà còn `blocker`/`major`: **dừng hẳn**, không chạy vòng 3, không hạ mức độ. Báo: finding còn lại, đã thử gì ở mỗi vòng, và để người dùng chọn
+   (sửa tay / thêm vòng / chấp nhận ngoại lệ có ghi lý do vào PR).
 
 ## Báo cáo cho người dùng
 

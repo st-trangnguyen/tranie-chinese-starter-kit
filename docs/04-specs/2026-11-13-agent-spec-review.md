@@ -11,35 +11,40 @@ với nhau để dọn chỗ mơ hồ, và người thật chỉ xem bản đã 
 
 ## 2. Thiết kế
 
-Ba agent, mỗi vai một agent (`.claude/agents/`). Mỗi agent có chế độ ghi và chế độ **DUYỆT** (chỉ đọc, agent mới
-mỗi vòng, context sạch). Duyệt chéo: agent không duyệt bản mình vừa viết trong cùng ngữ cảnh.
+Mỗi vai một agent (`.claude/agents/`), mỗi agent có nhiều chế độ; chế độ DUYỆT chỉ đọc, agent mới mỗi vòng, context sạch.
+Người viết không duyệt bản mình vừa viết.
 
-| Agent | Chế độ VIẾT / SỬA | Chế độ DUYỆT (trọng tâm) |
+| Vai | Agent | Chế độ |
 |---|---|---|
-| `spec-ba` (BA) | `proposal.md`, `specs/` | AC nguyên văn, Scenario đủ, ngôn ngữ BA/QA, mâu thuẫn spec cũ; `test-cases.md` có khớp spec |
-| `spec-qa` (QA) | `test-cases.md` | Scenario kiểm tra được, độ phủ case, kết quả mong đợi cụ thể (tìm lỗi trong `specs/`) |
-| `spec-dev` (Dev) | (không viết) | khả thi trong kiến trúc, layer, dependency, trùng/mâu thuẫn code |
+| BA | `ba` | VIẾT, SỬA spec theo review |
+| QA | `qa` | DUYỆT SPEC (tìm chỗ không kiểm tra được, AC nguyên văn, độ phủ), VIẾT/SỬA test case, NGHIỆM THU app |
+| Dev lead | `dev-lead` | DUYỆT SPEC (khả thi, layer, dependency), DUYỆT CODE (trên CI) |
+| Dev | `planner`, `test-writer`, `implementer` | lập plan; RED; GREEN và sửa theo review (giữ tách để người code không sửa test) |
 
-**Vòng tranh luận** (`/relay spec`, tối đa 3 vòng): ba agent chạy song song ở chế độ DUYỆT → mỗi người ra
-`VERDICT: approve|block` + finding (`blocker`/`major`/`minor`/`human`) → `spec-ba` và `spec-qa` sửa theo finding →
+Mỗi pha là **một lệnh `/relay` chạy lại được**: `/relay spec` (viết, duyệt, sửa) và `/relay code` (plan, RED/GREEN, sửa theo review).
+Duyệt code vẫn chạy trên CI (check `Review`); nghiệm thu do `qa` chạy trên bản build, label `qa-approved` do người thật gắn.
+
+**Vòng tranh luận** (`/relay spec`, tối đa 3 vòng): `qa` và `dev-lead` chạy song song ở chế độ DUYỆT SPEC → mỗi người ra
+`VERDICT: approve|block` + finding (`blocker`/`major`/`minor`/`human`) → `ba` và `qa` sửa theo finding →
 agent DUYỆT mới kiểm lại chỉ phần đã nêu. Finding được ghi vết trong `## Open Questions` của `proposal.md`.
 
 **Chỗ phải dồn lên người thật:** business rule mà story và spec không đủ cơ sở quyết (`human`), và trường hợp hết 3 vòng
 vẫn bất đồng. Chúng ở lại dạng `- [ ]`; cổng không cho merge khi còn `- [ ]`.
 
 **Ghi nhận verdict (quyết định):** một comment PR có marker
-`<!-- csk-spec-agents sha=<commit> ba=approve qa=approve dev=approve -->`, do `/relay spec` đăng sau khi push. Không dùng
+`<!-- csk-spec-agents sha=<commit> qa=approve dev-lead=approve -->`, do `/relay spec` đăng sau khi push. Không dùng
 tài khoản bot hay label.
 
-**Cổng `Spec approvals`** đổi thành: PR không draft · hết `- [ ]` · có `test-cases.md` · marker đúng commit đầu, đủ ba
+**Cổng `Spec approvals`** đổi thành: PR không draft · hết `- [ ]` · có `test-cases.md` · marker đúng commit đầu, đủ hai
 `approve`, từ OWNER/MEMBER/COLLABORATOR · **một** người trong `SPEC_APPROVERS` approve (commit đầu hiện tại). Cổng chạy
 lại khi có comment mới hoặc bị sửa/xoá: run `issue_comment` chỉ chạy lại check `pull_request` mới nhất của đúng commit đầu (check của run `issue_comment` gắn vào nhánh mặc định, không hiện trên PR). `BA_APPROVERS`, `DEV_APPROVERS` bị bỏ.
 
 ## 3. Giới hạn đã biết
 
+- `ba` không duyệt ai nên không có verdict của BA trong marker; việc kiểm "AC chép nguyên văn" chuyển sang `qa` (chế độ DUYỆT SPEC).
 - Marker là comment do tài khoản người chạy đăng, nên cổng chỉ chứng minh quy trình đã chạy trên đúng commit, không
   chứng minh agent thật sự duyệt. Đó là lý do người thật vẫn bắt buộc approve.
-- Ba agent cùng một mô hình dễ đồng thuận quá nhanh. Giảm bằng vai đối lập trong prompt (QA tìm lỗi, Dev tìm rủi ro),
+- Các agent cùng một mô hình dễ đồng thuận quá nhanh. Giảm bằng vai đối lập trong prompt (QA tìm lỗi, Dev tìm rủi ro),
   context sạch cho từng vòng, và finding phải chỉ ra đoạn spec cụ thể.
 - Repo chỉ có một người: tác giả PR được tính là người thật đã duyệt nếu nằm trong `SPEC_APPROVERS` (GitHub không cho
   tự approve), nên cổng người thật khi đó chỉ mang tính hình thức.
@@ -47,7 +52,7 @@ lại khi có comment mới hoặc bị sửa/xoá: run `issue_comment` chỉ ch
 
 ## 4. Thay đổi
 
-`.claude/agents/spec-{ba,qa,dev}.md` (gộp `spec-writer` và `qa-writer` cũ, thêm chế độ sửa theo finding và DUYỆT),
+`.claude/agents/{ba,qa,dev-lead}.md` (gộp từ `spec-writer`, `qa-writer`, `reviewer`; thêm chế độ sửa và DUYỆT), `.claude/commands/relay.md` (hai pha), `review-workflow.yml` (trỏ `dev-lead.md`),
 `.claude/commands/relay.md` (pha `spec`), `.github/workflows/spec-approvals-workflow.yml`, `spec-driven.md`,
 `CLAUDE.md` §8.
 

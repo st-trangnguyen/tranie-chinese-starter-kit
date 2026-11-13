@@ -197,16 +197,16 @@ Mỗi story đi qua **ba pha, hai PR**: **Spec** (agent BA + QA + Dev → ngư�
 2. **Propose**: `/relay spec s<epic>-<n>-<slug>` tạo `openspec/changes/<id>/` với **chỉ** `proposal.md`,
    `specs/` và `test-cases.md` (phần BA/QA đọc). AC của story chép nguyên văn thành Requirement + Scenario
    (ID `S<epic>.<n>-AC<k>`). `design.md` và `tasks.md` là của dev, **không** nằm trong PR spec.
-   **Tranh luận bằng agent**: ba agent `spec-ba`, `spec-qa`, `spec-dev` (BA viết spec, QA viết `test-cases.md`,
-   Dev chỉ duyệt) lần lượt viết rồi duyệt chéo ở chế độ DUYỆT (agent mới, chỉ đọc), nêu finding; BA và QA sửa; tối đa 3 vòng. Mỗi chỗ mơ hồ là một dòng
+   **Tranh luận bằng agent** (một lệnh `/relay spec`): `ba` viết spec, `qa` viết `test-cases.md`; rồi `qa` và `dev-lead` duyệt
+   spec (agent mới, chỉ đọc), nêu finding; `ba` và `qa` sửa; tối đa 3 vòng. Mỗi chỗ mơ hồ là một dòng
    trong `## Open Questions` của `proposal.md`: agent xử lý được thì `- [x] … → …`, business rule agent không
-   quyết được thì để `- [ ]` cho người thật. Cả ba agent approve (comment có marker, đúng commit đầu) thì mở PR
+   quyết được thì để `- [ ]` cho người thật. Cả hai agent duyệt approve (comment có marker, đúng commit đầu) thì mở PR
    spec (`Spec PR: N/A`), chuyển ready; **người thật** (`SPEC_APPROVERS`) review và approve (check
    `Spec approvals`) rồi merge, và **dừng chờ merge** trước khi viết bất kỳ code nào.
 
 **Pha B — Code (nhánh `feat/s<epic>-<n>-<slug>` cắt từ `main` sau khi PR spec merge):**
 
-3. **Plan** rồi tìm pattern: tạo `design.md` và `tasks.md` (`/relay plan <id>`; hai file này đi cùng
+3. **Plan** rồi tìm pattern: tạo `design.md` và `tasks.md` (`/relay code <id>`, bước plan; hai file này đi cùng
    PR code). Mở PR code ở dạng **draft chỉ chứa hai file này**; **dev lead duyệt và gắn label `plan-approved`
    (check `Plan đã duyệt`) thì mới được code**. Tìm code tương tự đã có trong repo và theo đúng pattern đó —
    nhất quán với codebase hiện tại quan trọng hơn áp dụng máy móc ví dụ trong tài liệu.
@@ -219,9 +219,9 @@ Mỗi story đi qua **ba pha, hai PR**: **Spec** (agent BA + QA + Dev → ngư�
    thấy kết quả pass.** Tick các task đã làm trong `tasks.md`.
 8. Chuyển PR code sang ready, ghi `Spec PR: #<số PR spec>`. PR code **không merge được** khi PR spec chưa
    review + merge (check `Spec PR đã merge`), plan chưa duyệt (`Plan đã duyệt`), **QA chưa nghiệm thu theo
-   `test-cases.md` trên bản build của CI và gắn `qa-approved`** (`QA sign-off`), và check `Review` (CI reviewer
+   `test-cases.md` trên bản build của CI và gắn `qa-approved`** (`QA sign-off`), và check `Review` (CI dev-lead
    độc lập, xem bên dưới) phải pass. Push code mới sau khi QA đã ký thì label bị gỡ, QA chạy lại case liên quan.
-   Sau khi mở PR, agent theo dõi PR và chạy `/relay fix` khi có finding. **Không archive trong PR code.**
+   Sau khi mở PR, agent theo dõi PR và chạy `/relay code` (bước sửa theo review) khi có finding. **Không archive trong PR code.**
 
 **Pha C — Archive (tự động):** sau khi PR code merge, workflow `archive-spec-workflow.yml` mở PR
 `docs(openspec): archive <id>` nếu mọi task đã tick. Spec sai hoặc thiếu khi đang code: mở PR spec
@@ -229,8 +229,8 @@ mới cho BA duyệt, đừng sửa spec trong PR code.
 
 Việc không có Scenario (docs, config, asset thuần) bỏ qua Pha A, cổng plan/QA, bước 4–5 và Pha C, ghi `Spec PR: N/A`.
 
-**Chạy bằng agent:** `/relay <spec|plan|code|fix> <change-id>` chạy các pha trên bằng subagent tách
-context (`spec-ba`, `spec-qa`, `spec-dev`, `planner`, `test-writer`, `implementer`, `reviewer` trong `.claude/agents/`; `reviewer` chạy trên CI, không chạy local). Chi tiết:
+**Chạy bằng agent:** `/relay <spec|code> <change-id>` chạy các pha trên bằng subagent tách
+context (`ba`, `qa`, `dev-lead`, `planner`, `test-writer`, `implementer` trong `.claude/agents/`; `dev-lead` duyệt code chạy trên CI, không chạy local). Mỗi pha là một lệnh chạy lại được. Chi tiết:
 `docs/05-standards/spec-driven.md` §7.
 
 ### Lệnh kiểm tra chuẩn
@@ -248,7 +248,7 @@ Không dùng `pnpm test` (watch mode, không tự thoát).
 
 Hàng rào tự động (L5): hook `.claude/hooks/` lint file vừa sửa và chạy typecheck · lint ·
 test · `content:check` trước khi agent kết thúc lượt; CI (`.github/workflows/ci-workflow.yml`)
-chạy lại cùng bộ đó kèm build + `check:fonts` cho mọi PR; `review-workflow.yml` chạy reviewer độc lập
+chạy lại cùng bộ đó kèm build + `check:fonts` cho mọi PR; `review-workflow.yml` chạy `dev-lead` độc lập
 trên PR có đổi ngoài `openspec/` và `docs/` (check `Review`, fail khi còn blocker/major). Dependency Rule §2 được lint bằng
 `no-restricted-imports` trong `eslint.config.mjs`.
 
