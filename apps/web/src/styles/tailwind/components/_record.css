@@ -1,0 +1,42 @@
+/* Ghi âm và so sánh — S5.1. Nút cao tối thiểu 44px; focus dùng :focus-visible toàn cục (_base.css). */
+
+@layer components {
+  .record-button {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-xl text-body font-semibold text-on-accent transition-colors;
+  }
+
+  .record-button:hover {
+    @apply bg-accent-hover;
+  }
+
+  .record-button.is-recording {
+    @apply bg-danger text-on-accent;
+  }
+
+  .record-play-button {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full border-2 border-line-strong bg-transparent px-lg text-body-sm font-semibold text-fg transition-colors;
+  }
+
+  .record-play-button:hover:enabled {
+    @apply bg-accent-soft;
+  }
+
+  .record-play-button:disabled {
+    @apply opacity-60;
+  }
+
+  .record-status {
+    @apply text-body-sm font-semibold text-danger-text;
+  }
+
+  .record-error {
+    @apply text-body-sm font-semibold text-danger-text;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .record-button,
+    .record-play-button {
+      @apply transition-none;
+    }
+  }
+}

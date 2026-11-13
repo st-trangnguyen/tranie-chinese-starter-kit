@@ -66,5 +66,13 @@
       "tone": "Thanh điệu"
     },
     "explanation": "Đáp án đúng: {{pinyin}}"
+  },
+  "record": {
+    "start": "Ghi âm",
+    "stop": "Dừng",
+    "recording": "Đang ghi âm",
+    "listenSample": "Nghe mẫu",
+    "listenRecording": "Nghe bản ghi",
+    "playError": "Không phát được bản ghi."
   }
 }
