@@ -52,7 +52,7 @@ export function SpeakExercise({
   );
   const isOnline = useOnlineStatus();
   const speech = useSpeechRecognition();
-  const canAutoCheck = isOnline && speech.isSupported && !speech.hasError;
+  const canAutoCheck = isOnline && speech.isSupported;
   const isRatingLocked = selectedRating !== null || isLocked;
   const target = resolveTarget(exercise, content);
 
@@ -103,7 +103,7 @@ export function SpeakExercise({
         onRecordStart={handleRecordStart}
         onRecordStop={handleRecordStop}
       />
-      {canAutoCheck && (
+      {canAutoCheck && !speech.hasError && (
         <SpeakAutoCheck
           expected={target.hanzi}
           transcript={speech.transcript}

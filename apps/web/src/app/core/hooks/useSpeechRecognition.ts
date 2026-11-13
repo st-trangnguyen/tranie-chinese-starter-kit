@@ -21,6 +21,7 @@ export function useSpeechRecognition(): SpeechRecognitionState {
   }
   const service = serviceRef.current;
   const isMountedRef = useRef(true);
+  const generationRef = useRef(0);
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
@@ -34,6 +35,7 @@ export function useSpeechRecognition(): SpeechRecognitionState {
   }, [service]);
 
   const start = useCallback((): void => {
+    generationRef.current += 1;
     setTranscript(null);
     setHasError(false);
     try {
@@ -46,17 +48,20 @@ export function useSpeechRecognition(): SpeechRecognitionState {
   }, [service]);
 
   const stop = useCallback(async (): Promise<void> => {
+    const token = generationRef.current;
+    const isCurrent = (): boolean =>
+      isMountedRef.current && generationRef.current === token;
     try {
       const heard = await service.stop();
-      if (isMountedRef.current) {
+      if (isCurrent()) {
         setTranscript(heard);
       }
     } catch {
-      if (isMountedRef.current) {
+      if (isCurrent()) {
         setHasError(true);
       }
     } finally {
-      if (isMountedRef.current) {
+      if (isCurrent()) {
         setIsListening(false);
       }
     }
