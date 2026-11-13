@@ -10,7 +10,9 @@ import { AudioSpeedProvider } from '@shared/contexts/AudioSpeedContext';
 import { SlowToggle } from '@shared/components/SlowToggle';
 import { mockContentFetch } from '@test/mocks/content-fetch';
 import {
+  grantMicrophone,
   installRecordingEnvironment,
+  rejectGetUserMedia,
   restoreRecordingEnvironment,
 } from '@test/record-compare.helpers';
 import testI18n from '@test/i18n';
@@ -998,5 +1000,61 @@ describe('LessonRunnerContainer — câu nói tự đánh giá (S5.2)', () => {
     expect(screen.getByText('75%')).toBeInTheDocument();
     expect(screen.getByText('Đúng 3 / 4 câu')).toBeInTheDocument();
     expect(screen.getByText('Sai 1 câu')).toBeInTheDocument();
+  });
+});
+
+describe('LessonRunnerContainer — mở bài mới kiểm tra lại mic (S5.4)', () => {
+  const speakLessonOf = (id: string) => ({
+    id,
+    type: 'lesson',
+    title: `Luyện nói ${id}`,
+    exercises: [{ id: `${id}-e1`, kind: 'speak', sentenceId: 's1' }],
+  });
+
+  beforeEach(() => {
+    installRecordingEnvironment();
+    rejectGetUserMedia('NotAllowedError');
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      mockContentFetch((input) => {
+        const id = /\/content\/lessons\/(.+)\.json$/.exec(String(input))?.[1];
+        return id === undefined
+          ? new Response('', { status: 404 })
+          : Response.json(speakLessonOf(id));
+      }),
+    );
+  });
+
+  afterEach(() => {
+    restoreRecordingEnvironment();
+  });
+
+  it('S5.4-AC2: bài A mic bị chặn (đọc to), sang bài B khi mic hoạt động thì có nút Ghi âm và không còn lời nhắc đọc to', async () => {
+    const user = userEvent.setup();
+    render(
+      <I18nextProvider i18n={testI18n}>
+        <MemoryRouter initialEntries={['/lessons/a']}>
+          <Link to="/lessons/b">Sang bài B</Link>
+          <Routes>
+            <Route
+              path="/lessons/:lessonId"
+              element={<LessonRunnerContainer />}
+            />
+          </Routes>
+        </MemoryRouter>
+      </I18nextProvider>,
+    );
+    await user.click(await screen.findByRole('button', { name: 'Ghi âm' }));
+    await screen.findByText(/đọc to chữ trên màn/i);
+    grantMicrophone();
+
+    await user.click(screen.getByRole('link', { name: 'Sang bài B' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Luyện nói b' }),
+    ).toBeVisible();
+    expect(
+      await screen.findByRole('button', { name: 'Ghi âm' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/đọc to chữ trên màn/i)).not.toBeInTheDocument();
   });
 });

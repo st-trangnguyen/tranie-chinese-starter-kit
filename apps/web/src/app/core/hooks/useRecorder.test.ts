@@ -159,6 +159,68 @@ describe('useRecorder', () => {
     pauseSpy.mockRestore();
   });
 
+  it('S5.4-AC1: quyền micro bị chặn thì start trả "blocked", failureReason "blocked" và không throw', async () => {
+    setMediaDevices(() =>
+      Promise.reject(new DOMException('denied', 'NotAllowedError')),
+    );
+    const { result } = renderHook(() => useRecorder());
+    expect(result.current.failureReason).toBeNull();
+
+    let returned: unknown;
+    await act(async () => {
+      returned = await result.current.start();
+    });
+
+    expect(returned).toBe('blocked');
+    expect(result.current.failureReason).toBe('blocked');
+    expect(result.current.isRecording).toBe(false);
+    expect(result.current.hasError).toBe(true);
+  });
+
+  it('S5.4-AC1: retry khi đã cấp quyền thì trả null và xóa failureReason/hasError', async () => {
+    setMediaDevices(() =>
+      Promise.reject(new DOMException('denied', 'NotAllowedError')),
+    );
+    const { result } = renderHook(() => useRecorder());
+    await act(async () => {
+      await result.current.start();
+    });
+    expect(result.current.failureReason).toBe('blocked');
+
+    const stream = {
+      getTracks: () => [{ stop: vi.fn() }],
+    } as unknown as MediaStream;
+    setMediaDevices(() => Promise.resolve(stream));
+    let returned: unknown;
+    await act(async () => {
+      returned = await result.current.retry();
+    });
+
+    expect(returned).toBeNull();
+    expect(result.current.failureReason).toBeNull();
+    expect(result.current.hasError).toBe(false);
+    expect(result.current.isRecording).toBe(false);
+  });
+
+  it('S5.4-AC1: retry mà vẫn bị chặn thì trả "blocked" và giữ failureReason', async () => {
+    setMediaDevices(() =>
+      Promise.reject(new DOMException('denied', 'NotAllowedError')),
+    );
+    const { result } = renderHook(() => useRecorder());
+    await act(async () => {
+      await result.current.start();
+    });
+
+    let returned: unknown;
+    await act(async () => {
+      returned = await result.current.retry();
+    });
+
+    expect(returned).toBe('blocked');
+    expect(result.current.failureReason).toBe('blocked');
+    expect(result.current.hasError).toBe(true);
+  });
+
   it('S5.1-AC1: rời màn khi đang ghi thì dừng ghi (track tắt, không setState sau unmount)', async () => {
     const trackStop = vi.fn();
     const stream = {
@@ -174,7 +236,7 @@ describe('useRecorder', () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { result, unmount } = renderHook(() => useRecorder());
 
-    let startPromise: Promise<void> = Promise.resolve();
+    let startPromise: Promise<unknown> = Promise.resolve();
     act(() => {
       startPromise = result.current.start();
     });
@@ -207,7 +269,7 @@ describe('useRecorder', () => {
     const startSpy = vi.spyOn(FakeMediaRecorder.prototype, 'start');
     const { result, unmount } = renderHook(() => useRecorder());
 
-    let startPromise: Promise<void> = Promise.resolve();
+    let startPromise: Promise<unknown> = Promise.resolve();
     act(() => {
       startPromise = result.current.start();
     });

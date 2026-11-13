@@ -60,6 +60,20 @@ export function createFakeStream(stopTrack: () => void = vi.fn()): MediaStream {
   } as unknown as MediaStream;
 }
 
+/** Micro bị từ chối: getUserMedia reject DOMException với `name` (vd NotAllowedError). */
+export function rejectGetUserMedia(name: string): void {
+  stubMediaDevices({
+    getUserMedia: () =>
+      Promise.reject(new DOMException('microphone unavailable', name)),
+  });
+}
+
+/** Cấp quyền micro (sau khi bị chặn): getUserMedia resolve stream giả. */
+export function grantMicrophone(): void {
+  const stream = createFakeStream();
+  stubMediaDevices({ getUserMedia: () => Promise.resolve(stream) });
+}
+
 /** Cài ranh giới ngoài (micro, MediaRecorder, Audio, URL) cho mỗi ca. */
 export function installRecordingEnvironment(): void {
   const stream = createFakeStream();
