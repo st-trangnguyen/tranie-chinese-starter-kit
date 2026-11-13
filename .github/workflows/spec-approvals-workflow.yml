@@ -21,7 +21,8 @@ on:
     types: [created, edited, deleted]
 
 concurrency:
-  group: spec-approvals-${{ github.event.pull_request.number || github.event.issue.number }}
+  # Comment dùng group riêng để không huỷ run `pull_request` đang chạy.
+  group: spec-approvals-${{ github.event_name == 'issue_comment' && 'comment-' || '' }}${{ github.event.pull_request.number || github.event.issue.number }}
   cancel-in-progress: true
 
 permissions:
