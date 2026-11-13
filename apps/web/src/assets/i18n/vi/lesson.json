@@ -74,5 +74,15 @@
     "listenSample": "Nghe mẫu",
     "listenRecording": "Nghe bản ghi",
     "playError": "Không phát được bản ghi."
+  },
+  "speak": {
+    "groupLabel": "Tự đánh giá phát âm",
+    "rating": {
+      "notYet": "Chưa đúng",
+      "close": "Gần đúng",
+      "correct": "Đúng"
+    },
+    "selected": "Đã chọn",
+    "explanation": "Đáp án: {{hanzi}} · {{pinyin}} · {{vi}}"
   }
 }

@@ -1,0 +1,116 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import type { ExerciseContent, ExerciseProps } from './exercise.types';
+import {
+  isRatingCorrect,
+  SPEAK_RATINGS,
+  type SpeakRating,
+} from '../../utils/speak-rating.utils';
+import { RecordCompare } from '../RecordCompare';
+
+const RATING_LABEL_KEYS = {
+  'not-yet': 'speak.rating.notYet',
+  close: 'speak.rating.close',
+  correct: 'speak.rating.correct',
+} as const satisfies Record<SpeakRating, string>;
+
+interface SpeakTarget {
+  hanzi: string;
+  pinyin: string;
+  vi: string;
+  audio: string;
+}
+
+function resolveTarget(
+  exercise: ExerciseProps<'speak'>['exercise'],
+  content: ExerciseContent,
+): SpeakTarget | null {
+  const word = content.words.find((item) => item.id === exercise.wordId);
+  if (word) {
+    return { ...word, vi: word.vi.join(', ') };
+  }
+  const sentence = content.sentences.find(
+    (item) => item.id === exercise.sentenceId,
+  );
+  return sentence ?? null;
+}
+
+export function SpeakExercise({
+  exercise,
+  content,
+  isLocked,
+  onResult,
+}: ExerciseProps<'speak'>) {
+  const { t } = useTranslation('lesson');
+  const [selectedRating, setSelectedRating] = useState<SpeakRating | null>(
+    null,
+  );
+  const isRatingLocked = selectedRating !== null || isLocked;
+  const target = resolveTarget(exercise, content);
+
+  if (!target) {
+    return null;
+  }
+
+  function handleSelect(rating: SpeakRating): void {
+    if (isRatingLocked) {
+      return;
+    }
+    setSelectedRating(rating);
+    if (isRatingCorrect(rating)) {
+      onResult({ isCorrect: true });
+      return;
+    }
+    onResult({
+      isCorrect: false,
+      explanation: t('speak.explanation', {
+        hanzi: target?.hanzi,
+        pinyin: target?.pinyin,
+        vi: target?.vi,
+      }),
+    });
+  }
+
+  return (
+    <div className="flex flex-col gap-md">
+      <div className="flex flex-col gap-xs">
+        <p>{target.hanzi}</p>
+        <p>{target.pinyin}</p>
+        <p>{target.vi}</p>
+      </div>
+      <RecordCompare audioPath={target.audio} />
+      <div
+        role="group"
+        aria-label={t('speak.groupLabel')}
+        className="flex flex-col gap-sm"
+      >
+        {SPEAK_RATINGS.map((rating) => {
+          const isSelected = selectedRating === rating;
+          return (
+            <div key={rating} className="flex flex-col gap-xs">
+              <button
+                type="button"
+                className={
+                  isSelected
+                    ? 'speak-rating-option is-selected'
+                    : 'speak-rating-option'
+                }
+                aria-pressed={isSelected}
+                disabled={isRatingLocked}
+                onClick={() => handleSelect(rating)}
+              >
+                {t(RATING_LABEL_KEYS[rating])}
+              </button>
+              {isSelected && (
+                <span className="speak-rating-selected">
+                  {t('speak.selected')}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,29 @@
+/* Dạng bài nói, tự đánh giá — S5.2. Nút cao tối thiểu 44px, focus nhìn thấy. */
+
+@layer components {
+  .speak-rating-option {
+    @apply min-h-11 rounded-md border-2 border-line bg-surface px-md text-body font-semibold text-fg transition-colors;
+  }
+
+  .speak-rating-option.is-selected {
+    @apply border-accent bg-accent-soft;
+  }
+
+  .speak-rating-option:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .speak-rating-option:disabled {
+    @apply opacity-70;
+  }
+
+  .speak-rating-selected {
+    @apply text-body-sm font-semibold text-fg;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .speak-rating-option {
+      @apply transition-none;
+    }
+  }
+}
