@@ -5,15 +5,27 @@ import { useRecorder } from '@core/hooks/useRecorder';
 
 interface RecordCompareProps {
   audioPath: string;
+  onRecordStart?: () => void;
+  onRecordStop?: () => void;
 }
 
-export function RecordCompare({ audioPath }: RecordCompareProps) {
+export function RecordCompare({
+  audioPath,
+  onRecordStart,
+  onRecordStop,
+}: RecordCompareProps) {
   const { t } = useTranslation('lesson');
   const { isRecording, recordingUrl, start, stop } = useRecorder();
   const { play, playUrl, hasError } = useAudioPlayer();
 
   function handleToggleRecording() {
-    void (isRecording ? stop() : start());
+    if (isRecording) {
+      onRecordStop?.();
+      void stop();
+      return;
+    }
+    onRecordStart?.();
+    void start();
   }
 
   function handlePlaySample() {

@@ -1,0 +1,39 @@
+/* Dạng bài nói, chấm tự động — S5.3. Không chỉ dựa màu: có gạch dưới/viền khác nhau. */
+
+@layer components {
+  .auto-check {
+    @apply rounded-md border border-line bg-surface p-md;
+  }
+
+  .auto-check-title {
+    @apply text-body font-semibold text-fg;
+  }
+
+  .auto-check-text {
+    @apply text-body text-fg;
+  }
+
+  .auto-check-char {
+    @apply rounded-sm px-1 text-fg;
+  }
+
+  .auto-check-char.is-different {
+    @apply bg-danger-soft text-danger-text underline decoration-2;
+  }
+
+  .auto-check-char.is-missing {
+    @apply border-b-2 border-dashed border-warning-text bg-warning-soft text-warning-text;
+  }
+
+  .auto-check-char.is-extra {
+    @apply bg-warning-soft text-warning-text line-through;
+  }
+
+  .auto-check-label {
+    @apply text-body-sm text-fg-muted;
+  }
+
+  .auto-check-message {
+    @apply text-body-sm font-semibold text-fg;
+  }
+}

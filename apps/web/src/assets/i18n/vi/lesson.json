@@ -83,6 +83,17 @@
       "correct": "Đúng"
     },
     "selected": "Đã chọn",
-    "explanation": "Đáp án: {{hanzi}} · {{pinyin}} · {{vi}}"
+    "explanation": "Đáp án: {{hanzi}} · {{pinyin}} · {{vi}}",
+    "autoCheck": {
+      "title": "Chấm tự động",
+      "hint": "Chỉ để tham khảo, bạn vẫn tự chọn mức bên dưới.",
+      "matched": "Khớp với câu đúng",
+      "notHeard": "Máy không nghe được, hãy thử lại",
+      "label": {
+        "different": "Khác",
+        "missing": "Thiếu",
+        "extra": "Thừa"
+      }
+    }
   }
 }
