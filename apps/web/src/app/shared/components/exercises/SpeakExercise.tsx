@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useOnlineStatus } from '@core/hooks/useOnlineStatus';
+import { useSpeechRecognition } from '@core/hooks/useSpeechRecognition';
+
 import type { ExerciseContent, ExerciseProps } from './exercise.types';
 import {
   isRatingCorrect,
@@ -8,6 +11,7 @@ import {
   type SpeakRating,
 } from '../../utils/speak-rating.utils';
 import { RecordCompare } from '../RecordCompare';
+import { SpeakAutoCheck } from './SpeakAutoCheck';
 
 const RATING_LABEL_KEYS = {
   'not-yet': 'speak.rating.notYet',
@@ -46,11 +50,26 @@ export function SpeakExercise({
   const [selectedRating, setSelectedRating] = useState<SpeakRating | null>(
     null,
   );
+  const isOnline = useOnlineStatus();
+  const speech = useSpeechRecognition();
+  const canAutoCheck = isOnline && speech.isSupported && !speech.hasError;
   const isRatingLocked = selectedRating !== null || isLocked;
   const target = resolveTarget(exercise, content);
 
   if (!target) {
     return null;
+  }
+
+  function handleRecordStart(): void {
+    if (canAutoCheck) {
+      speech.start();
+    }
+  }
+
+  function handleRecordStop(): void {
+    if (speech.isListening) {
+      void speech.stop();
+    }
   }
 
   function handleSelect(rating: SpeakRating): void {
@@ -79,7 +98,17 @@ export function SpeakExercise({
         <p>{target.pinyin}</p>
         <p>{target.vi}</p>
       </div>
-      <RecordCompare audioPath={target.audio} />
+      <RecordCompare
+        audioPath={target.audio}
+        onRecordStart={handleRecordStart}
+        onRecordStop={handleRecordStop}
+      />
+      {canAutoCheck && (
+        <SpeakAutoCheck
+          expected={target.hanzi}
+          transcript={speech.transcript}
+        />
+      )}
       <div
         role="group"
         aria-label={t('speak.groupLabel')}
