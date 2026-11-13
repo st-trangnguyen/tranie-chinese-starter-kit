@@ -22,6 +22,8 @@ rules:
     - Open with the story id, a link to its GitHub issue, and the line "Refs #<issue>".
     - State the target layer(s) from CLAUDE.md §1 before describing the solution.
     - State what is out of scope.
+    - 'Include a "## Open Questions" section: one "- [ ]" item per unresolved question, or the single
+      line "Không có." when none. Unticked items block the spec PR from merging.'
   specs:
     - Copy each story AC verbatim into one Requirement with one or more Scenarios (WHEN/THEN).
     - Prefix every Scenario name with its ID, e.g. "S3.1-AC2".

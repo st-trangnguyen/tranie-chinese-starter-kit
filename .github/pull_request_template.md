@@ -20,6 +20,10 @@
 
 <!-- Bắt buộc khi PR thay đổi giao diện (component, CSS, layout, icon, manifest): mobile 375×812 và desktop 1280×800, mỗi khổ sáng + tối (ảnh trên nhánh pr-assets, xem CLAUDE.md §8). Không liên quan UI thì ghi "N/A". -->
 
+#### QA
+
+> Link comment kết quả QA (bảng TC | Pass/Fail | Ghi chú), hoặc N/A nếu PR không có spec
+
 #### Checklist
 
 > Note: Developer is responsible for checking your own code according to this checklist.
@@ -30,6 +34,8 @@
 - [ ] All new and changes have enough test suites.
 - [ ] Mỗi Scenario có một test mang ID `S<epic>.<n>-AC<k>`, test được viết trước và đã thấy fail (RED).
 - [ ] PR spec đã review và merge, mọi task trong `tasks.md` đã tick. Archive do workflow tự mở PR sau khi PR này merge.
+- [ ] Plan đã được dev lead duyệt (label `plan-approved`), hoặc `N/A` nếu PR không có spec.
+- [ ] QA đã nghiệm thu theo `test-cases.md` (label `qa-approved`), hoặc `N/A` nếu PR không có spec.
 
 ##### Coding:
 

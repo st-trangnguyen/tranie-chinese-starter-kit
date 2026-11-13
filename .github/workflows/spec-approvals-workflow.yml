@@ -1,0 +1,122 @@
+# Cổng duyệt spec: PR spec chỉ merge được khi hết câu hỏi mở và đủ approve của ba vai BA / QA / Dev.
+# Quy trình: docs/05-standards/spec-driven.md §2 (Pha A) và "Các cổng".
+#
+# Danh sách người duyệt nằm ở repo variables (handle GitHub, cách nhau dấu phẩy):
+#   BA_APPROVERS, QA_APPROVERS, DEV_APPROVERS
+# Để cổng chặn thật: đặt check "Spec approvals" làm required trong branch protection của `main`.
+# Chỉ dùng API của GitHub và payload sự kiện, không checkout hay chạy code từ nhánh PR.
+name: Spec approvals
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review, converted_to_draft]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+concurrency:
+  group: spec-approvals-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  check:
+    name: Spec approvals
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Kiểm tra Open Questions, test-cases.md và approve của ba vai
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          IS_DRAFT: ${{ github.event.pull_request.draft }}
+          BA_APPROVERS: ${{ vars.BA_APPROVERS }}
+          QA_APPROVERS: ${{ vars.QA_APPROVERS }}
+          DEV_APPROVERS: ${{ vars.DEV_APPROVERS }}
+        run: |
+          set -euo pipefail
+
+          # Chỉ PR spec (nhánh spec/*) cần cổng này. Job vẫn pass cho PR khác để check bắt buộc không treo.
+          if [[ "$HEAD_REF" != spec/* ]]; then
+            echo "Không phải PR spec, bỏ qua."
+            exit 0
+          fi
+
+          failed=0
+          fail() { echo "::error::$1"; failed=1; }
+
+          if [[ "$IS_DRAFT" == "true" ]]; then
+            fail "PR spec đang draft. Chuyển sang ready for review khi hết Open Questions."
+          fi
+
+          # Các change bị PR này đụng tới (bỏ archive/), kèm trạng thái file.
+          files=$(gh api "repos/$REPO/pulls/$PR_NUMBER/files" --paginate \
+            --jq '.[] | [.status, .filename] | @tsv')
+          changes=$(printf '%s\n' "$files" \
+            | awk -F'\t' '{print $2}' \
+            | grep -oE '^openspec/changes/[a-z0-9][a-z0-9-]*/' \
+            | grep -v '^openspec/changes/archive/' | sort -u || true)
+
+          for dir in $changes; do
+            id=${dir#openspec/changes/}; id=${id%/}
+
+            proposal=$(gh api "repos/$REPO/contents/openspec/changes/$id/proposal.md?ref=$HEAD_SHA" \
+              -H "Accept: application/vnd.github.raw" 2>/dev/null || true)
+            if [[ -n "$proposal" ]]; then
+              open_count=$(printf '%s\n' "$proposal" | awk '/^##[[:space:]]+Open Questions/{s=1;next} /^##[[:space:]]/{s=0} s && /^[[:space:]]*- \[ \]/{n++} END{print n+0}')
+              if [[ "$open_count" -gt 0 ]]; then
+                fail "$id: còn $open_count câu hỏi mở (- [ ]) trong 'Open Questions' của proposal.md."
+              fi
+            fi
+
+            # Chỉ đòi test-cases.md khi PR thêm mới proposal.md (change cũ không bị fail oan).
+            if printf '%s\n' "$files" | grep -qxF "added	openspec/changes/$id/proposal.md"; then
+              if ! gh api "repos/$REPO/contents/openspec/changes/$id/test-cases.md?ref=$HEAD_SHA" \
+                   >/dev/null 2>&1; then
+                fail "$id: thiếu openspec/changes/$id/test-cases.md (QA viết cùng PR spec)."
+              fi
+            fi
+          done
+
+          # Review mới nhất của từng người; chỉ APPROVED **trên commit đầu hiện tại** mới tính (push mới làm
+          # approve cũ hết hiệu lực). COMMENTED không đổi trạng thái.
+          approvers=$(gh api "repos/$REPO/pulls/$PR_NUMBER/reviews" --paginate \
+            | jq -rs --arg sha "$HEAD_SHA" '[.[][] | select(.state != "COMMENTED")]
+                      | group_by(.user.login) | map(max_by(.submitted_at))
+                      | .[] | select(.state == "APPROVED" and .commit_id == $sha) | .user.login')
+          # GitHub không cho tác giả tự approve: tác giả PR spec được tính là đã duyệt cho vai của mình.
+          approvers="$approvers $PR_AUTHOR"
+
+          lower() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
+
+          has_role() { # $1 = danh sách handle cách nhau dấu phẩy
+            local list login
+            list=$(lower "${1// /}")
+            for login in $approvers; do
+              if [[ ",$list," == *",$(lower "$login"),"* ]]; then return 0; fi
+            done
+            return 1
+          }
+
+          check_role() { # $1 = tên vai, $2 = tên variable, $3 = giá trị
+            if [[ -z "${3// /}" ]]; then
+              fail "Chưa cấu hình repo variable $2 (xem spec-driven.md, mục Cấu hình repo)."
+            elif has_role "$3"; then
+              echo "✓ $1 đã approve."
+            else
+              fail "Thiếu approve của $1 (một người trong $2)."
+            fi
+          }
+
+          check_role "BA"  BA_APPROVERS  "$BA_APPROVERS"
+          check_role "QA"  QA_APPROVERS  "$QA_APPROVERS"
+          check_role "Dev" DEV_APPROVERS "$DEV_APPROVERS"
+
+          if [[ "$failed" -ne 0 ]]; then exit 1; fi
+          echo "PR spec đủ điều kiện merge."

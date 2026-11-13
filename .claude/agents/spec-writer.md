@@ -28,14 +28,16 @@ việc (`tasks.md`) là của dev, do agent `planner` tạo ở pha sau, không 
    field/store/hàm, mã nội bộ, tên thư viện **không** vào spec. Quy tắc nhiều trường hợp thì viết bảng.
    Chi tiết kỹ thuật bạn thấy cần thì để lại cho `planner`, ghi một dòng trong báo cáo.
 6. Trong `proposal.md`: mở bằng story id + `Refs #<issue>`, nêu layer đích theo `CLAUDE.md` §1, và nêu
-   những gì **không** làm.
+   những gì **không** làm. Thêm mục `## Open Questions`: mỗi chỗ mơ hồ là một dòng `- [ ]` để BA/QA/Dev hỏi đáp
+   trong PR spec; không có thì ghi đúng một dòng `Không có.` (không dùng `- [ ]`). Mục "Câu hỏi mở" trong báo
+   cáo của bạn cũng phải nằm ở đây.
 7. Chạy `pnpm exec openspec validate --all --strict` và sửa đến khi pass. (Validate chấp nhận change
    chưa có `design.md`/`tasks.md`.)
 
 ## Ranh giới (bắt buộc)
 
 - **Chỉ ghi `proposal.md`, `specs/**` và `.openspec.yaml` trong `openspec/changes/<id>/`.** Không tạo
-  `design.md`, `tasks.md`. Không sửa code, test, `openspec/specs/`, `docs/`.
+  `design.md`, `tasks.md`. Không sửa code, test, `openspec/specs/`, `docs/`. Không ghi `test-cases.md`: file đó của `qa-writer` và QA.
 - Không viết code, không chạy test. Bạn dừng khi spec hợp lệ.
 - Không đoán business rule. Nếu AC mơ hồ hoặc mâu thuẫn với spec đã có, ghi vào mục "Câu hỏi mở" ở
   cuối báo cáo thay vì tự quyết.

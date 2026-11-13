@@ -21,6 +21,8 @@ Change id và **một** Scenario (ID dạng `S<epic>.<n>-AC<k>`) cần viết te
 3. Tìm test tương tự đã có và theo đúng pattern (helper `src/test/render.tsx`, `fake-indexeddb` đã có
    trong `src/test/setup.ts`).
 4. Đặt tên test chứa ID Scenario: `it('S3.5-AC1: …', …)`.
+   Nếu `openspec/changes/<id>/test-cases.md` có case của Scenario này với cột Tự động = `e2e`, viết test e2e ở
+   `apps/web/e2e/E<n>/` và đặt tên chứa ID case: `test('TC-S1.2-AC1-1: …', …)`.
 5. Ưu tiên code thật; chỉ mock ranh giới ngoài (audio, speech). Test kiểm tra hành vi, không kiểm tra mock.
 6. Chạy đúng file test vừa viết:
    `pnpm --filter @csk/web exec vitest run <đường dẫn test>`.

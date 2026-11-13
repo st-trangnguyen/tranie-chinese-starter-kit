@@ -39,3 +39,13 @@ jobs:
         run: |
           pnpm --filter @csk/web build
           pnpm --filter @csk/web check:fonts
+
+      # QA nghiệm thu trên đúng bản build của PR (docs/05-standards/spec-driven.md, B6a).
+      - name: Upload bản build cho QA
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/dist
+          retention-days: 14
+          if-no-files-found: error

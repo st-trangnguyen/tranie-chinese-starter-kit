@@ -19,36 +19,43 @@ E1 và E2 đã xong trước khi có OpenSpec nên không migrate. Áp dụng t�
 
 ## 2. Vòng làm một story
 
-Mỗi story đi qua **ba pha, hai PR**, mỗi pha có chủ riêng. BA giữ spec, dev giữ code, không ai phải
-chờ ai báo lại.
+Mỗi story đi qua **ba pha, hai PR**, mỗi pha có chủ riêng. BA giữ spec, QA giữ test case và nghiệm thu, dev giữ code, dev lead giữ cổng plan.
 
 | Pha | Chủ | PR | Kết thúc khi |
 |---|---|---|---|
-| A. Spec | BA | **PR spec** (nhánh `spec/s<epic>-<n>-<slug>`) | PR spec được review và **merge vào `main`**; change vẫn nằm ở `openspec/changes/`, chỉ có `proposal.md` + `specs/` |
-| B. Code | Dev | **PR code** (nhánh `feat/s<epic>-<n>-<slug>`, cắt từ `main` sau pha A) | PR code được review và merge; mọi task trong `tasks.md` đã tick |
+| A. Spec | BA + QA + Dev | **PR spec** (nhánh `spec/s<epic>-<n>-<slug>`) | PR spec được review và **merge vào `main`**; change vẫn nằm ở `openspec/changes/`, chỉ có `proposal.md` + `specs/` + `test-cases.md` |
+| B. Code | Dev, dev lead (plan), QA (nghiệm thu) | **PR code** (nhánh `feat/s<epic>-<n>-<slug>`, cắt từ `main` sau pha A) | plan được duyệt, QA nghiệm thu, PR code được review và merge; mọi task trong `tasks.md` đã tick |
 | C. Archive | Workflow | **PR archive** tự mở sau khi PR code merge | PR archive được merge |
 
-### Pha A: Spec (BA)
+### Pha A: Spec (BA + QA + Dev)
+
+BA giữ spec, QA giữ `test-cases.md`, Dev hỏi đáp để chốt chỗ mơ hồ. Cả ba cùng duyệt trước khi merge.
 
 | # | Bước | Lệnh / việc | Cổng |
 |---|---|---|---|
 | A1 | Chọn story, tạo nhánh `spec/s<epic>-<n>-<slug>` | | |
-| A2 | **Propose** | `/relay spec s<epic>-<n>-<slug>`: chỉ `proposal.md` và `specs/` (không `design.md`, `tasks.md`; nếu dùng `/opsx:propose` thì xoá hai file đó khỏi PR spec) | `pnpm exec openspec validate --all --strict` pass |
-| A3 | Mở **PR spec** | Theo template, `Spec PR: N/A`, `Refs #<story>`, Screenshots `N/A` | **Review và merge**; không có code trong PR này |
+| A2 | **Propose** | `/relay spec s<epic>-<n>-<slug>`: `spec-writer` viết `proposal.md` + `specs/`, `qa-writer` soạn nháp `test-cases.md` (không `design.md`, `tasks.md`; nếu dùng `/opsx:propose` thì xoá hai file đó khỏi PR spec) | `pnpm exec openspec validate --all --strict` pass |
+| A3 | Mở **PR spec ở dạng draft** | Theo template, `Spec PR: N/A`, `Refs #<story>`, Screenshots `N/A`. Hỏi đáp trong comment PR; mỗi câu chốt xong thì sửa spec và tick câu hỏi trong `## Open Questions` | |
+| A4 | QA hoàn thiện `test-cases.md` | QA chỉnh nháp, bổ sung case biên, a11y, mobile, sáng/tối, offline (xem §3) | |
+| A5 | Chuyển PR sang **ready for review** | Chỉ khi `Open Questions` hết `- [ ]` và `test-cases.md` đã có | |
+| A6 | **Review và merge** | Cần approve của đủ ba vai: **BA, QA, Dev**. Không có code trong PR này | `Spec approvals` xanh |
 
 ### Pha B: Code (dev)
 
 | # | Bước | Lệnh / việc | Cổng |
 |---|---|---|---|
 | B1 | Cắt nhánh `feat/s<epic>-<n>-<slug>` từ `main` đã có spec | | PR spec đã merge |
-| B1a | **Plan** | `/relay plan <id>`: tạo `design.md` (cách làm, layer, file) và `tasks.md` (cặp RED/GREEN cho mỗi Scenario). Đi cùng PR code. Spec sai/thiếu thì dừng, mở PR spec fix | `openspec validate --all --strict` pass |
+| B1a | **Plan** | `/relay plan <id>`: tạo `design.md` (cách làm, layer, file) và `tasks.md` (cặp RED/GREEN cho mỗi Scenario). Mở **PR code ở dạng draft chỉ chứa hai file này**. Spec sai/thiếu thì dừng, mở PR spec fix | `openspec validate --all --strict` pass |
+| B1b | **Duyệt plan** | Dev lead review `design.md` + `tasks.md` rồi gắn label `plan-approved`. Chỉ người trong `PLAN_APPROVERS` được tính. Sửa `design.md` sau đó thì label bị gỡ và phải duyệt lại; chỉ tick `tasks.md` thì không | `Plan đã duyệt` xanh; **chưa có label thì chưa viết code** (`/relay code` từ chối chạy) |
 | B2 | **RED** | Viết test cho một Scenario, chạy, thấy fail đúng lý do. Commit `test(...)` | Phải có output fail |
 | B3 | **GREEN** | `/opsx:apply`: code tối thiểu, đúng layer (CLAUDE.md §1–§3). Commit `feat(...)` | Test pass |
 | B4 | **REFACTOR** | Dọn code, giữ xanh | |
 | B5 | **Verify** | `pnpm typecheck && pnpm lint && pnpm test:run` (+ `content:check`, `e2e` theo CLAUDE.md §8) | Toàn bộ pass |
-| B6 | Mở **PR code** | Theo template, ghi `Spec PR: #<số PR spec>`. `Closes #<story>` nếu xong mọi AC, ngược lại `Refs #<story>` | Cổng spec (bên dưới) xanh |
+| B6 | Chuyển **PR code** sang ready | Theo template, ghi `Spec PR: #<số PR spec>`. `Closes #<story>` nếu xong mọi AC, ngược lại `Refs #<story>` | `Spec PR đã merge` (bên dưới) xanh |
+| B6a | **QA nghiệm thu** | QA chạy `test-cases.md` trên artifact `web-dist` của CI: tải về, giải nén vào `apps/web/dist`, chạy `pnpm --filter @csk/web exec vite preview --port 4173`. Kết quả ghi trong **một comment** (bảng `TC \| Pass/Fail \| Ghi chú`). Case Fail: Dev sửa trong PR, QA chạy lại case đó. Pass hết thì gắn label `qa-approved` (chỉ `QA_APPROVERS`). Push code mới thì label bị gỡ | `QA sign-off` xanh |
 
-Lặp B2–B4 cho từng Scenario, không viết hết test rồi mới code. **Không archive trong PR code.**
+Lặp B2–B4 cho từng Scenario, không viết hết test rồi mới code. Case của `test-cases.md` có cột
+Tự động = `e2e` do `test-writer` viết ở `apps/web/e2e/E<n>/`, tên test mang ID `TC-…`. **Không archive trong PR code.**
 
 ### Pha C: Archive (tự động)
 
@@ -60,18 +67,47 @@ PR code, workflow bỏ qua và chờ PR cuối. Cần chạy lại thủ công t
 PR archive chỉ đổi `openspec/`, cần review nhanh rồi merge. Nếu PR archive không tự chạy CI thì
 cấu hình secret `ARCHIVE_PR_TOKEN` (PR tạo bằng `GITHUB_TOKEN` không kích hoạt workflow khác).
 
-### Cổng spec
+### Các cổng
 
-PR code **bắt buộc** có dòng `Spec PR: #<số>` ở mục References, và PR đó phải ở trạng thái **merged**.
-Check `Spec PR đã merge` (`spec-gate-workflow.yml`) fail nếu thiếu dòng, số PR sai, hoặc PR spec chưa
-merge. PR ghi `Closes #<story>` (PR cuối của story) còn phải có dòng `OpenSpec change:` và mọi task
+| Check (bắt buộc) | Áp dụng cho | Fail khi |
+|---|---|---|
+| `Spec approvals` | PR spec (nhánh `spec/*`) | PR còn draft; `proposal.md` còn `- [ ]` trong `## Open Questions`; PR thêm `proposal.md` mới mà thiếu `test-cases.md`; thiếu approve của một trong ba vai BA / QA / Dev. Approve chỉ tính trên **commit đầu hiện tại**; tác giả PR được tính là đã duyệt cho vai của mình (GitHub không cho tự approve) |
+| `Spec PR đã merge` | PR code | Thiếu dòng `Spec PR:`, số PR sai, hoặc PR spec chưa merge (chi tiết bên dưới) |
+| `Plan đã duyệt` | PR đổi file dưới `apps/` hoặc `packages/` | Chưa có label `plan-approved`, hoặc người gắn không thuộc `PLAN_APPROVERS`, hoặc chính là tác giả PR |
+| `QA sign-off` | PR đổi file dưới `apps/` hoặc `packages/` | PR còn draft, chưa có label `qa-approved`, hoặc người gắn không thuộc `QA_APPROVERS`, hoặc chính là tác giả PR |
+
+**Phạm vi của `Plan đã duyệt` và `QA sign-off` tính theo FILE đổi, không theo tên nhánh hay dòng `Spec PR:`**
+(hai thứ đó tự khai được). PR không đổi file nào dưới `apps/` hoặc `packages/` (PR spec, PR archive, docs, config,
+workflow) được miễn: job vẫn chạy và pass để check bắt buộc không treo pending. PR có đổi `apps/` hoặc `packages/`
+luôn cần cả hai cổng, kể cả khi ghi `Spec PR: N/A`. Hệ quả: PR chỉ đổi asset nằm trong `apps/` (ví dụ font) cũng
+cần dev lead và QA duyệt.
+
+**Spec PR đã merge.** PR code **bắt buộc** có dòng `Spec PR: #<số>` ở mục References, và PR đó phải ở trạng
+thái **merged**. Check `Spec PR đã merge` (`spec-gate-workflow.yml`) fail nếu thiếu dòng, số PR sai, hoặc PR
+spec chưa merge. PR ghi `Closes #<story>` (PR cuối của story) còn phải có dòng `OpenSpec change:` và mọi task
 trong `tasks.md` đã tick, nếu không workflow archive sẽ bỏ qua change; PR một phần dùng `Refs #<story>`.
 Khi PR spec merge, workflow tự chạy lại check cho các PR code đang chờ. Dùng `Spec PR: N/A`
 cho PR không có spec đi kèm (docs, config, asset thuần) và cho chính PR spec và PR archive.
 
-PR spec chỉ merge được sau khi được duyệt, nên "merged" đồng nghĩa "đã review". Để cổng chặn thật,
-repo cần bật branch protection cho `main`: bắt buộc approval, và đặt check `Spec PR đã merge` làm required.
-Phần này cấu hình trong Settings, không nằm trong file.
+**Giới hạn đã biết.** GitHub không chặn được việc push commit lên nhánh. Các cổng chặn **merge**; agent
+(`/relay code`) tuân thủ cổng plan. Dev cố tình code trước vẫn push được nhưng PR không merge được. Một người nằm
+trong nhiều danh sách vẫn được tính đủ nhiều vai.
+
+**Cấu hình repo (làm tay, không nằm trong file):**
+
+1. Tạo label: `gh label create plan-approved --color 0E8A16` và `gh label create qa-approved --color 1D76DB`.
+2. Đặt repo variables (Settings → Secrets and variables → Actions → Variables), giá trị là handle GitHub cách nhau
+   dấu phẩy: `BA_APPROVERS`, `QA_APPROVERS`, `DEV_APPROVERS`, `PLAN_APPROVERS`.
+3. Điền handle thật vào `.github/CODEOWNERS` (BA, QA, Dev, dev lead).
+4. Branch protection của `main`: bắt buộc approval và đặt `Spec PR đã merge`, `Spec approvals`,
+   `Plan đã duyệt`, `QA sign-off`, `Review` làm required. Bật **Require review from Code Owners** và
+   **Dismiss stale pull request approvals**.
+5. CODEOWNERS gán `/.github/` cho dev lead: PR đổi workflow chạy workflow của chính nó, nên không có bước này thì
+   một PR có thể sửa cổng thành luôn xanh.
+6. Repo chỉ có một người thì không ai thỏa "khác tác giả": hai cổng label sẽ không pass với PR của người đó. Khi chạy
+   thử, dùng tài khoản thứ hai, hoặc chưa đặt hai check này làm required.
+7. PR archive do `GITHUB_TOKEN` tạo không kích hoạt workflow, nên các check required treo pending nếu thiếu
+   secret `ARCHIVE_PR_TOKEN` (xem Pha C).
 
 ### Spec sai hoặc thiếu khi đang code
 
@@ -79,7 +115,8 @@ Dev không sửa spec trong PR code. Mở PR spec mới (`spec/s<epic>-<n>-<slug
 rồi rebase nhánh code. PR code trỏ lại số PR spec mới nhất trong dòng `Spec PR:` nếu thay đổi đó là
 điều kiện để code.
 
-CODEOWNERS nên gán `openspec/` cho BA và phần còn lại cho dev, để mỗi PR tự xin đúng người review.
+CODEOWNERS gán `openspec/` cho BA + QA + Dev, `test-cases.md` cho QA, `design.md` và `tasks.md` cho dev lead,
+phần còn lại cho dev, để mỗi PR tự xin đúng người review.
 
 ## 3. Viết spec
 
@@ -101,6 +138,30 @@ Quy tắc:
 - Scenario không kiểm tra tự động được thì **viết lại Scenario**, đừng bỏ qua test.
 - Heading cấu trúc và `SHALL`/`MUST` giữ tiếng Anh, nội dung tiếng Việt.
 - Proposal ghi layer đích theo CLAUDE.md §1 và những gì **không** làm.
+
+### Open Questions trong proposal
+
+`proposal.md` có mục `## Open Questions`: mỗi chỗ mơ hồ là một dòng `- [ ]`. BA, QA, Dev hỏi và trả lời trong
+comment PR spec; chốt xong thì sửa spec rồi đổi thành `- [x]`. Không có câu hỏi thì ghi một dòng `Không có.`
+(không dùng `- [ ]`). Còn `- [ ]` thì check `Spec approvals` fail.
+
+### Viết `test-cases.md`
+
+`openspec/changes/<id>/test-cases.md` do QA giữ (`qa-writer` soạn nháp, QA chỉnh), nằm trong PR spec. Chỉ dùng
+thứ người học nhìn thấy, cùng luật với spec. Mỗi Scenario có ít nhất một case.
+
+```markdown
+| ID | Scenario | Loại | Các bước | Kết quả mong đợi | Tự động |
+|---|---|---|---|---|---|
+| TC-S1.2-AC1-1 | S1.2-AC1 | Chức năng | Mở app, tắt mạng, mở lại | Vào được màn Lộ trình | e2e |
+| TC-S1.2-AC1-2 | S1.2-AC1 | Offline | … | … | không |
+```
+
+- ID: `TC-<ID Scenario>-<số thứ tự>`.
+- **Loại:** Chức năng, Biên, A11y, Mobile 375, Sáng/Tối, Offline.
+- **Tự động:** `e2e` (case lặp lại và quan trọng, đưa vào Playwright trong PR code) hoặc `không` (QA chạy tay
+  mỗi lần nghiệm thu).
+- Story nhỏ: 1–3 dòng là đủ.
 
 ### Viết cho BA/QA
 
@@ -181,6 +242,7 @@ việc là một agent mới, thông tin đi qua file và git diff.
 | Agent (`.claude/agents/`) | Pha | Được ghi | Trả về |
 |---|---|---|---|
 | `spec-writer` | A | `proposal.md`, `specs/` trong `openspec/changes/<id>/` | change id, Scenario, kết quả validate |
+| `qa-writer` | A | `test-cases.md` (bản nháp cho QA chỉnh) | số case, Scenario chưa có case, câu hỏi mở |
 | `planner` | B1a | `design.md`, `tasks.md` (không sửa spec) | số task, layer, file dự kiến, vấn đề với spec |
 | `test-writer` | B2 (RED) | file test | test + output fail đúng lý do |
 | `implementer` | B3–B4 (GREEN, REFACTOR), sửa finding | code production, không file test | file đã đổi + output pass |
@@ -201,4 +263,6 @@ nhận lời giải thích của `implementer`, chỉ nhận diff, spec và `CLA
 - **Sửa theo feedback:** sau khi mở PR, phiên gắn PR (`bind_pr`, `set_monitor`); có review comment
   hoặc CI đỏ thì app đánh thức agent chạy `/relay fix <id>` (subagent mới cho mỗi việc). Phiên mới vẫn
   chạy được: trạng thái nằm ở nhánh, `tasks.md` và comment PR.
+- **Cổng plan:** `/relay code` từ chối chạy khi PR của nhánh chưa có label `plan-approved` (trừ change không có
+  Scenario: docs, config, asset thuần).
 - `/relay` dừng trước khi commit/mở PR; người dùng quyết.
