@@ -3,6 +3,7 @@
 # Quy trình: docs/05-standards/spec-driven.md §2 (Pha A) và "Các cổng"; thiết kế:
 # docs/04-specs/2026-11-13-agent-spec-review.md.
 #
+# Comment mới/sửa/xoá chỉ kích hoạt chạy lại check của PR (xem bước issue_comment bên dưới).
 # Verdict của ba agent ghi trong một comment PR có marker (do `/relay spec` đăng):
 #   <!-- csk-spec-agents sha=<commit> ba=approve qa=approve dev=approve -->
 # Chỉ tính comment của OWNER/MEMBER/COLLABORATOR, đúng sha đầu PR, comment mới nhất có marker.
@@ -27,6 +28,7 @@ permissions:
   contents: read
   pull-requests: read
   issues: read
+  actions: write
 
 jobs:
   check:
@@ -39,6 +41,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          EVENT_NAME: ${{ github.event_name }}
           SPEC_APPROVERS: ${{ vars.SPEC_APPROVERS }}
         run: |
           set -euo pipefail
@@ -56,6 +59,19 @@ jobs:
           # Chỉ PR spec (nhánh spec/*) cần cổng này. Job vẫn pass cho PR khác để check bắt buộc không treo.
           if [[ "$HEAD_REF" != spec/* ]]; then
             echo "Không phải PR spec, bỏ qua."
+            exit 0
+          fi
+
+          # issue_comment chạy ở ngữ cảnh nhánh mặc định nên check của nó không gắn vào commit của PR. Vì vậy
+          # comment chỉ dùng để chạy lại check `pull_request` mới nhất của đúng head SHA; check đó mới hiện trên PR.
+          if [[ "$EVENT_NAME" == "issue_comment" ]]; then
+            run_id=$(gh api "repos/$REPO/actions/workflows/spec-approvals-workflow.yml/runs?head_sha=$HEAD_SHA&event=pull_request" \
+              --jq '.workflow_runs | sort_by(.created_at) | last | .id // empty')
+            if [[ -n "$run_id" ]]; then
+              gh run rerun "$run_id" --repo "$REPO" || echo "Chưa chạy lại được run $run_id (đang chạy?); sẽ tự cập nhật ở sự kiện sau."
+            else
+              echo "Chưa có run pull_request cho commit này, bỏ qua."
+            fi
             exit 0
           fi
 

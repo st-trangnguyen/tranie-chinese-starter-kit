@@ -30,7 +30,7 @@ tài khoản bot hay label.
 
 **Cổng `Spec approvals`** đổi thành: PR không draft · hết `- [ ]` · có `test-cases.md` · marker đúng commit đầu, đủ ba
 `approve`, từ OWNER/MEMBER/COLLABORATOR · **một** người trong `SPEC_APPROVERS` approve (commit đầu hiện tại). Cổng chạy
-lại khi có comment mới hoặc bị sửa/xoá. `BA_APPROVERS`, `DEV_APPROVERS` bị bỏ.
+lại khi có comment mới hoặc bị sửa/xoá: run `issue_comment` chỉ chạy lại check `pull_request` mới nhất của đúng commit đầu (check của run `issue_comment` gắn vào nhánh mặc định, không hiện trên PR). `BA_APPROVERS`, `DEV_APPROVERS` bị bỏ.
 
 ## 3. Giới hạn đã biết
 
