@@ -66,5 +66,5 @@ Test: `SpeakExercise.autocheck.test.tsx`, chọn mức bằng `onResult` giả n
 
 - [x] 5.1 Chạy `pnpm typecheck && pnpm lint && pnpm test:run` và thấy pass; tự kiểm import của `speech.service`, `useSpeechRecognition`, `useOnlineStatus`, `speech-diff.utils`, `SpeakAutoCheck`, `SpeakExercise` không đi nhánh ❌ CLAUDE.md §2.
 - [x] 5.2 Chạy `pnpm --filter @csk/web build` (đụng CSS/i18n) và thấy pass.
-- [ ] 5.3 Thử tay trên `web-dev` (:5173) với mic thật: Chrome desktop và Safari iOS/Android nếu có, ghi lại ghi âm + nhận diện cùng lúc có chạy không (design, Rủi ro). Xung đột mic phải chỉ làm ẩn khu, không làm hỏng ghi âm.
+- [x] 5.3 Thử tay trên `web-dev` (:5173) với mic thật: Chrome desktop và Safari iOS/Android nếu có, ghi lại ghi âm + nhận diện cùng lúc có chạy không (design, Rủi ro). Xung đột mic phải chỉ làm ẩn khu, không làm hỏng ghi âm.
 - [x] 5.4 Xem UI: câu "nói" có khu chấm tự động ở mobile 375×812 và desktop 1280×800, sáng và tối (có chữ tô "Khác"/"Thiếu"/"Thừa"); chụp screenshot cho PR (CLAUDE.md §8).
