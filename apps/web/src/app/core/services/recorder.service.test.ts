@@ -151,6 +151,34 @@ describe('RecorderService', () => {
     expect(revokeObjectUrl).not.toHaveBeenCalled();
   });
 
+  it('S5.1-AC1: discard khi getUserMedia còn pending thì khi stream về mọi track bị dừng và không tạo/khởi động recorder', async () => {
+    const stream = new FakeStream();
+    let resolveStream: (value: MediaStream) => void = () => {};
+    const createRecorder = vi.fn(
+      () => new FakeRecorder('voice') as unknown as MediaRecorder,
+    );
+    const service = new RecorderService({
+      getUserMedia: () =>
+        new Promise<MediaStream>((resolve) => {
+          resolveStream = resolve;
+        }),
+      createRecorder,
+      createObjectUrl: vi.fn(() => 'blob:fake-1'),
+      revokeObjectUrl: vi.fn(),
+    });
+    const startSpy = vi.spyOn(FakeRecorder.prototype, 'start');
+
+    const startPromise = service.start();
+    service.discard();
+    resolveStream(stream as unknown as MediaStream);
+    await startPromise.catch(() => undefined);
+
+    stream.tracks.forEach((track) => expect(track.stop).toHaveBeenCalled());
+    expect(startSpy).not.toHaveBeenCalled();
+    expect(createRecorder).not.toHaveBeenCalled();
+    startSpy.mockRestore();
+  });
+
   it('S5.1-AC1: discard gọi hai lần không lỗi và không thu hồi URL hai lần', async () => {
     const { service, revokeObjectUrl } = setup();
 

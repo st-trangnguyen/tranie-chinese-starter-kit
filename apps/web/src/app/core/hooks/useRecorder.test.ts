@@ -190,4 +190,34 @@ describe('useRecorder', () => {
     expect(errorSpy).not.toHaveBeenCalled();
     errorSpy.mockRestore();
   });
+
+  it('S5.1-AC1: rời màn khi getUserMedia còn pending thì khi stream về track bị dừng', async () => {
+    const trackStop = vi.fn();
+    const stream = {
+      getTracks: () => [{ stop: trackStop }],
+    } as unknown as MediaStream;
+    let resolveStream: (value: MediaStream) => void = () => {};
+    setMediaDevices(
+      () =>
+        new Promise<MediaStream>((resolve) => {
+          resolveStream = resolve;
+        }),
+    );
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const startSpy = vi.spyOn(FakeMediaRecorder.prototype, 'start');
+    const { result, unmount } = renderHook(() => useRecorder());
+
+    let startPromise: Promise<void> = Promise.resolve();
+    act(() => {
+      startPromise = result.current.start();
+    });
+    unmount();
+    resolveStream(stream);
+    await startPromise.catch(() => undefined);
+
+    expect(trackStop).toHaveBeenCalled();
+    expect(startSpy).not.toHaveBeenCalled();
+    startSpy.mockRestore();
+    errorSpy.mockRestore();
+  });
 });
