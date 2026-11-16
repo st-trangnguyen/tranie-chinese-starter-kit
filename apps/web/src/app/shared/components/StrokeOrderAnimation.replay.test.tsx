@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { act, renderWithProviders, screen } from '@test/render';
 import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
-import { STROKE_DATA_HAO } from '@test/stroke.fixtures';
+import { STROKE_DATA_HAO, STROKE_DATA_REN } from '@test/stroke.fixtures';
 
 import { StrokeOrderAnimation } from './StrokeOrderAnimation';
 
@@ -14,6 +14,9 @@ vi.mock('hanzi-writer', async () => {
 
 const HAO_STROKE_COUNT = STROKE_DATA_HAO.strokes.length;
 const ALL_HAO_STROKES = STROKE_DATA_HAO.strokes.map((_, index) => index);
+const REN_STROKE_COUNT = STROKE_DATA_REN.strokes.length;
+const ALL_REN_STROKES = STROKE_DATA_REN.strokes.map((_, index) => index);
+const REPLAY_TIMES = 3;
 
 /** Các nét được yêu cầu vẽ kể từ mốc `before` (writer cũ dùng lại, hoặc writer mới). */
 const strokesRequestedSince = (
@@ -141,5 +144,54 @@ describe('StrokeOrderAnimation — phát lại khi đang phát', () => {
       'data-drawn-stroke-count',
       String(HAO_STROKE_COUNT),
     );
+  });
+});
+
+describe('StrokeOrderAnimation — phát lại nhiều lần', () => {
+  beforeEach(() => {
+    FakeHanziWriter.reset();
+  });
+
+  afterEach(() => {
+    FakeHanziWriter.reset();
+  });
+
+  it('S6.1-AC2: Phát lại nhiều lần — 3 lần bấm trên 人, mỗi lần vẽ đủ 2 nét theo thứ tự', async () => {
+    const { user } = renderWithProviders(
+      <StrokeOrderAnimation character="人" strokeData={STROKE_DATA_REN} />,
+    );
+    const figure = screen.getByRole('img', { name: 'Thứ tự nét chữ 人' });
+    await vi.waitFor(() => {
+      expect(FakeHanziWriter.last().pendingStrokes).toEqual([0]);
+    });
+    await playStrokes(FakeHanziWriter.last(), figure, 0, REN_STROKE_COUNT);
+    await waitALittle();
+
+    for (let round = 1; round <= REPLAY_TIMES; round += 1) {
+      const writer = FakeHanziWriter.last();
+      const requestedBefore = writer.requestedStrokes.length;
+
+      await user.click(screen.getByRole('button', { name: 'Phát lại' }));
+
+      // Ngay sau mỗi lần bấm: bắt đầu lại từ 0 nét.
+      expect(figure).toHaveAttribute('data-drawn-stroke-count', '0');
+      await vi.waitFor(() => {
+        expect(strokesRequestedSince(writer, requestedBefore)).toEqual([0]);
+      });
+
+      const replayWriter = FakeHanziWriter.last();
+      await playStrokes(replayWriter, figure, 0, REN_STROKE_COUNT);
+
+      // Lượt này yêu cầu đúng nét 0 rồi nét 1, không nét thừa, xong có 2 nét.
+      await waitALittle();
+      expect(strokesRequestedSince(writer, requestedBefore)).toEqual(
+        ALL_REN_STROKES,
+      );
+      expect(replayWriter.pendingStrokes).toEqual([]);
+      expect(figure).toHaveAttribute(
+        'data-drawn-stroke-count',
+        String(REN_STROKE_COUNT),
+      );
+    }
   });
 });
