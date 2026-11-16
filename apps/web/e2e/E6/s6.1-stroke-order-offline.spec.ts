@@ -88,7 +88,9 @@ test.describe('S6.1 Xem thứ tự nét khi không có mạng', () => {
     await expect(page.getByText(UNAVAILABLE_MESSAGE)).toBeVisible();
     await expect(page.getByText(ERROR_MESSAGE)).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Thử lại' })).toHaveCount(0);
-    await expect(page.getByRole('img', { name: /Thứ tự nét chữ/ })).toHaveCount(0);
+    await expect(page.getByRole('img', { name: /Thứ tự nét chữ/ })).toHaveCount(
+      0,
+    );
     await expect(page.getByRole('button', { name: 'Phát lại' })).toHaveCount(0);
   });
 
