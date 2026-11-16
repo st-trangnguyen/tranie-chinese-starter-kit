@@ -16,7 +16,7 @@ export function useStrokeAnimation(
   character: string,
   strokeData: StrokeData,
 ): StrokeAnimation {
-  const [drawnStrokeCount] = useState(0);
+  const [drawnStrokeCount, setDrawnStrokeCount] = useState(0);
 
   useEffect(() => {
     const target = targetRef.current;
@@ -24,8 +24,22 @@ export function useStrokeAnimation(
       return undefined;
     }
     const writer = createStrokeWriter(target, character, strokeData);
-    void writer.animateStroke(0);
+    let isActive = true;
+
+    // Mỗi nét chỉ bắt đầu sau khi nét trước resolve, nên không bao giờ có hai nét cùng vẽ.
+    const play = async (): Promise<void> => {
+      for (let index = 0; index < strokeData.strokes.length; index += 1) {
+        const result = await writer.animateStroke(index);
+        if (!isActive || result === 'cancelled') {
+          return;
+        }
+        setDrawnStrokeCount(index + 1);
+      }
+    };
+    void play();
+
     return () => {
+      isActive = false;
       writer.destroy();
     };
   }, [targetRef, character, strokeData]);

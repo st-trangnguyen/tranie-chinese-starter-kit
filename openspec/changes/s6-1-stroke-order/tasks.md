@@ -55,8 +55,8 @@ Test chung file `apps/web/src/app/shared/components/StrokeOrderAnimation.test.ts
 - [x] 7.2 GREEN: `useStrokeAnimation` (`targetRef: RefObject<SVGGElement | null>`, tự phát một lần trong effect, cleanup `destroy`) + `StrokeOrderAnimation` (figure, `<g ref>` đích writer trong `<svg viewBox="0 0 1024 1024">`); tạo `assets/i18n/vi/stroke-order.json` (key `figureLabel`), thêm `'stroke-order'` vào `I18N_NAMESPACES` và `src/test/i18n.ts`; kiểm: test 7.1 pass
 - [x] 7.3 RED: S6.1-AC1 "Chữ mờ nền hiện trong lúc vẽ" — lớp chữ mờ có đủ 6 path của 好 ngay khi mở, giữa chừng và khi xong; số nét đã vẽ ngay khi mở là 0, khi xong là 6 (không cộng lớp mờ); `<g>` đích writer nằm trong cùng `<svg>` với lớp mờ, sau các path mờ — kiểm: fail
 - [x] 7.4 GREEN: `shared/components/StrokeGlyph.tsx` (variant `outline`, render `children` sau nhóm path) + `shared/utils/stroke.utils.ts` (`STROKE_VIEWBOX`, `STROKE_PATH_TRANSFORM`), `StrokeOrderAnimation` đặt `<g ref>` làm `children` của `StrokeGlyph`; kiểm: test 7.3 pass
-- [ ] 7.5 RED: S6.1-AC1 "Mỗi lúc chỉ vẽ một nét" — với 好, sau mỗi `finishStroke()` số nét tăng đúng 1 (1…6) và fake không bao giờ có hơn một nét đang vẽ — kiểm: fail
-- [ ] 7.6 GREEN: vòng lặp tuần tự `await animateStroke(i)` rồi tăng `drawnStrokeCount`; kiểm: test 7.5 pass
+- [x] 7.5 RED: S6.1-AC1 "Mỗi lúc chỉ vẽ một nét" — với 好, sau mỗi `finishStroke()` số nét tăng đúng 1 (1…6) và fake không bao giờ có hơn một nét đang vẽ — kiểm: fail
+- [x] 7.6 GREEN: vòng lặp tuần tự `await animateStroke(i)` rồi tăng `drawnStrokeCount`; kiểm: test 7.5 pass
 - [ ] 7.7 RED: S6.1-AC1 "Nét hiện đúng thứ tự viết" — với 人, nét 0 (phẩy) xong trước khi nét 1 (mác) được yêu cầu; xong có 2 nét — kiểm: chạy, nếu pass ngay thì tạm đảo thứ tự lặp để thấy fail rồi trả lại
 - [ ] 7.8 GREEN: thứ tự theo chỉ số nét của dữ liệu; kiểm: test 7.7 pass
 - [ ] 7.9 RED: S6.1-AC1 "Số nét được vẽ bằng số nét của chữ" — 白 phát xong có đúng 5 nét, không có lần gọi vẽ nét thứ 6 — kiểm: fail nếu vòng lặp chưa dừng đúng, nếu pass ngay thì xác nhận bằng cách tạm đổi giới hạn vòng lặp
