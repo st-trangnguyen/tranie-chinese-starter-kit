@@ -80,4 +80,27 @@ describe('StrokeOrderService — use cases', () => {
     expect(source.getStrokeIndex).not.toHaveBeenCalled();
     expect(source.getStrokeData).not.toHaveBeenCalled();
   });
+
+  it('S6.1-AC1 Chữ không có dữ liệu nét: "龘" không có trong danh sách thì trả unavailable và không đọc file nét', async () => {
+    const source = makeSource();
+    const service = new StrokeOrderService(source);
+
+    const result = await service.getStrokeOrder('龘');
+
+    expect(result).toEqual({ status: 'unavailable' });
+    expect(source.getStrokeData).not.toHaveBeenCalled();
+  });
+
+  it('S6.1-AC1 Chữ không có dữ liệu nét: "人" có trong danh sách thì trả available kèm dữ liệu nét của 人', async () => {
+    const source = makeSource();
+    const service = new StrokeOrderService(source);
+
+    const result = await service.getStrokeOrder('人');
+
+    expect(result).toEqual({
+      status: 'available',
+      character: '人',
+      strokeData: STROKE_DATA,
+    });
+  });
 });
