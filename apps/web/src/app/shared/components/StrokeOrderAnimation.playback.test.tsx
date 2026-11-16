@@ -12,6 +12,26 @@ vi.mock('hanzi-writer', async () => {
   return { default: mock.FakeHanziWriter };
 });
 
+/** Các path của lớp chữ mờ nền (`stroke-order-outline`), không tính nét writer vẽ. */
+const getOutlinePaths = (figure: HTMLElement): SVGPathElement[] => {
+  const paths = figure.querySelectorAll<SVGPathElement>(
+    '.stroke-order-outline path, path.stroke-order-outline',
+  );
+  return [...new Set(paths)].filter(
+    (path) => path.closest('.stroke-order-writer') === null,
+  );
+};
+
+/** Các nét được yêu cầu vẽ kể từ mốc `before` (writer cũ dùng lại, hoặc writer mới). */
+const strokesRequestedSince = (
+  previous: FakeHanziWriter,
+  before: number,
+): number[] => {
+  const current = FakeHanziWriter.last();
+  const offset = current === previous ? before : 0;
+  return current.requestedStrokes.slice(offset);
+};
+
 const waitALittle = async (): Promise<void> => {
   await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -103,5 +123,63 @@ describe('StrokeOrderAnimation — lượt phát', () => {
     // Sau khi phát xong: nút vẫn còn và bấm được.
     const replayAfterDone = screen.getByRole('button', { name: 'Phát lại' });
     expect(replayAfterDone).toBeEnabled();
+  });
+
+  it('S6.1-AC2: Phát lại sau khi đã phát xong', async () => {
+    const { user } = renderWithProviders(
+      <StrokeOrderAnimation character="人" strokeData={STROKE_DATA_REN} />,
+    );
+
+    const figure = screen.getByRole('img', { name: 'Thứ tự nét chữ 人' });
+    await vi.waitFor(() => {
+      expect(FakeHanziWriter.last().pendingStrokes).toEqual([0]);
+    });
+    const writer = FakeHanziWriter.last();
+
+    // Phát xong cả 2 nét của 人.
+    for (let drawn = 1; drawn <= STROKE_DATA_REN.strokes.length; drawn += 1) {
+      await act(async () => {
+        writer.finishStroke();
+      });
+      await vi.waitFor(() => {
+        expect(figure).toHaveAttribute(
+          'data-drawn-stroke-count',
+          String(drawn),
+        );
+      });
+    }
+    const requestedBefore = writer.requestedStrokes.length;
+
+    await user.click(screen.getByRole('button', { name: 'Phát lại' }));
+
+    // Ngay sau khi bấm: chưa có nét nào được vẽ, chỉ còn chữ mờ nền đủ 2 nét.
+    expect(figure).toHaveAttribute('data-drawn-stroke-count', '0');
+    const outlinePaths = getOutlinePaths(figure);
+    expect(outlinePaths).toHaveLength(STROKE_DATA_REN.strokes.length);
+    expect(outlinePaths.map((path) => path.getAttribute('d'))).toEqual(
+      STROKE_DATA_REN.strokes,
+    );
+
+    // Vẽ lại từ nét đầu tiên, đúng thứ tự: nét 0 rồi nét 1.
+    await vi.waitFor(() => {
+      expect(strokesRequestedSince(writer, requestedBefore)).toEqual([0]);
+    });
+    const replayWriter = FakeHanziWriter.last();
+    for (let drawn = 1; drawn <= STROKE_DATA_REN.strokes.length; drawn += 1) {
+      expect(replayWriter.pendingStrokes).toEqual([drawn - 1]);
+      await act(async () => {
+        replayWriter.finishStroke();
+      });
+      await vi.waitFor(() => {
+        expect(figure).toHaveAttribute(
+          'data-drawn-stroke-count',
+          String(drawn),
+        );
+      });
+    }
+
+    await waitALittle();
+    expect(strokesRequestedSince(writer, requestedBefore)).toEqual([0, 1]);
+    expect(figure).toHaveAttribute('data-drawn-stroke-count', '2');
   });
 });

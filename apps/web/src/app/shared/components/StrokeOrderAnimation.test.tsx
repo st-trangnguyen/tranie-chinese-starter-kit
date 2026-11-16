@@ -211,7 +211,10 @@ describe('StrokeOrderAnimation', () => {
         writer.finishStroke();
       });
       await vi.waitFor(() => {
-        expect(figure).toHaveAttribute('data-drawn-stroke-count', String(drawn));
+        expect(figure).toHaveAttribute(
+          'data-drawn-stroke-count',
+          String(drawn),
+        );
       });
     }
 
