@@ -51,3 +51,35 @@ describe('StrokeOrderContainer — tải dữ liệu nét lỗi', () => {
     await expectLoadErrorScreen();
   });
 });
+
+describe('StrokeOrderContainer — dữ liệu nét hỏng hoặc sai cấu trúc', () => {
+  it('S6.1-AC1 Dữ liệu nét hỏng hoặc sai cấu trúc: should show "Có lỗi xảy ra" with "Thử lại" and no figure or "Phát lại" when 人.json is not JSON', async () => {
+    env.replaceStrokeFetch({
+      '人.json': () => new Response('<!doctype html>', { status: 200 }),
+    });
+
+    await expectLoadErrorScreen();
+  });
+
+  it('S6.1-AC1 Dữ liệu nét hỏng hoặc sai cấu trúc: should show "Có lỗi xảy ra" with "Thử lại" and no figure or "Phát lại" when 人.json is valid JSON without strokes', async () => {
+    env.replaceStrokeFetch({
+      '人.json': () =>
+        new Response(
+          JSON.stringify({
+            medians: [
+              [
+                [0, 0],
+                [10, 10],
+              ],
+            ],
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        ),
+    });
+
+    await expectLoadErrorScreen();
+  });
+});
