@@ -63,8 +63,8 @@ Test chung file `apps/web/src/app/shared/components/StrokeOrderAnimation.test.ts
 - [x] 7.10 GREEN: dừng đúng ở `strokes.length`; kiểm: test 7.9 pass
 - [x] 7.11 RED: S6.1-AC1 "Animation chỉ tự phát một lần" — 人 phát xong, chạy hết timer giả/re-render: không có lượt phát mới, vẫn 2 nét — kiểm: fail nếu effect phát lại, nếu pass ngay thì tạm thêm dep sai để thấy fail rồi trả lại
 - [x] 7.12 GREEN: effect chỉ phụ thuộc writer/dữ liệu; kiểm: test 7.11 pass
-- [ ] 7.13 RED: S6.1-AC2 "Có nút Phát lại bấm được" — có `button` tên "Phát lại", không `disabled`, cả khi đang phát và sau khi xong — kiểm: fail vì chưa có nút
-- [ ] 7.14 GREEN: nút `type="button"`, key `replay` trong `stroke-order.json`; kiểm: test 7.13 pass
+- [x] 7.13 RED: S6.1-AC2 "Có nút Phát lại bấm được" — có `button` tên "Phát lại", không `disabled`, cả khi đang phát và sau khi xong — kiểm: fail vì chưa có nút
+- [x] 7.14 GREEN: nút `type="button"`, key `replay` trong `stroke-order.json`; kiểm: test 7.13 pass
 - [ ] 7.15 RED: S6.1-AC2 "Phát lại sau khi đã phát xong" — 人 xong, bấm "Phát lại": ngay sau bấm số nét 0 và lớp mờ vẫn còn; vẽ lại từ nét 0 rồi nét 1, xong có 2 nét — kiểm: fail
 - [ ] 7.16 GREEN: `replay()` (event handler): `runId` mới, `clear()`, đặt 0, phát lại; kiểm: test 7.15 pass
 - [ ] 7.17 RED: S6.1-AC2 "Phát lại khi đang phát" — 好 đang ở nét thứ 3, bấm "Phát lại": ngay sau bấm 0 nét; `finishStroke()` của lượt cũ không làm tăng số nét; lượt mới vẽ từ nét 0, xong có đúng 6 nét — kiểm: fail

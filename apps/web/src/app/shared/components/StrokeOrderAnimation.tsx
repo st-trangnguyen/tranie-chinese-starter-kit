@@ -24,15 +24,20 @@ export function StrokeOrderAnimation({
   );
 
   return (
-    <figure
-      role="img"
-      aria-label={t('figureLabel', { character })}
-      data-drawn-stroke-count={drawnStrokeCount}
-      className="stroke-order-figure flex flex-col"
-    >
-      <StrokeGlyph strokeData={strokeData} variant="outline">
-        <g ref={targetRef} className="stroke-order-writer" />
-      </StrokeGlyph>
-    </figure>
+    <div className="flex flex-col gap-md">
+      <figure
+        role="img"
+        aria-label={t('figureLabel', { character })}
+        data-drawn-stroke-count={drawnStrokeCount}
+        className="stroke-order-figure flex flex-col"
+      >
+        <StrokeGlyph strokeData={strokeData} variant="outline">
+          <g ref={targetRef} className="stroke-order-writer" />
+        </StrokeGlyph>
+      </figure>
+      <button type="button" className="btn btn-ghost self-center">
+        {t('replay')}
+      </button>
+    </div>
   );
 }
