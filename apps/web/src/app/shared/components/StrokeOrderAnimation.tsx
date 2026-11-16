@@ -17,11 +17,15 @@ export function StrokeOrderAnimation({
 }: StrokeOrderAnimationProps) {
   const { t } = useTranslation('stroke-order');
   const targetRef = useRef<SVGGElement>(null);
-  const { drawnStrokeCount } = useStrokeAnimation(
+  const { drawnStrokeCount, replay } = useStrokeAnimation(
     targetRef,
     character,
     strokeData,
   );
+
+  function handleReplay() {
+    replay();
+  }
 
   return (
     <div className="flex flex-col gap-md">
@@ -35,7 +39,11 @@ export function StrokeOrderAnimation({
           <g ref={targetRef} className="stroke-order-writer" />
         </StrokeGlyph>
       </figure>
-      <button type="button" className="btn btn-ghost self-center">
+      <button
+        type="button"
+        className="btn btn-ghost self-center"
+        onClick={handleReplay}
+      >
         {t('replay')}
       </button>
     </div>
