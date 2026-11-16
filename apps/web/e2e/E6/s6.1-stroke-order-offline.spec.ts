@@ -76,6 +76,22 @@ test.describe('S6.1 Xem thứ tự nét khi không có mạng', () => {
     await expect(page.getByText(UNAVAILABLE_MESSAGE)).toHaveCount(0);
   });
 
+  test('TC-S6.1-AC1-38: S6.1-AC1 Chữ không có dữ liệu nét khi offline — 龘 hiện thông báo, không lỗi', async ({
+    page,
+    context,
+  }) => {
+    await openOnceWithServiceWorker(page);
+
+    await context.setOffline(true);
+    await page.goto(strokeOrderPath('龘'));
+
+    await expect(page.getByText(UNAVAILABLE_MESSAGE)).toBeVisible();
+    await expect(page.getByText(ERROR_MESSAGE)).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Thử lại' })).toHaveCount(0);
+    await expect(page.getByRole('img', { name: /Thứ tự nét chữ/ })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Phát lại' })).toHaveCount(0);
+  });
+
   test('TC-S6.1-AC1-37: danh sách chữ có dữ liệu nét của bản build khớp dữ liệu nét của dự án', async ({
     request,
   }) => {

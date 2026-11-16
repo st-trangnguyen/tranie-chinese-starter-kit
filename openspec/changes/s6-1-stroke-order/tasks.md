@@ -120,8 +120,8 @@ E2E viết sau nhóm 9 sẽ chạy trên màn đã có: với mỗi RED, nếu p
 - [x] 11.4 GREEN: bảo đảm `content/strokes/*.json` và `index.json` trong precache (glob hiện có); kiểm: test 11.3 pass
 - [x] 11.5 RED: S6.1-AC1 "Mọi chữ có dữ liệu nét đều xem được khi offline" (TC-AC1-37) — trong `s6.1-stroke-order-offline.spec.ts`: lúc nạp file đọc `apps/web/src/assets/content/strokes/index.json` và parse bằng `strokeIndexSchema`, sinh **một test cho mỗi chữ** (tên chứa ID và chữ); một test chặn lệch: `/content/strokes/index.json` của bản build (qua `request`) bằng đúng danh sách đó; mỗi test chữ đọc số nét từ file nét của bản build **trước** khi tắt mạng (qua `request`, không qua trang), rồi offline mở chữ đó, `expect.poll` `data-drawn-stroke-count` bằng số nét với `timeout: strokePollTimeout(số nét)`; kiểm: thấy fail như 11.3 rồi trả lại
 - [x] 11.6 GREEN: sửa đến khi pass; kiểm: test 11.5 pass
-- [ ] 11.7 RED: S6.1-AC1 "Chữ không có dữ liệu nét khi offline" (TC-AC1-38) — offline mở 龘: "Chưa có dữ liệu nét cho chữ này.", không "Có lỗi xảy ra", không "Thử lại", không figure, không "Phát lại"; kiểm: thấy fail (tạm cho service fetch file nét trước khi xét danh sách nếu pass ngay) rồi trả lại
-- [ ] 11.8 GREEN: sửa đến khi pass; kiểm: test 11.7 pass
+- [x] 11.7 RED: S6.1-AC1 "Chữ không có dữ liệu nét khi offline" (TC-AC1-38) — offline mở 龘: "Chưa có dữ liệu nét cho chữ này.", không "Có lỗi xảy ra", không "Thử lại", không figure, không "Phát lại"; kiểm: thấy fail (tạm cho service fetch file nét trước khi xét danh sách nếu pass ngay) rồi trả lại
+- [x] 11.8 GREEN: sửa đến khi pass; kiểm: test 11.7 pass
 
 ## 12. Tài liệu và kiểm tra
 
