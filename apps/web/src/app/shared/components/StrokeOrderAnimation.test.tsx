@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { act, renderWithProviders, screen } from '@test/render';
 import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
-import { STROKE_DATA_HAO } from '@test/stroke.fixtures';
+import { STROKE_DATA_HAO, STROKE_DATA_REN } from '@test/stroke.fixtures';
 
 import { StrokeOrderAnimation } from './StrokeOrderAnimation';
 
@@ -149,6 +149,41 @@ describe('StrokeOrderAnimation', () => {
       'data-drawn-stroke-count',
       String(strokeCount),
     );
+    expect(writer.pendingStrokes).toEqual([]);
+  });
+
+  it('S6.1-AC1: Nét hiện đúng thứ tự viết', async () => {
+    renderWithProviders(
+      <StrokeOrderAnimation character="人" strokeData={STROKE_DATA_REN} />,
+    );
+
+    const figure = screen.getByRole('img', { name: 'Thứ tự nét chữ 人' });
+    await vi.waitFor(() => {
+      expect(FakeHanziWriter.last().pendingStrokes).toEqual([0]);
+    });
+    const writer = FakeHanziWriter.last();
+
+    // Nét phẩy (0) đang vẽ: nét mác (1) chưa được yêu cầu.
+    expect(writer.requestedStrokes).toEqual([0]);
+    expect(figure).toHaveAttribute('data-drawn-stroke-count', '0');
+
+    // Phẩy xong rồi mới tới mác.
+    await act(async () => {
+      writer.finishStroke();
+    });
+    await vi.waitFor(() => {
+      expect(writer.requestedStrokes).toEqual([0, 1]);
+    });
+    expect(writer.pendingStrokes).toEqual([1]);
+    expect(figure).toHaveAttribute('data-drawn-stroke-count', '1');
+
+    await act(async () => {
+      writer.finishStroke();
+    });
+    await vi.waitFor(() => {
+      expect(figure).toHaveAttribute('data-drawn-stroke-count', '2');
+    });
+    expect(writer.requestedStrokes).toEqual([0, 1]);
     expect(writer.pendingStrokes).toEqual([]);
   });
 });
