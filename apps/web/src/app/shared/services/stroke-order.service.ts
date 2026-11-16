@@ -43,11 +43,15 @@ export class StrokeOrderService {
     if (!this.isSingleHanCharacter(input)) {
       return { status: 'unavailable' };
     }
-    const index = await this.readStrokeIndex();
-    if (!this.hasStrokeData(input, index)) {
-      return { status: 'unavailable' };
+    try {
+      const index = await this.readStrokeIndex();
+      if (!this.hasStrokeData(input, index)) {
+        return { status: 'unavailable' };
+      }
+      const strokeData = await this.readStrokeData(input);
+      return { status: 'available', character: input, strokeData };
+    } catch (error) {
+      throw new Error('Không tải được dữ liệu nét.', { cause: error });
     }
-    const strokeData = await this.readStrokeData(input);
-    return { status: 'available', character: input, strokeData };
   }
 }

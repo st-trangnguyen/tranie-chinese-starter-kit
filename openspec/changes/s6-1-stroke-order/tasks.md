@@ -39,8 +39,8 @@ Ba file hỗ trợ này tạo ở task RED đầu tiên cần đến chúng.
 - [x] 5.8 GREEN: Phần 1 `readStrokeIndex`/`readStrokeData`, Phần 2 `hasStrokeData` (comment "Rule: …"), Phần 3 nhánh danh sách; kiểm: test 5.7 pass
 - [x] 5.9 RED: S6.1-AC1 "Chữ không có dữ liệu nét khi offline" — fake nguồn: `getStrokeIndex` trả danh sách, mọi `getStrokeData` throw lỗi mạng; `getStrokeOrder('龘')` vẫn trả `unavailable` (không throw) — `stroke-order.service.test.ts`; kiểm: chạy, nếu pass ngay thì xác nhận test đúng bằng cách tạm đảo nhánh 5.8 cho thấy fail rồi trả lại
 - [x] 5.10 GREEN: giữ thứ tự "kiểm danh sách trước, chỉ đọc file nét khi có trong danh sách"; kiểm: test 5.9 pass
-- [ ] 5.11 RED: S6.1-AC1 "Tải dữ liệu nét lỗi" và "Dữ liệu nét hỏng hoặc sai cấu trúc" — nguồn throw ở `getStrokeIndex` hoặc ở `getStrokeData('人')` → `getStrokeOrder` throw `Error('Không tải được dữ liệu nét.')` có `cause` — `stroke-order.service.test.ts`; kiểm: fail
-- [ ] 5.12 GREEN: bọc lỗi đọc trong Phần 3; kiểm: test 5.11 pass
+- [x] 5.11 RED: S6.1-AC1 "Tải dữ liệu nét lỗi" và "Dữ liệu nét hỏng hoặc sai cấu trúc" — nguồn throw ở `getStrokeIndex` hoặc ở `getStrokeData('人')` → `getStrokeOrder` throw `Error('Không tải được dữ liệu nét.')` có `cause` — `stroke-order.service.test.ts`; kiểm: fail
+- [x] 5.12 GREEN: bọc lỗi đọc trong Phần 3; kiểm: test 5.11 pass
 
 ## 6. Adapter vẽ nét — `core/services/stroke-writer.service.ts` (design D5; nền cho "Mỗi lúc chỉ vẽ một nét")
 
