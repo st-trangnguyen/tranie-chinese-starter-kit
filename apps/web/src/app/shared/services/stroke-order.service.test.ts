@@ -120,3 +120,94 @@ describe('StrokeOrderService — use cases', () => {
     expect(offlineSource.getStrokeData).not.toHaveBeenCalled();
   });
 });
+
+const STROKE_LOAD_ERROR_MESSAGE = 'Không tải được dữ liệu nét.';
+
+const captureRejection = async (
+  promise: Promise<unknown>,
+): Promise<unknown> => {
+  try {
+    await promise;
+  } catch (error) {
+    return error;
+  }
+  throw new Error('Mong đợi promise bị reject nhưng nó resolve');
+};
+
+const expectStrokeLoadError = (error: unknown, original: Error): void => {
+  expect(error).toBeInstanceOf(Error);
+  if (!(error instanceof Error)) {
+    return;
+  }
+  expect(error.message).toBe(STROKE_LOAD_ERROR_MESSAGE);
+  expect(error.cause).toBe(original);
+};
+
+describe('StrokeOrderService — lỗi tải dữ liệu nét', () => {
+  it('S6.1-AC1 Tải dữ liệu nét lỗi: đọc danh sách chữ có nét thất bại thì "人" reject với lỗi "Không tải được dữ liệu nét." kèm cause là lỗi gốc', async () => {
+    const original = new TypeError('Failed to fetch');
+    const source: ContentSource = {
+      ...makeSource(),
+      getStrokeIndex: vi.fn(async () => {
+        throw original;
+      }),
+    };
+    const service = new StrokeOrderService(source);
+
+    const error = await captureRejection(service.getStrokeOrder('人'));
+
+    expectStrokeLoadError(error, original);
+    expect(source.getStrokeData).not.toHaveBeenCalled();
+  });
+
+  it('S6.1-AC1 Tải dữ liệu nét lỗi: đọc file nét của "人" thất bại (HTTP 500) thì reject với lỗi "Không tải được dữ liệu nét." kèm cause là lỗi gốc', async () => {
+    const original = new Error(
+      'Không tải được nội dung: /content/strokes/%E4%BA%BA.json (HTTP 500)',
+    );
+    const source: ContentSource = {
+      ...makeSource(),
+      getStrokeData: vi.fn(async () => {
+        throw original;
+      }),
+    };
+    const service = new StrokeOrderService(source);
+
+    const error = await captureRejection(service.getStrokeOrder('人'));
+
+    expectStrokeLoadError(error, original);
+  });
+
+  it('S6.1-AC1 Dữ liệu nét hỏng hoặc sai cấu trúc: file nét của "人" sai cấu trúc thì reject với lỗi "Không tải được dữ liệu nét." kèm cause là lỗi gốc', async () => {
+    const original = new Error(
+      'Nội dung không hợp lệ: /content/strokes/%E4%BA%BA.json',
+    );
+    const source: ContentSource = {
+      ...makeSource(),
+      getStrokeData: vi.fn(async () => {
+        throw original;
+      }),
+    };
+    const service = new StrokeOrderService(source);
+
+    const error = await captureRejection(service.getStrokeOrder('人'));
+
+    expectStrokeLoadError(error, original);
+  });
+
+  it('S6.1-AC1 Dữ liệu nét hỏng hoặc sai cấu trúc: file nét của "人" là JSON hỏng thì reject với lỗi "Không tải được dữ liệu nét." kèm cause là lỗi gốc', async () => {
+    const original = new SyntaxError(
+      'Unexpected token } in JSON at position 12',
+    );
+    const source: ContentSource = {
+      ...makeSource(),
+      getStrokeData: vi.fn(async () => {
+        throw original;
+      }),
+    };
+    const service = new StrokeOrderService(source);
+
+    const error = await captureRejection(service.getStrokeOrder('人'));
+
+    expectStrokeLoadError(error, original);
+  });
+});
