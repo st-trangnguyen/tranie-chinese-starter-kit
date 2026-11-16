@@ -176,4 +176,35 @@ describe('StrokeOrderContainer', () => {
     );
     expect(strokeFileRequests).toEqual([]);
   });
+
+  it('S6.1-AC1 Chữ được yêu cầu rỗng: should show "Chưa có dữ liệu nét cho chữ này." without figure, replay button or any stroke request when opening /characters/stroke-order', async () => {
+    openRoute('/characters/stroke-order');
+
+    // Màn thứ tự nét được mở, không rơi vào trang NotFound.
+    await screen.findByRole(
+      'heading',
+      { name: 'Thứ tự nét' },
+      { timeout: 3000 },
+    );
+    expect(
+      screen.queryByRole('heading', { name: 'Không tìm thấy trang' }),
+    ).not.toBeInTheDocument();
+
+    expect(
+      await screen.findByText('Chưa có dữ liệu nét cho chữ này.'),
+    ).toBeInTheDocument();
+
+    // Không hiện khối animation, không hiện nút "Phát lại".
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(document.querySelectorAll('figure')).toHaveLength(0);
+    expect(
+      screen.queryByRole('button', { name: 'Phát lại' }),
+    ).not.toBeInTheDocument();
+
+    // Chữ rỗng bị loại trước khi đọc nguồn: không request nào tới dữ liệu nét.
+    const strokeRequests = strokeFetch.requests.filter((url) =>
+      url.startsWith('/content/strokes/'),
+    );
+    expect(strokeRequests).toEqual([]);
+  });
 });

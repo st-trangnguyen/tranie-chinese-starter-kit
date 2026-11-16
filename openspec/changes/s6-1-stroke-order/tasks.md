@@ -89,8 +89,8 @@ Test chung `apps/web/src/app/pages/stroke-order/containers/StrokeOrderContainer.
 - [x] 9.4 GREEN: nhánh `loading` (`role="status"`, key `loading`); kiểm: test 9.3 pass
 - [x] 9.5 RED: S6.1-AC1 "Chữ không có dữ liệu nét" — mở 龘: thấy "Chưa có dữ liệu nét cho chữ này.", không figure, không "Phát lại", không "Có lỗi xảy ra" — kiểm: fail
 - [x] 9.6 GREEN: nhánh `unavailable` (key `unavailable`); kiểm: test 9.5 pass
-- [ ] 9.7 RED: S6.1-AC1 "Chữ được yêu cầu rỗng" — mở `/characters/stroke-order`: thông báo không có dữ liệu, không figure, không "Phát lại", không có request nét nào — kiểm: fail nếu route không khớp (rơi vào NotFound)
-- [ ] 9.8 GREEN: segment tùy chọn `:character?`, `useParams().character ?? ''`; kiểm: test 9.7 pass
+- [x] 9.7 RED: S6.1-AC1 "Chữ được yêu cầu rỗng" — mở `/characters/stroke-order`: thông báo không có dữ liệu, không figure, không "Phát lại", không có request nét nào — kiểm: fail nếu route không khớp (rơi vào NotFound)
+- [x] 9.8 GREEN: segment tùy chọn `:character?`, `useParams().character ?? ''`; kiểm: test 9.7 pass
 - [ ] 9.9 RED: S6.1-AC1 "Chữ được yêu cầu không phải chữ Hán" — mở `/characters/abc/stroke-order`: thông báo không có dữ liệu, không figure, không "Phát lại" — kiểm: chạy, nếu pass ngay nhờ 5.4 thì xác nhận bằng cách tạm cho container bỏ qua `unavailable` rồi trả lại
 - [ ] 9.10 GREEN: sửa đến khi pass; kiểm: test 9.9 pass
 - [ ] 9.11 RED: S6.1-AC1 "Chữ được yêu cầu gồm nhiều chữ" — mở `/characters/你好/stroke-order` (URL encode): thông báo không có dữ liệu, không figure, không "Phát lại", không có text/figure riêng của 你 hay 好 — kiểm: như 9.9
