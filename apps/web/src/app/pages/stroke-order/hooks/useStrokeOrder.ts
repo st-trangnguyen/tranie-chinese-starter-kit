@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useInitialReducedMotion } from '@core/hooks/useInitialReducedMotion';
 import type { StrokeOrderView } from '@shared/models/stroke-order.model';
 import { StrokeOrderService } from '@shared/services/stroke-order.service';
 
 export interface StrokeOrderState {
   view: StrokeOrderView;
   retry: () => void;
+  /** Giảm chuyển động lúc mở màn (chốt khi mount, D7). */
+  isReducedMotion: boolean;
 }
 
 /** Nạp dữ liệu nét của một chữ (S6.1); `view` giữ trong state nên `strokeData` ổn định giữa các lần render. */
 export const useStrokeOrder = (character: string): StrokeOrderState => {
+  const isReducedMotion = useInitialReducedMotion();
   const strokeOrderService = useMemo(() => new StrokeOrderService(), []);
   const [view, setView] = useState<StrokeOrderView>({ status: 'loading' });
   const [attempt, setAttempt] = useState(0);
@@ -48,5 +52,5 @@ export const useStrokeOrder = (character: string): StrokeOrderState => {
     setAttempt((previous) => previous + 1);
   }, []);
 
-  return { view, retry };
+  return { view, retry, isReducedMotion };
 };

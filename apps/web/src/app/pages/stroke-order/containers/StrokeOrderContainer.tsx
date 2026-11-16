@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import { StrokeOrderAnimation } from '@shared/components/StrokeOrderAnimation';
+import { StrokeOrderStatic } from '@shared/components/StrokeOrderStatic';
 import { useStrokeOrder } from '../hooks/useStrokeOrder';
 
 interface StrokeOrderScreenProps {
@@ -11,7 +12,7 @@ interface StrokeOrderScreenProps {
 /** Phần thân màn theo trạng thái tải dữ liệu nét. */
 function StrokeOrderBody({ character }: StrokeOrderScreenProps) {
   const { t } = useTranslation(['stroke-order', 'common']);
-  const { view, retry } = useStrokeOrder(character);
+  const { view, retry, isReducedMotion } = useStrokeOrder(character);
 
   const handleRetry = () => {
     retry();
@@ -40,6 +41,14 @@ function StrokeOrderBody({ character }: StrokeOrderScreenProps) {
     return <p className="stroke-order-message">{t('unavailable')}</p>;
   }
   if (view.status === 'ready') {
+    if (isReducedMotion) {
+      return (
+        <StrokeOrderStatic
+          character={view.character}
+          strokeData={view.strokeData}
+        />
+      );
+    }
     return (
       <StrokeOrderAnimation
         character={view.character}
