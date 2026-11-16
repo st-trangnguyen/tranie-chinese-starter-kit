@@ -1,19 +1,9 @@
-import { Suspense } from 'react';
-import { I18nextProvider } from 'react-i18next';
-import { Outlet, RouterProvider, createMemoryRouter } from 'react-router-dom';
-import { render, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
-import { renderChildren } from '@core/modules/custom-router-dom/RouterOutlet';
-import testI18n from '@test/i18n';
-import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
-import {
-  mockStrokeFetch,
-  type StrokeFetchMock,
-} from '@test/mocks/stroke-fetch';
 import { screen } from '@test/render';
+import { openRoute, setupStrokeOrderRoute } from '@test/stroke-order-route';
 import strokeIndex from '@assets/content/strokes/index.json';
-import pageRoutes from '../../page.routes';
 
 // Ranh giới ngoài: thư viện vẽ nét hanzi-writer được thay bằng bản giả điều khiển được.
 vi.mock('hanzi-writer', async () => {
@@ -21,59 +11,7 @@ vi.mock('hanzi-writer', async () => {
   return { default: mock.FakeHanziWriter };
 });
 
-const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
-
-// Trình duyệt không bật giảm chuyển động.
-const stubReducedMotion = (matches: boolean): void => {
-  vi.stubGlobal(
-    'matchMedia',
-    vi.fn((query: string) => ({
-      matches: query === REDUCED_MOTION_QUERY ? matches : false,
-      media: query,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-    })),
-  );
-};
-
-/** Mở một địa chỉ qua đúng bảng route của app (cùng cấu trúc Root trong App.tsx). */
-const openRoute = (path: string) => {
-  const router = createMemoryRouter(
-    [
-      {
-        path: '/',
-        element: (
-          <Suspense fallback={null}>
-            <Outlet />
-          </Suspense>
-        ),
-        children: renderChildren(pageRoutes),
-      },
-    ],
-    { initialEntries: [path] },
-  );
-  return render(
-    <I18nextProvider i18n={testI18n}>
-      <RouterProvider router={router} />
-    </I18nextProvider>,
-  );
-};
-
-let strokeFetch: StrokeFetchMock;
-
-beforeEach(() => {
-  FakeHanziWriter.reset();
-  stubReducedMotion(false);
-  strokeFetch = mockStrokeFetch();
-  vi.spyOn(globalThis, 'fetch').mockImplementation(strokeFetch.fetch);
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
-  vi.unstubAllGlobals();
-});
+const env = setupStrokeOrderRoute();
 
 describe('StrokeOrderContainer', () => {
   it('S6.1-AC1 Màn chỉ hiện một chữ: should show only the stroke-order figure of 好 when opening /characters/好/stroke-order', async () => {
@@ -102,7 +40,7 @@ describe('StrokeOrderContainer', () => {
     otherCharacters.forEach((character) =>
       expect(document.body).not.toHaveTextContent(character),
     );
-    const strokeFileRequests = strokeFetch.requests.filter(
+    const strokeFileRequests = env.strokeFetch.requests.filter(
       (url) =>
         url.startsWith('/content/strokes/') && !url.endsWith('/index.json'),
     );
@@ -113,10 +51,9 @@ describe('StrokeOrderContainer', () => {
 
   it('S6.1-AC1 Đang tải dữ liệu nét: should show "Đang tải…" without figure or replay button while stroke data of 人 is still loading', async () => {
     // Ranh giới ngoài: file nét của 人 không bao giờ trả về (đang tải).
-    strokeFetch = mockStrokeFetch({
+    env.replaceStrokeFetch({
       '人.json': () => new Promise<Response>(() => undefined),
     });
-    vi.spyOn(globalThis, 'fetch').mockImplementation(strokeFetch.fetch);
 
     openRoute(`/characters/${encodeURIComponent('人')}/stroke-order`);
 
@@ -127,7 +64,7 @@ describe('StrokeOrderContainer', () => {
       { timeout: 3000 },
     );
     await waitFor(() =>
-      expect(strokeFetch.requests).toContain(
+      expect(env.strokeFetch.requests).toContain(
         `/content/strokes/${encodeURIComponent('人')}.json`,
       ),
     );
@@ -153,7 +90,7 @@ describe('StrokeOrderContainer', () => {
       { timeout: 3000 },
     );
     await waitFor(() =>
-      expect(strokeFetch.requests).toContain('/content/strokes/index.json'),
+      expect(env.strokeFetch.requests).toContain('/content/strokes/index.json'),
     );
 
     expect(
@@ -170,7 +107,7 @@ describe('StrokeOrderContainer', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
     // Không tải file nét nào, chỉ đọc danh sách.
-    const strokeFileRequests = strokeFetch.requests.filter(
+    const strokeFileRequests = env.strokeFetch.requests.filter(
       (url) =>
         url.startsWith('/content/strokes/') && !url.endsWith('/index.json'),
     );
@@ -202,7 +139,7 @@ describe('StrokeOrderContainer', () => {
     ).not.toBeInTheDocument();
 
     // Chữ rỗng bị loại trước khi đọc nguồn: không request nào tới dữ liệu nét.
-    const strokeRequests = strokeFetch.requests.filter((url) =>
+    const strokeRequests = env.strokeFetch.requests.filter((url) =>
       url.startsWith('/content/strokes/'),
     );
     expect(strokeRequests).toEqual([]);
@@ -230,7 +167,7 @@ describe('StrokeOrderContainer', () => {
     ).not.toBeInTheDocument();
 
     // Chữ không hợp lệ bị loại trước khi đọc nguồn: không request nào tới dữ liệu nét.
-    const strokeRequests = strokeFetch.requests.filter((url) =>
+    const strokeRequests = env.strokeFetch.requests.filter((url) =>
       url.startsWith('/content/strokes/'),
     );
     expect(strokeRequests).toEqual([]);
