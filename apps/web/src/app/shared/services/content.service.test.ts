@@ -3,6 +3,8 @@ import type {
   Exercise,
   Lesson,
   Sentence,
+  StrokeData,
+  StrokeIndex,
   Word,
 } from '@csk/shared';
 
@@ -55,6 +57,16 @@ const makeSentence = (id: string): Sentence => ({
 });
 
 const WORDS: Word[] = ['w1', 'w2', 'w3'].map(makeWord);
+const STROKE_INDEX: StrokeIndex = ['八'];
+const STROKE_DATA: StrokeData = {
+  strokes: ['M 0 0 L 1 1'],
+  medians: [
+    [
+      [0, 0],
+      [1, 1],
+    ],
+  ],
+};
 const SENTENCES: Sentence[] = ['s1', 's2'].map(makeSentence);
 
 const makeSource = (): ContentSource => ({
@@ -62,6 +74,8 @@ const makeSource = (): ContentSource => ({
   getLesson: vi.fn(async (lessonId: string) => makeLesson(lessonId)),
   getWords: vi.fn(async () => WORDS),
   getSentences: vi.fn(async () => SENTENCES),
+  getStrokeIndex: vi.fn(async () => STROKE_INDEX),
+  getStrokeData: vi.fn(async () => STROKE_DATA),
 });
 
 describe('ContentService — use cases', () => {
