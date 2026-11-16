@@ -83,8 +83,8 @@ Test chung file `apps/web/src/app/shared/components/StrokeOrderAnimation.test.ts
 
 Test chung `apps/web/src/app/pages/stroke-order/containers/StrokeOrderContainer.test.tsx` — Vitest + Testing Library, `MemoryRouter` + route `characters/:character?/stroke-order` thật từ `stroke-order.routes.ts`, mock `fetch` bằng `src/test/mocks/stroke-fetch.ts` (tạo ở 9.1), fake hanzi-writer, stub `matchMedia`. Tách `StrokeOrderContainer.states.test.tsx` nếu > 300 dòng.
 
-- [ ] 9.1 RED: S6.1-AC1 "Màn chỉ hiện một chữ" — mở `/characters/好/stroke-order`: đúng một figure "Thứ tự nét chữ 好", không có figure/nút chuyển chữ khác — kiểm: fail vì chưa có route/màn
-- [ ] 9.2 GREEN: `ROUTE_PATHS.strokeOrder`, `stroke-order.routes.ts` (gom vào `page.routes.ts` trước `errorRoutes`), `useStrokeOrder`, `StrokeOrderContainer` (+ `StrokeOrderScreen` private, `key={character}`), key `title` trong `stroke-order.json`; kiểm: test 9.1 pass
+- [x] 9.1 RED: S6.1-AC1 "Màn chỉ hiện một chữ" — mở `/characters/好/stroke-order`: đúng một figure "Thứ tự nét chữ 好", không có figure/nút chuyển chữ khác — kiểm: fail vì chưa có route/màn
+- [x] 9.2 GREEN: `ROUTE_PATHS.strokeOrder`, `stroke-order.routes.ts` (gom vào `page.routes.ts` trước `errorRoutes`), `useStrokeOrder`, `StrokeOrderContainer` (+ `StrokeOrderScreen` private, `key={character}`), key `title` trong `stroke-order.json`; kiểm: test 9.1 pass
 - [ ] 9.3 RED: S6.1-AC1 "Đang tải dữ liệu nét" — `fetch` file nét của 人 treo: thấy "Đang tải…", không có figure, không có nút "Phát lại" — kiểm: fail
 - [ ] 9.4 GREEN: nhánh `loading` (`role="status"`, key `loading`); kiểm: test 9.3 pass
 - [ ] 9.5 RED: S6.1-AC1 "Chữ không có dữ liệu nét" — mở 龘: thấy "Chưa có dữ liệu nét cho chữ này.", không figure, không "Phát lại", không "Có lỗi xảy ra" — kiểm: fail
