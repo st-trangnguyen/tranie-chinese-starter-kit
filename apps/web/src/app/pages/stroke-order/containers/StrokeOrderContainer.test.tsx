@@ -142,4 +142,38 @@ describe('StrokeOrderContainer', () => {
       screen.queryByRole('button', { name: 'Phát lại' }),
     ).not.toBeInTheDocument();
   });
+
+  it('S6.1-AC1 Chữ không có dữ liệu nét: should show "Chưa có dữ liệu nét cho chữ này." without figure, replay button or error when opening /characters/龘/stroke-order', async () => {
+    openRoute(`/characters/${encodeURIComponent('龘')}/stroke-order`);
+
+    // Màn đã mở và đã đọc danh sách chữ có dữ liệu nét.
+    await screen.findByRole(
+      'heading',
+      { name: 'Thứ tự nét' },
+      { timeout: 3000 },
+    );
+    await waitFor(() =>
+      expect(strokeFetch.requests).toContain('/content/strokes/index.json'),
+    );
+
+    expect(
+      await screen.findByText('Chưa có dữ liệu nét cho chữ này.'),
+    ).toBeInTheDocument();
+
+    // Không hiện khối animation, không hiện nút "Phát lại", không phải trạng thái lỗi.
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(document.querySelectorAll('figure')).toHaveLength(0);
+    expect(
+      screen.queryByRole('button', { name: 'Phát lại' }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Có lỗi xảy ra')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    // Không tải file nét nào, chỉ đọc danh sách.
+    const strokeFileRequests = strokeFetch.requests.filter(
+      (url) =>
+        url.startsWith('/content/strokes/') && !url.endsWith('/index.json'),
+    );
+    expect(strokeFileRequests).toEqual([]);
+  });
 });
