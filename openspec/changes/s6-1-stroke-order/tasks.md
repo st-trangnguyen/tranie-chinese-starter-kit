@@ -14,8 +14,8 @@ Ba file hỗ trợ này tạo ở task RED đầu tiên cần đến chúng.
 
 ## 2. Schema dữ liệu nét — `@csk/shared` (design D3; nền cho S6.1-AC1 "Dữ liệu nét hỏng hoặc sai cấu trúc")
 
-- [ ] 2.1 RED: test `hanCharacterSchema` (`"人"`, chữ Hán ngoài BMP như `"𠀀"` hợp lệ; `""`, `"a"`, `"abc"`, `"你好"`, `"人 "` không hợp lệ), `strokeDataSchema` (hợp lệ với dữ liệu `人.json` thật; thiếu `strokes`; `strokes` rỗng; `medians` lệch số nét; điểm median không phải cặp số) và `strokeIndexSchema` (hợp lệ; phần tử nhiều ký tự; phần tử không phải chữ Hán; trùng) — Vitest, `packages/shared/src/stroke.schema.test.ts`; kiểm: fail vì chưa có schema
-- [ ] 2.2 GREEN: thêm `packages/shared/src/stroke.schema.ts` (`hanCharacterSchema`, `strokeDataSchema`, `StrokeData`, `strokeIndexSchema` = mảng `hanCharacterSchema` không trùng, `StrokeIndex`), export trong `packages/shared/src/index.ts`; kiểm: test 2.1 pass
+- [x] 2.1 RED: test `hanCharacterSchema` (`"人"`, chữ Hán ngoài BMP như `"𠀀"` hợp lệ; `""`, `"a"`, `"abc"`, `"你好"`, `"人 "` không hợp lệ), `strokeDataSchema` (hợp lệ với dữ liệu `人.json` thật; thiếu `strokes`; `strokes` rỗng; `medians` lệch số nét; điểm median không phải cặp số) và `strokeIndexSchema` (hợp lệ; phần tử nhiều ký tự; phần tử không phải chữ Hán; trùng) — Vitest, `packages/shared/src/stroke.schema.test.ts`; kiểm: fail vì chưa có schema
+- [x] 2.2 GREEN: thêm `packages/shared/src/stroke.schema.ts` (`hanCharacterSchema`, `strokeDataSchema`, `StrokeData`, `strokeIndexSchema` = mảng `hanCharacterSchema` không trùng, `StrokeIndex`), export trong `packages/shared/src/index.ts`; kiểm: test 2.1 pass
 
 ## 3. Danh sách chữ có dữ liệu nét — `content:build` (design D2; nền cho "Chữ không có dữ liệu nét khi offline")
 

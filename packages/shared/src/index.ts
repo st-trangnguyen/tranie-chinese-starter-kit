@@ -53,3 +53,9 @@ export type {
   Voice,
   Word,
 } from './content.schema';
+export {
+  hanCharacterSchema,
+  strokeDataSchema,
+  strokeIndexSchema,
+} from './stroke.schema';
+export type { StrokeData, StrokeIndex } from './stroke.schema';
