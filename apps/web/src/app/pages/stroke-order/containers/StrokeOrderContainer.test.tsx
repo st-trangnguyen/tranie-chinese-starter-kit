@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { Outlet, RouterProvider, createMemoryRouter } from 'react-router-dom';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderChildren } from '@core/modules/custom-router-dom/RouterOutlet';
@@ -109,5 +109,37 @@ describe('StrokeOrderContainer', () => {
     expect(strokeFileRequests).toEqual([
       `/content/strokes/${encodeURIComponent('好')}.json`,
     ]);
+  });
+
+  it('S6.1-AC1 Đang tải dữ liệu nét: should show "Đang tải…" without figure or replay button while stroke data of 人 is still loading', async () => {
+    // Ranh giới ngoài: file nét của 人 không bao giờ trả về (đang tải).
+    strokeFetch = mockStrokeFetch({
+      '人.json': () => new Promise<Response>(() => undefined),
+    });
+    vi.spyOn(globalThis, 'fetch').mockImplementation(strokeFetch.fetch);
+
+    openRoute(`/characters/${encodeURIComponent('人')}/stroke-order`);
+
+    // Màn đã mở và đã bắt đầu tải file nét của 人.
+    await screen.findByRole(
+      'heading',
+      { name: 'Thứ tự nét' },
+      { timeout: 3000 },
+    );
+    await waitFor(() =>
+      expect(strokeFetch.requests).toContain(
+        `/content/strokes/${encodeURIComponent('人')}.json`,
+      ),
+    );
+
+    const status = await screen.findByRole('status');
+    expect(status).toHaveTextContent('Đang tải…');
+
+    // Không hiện khối animation, không hiện nút "Phát lại".
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(document.querySelectorAll('figure')).toHaveLength(0);
+    expect(
+      screen.queryByRole('button', { name: 'Phát lại' }),
+    ).not.toBeInTheDocument();
   });
 });
