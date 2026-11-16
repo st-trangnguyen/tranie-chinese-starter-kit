@@ -28,8 +28,13 @@ Duyệt code vẫn chạy trên CI (check `Review`); nghiệm thu do `qa` chạy
 `VERDICT: approve|block` + finding (`blocker`/`major`/`minor`/`human`) → `ba` và `qa` sửa theo finding →
 agent DUYỆT mới kiểm lại chỉ phần đã nêu. Finding được ghi vết trong `## Open Questions` của `proposal.md`.
 
-**Chỗ phải dồn lên người thật:** business rule mà story và spec không đủ cơ sở quyết (`human`), và trường hợp hết 3 vòng
-vẫn bất đồng. Chúng ở lại dạng `- [ ]`; cổng không cho merge khi còn `- [ ]`.
+**Chỗ story còn thiếu do `ba` đề xuất và chốt**, không đẩy cho người thật: màn nào, tự phát hay bấm, trường hợp biên, thông báo,
+giảm chuyển động, v.v. `ba` chọn phương án đơn giản nhất khớp story và kiến trúc, viết vào `specs/`, ghi
+`- [x] … → … (ba đề xuất, chờ người thật xác nhận)`. `qa` và `dev-lead` kiểm đề xuất có hợp lý không. Marker kèm danh sách các
+quyết định `ba` đề xuất để người thật xác nhận hoặc đổi ở bước duyệt cuối.
+
+**Chỉ dồn lên người thật (`human`, ở lại `- [ ]`):** thêm dependency mới (CLAUDE.md §9), buộc phá luật §0/§2, quyết định khó đảo ngược
+(schema dữ liệu người dùng/IndexedDB), và bất đồng giữa agent không giải quyết được. Cổng không cho merge khi còn `- [ ]`.
 
 **Ghi nhận verdict (quyết định):** một comment PR có marker
 `<!-- csk-spec-agents sha=<commit> qa=approve dev-lead=approve -->`, do `/relay spec` đăng sau khi push. Không dùng

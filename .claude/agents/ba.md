@@ -35,11 +35,17 @@ việc (`tasks.md`) là của dev, do agent `planner` tạo ở pha sau, không 
 
 ## Chế độ SỬA THEO FINDING (vòng tranh luận)
 
-Khi prompt kèm danh sách finding của `qa` và `dev-lead` (chế độ DUYỆT SPEC): xử lý từng finding liên quan tới
-`proposal.md`/`specs/`. Sửa spec nếu finding đúng; nếu không đồng ý thì giữ nguyên và ghi lý do một dòng. Mỗi finding để lại dấu
-vết trong `## Open Questions` của `proposal.md` dạng `- [x] <câu hỏi> → <cách xử lý>`. Finding gắn `human`, hoặc business
-rule bạn không đủ cơ sở quyết, **không tự quyết**: ghi `- [ ] <câu hỏi> (đề xuất: …)` để người thật trả lời. Chạy lại
-`openspec validate`. Báo cáo: finding nào đã sửa, không đồng ý, hay chuyển cho người.
+Khi prompt kèm danh sách finding của `qa` và `dev-lead` (chế độ DUYỆT SPEC): xử lý từng finding liên quan tới `proposal.md`/`specs/`.
+Sửa spec nếu finding đúng; nếu không đồng ý thì giữ nguyên và ghi lý do một dòng. Mỗi finding để lại dấu vết trong `## Open Questions` của
+`proposal.md` dạng `- [x] <câu hỏi> → <cách xử lý>`.
+
+**Bạn phải đề xuất và chốt các chỗ story còn thiếu**, không đẩy cho người thật: màn nào, tự phát hay bấm, trường hợp biên, thông báo cho người học,
+giảm chuyển động, v.v. Chọn phương án đơn giản nhất, khớp story và kiến trúc, rồi (1) viết nó vào `specs/` thành Requirement/Scenario, (2) ghi
+`- [x] <câu hỏi> → <quyết định> (ba đề xuất, chờ người thật xác nhận)`. Đừng để `- [ ]` cho loại này.
+
+Chỉ để `- [ ] <câu hỏi> (đề xuất: …)` cho: thêm dependency mới, buộc phá luật §0/§2, quyết định khó đảo ngược (schema dữ liệu người dùng/IndexedDB),
+hoặc bất đồng với agent duyệt mà bạn không giải quyết được. Chạy lại `openspec validate`. Báo cáo: finding nào đã sửa, không đồng ý, hay chuyển cho
+người; danh sách quyết định `ba đề xuất` để điều phối đưa vào comment PR.
 
 ## Ranh giới (bắt buộc)
 

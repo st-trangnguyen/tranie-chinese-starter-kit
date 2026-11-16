@@ -199,8 +199,8 @@ Mỗi story đi qua **ba pha, hai PR**: **Spec** (agent BA + QA + Dev → ngư�
    (ID `S<epic>.<n>-AC<k>`). `design.md` và `tasks.md` là của dev, **không** nằm trong PR spec.
    **Tranh luận bằng agent** (một lệnh `/relay spec`): `ba` viết spec, `qa` viết `test-cases.md`; rồi `qa` và `dev-lead` duyệt
    spec (agent mới, chỉ đọc), nêu finding; `ba` và `qa` sửa; tối đa 3 vòng. Mỗi chỗ mơ hồ là một dòng
-   trong `## Open Questions` của `proposal.md`: agent xử lý được thì `- [x] … → …`, business rule agent không
-   quyết được thì để `- [ ]` cho người thật. Cả hai agent duyệt approve (comment có marker, đúng commit đầu) thì mở PR
+   trong `## Open Questions` của `proposal.md`: agent xử lý được thì `- [x] … → …`, chỗ story còn thiếu thì `ba` đề xuất
+   và chốt (`ba đề xuất, chờ người thật xác nhận`); chỉ dependency mới, phá §0/§2, quyết định khó đảo ngược hoặc bất đồng không giải quyết được mới để `- [ ]` cho người thật. Cả hai agent duyệt approve (comment có marker, đúng commit đầu) thì mở PR
    spec (`Spec PR: N/A`), chuyển ready; **người thật** (`SPEC_APPROVERS`) review và approve (check
    `Spec approvals`) rồi merge, và **dừng chờ merge** trước khi viết bất kỳ code nào.
 

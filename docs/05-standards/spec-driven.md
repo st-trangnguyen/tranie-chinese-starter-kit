@@ -29,13 +29,13 @@ Mỗi story đi qua **ba pha, hai PR**, mỗi pha có chủ riêng. Ở pha Spec
 
 ### Pha A: Spec (agent BA + QA + Dev, rồi người thật)
 
-Các vai do agent đảm nhiệm: `ba` viết spec (và sửa theo review), `qa` viết `test-cases.md` và duyệt spec, `dev-lead` duyệt spec. `qa` và `dev-lead` duyệt ở chế độ DUYỆT SPEC (agent mới, chỉ đọc) và tranh luận với `ba`/`qa` qua tối đa 3 vòng. Chỗ agent không quyết được (business rule) thành `- [ ]` cho người thật. Người thật chỉ review sau khi cả hai agent duyệt đã approve. Cả pha là một lệnh `/relay spec`. Thiết kế: `docs/04-specs/2026-11-13-agent-spec-review.md`.
+Các vai do agent đảm nhiệm: `ba` viết spec (và sửa theo review), `qa` viết `test-cases.md` và duyệt spec, `dev-lead` duyệt spec. `qa` và `dev-lead` duyệt ở chế độ DUYỆT SPEC (agent mới, chỉ đọc) và tranh luận với `ba`/`qa` qua tối đa 3 vòng. Chỗ story còn thiếu thì `ba` đề xuất và chốt (`- [x] … (ba đề xuất, chờ người thật xác nhận)`); chỉ dependency mới, phá §0/§2, quyết định khó đảo ngược và bất đồng không giải quyết được mới thành `- [ ]` cho người thật. Người thật chỉ review sau khi cả hai agent duyệt đã approve. Cả pha là một lệnh `/relay spec`. Thiết kế: `docs/04-specs/2026-11-13-agent-spec-review.md`.
 
 | # | Bước | Lệnh / việc | Cổng |
 |---|---|---|---|
 | A1 | Chọn story, tạo nhánh `spec/s<epic>-<n>-<slug>` | | |
 | A2 | **Propose** | `/relay spec s<epic>-<n>-<slug>`: `ba` viết `proposal.md` + `specs/`, `qa` soạn nháp `test-cases.md` (không `design.md`, `tasks.md`; nếu dùng `/opsx:propose` thì xoá hai file đó khỏi PR spec) | `pnpm exec openspec validate --all --strict` pass |
-| A3 | **Vòng tranh luận** | `qa` và `dev-lead` (chế độ DUYỆT SPEC) đọc spec, ra `VERDICT` + finding; `ba`/`qa` sửa; lặp tối đa 3 vòng. Mỗi finding để lại dấu vết `- [x] … → …` trong `## Open Questions`; câu cần người quyết để `- [ ]` | Cả hai agent `approve` |
+| A3 | **Vòng tranh luận** | `qa` và `dev-lead` (chế độ DUYỆT SPEC) đọc spec, ra `VERDICT` + finding; `ba`/`qa` sửa; lặp tối đa 3 vòng. Mỗi finding để lại dấu vết `- [x] … → …` trong `## Open Questions`; quyết định `ba` đề xuất ghi `(ba đề xuất, chờ người thật xác nhận)`; chỉ câu thuộc nhóm `human` để `- [ ]` | Cả hai agent `approve` |
 | A4 | Mở **PR spec** và đăng verdict | Theo template, `Spec PR: N/A`, `Refs #<story>`, Screenshots `N/A`. Đăng một comment có marker `<!-- csk-spec-agents sha=… qa=approve dev-lead=approve -->` (xem `/relay spec`) | |
 | A5 | Chuyển PR sang **ready for review** | Chỉ khi `qa` và `dev-lead` đã approve, `Open Questions` hết `- [ ]` và `test-cases.md` đã có | |
 | A6 | **Người thật review và merge** | Một người trong `SPEC_APPROVERS` approve, trả lời các `- [ ]` còn lại nếu có. Không có code trong PR này | `Spec approvals` xanh |
@@ -142,7 +142,7 @@ Quy tắc:
 ### Open Questions trong proposal
 
 `proposal.md` có mục `## Open Questions`: mỗi chỗ mơ hồ là một dòng `- [ ]`. Agent duyệt hỏi, `ba` trả
-lời và sửa spec rồi đổi thành `- [x] <câu hỏi> → <xử lý>`; câu cần người quyết để `- [ ]` cho người thật trả lời trong comment PR. Không có câu hỏi thì ghi một dòng `Không có.`
+lời và sửa spec rồi đổi thành `- [x] <câu hỏi> → <xử lý>`; quyết định `ba` đề xuất ghi `(ba đề xuất, chờ người thật xác nhận)`; chỉ câu thuộc nhóm `human` để `- [ ]` cho người thật trả lời trong comment PR. Không có câu hỏi thì ghi một dòng `Không có.`
 (không dùng `- [ ]`). Còn `- [ ]` thì check `Spec approvals` fail.
 
 ### Viết `test-cases.md`

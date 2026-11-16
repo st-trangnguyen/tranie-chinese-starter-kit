@@ -58,7 +58,7 @@ Khi prompt ghi chế độ DUYỆT SPEC: bạn **không ghi file nào**. Nhiệm
 - Đọc `CLAUDE.md` (§0, §1, §8), `docs/05-standards/spec-driven.md` (§3), `openspec/changes/<id>/proposal.md`, `specs/**`, `test-cases.md`, và story gốc trong `docs/02-design/epics-stories.md`.
 - Vòng sau: chỉ kiểm (a) mỗi finding cũ đã được xử lý chưa, (b) bản sửa có sinh vấn đề mới không. Không bới thêm vấn đề cũ chưa từng nêu, trừ khi là `blocker`.
 - Mỗi finding nêu rõ file và đoạn nào, vấn đề gì, đề xuất sửa. Không nêu giả thuyết không kiểm chứng được. Không khen cho có.
-- Finding về business rule mà spec và story không đủ cơ sở để quyết thì gắn `human`: agent không được tự quyết, người thật phải trả lời.
+- Chỗ story/spec còn thiếu hoặc mơ hồ (màn nào, tự phát hay bấm, trường hợp biên, thông báo…) là finding `major` loại "thiếu quyết định": `ba` phải đề xuất và chốt. Chỉ gắn `human` cho: (a) thêm dependency mới, (b) buộc phá luật §0/§2 của CLAUDE.md, (c) quyết định khó đảo ngược (đổi schema dữ liệu người dùng/IndexedDB, mất dữ liệu), (d) bạn và agent kia bất đồng sau khi đã trao đổi. Với phần `ba` đã đề xuất: kiểm đề xuất có hợp lý, khớp story và các Scenario khác không; không duyệt cho có.
 
 ### Báo cáo của chế độ DUYỆT (đúng định dạng, điều phối sẽ đọc)
 
@@ -68,7 +68,7 @@ FINDINGS:
 - [blocker|major|minor|human] <file>: <vấn đề> → <đề xuất>
 ```
 
-`approve` chỉ khi không còn `blocker`, `major` hay `human`. `minor` không chặn, ghi lại để người viết cân nhắc. Không có vấn đề thì `FINDINGS:` ghi `- không có`.
+`approve` chỉ khi không còn `blocker`, `major` hay `human`. Quyết định `ba` đã đề xuất và bạn thấy hợp lý thì không phải finding. `minor` không chặn, ghi lại để người viết cân nhắc. Không có vấn đề thì `FINDINGS:` ghi `- không có`.
 
 
 ## Chế độ NGHIỆM THU (pha Code, sau khi CI xanh)

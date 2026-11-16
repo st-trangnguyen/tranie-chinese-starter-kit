@@ -73,7 +73,7 @@ Nhánh `spec/<id>`, chỉ đụng `openspec/`. Chạy lần lượt, bỏ qua b�
    3. Gom finding `blocker`/`major`: về `proposal.md`/`specs/` giao `ba` (SỬA); về `test-cases.md` giao `qa` (SỬA). Finding
       của `dev-lead` về khả thi đi tới `ba` để xử lý trong spec. Kiểm vùng ghi, chạy `openspec validate`.
    4. Nếu đã có PR, đăng một comment tóm tắt vòng (bảng agent × verdict × finding chính).
-   Finding `human` hoặc business rule không đủ cơ sở quyết: **không tự quyết**, để thành `- [ ]` trong `## Open Questions`
+   Chỗ story còn thiếu: `ba` **đề xuất và chốt** (`- [x] … (ba đề xuất, chờ người thật xác nhận)`). Chỉ finding `human` (dependency mới, phá §0/§2, quyết định khó đảo ngược, bất đồng không giải quyết được) mới để thành `- [ ]` trong `## Open Questions`
    của `proposal.md`. Còn `- [ ]` thì chưa thể approve: dừng và đưa câu hỏi cho người dùng (kèm đề xuất mặc định); có câu
    trả lời thì chạy lại lệnh. Hết 3 vòng vẫn còn `blocker`/`major`: **dừng hẳn**, không hạ mức độ, báo finding còn lại để người dùng quyết.
 4. **Khi cả hai agent approve** và `Open Questions` hết `- [ ]`: khi người dùng đồng ý, commit, push, mở hoặc cập nhật **PR spec**
@@ -86,7 +86,8 @@ Nhánh `spec/<id>`, chỉ đụng `openspec/`. Chạy lần lượt, bỏ qua b�
    |---|---|---|
    | qa | approve | … |
    | dev-lead | approve | … |
-   Tóm tắt tranh luận và các quyết định: …
+   **Quyết định do `ba` đề xuất, chờ người thật xác nhận:** (liệt kê từng quyết định)
+   Tóm tắt tranh luận: …
    ```
 
    Push thêm commit thì marker hết hiệu lực: chạy lại bước 3 và đăng lại. Chuyển PR sang ready; check `Spec approvals`
