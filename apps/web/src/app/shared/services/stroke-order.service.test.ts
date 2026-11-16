@@ -103,4 +103,20 @@ describe('StrokeOrderService — use cases', () => {
       strokeData: STROKE_DATA,
     });
   });
+
+  it('S6.1-AC1 Chữ không có dữ liệu nét khi offline: "龘" vẫn trả unavailable (không throw) và không đọc file nét khi mất mạng', async () => {
+    const source = makeSource();
+    const offlineSource: ContentSource = {
+      ...source,
+      getStrokeData: vi.fn(async () => {
+        throw new TypeError('Failed to fetch');
+      }),
+    };
+    const service = new StrokeOrderService(offlineSource);
+
+    const result = await service.getStrokeOrder('龘');
+
+    expect(result).toEqual({ status: 'unavailable' });
+    expect(offlineSource.getStrokeData).not.toHaveBeenCalled();
+  });
 });
