@@ -1,5 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
+import { strokeOrderPath, strokePollTimeout } from './stroke-order.helpers';
+
 declare global {
   interface Window {
     /** Các giá trị `data-drawn-stroke-count` đã đổi, ghi bởi MutationObserver của test. */
@@ -9,13 +11,6 @@ declare global {
 
 const UNAVAILABLE_MESSAGE = 'Chưa có dữ liệu nét cho chữ này.';
 const ERROR_MESSAGE = 'Có lỗi xảy ra';
-
-/** hanzi-writer thật vẽ mỗi nét ~0,3–0,7 s: chờ theo số nét (design "Test"). */
-const strokePollTimeout = (strokeCount: number): number =>
-  5_000 + strokeCount * 1_000;
-
-const strokeOrderPath = (character: string): string =>
-  `/characters/${encodeURIComponent(character)}/stroke-order`;
 
 const openStrokeOrder = async (
   page: Page,
