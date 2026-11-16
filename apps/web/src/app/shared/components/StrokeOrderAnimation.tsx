@@ -4,6 +4,8 @@ import type { StrokeData } from '@csk/shared';
 
 import { useStrokeAnimation } from '@core/hooks/useStrokeAnimation';
 
+import { StrokeGlyph } from './StrokeGlyph';
+
 interface StrokeOrderAnimationProps {
   character: string;
   strokeData: StrokeData;
@@ -28,13 +30,9 @@ export function StrokeOrderAnimation({
       data-drawn-stroke-count={drawnStrokeCount}
       className="stroke-order-figure flex flex-col"
     >
-      <svg
-        viewBox="0 0 1024 1024"
-        aria-hidden="true"
-        className="block w-full h-auto"
-      >
+      <StrokeGlyph strokeData={strokeData} variant="outline">
         <g ref={targetRef} className="stroke-order-writer" />
-      </svg>
+      </StrokeGlyph>
     </figure>
   );
 }
