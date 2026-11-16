@@ -10,7 +10,7 @@ interface StrokeOrderScreenProps {
 
 /** Phần thân màn theo trạng thái tải dữ liệu nét. */
 function StrokeOrderBody({ character }: StrokeOrderScreenProps) {
-  const { t } = useTranslation('stroke-order');
+  const { t } = useTranslation(['stroke-order', 'common']);
   const { view } = useStrokeOrder(character);
 
   if (view.status === 'loading') {
@@ -18,6 +18,18 @@ function StrokeOrderBody({ character }: StrokeOrderScreenProps) {
       <p role="status" className="stroke-order-message">
         {t('loading')}
       </p>
+    );
+  }
+  if (view.status === 'error') {
+    return (
+      <div className="flex flex-col items-start gap-md">
+        <p role="alert" className="stroke-order-message">
+          {t('common:error.title')}
+        </p>
+        <button type="button" className="btn btn-primary">
+          {t('common:error.retry')}
+        </button>
+      </div>
     );
   }
   if (view.status === 'unavailable') {
