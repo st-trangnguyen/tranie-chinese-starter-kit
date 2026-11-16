@@ -31,8 +31,8 @@ Ba file hỗ trợ này tạo ở task RED đầu tiên cần đến chúng.
 
 - [x] 5.1 RED: S6.1-AC1 "Chữ được yêu cầu rỗng" — `isSingleHanCharacter('')` là `false`, `getStrokeOrder('')` trả `unavailable` và không đọc nguồn — Vitest thuần + fake `ContentSource`, `apps/web/src/app/shared/services/stroke-order.service.test.ts`; kiểm: fail vì chưa có service
 - [x] 5.2 GREEN: tạo `StrokeOrderService` 3 phần + `shared/models/stroke-order.model.ts` (`StrokeOrderResult`, `StrokeOrderView`), Phần 2 `isSingleHanCharacter` = `hanCharacterSchema.safeParse(input).success` (comment "Rule: …", không viết lại regex), Phần 3 `getStrokeOrder` nhánh không hợp lệ; kiểm: test 5.1 pass
-- [ ] 5.3 RED: S6.1-AC1 "Chữ được yêu cầu không phải chữ Hán" — `"abc"` → `unavailable`, không đọc nguồn — `stroke-order.service.test.ts`; kiểm: chạy, nếu pass ngay nhờ `hanCharacterSchema` (2.2) thì tạm cho rule chỉ kiểm chuỗi rỗng để thấy fail rồi trả lại
-- [ ] 5.4 GREEN: rule dùng `hanCharacterSchema` (phần chữ Hán); kiểm: test 5.3 pass
+- [x] 5.3 RED: S6.1-AC1 "Chữ được yêu cầu không phải chữ Hán" — `"abc"` → `unavailable`, không đọc nguồn — `stroke-order.service.test.ts`; kiểm: chạy, nếu pass ngay nhờ `hanCharacterSchema` (2.2) thì tạm cho rule chỉ kiểm chuỗi rỗng để thấy fail rồi trả lại
+- [x] 5.4 GREEN: rule dùng `hanCharacterSchema` (phần chữ Hán); kiểm: test 5.3 pass
 - [ ] 5.5 RED: S6.1-AC1 "Chữ được yêu cầu gồm nhiều chữ" — `"你好"` → `unavailable`, không đọc file nét của 你 hay 好 — `stroke-order.service.test.ts`; kiểm: như 5.3 (tạm cho rule chỉ kiểm có chữ Hán để thấy fail rồi trả lại)
 - [ ] 5.6 GREEN: rule dùng `hanCharacterSchema` (phần đúng một ký tự); kiểm: test 5.5 pass
 - [ ] 5.7 RED: S6.1-AC1 "Chữ không có dữ liệu nét" — danh sách không có `"龘"` → `unavailable`, `getStrokeData` không được gọi; chữ `"人"` có trong danh sách → `available` với `strokeData` của 人 — `stroke-order.service.test.ts`; kiểm: fail
