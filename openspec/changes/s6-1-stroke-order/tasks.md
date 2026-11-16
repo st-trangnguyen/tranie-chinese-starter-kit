@@ -24,8 +24,8 @@ Ba file hỗ trợ này tạo ở task RED đầu tiên cần đến chúng.
 
 ## 4. Nạp dữ liệu nét — `core/services` (design D4)
 
-- [ ] 4.1 RED: test `FetchContentSource.getStrokeIndex()` và `getStrokeData('人')` (đúng URL `/content/strokes/…`, encode chữ; HTTP lỗi → throw; JSON hỏng → throw; sai cấu trúc → throw "Nội dung không hợp lệ") — Vitest, mock `fetch` ở ranh giới, `apps/web/src/app/core/services/content-source.service.test.ts`; kiểm: fail vì thiếu method
-- [ ] 4.2 GREEN: thêm hai method vào interface `ContentSource` và `FetchContentSource` (dùng lại `load`); cập nhật các fake `ContentSource` trong test hiện có cho đủ interface; kiểm: test 4.1 pass, `pnpm --filter @csk/web typecheck` pass
+- [x] 4.1 RED: test `FetchContentSource.getStrokeIndex()` và `getStrokeData('人')` (đúng URL `/content/strokes/…`, encode chữ; HTTP lỗi → throw; JSON hỏng → throw; sai cấu trúc → throw "Nội dung không hợp lệ") — Vitest, mock `fetch` ở ranh giới, `apps/web/src/app/core/services/content-source.service.test.ts`; kiểm: fail vì thiếu method
+- [x] 4.2 GREEN: thêm hai method vào interface `ContentSource` và `FetchContentSource` (dùng lại `load`); cập nhật các fake `ContentSource` trong test hiện có cho đủ interface; kiểm: test 4.1 pass, `pnpm --filter @csk/web typecheck` pass
 
 ## 5. Use case thứ tự nét — `shared/services/stroke-order.service.ts` (design D4)
 

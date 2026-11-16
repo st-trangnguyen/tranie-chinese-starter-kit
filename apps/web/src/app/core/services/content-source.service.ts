@@ -2,10 +2,14 @@ import {
   contentRootSchema,
   lessonSchema,
   sentenceSchema,
+  strokeDataSchema,
+  strokeIndexSchema,
   wordSchema,
   type ContentRoot,
   type Lesson,
   type Sentence,
+  type StrokeData,
+  type StrokeIndex,
   type Word,
 } from '@csk/shared';
 
@@ -18,6 +22,8 @@ export interface ContentSource {
   getLesson(lessonId: string): Promise<Lesson>;
   getWords(): Promise<Word[]>;
   getSentences(): Promise<Sentence[]>;
+  getStrokeIndex(): Promise<StrokeIndex>;
+  getStrokeData(character: string): Promise<StrokeData>;
 }
 
 const CONTENT_BASE_PATH = '/content';
@@ -48,6 +54,20 @@ export class FetchContentSource implements ContentSource {
     return this.load(
       `${CONTENT_BASE_PATH}/sentences.json`,
       sentenceSchema.array(),
+    );
+  }
+
+  getStrokeIndex(): Promise<StrokeIndex> {
+    return this.load(
+      `${CONTENT_BASE_PATH}/strokes/index.json`,
+      strokeIndexSchema,
+    );
+  }
+
+  getStrokeData(character: string): Promise<StrokeData> {
+    return this.load(
+      `${CONTENT_BASE_PATH}/strokes/${encodeURIComponent(character)}.json`,
+      strokeDataSchema,
     );
   }
 
