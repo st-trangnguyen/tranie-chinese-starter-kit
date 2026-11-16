@@ -65,22 +65,28 @@ Quan sát được trong repo (không phải đề xuất):
 
 - `assembleContent` thêm file `strokes/index.json` = mảng chữ (đã sort) **có** dữ liệu nét, chỉ ghi khi đã lọc
   `data !== undefined`. `outputInSyncCheck` tự giữ file này khớp với thư mục nét.
-- Schema `strokeIndexSchema` (`@csk/shared`): mảng chuỗi, mỗi chuỗi đúng một ký tự Hán, không trùng.
+- Schema `strokeIndexSchema` (`@csk/shared`): mảng `hanCharacterSchema` (D3), không trùng.
 - File nằm trong precache như mọi JSON nội dung, nên offline vẫn biết "龘" không có dữ liệu mà không cần request
   `龘.json`. Chữ không có trong danh sách → `unavailable`, **không fetch**; chữ có trong danh sách mà tải/parse lỗi →
   `error`; không tải được danh sách → `error`.
 - Thay thế đã cân nhắc: (a) dựa vào HTTP 404 → sai vì SPA fallback trả 200 HTML và offline thì lỗi mạng (xem Context);
   (b) thêm `strokeCharacters` vào `content.json` → đổi `contentRootSchema` và `contentVersion`, trái "không đổi schema
-  nội dung" của proposal; (c) plugin Vite sinh module ảo từ thư mục → thêm cấu hình build riêng, Vitest không có, khó
-  dùng cho e2e. Phương án D2 cũng giúp e2e TC-S6.1-AC1-37 đọc danh sách chữ từ bản build.
-- Đây là output mới của pipeline nội dung (vùng của S2.5). Cần dev lead đồng ý ở cổng plan (xem Open Questions).
+  nội dung" của proposal; (c) plugin Vite sinh module ảo từ thư mục → Vitest chạy cùng plugin Vite nên test được,
+  nhưng đặt danh sách ở chỗ thứ hai ngoài pipeline nội dung: `content:check` (`outputInSyncCheck`) không kiểm được nó,
+  và danh sách không có dưới dạng file trong bản build để e2e TC-S6.1-AC1-37 đọc và đối chiếu. Phương án D2 giữ một
+  nguồn sinh duy nhất (`assembleContent`) và cho e2e đọc danh sách từ bản build.
+- **Đã chốt** (dev lead, cổng plan): `content:build` sinh thêm `strokes/index.json`. Đây là output mới của pipeline nội
+  dung (vùng của S2.5), không đổi schema hay dữ liệu hiện có.
 
 ### D3. Schema Zod dữ liệu nét: `packages/shared/src/stroke.schema.ts`
 
 - `strokeDataSchema`: `strokes` mảng chuỗi path không rỗng (≥ 1), `medians` mảng (mỗi phần tử mảng điểm `[number,
   number]`, ≥ 1 điểm), `radStrokes` tùy chọn mảng số nguyên ≥ 0; `refine`: `medians.length === strokes.length`.
   Type `StrokeData`. Không `passthrough` (field lạ bị bỏ).
-- `strokeIndexSchema` + type `StrokeIndex` (D2).
+- `hanCharacterSchema`: chuỗi gồm **đúng một** ký tự (đếm theo code point) và ký tự đó thuộc `\p{Script=Han}` (regex
+  `^\p{Script=Han}$` với cờ `u`); rỗng, "abc", "你好" không hợp lệ. Rule "đúng một ký tự Hán" chỉ định nghĩa ở đây, dùng
+  cho cả phần tử danh sách (D2) lẫn tham số URL (D4).
+- `strokeIndexSchema` = `z.array(hanCharacterSchema)` + `refine` không trùng; type `StrokeIndex` (D2).
 - Export từ `packages/shared/src/index.ts`. Test `packages/shared/src/stroke.schema.test.ts`.
 
 ### D4. Nạp dữ liệu: `core/services` (hạ tầng) → `shared/services` (use case)
@@ -93,10 +99,10 @@ Quan sát được trong repo (không phải đề xuất):
   thêm hai method (typecheck bắt).
 - `shared/services/stroke-order.service.ts`, class `StrokeOrderService(source: ContentSource = contentSource)`:
   - **Phần 1** (private): `readStrokeIndex()`, `readStrokeData(character)`.
-  - **Phần 2** (pure, public): `isSingleHanCharacter(input: string): boolean` — Rule: chữ được yêu cầu hợp lệ khi gồm
-    đúng một ký tự (đếm theo code point, `Array.from`) và ký tự đó thuộc `\p{Script=Han}`; rỗng, "abc", "你好" đều
-    không hợp lệ. `hasStrokeData(character, index): boolean` — Rule: chỉ chữ có trong danh sách nét của bản app mới
-    có dữ liệu nét.
+  - **Phần 2** (pure, public): `isSingleHanCharacter(input: string): boolean` — trả
+    `hanCharacterSchema.safeParse(input).success`, comment "Rule: chữ được yêu cầu hợp lệ khi gồm đúng một ký tự Hán;
+    rỗng, chữ Latin, nhiều chữ đều không hợp lệ". Không viết lại regex ở đây (một nguồn rule ở `@csk/shared`).
+    `hasStrokeData(character, index): boolean` — Rule: chỉ chữ có trong danh sách nét của bản app mới có dữ liệu nét.
   - **Phần 3** (public): `getStrokeOrder(input: string): Promise<StrokeOrderResult>` — không hợp lệ →
     `{ status: 'unavailable' }` (không đọc gì); đọc danh sách; không có → `unavailable` (không đọc file nét); có →
     đọc file nét → `{ status: 'available', character, strokeData }`. Lỗi đọc/validate → throw
@@ -107,13 +113,26 @@ Quan sát được trong repo (không phải đề xuất):
 ### D5. Vẽ nét: adapter `core/services/stroke-writer.service.ts` bọc hanzi-writer
 
 - Interface `StrokeWriter { animateStroke(index: number): Promise<'completed' | 'cancelled'>; clear(): void;
-  destroy(): void }` và `createStrokeWriter(target: HTMLElement, character: string, strokeData: StrokeData):
+  destroy(): void }` và `createStrokeWriter(target: SVGGElement, character: string, strokeData: StrokeData):
   StrokeWriter`.
+- Đích vẽ là một `<g>` rỗng **bên trong** `<svg viewBox="0 0 1024 1024">` của `StrokeGlyph` (D9), không phải `div` và
+  không phải chính `<svg>` của app: hanzi-writer nhận đích là phần tử SVG/G (`RenderTarget.init`); nếu đích là `div`
+  nó tạo `<svg width height>` pixel cố định không `viewBox`, còn nếu đích là `<svg>` nó ghi đè `width`/`height`. Vẽ vào
+  `<g>` thì nét của writer nằm trong cùng hệ toạ độ co giãn với lớp chữ mờ, không cần đo kích thước hay
+  `ResizeObserver`.
 - Bản thật: `HanziWriter.create(target, character, { charDataLoader: (_c, onLoad) => onLoad(strokeData),
-  showCharacter: false, showOutline: false, padding: 0, width, height })` — dữ liệu đã validate được đưa thẳng vào,
-  hanzi-writer **không** tự fetch (không có request ngoài, offline an toàn). `animateStroke(i)` gọi
-  `writer.animateStroke(i, { onComplete })` và resolve `'cancelled'` khi `onComplete` báo `canceled`. `clear()` gọi
-  `hideCharacter({ duration: 0 })` (huỷ animation đang chạy). `destroy()` gỡ DOM của writer khỏi `target`.
+  showCharacter: false, showOutline: false, width: 1024, height: 1024, padding: 0 })`. Với hộp 1024 và `padding: 0`,
+  transform của `Positioner` trùng `STROKE_PATH_TRANSFORM` (`translate(0, 900) scale(1, -1)`) của lớp chữ mờ. Dữ liệu
+  đã validate được đưa thẳng vào, hanzi-writer **không** tự fetch (không có request ngoài, offline an toàn).
+  `animateStroke(i)` gọi `writer.animateStroke(i, { onComplete })` và resolve `'cancelled'` khi `onComplete` báo
+  `canceled`. `clear()` gọi `hideCharacter({ duration: 0 })` (huỷ chain đang chạy: `cancelMutations` resolve
+  `{ canceled: true }`).
+- hanzi-writer 3.x không có `destroy`/`cancelAll` công khai. `destroy()` của adapter: gọi `hideCharacter({ duration: 0 })`
+  trước để huỷ chain animation, rồi gỡ mọi con của `target` (`<g>` của app vẫn còn, React quản lý nó).
+- Type dữ liệu chữ của hanzi-writer: `import type { CharacterJson } from 'hanzi-writer'` (3.7.3 export trực tiếp
+  `CharacterJson = { strokes: string[]; medians: number[][][]; radStrokes?: number[] }`; `StrokeData` của
+  hanzi-writer là kết quả quiz, không dùng). Adapter chuyển `StrokeData` (Zod, `@csk/shared`) sang `CharacterJson`
+  ở một chỗ.
 - Chỉ adapter này import `hanzi-writer`. Vitest giả thư viện ở ranh giới bằng `vi.mock('hanzi-writer', …)` với
   `src/test/mocks/hanzi-writer.ts` (`FakeHanziWriter`: ghi các nét đang/đã được yêu cầu vẽ, `finishStroke()` để test
   điều khiển thời điểm), giống cách `useAudioPlayer.test.ts` giả `Audio`.
@@ -121,9 +140,9 @@ Quan sát được trong repo (không phải đề xuất):
   hanzi-writer để chấm nét; gọi `animateCharacter()` một lần → không đếm được nét đã vẽ và không chặn được hai nét
   chồng nhau từ phía app.
 
-### D6. Trình tự phát: `core/hooks/useStrokeAnimation.ts`
+### D6. Trình tự phát: `core/hooks/useStrokeAnimation.ts` (đã chốt với dev lead)
 
-- `useStrokeAnimation(targetRef: RefObject<HTMLDivElement | null>, character: string, strokeData: StrokeData)` →
+- `useStrokeAnimation(targetRef: RefObject<SVGGElement | null>, character: string, strokeData: StrokeData)` →
   `{ drawnStrokeCount: number; isPlaying: boolean; replay: () => void }`.
 - Effect (deps `[targetRef, character, strokeData]`): tạo writer, **tự phát một lần**, cleanup `destroy()` và vô hiệu
   lượt đang chạy. Một lượt phát: `runId += 1`, `clear()`, `drawnStrokeCount = 0`, lặp `i = 0..n-1`: `await
@@ -162,13 +181,16 @@ Quan sát được trong repo (không phải đề xuất):
 ### D9. Component dùng chung `shared/components/`
 
 - `StrokeOrderAnimation.tsx` — props `{ character, strokeData }`: `<figure>` có `role="img"`, `aria-label`
-  "Thứ tự nét chữ {{character}}", `data-drawn-stroke-count={drawnStrokeCount}`; bên trong lớp chữ mờ nền
-  (`StrokeGlyph` mode outline) và `div` đích của writer chồng lên (absolute, cùng kích thước, `aria-hidden`); dưới
-  figure là `<button type="button">` "Phát lại" gọi `replay`.
+  "Thứ tự nét chữ {{character}}", `data-drawn-stroke-count={drawnStrokeCount}`; bên trong là một `StrokeGlyph`
+  variant `outline` (lớp chữ mờ nền) và, làm `children` của nó, `<g ref={targetRef} className="stroke-order-writer">`
+  rỗng đặt **sau** các path mờ (nét vẽ nằm trên lớp mờ, cùng một `<svg>`, cùng `viewBox`); dưới figure là
+  `<button type="button">` "Phát lại" gọi `replay`. Không có `div` chồng lớp, không absolute.
 - `StrokeOrderStatic.tsx` — props `{ character, strokeData }`: `<figure role="img">` cùng nhãn; vẽ mọi nét đậm và
   một `<text>` số `1..n` ở điểm đầu median của mỗi nét; không nút.
-- `StrokeGlyph.tsx` — SVG `viewBox="0 0 1024 1024"`, vẽ các path của `strokeData` (lật trục y), prop `variant:
-  'outline' | 'solid'`; S6.2 dùng lại cho khung viết.
+- `StrokeGlyph.tsx` — props `{ strokeData, variant: 'outline' | 'solid', children? }`: một `<svg viewBox="0 0 1024
+  1024" aria-hidden>` co theo chiều rộng phần tử cha, vẽ các path của `strokeData` trong `<g transform=
+  {STROKE_PATH_TRANSFORM}>`, rồi render `children` (ngoài nhóm transform, vì Positioner của hanzi-writer tự đặt
+  transform tương đương). Khối tĩnh truyền các `<text>` số qua `children`; S6.2 dùng lại cho khung viết.
 - `shared/utils/stroke.utils.ts` (leaf, pure): `STROKE_VIEWBOX`, `STROKE_PATH_TRANSFORM`
   (`translate(0, 900) scale(1, -1)`), `strokeLabelPoint(median): { x: number; y: number }` (điểm đầu median, đổi sang
   toạ độ màn). Test `stroke.utils.test.ts`.
@@ -177,13 +199,21 @@ Quan sát được trong repo (không phải đề xuất):
 
 ### D10. i18n, style
 
+- Chữ giao diện **đã chốt** (dev lead, cổng plan): tiêu đề "Thứ tự nét", nhãn figure "Thứ tự nét chữ {{character}}".
 - `assets/i18n/vi/stroke-order.json`: `title` "Thứ tự nét", `loading` "Đang tải…", `unavailable` "Chưa có dữ liệu nét
   cho chữ này.", `replay` "Phát lại", `figureLabel` "Thứ tự nét chữ {{character}}". Thêm `'stroke-order'` vào
   `I18N_NAMESPACES` và `src/test/i18n.ts`.
 - `styles/tailwind/components/_stroke-order.css` (import trong `main.css`): `.stroke-order-figure`,
-  `.stroke-order-outline` (màu mờ từ token, contrast ≥ 3:1 với nền cho thành phần UI), `.stroke-order-stroke`
-  (màu nét đã vẽ, CSS `fill` ghi đè thuộc tính `fill` mà hanzi-writer đặt trên path), `.stroke-order-label`,
-  `.stroke-order-message`; biến thể tối trong `themes/_dark.css` nếu token chưa tự đổi. JSX chỉ layout/spacing (§6).
+  `.stroke-order-outline` (màu mờ từ token, contrast ≥ 3:1 với nền cho thành phần UI), `.stroke-order-stroke` (path
+  nét đậm của khối tĩnh, của app, tô bằng `fill`), `.stroke-order-writer path { stroke: var(--color-…); }` (màu nét
+  writer đang/đã vẽ), `.stroke-order-label`, `.stroke-order-message`; biến thể tối trong `themes/_dark.css` nếu token
+  chưa tự đổi. JSX chỉ layout/spacing (§6).
+- Nét của hanzi-writer được vẽ bằng **`stroke`** (attr `stroke`, `stroke-width`, `stroke-dasharray`/`dashoffset`) trên
+  path median có `clip-path` theo hình nét và `fill: none`, không phải bằng `fill`. CSS trong `.stroke-order-writer`
+  **chỉ** ghi đè `stroke` (màu); **không** đụng `fill`, `stroke-width`, `stroke-dasharray`, `stroke-dashoffset`,
+  `clip-path` — ghi đè `fill` sẽ tô cả khối nét tức thì và hỏng animation. Thay thế: truyền `strokeColor` lấy từ token
+  vào `HanziWriter.create` → phải đọc giá trị CSS bằng JS và tạo lại writer khi đổi theme; ghi đè `stroke` bằng CSS tự
+  đổi theo theme nên chọn cách này.
   Khung vuông co theo chiều rộng (mobile-first, không cuộn ngang ở 375 px).
 
 ### D11. Dependency mới
@@ -210,7 +240,7 @@ Quan sát được trong repo (không phải đề xuất):
 |---|---|---|
 | `content/strokes/index.json` | `strokeIndexSchema` | `FetchContentSource.getStrokeIndex` |
 | `content/strokes/<chữ>.json` | `strokeDataSchema` | `FetchContentSource.getStrokeData` |
-| Tham số URL `:character` | Không cần Zod: là `string \| undefined` từ router, chỉ đi qua rule `isSingleHanCharacter` rồi so với danh sách đã validate; không gắn type nghiệp vụ | `StrokeOrderService` Phần 2 |
+| Tham số URL `:character` | `hanCharacterSchema` (`safeParse`, qua rule `isSingleHanCharacter`), rồi so với danh sách đã validate (§0.4) | `StrokeOrderService` Phần 2 |
 
 ### Test (tầng theo spec-driven §4)
 
@@ -232,7 +262,13 @@ theo `strokeDataSchema`) và helper `mockStrokeFetch` (trả `index.json` + file
 cấu trúc/treo), theo mẫu `src/test/mocks/content-fetch.ts`.
 
 E2E: Playwright `test.describe('S6.1 Xem thứ tự nét')`, mỗi test mang ID AC; chỉ kiểm trạng thái ổn định
-(`data-drawn-stroke-count` cuối, nút, thông báo) bằng `expect.poll`. Giảm chuyển động bằng
+(`data-drawn-stroke-count` cuối, nút, thông báo) bằng `expect.poll`. hanzi-writer thật vẽ mỗi nét khoảng 0,3–0,7 s
+(chữ 8 nét như 爸 có thể quá 5 s mặc định), nên mọi `expect.poll` chờ số nét có `timeout` rõ theo số nét, qua helper
+`strokePollTimeout(strokeCount) = 5_000 + strokeCount * 1_000` ms đặt trong file spec.
+TC-S6.1-AC1-37 sinh **một test cho mỗi chữ** từ danh sách (không mở 9 chữ trong một test, tránh chạm 30 s): danh sách
+đọc lúc nạp file spec từ `apps/web/src/assets/content/strokes/index.json` (output của `content:build`, chính là file
+được đưa vào bản build) và parse bằng `strokeIndexSchema`; thêm một test chặn lệch: `/content/strokes/index.json` của
+bản build (qua `request`) bằng đúng danh sách đó. Mỗi test chữ đọc số nét từ file nét của bản build trước khi tắt mạng. Giảm chuyển động bằng
 `page.emulateMedia({ reducedMotion })`. Case chặn/làm chậm/thay phản hồi dùng `page.route` với
 `serviceWorkers: 'block'` (route của page không chặn được request do service worker phục vụ). Offline theo mẫu
 `e2e/E1/s1.2-offline.spec.ts` (`openOnceWithServiceWorker` → `context.setOffline(true)`); danh sách chữ đọc từ
@@ -240,8 +276,15 @@ E2E: Playwright `test.describe('S6.1 Xem thứ tự nét')`, mỗi test mang ID 
 
 ## Risks / Trade-offs
 
-- [hanzi-writer và lớp chữ mờ nền của app lệch vị trí] → cả hai dùng hộp 1024 với `padding: 0` và cùng kích thước
-  phần tử; QA xác nhận TC-S6.1-AC1-5/6; nếu lệch, cho writer render vào cùng `<svg>` (hanzi-writer nhận phần tử `svg`).
+- [hanzi-writer và lớp chữ mờ nền của app lệch vị trí khi resize] → writer vẽ vào `<g>` bên trong cùng
+  `<svg viewBox="0 0 1024 1024">` của `StrokeGlyph`, `width/height 1024`, `padding: 0`, nên transform của Positioner
+  trùng `STROKE_PATH_TRANSFORM` và co giãn cùng viewBox; không dùng `div` (svg pixel cố định) hay chính `<svg>` của app
+  (bị ghi đè width/height) làm đích. QA xác nhận TC-S6.1-AC1-5/6 ở 375 px và 1280 px.
+- [CSS ghi đè `fill` của path writer] → nét bị tô cả khối tức thì, mất animation. CSS trong `.stroke-order-writer` chỉ
+  được đổi `stroke` (màu), không đụng `fill`/`stroke-dasharray`/`stroke-dashoffset`/`clip-path` (D10); e2e và QA
+  xem animation thật.
+- [hanzi-writer không có `destroy` công khai, animation còn chạy sau unmount] → adapter `destroy()` gọi
+  `hideCharacter({ duration: 0 })` để huỷ chain trước khi gỡ con của `<g>`; hook còn vô hiệu lượt bằng `runId`.
 - [hanzi-writer không resolve `onComplete` khi bị huỷ bởi `hideCharacter`] → lượt cũ vẫn bị bỏ nhờ `runId`; adapter
   test khẳng định lượt mới không bị chặn bởi promise treo của lượt cũ.
 - [Fake hanzi-writer làm test xanh trong khi thư viện thật khác] → e2e trên bản build chạy thư viện thật cho số nét
@@ -261,7 +304,8 @@ E2E: Playwright `test.describe('S6.1 Xem thứ tự nét')`, mỗi test mang ID 
 
 ## Open Questions
 
-- Dev lead xác nhận ở cổng plan: thêm output `content/strokes/index.json` vào `content:build` (D2) — chạm pipeline
-  nội dung của S2.5 nhưng không đổi schema hay dữ liệu hiện có. Nếu không đồng ý thì phương án thay là D2(c) (module
-  ảo), task nhóm 2 đổi theo.
-- Tiêu đề màn "Thứ tự nét" (`h1`) là chữ giao diện chưa có trong spec; đổi chữ không ảnh hưởng thiết kế.
+Không còn. Đã chốt với dev lead ở cổng plan:
+
+- [x] `content:build` sinh `content/strokes/index.json` → D2.
+- [x] Trình tự phát nằm ở `core/hooks/useStrokeAnimation.ts` → D6.
+- [x] Chữ giao diện "Thứ tự nét" / "Thứ tự nét chữ {{character}}" → D10.

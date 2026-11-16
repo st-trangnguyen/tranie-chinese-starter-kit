@@ -14,8 +14,8 @@ Ba file hỗ trợ này tạo ở task RED đầu tiên cần đến chúng.
 
 ## 2. Schema dữ liệu nét — `@csk/shared` (design D3; nền cho S6.1-AC1 "Dữ liệu nét hỏng hoặc sai cấu trúc")
 
-- [ ] 2.1 RED: test `strokeDataSchema` (hợp lệ với dữ liệu `人.json` thật; thiếu `strokes`; `strokes` rỗng; `medians` lệch số nét; điểm median không phải cặp số) và `strokeIndexSchema` (hợp lệ; phần tử nhiều ký tự; phần tử không phải chữ Hán; trùng) — Vitest, `packages/shared/src/stroke.schema.test.ts`; kiểm: fail vì chưa có schema
-- [ ] 2.2 GREEN: thêm `packages/shared/src/stroke.schema.ts` (`strokeDataSchema`, `StrokeData`, `strokeIndexSchema`, `StrokeIndex`), export trong `packages/shared/src/index.ts`; kiểm: test 2.1 pass
+- [ ] 2.1 RED: test `hanCharacterSchema` (`"人"`, chữ Hán ngoài BMP như `"𠀀"` hợp lệ; `""`, `"a"`, `"abc"`, `"你好"`, `"人 "` không hợp lệ), `strokeDataSchema` (hợp lệ với dữ liệu `人.json` thật; thiếu `strokes`; `strokes` rỗng; `medians` lệch số nét; điểm median không phải cặp số) và `strokeIndexSchema` (hợp lệ; phần tử nhiều ký tự; phần tử không phải chữ Hán; trùng) — Vitest, `packages/shared/src/stroke.schema.test.ts`; kiểm: fail vì chưa có schema
+- [ ] 2.2 GREEN: thêm `packages/shared/src/stroke.schema.ts` (`hanCharacterSchema`, `strokeDataSchema`, `StrokeData`, `strokeIndexSchema` = mảng `hanCharacterSchema` không trùng, `StrokeIndex`), export trong `packages/shared/src/index.ts`; kiểm: test 2.1 pass
 
 ## 3. Danh sách chữ có dữ liệu nét — `content:build` (design D2; nền cho "Chữ không có dữ liệu nét khi offline")
 
@@ -30,11 +30,11 @@ Ba file hỗ trợ này tạo ở task RED đầu tiên cần đến chúng.
 ## 5. Use case thứ tự nét — `shared/services/stroke-order.service.ts` (design D4)
 
 - [ ] 5.1 RED: S6.1-AC1 "Chữ được yêu cầu rỗng" — `isSingleHanCharacter('')` là `false`, `getStrokeOrder('')` trả `unavailable` và không đọc nguồn — Vitest thuần + fake `ContentSource`, `apps/web/src/app/shared/services/stroke-order.service.test.ts`; kiểm: fail vì chưa có service
-- [ ] 5.2 GREEN: tạo `StrokeOrderService` 3 phần + `shared/models/stroke-order.model.ts` (`StrokeOrderResult`, `StrokeOrderView`), Phần 2 `isSingleHanCharacter` (comment "Rule: …"), Phần 3 `getStrokeOrder` nhánh không hợp lệ; kiểm: test 5.1 pass
-- [ ] 5.3 RED: S6.1-AC1 "Chữ được yêu cầu không phải chữ Hán" — `"abc"` → `unavailable`, không đọc nguồn — `stroke-order.service.test.ts`; kiểm: fail
-- [ ] 5.4 GREEN: rule kiểm `\p{Script=Han}`; kiểm: test 5.3 pass
-- [ ] 5.5 RED: S6.1-AC1 "Chữ được yêu cầu gồm nhiều chữ" — `"你好"` → `unavailable`, không đọc file nét của 你 hay 好 — `stroke-order.service.test.ts`; kiểm: fail
-- [ ] 5.6 GREEN: rule đếm đúng một code point (`Array.from`); kiểm: test 5.5 pass
+- [ ] 5.2 GREEN: tạo `StrokeOrderService` 3 phần + `shared/models/stroke-order.model.ts` (`StrokeOrderResult`, `StrokeOrderView`), Phần 2 `isSingleHanCharacter` = `hanCharacterSchema.safeParse(input).success` (comment "Rule: …", không viết lại regex), Phần 3 `getStrokeOrder` nhánh không hợp lệ; kiểm: test 5.1 pass
+- [ ] 5.3 RED: S6.1-AC1 "Chữ được yêu cầu không phải chữ Hán" — `"abc"` → `unavailable`, không đọc nguồn — `stroke-order.service.test.ts`; kiểm: chạy, nếu pass ngay nhờ `hanCharacterSchema` (2.2) thì tạm cho rule chỉ kiểm chuỗi rỗng để thấy fail rồi trả lại
+- [ ] 5.4 GREEN: rule dùng `hanCharacterSchema` (phần chữ Hán); kiểm: test 5.3 pass
+- [ ] 5.5 RED: S6.1-AC1 "Chữ được yêu cầu gồm nhiều chữ" — `"你好"` → `unavailable`, không đọc file nét của 你 hay 好 — `stroke-order.service.test.ts`; kiểm: như 5.3 (tạm cho rule chỉ kiểm có chữ Hán để thấy fail rồi trả lại)
+- [ ] 5.6 GREEN: rule dùng `hanCharacterSchema` (phần đúng một ký tự); kiểm: test 5.5 pass
 - [ ] 5.7 RED: S6.1-AC1 "Chữ không có dữ liệu nét" — danh sách không có `"龘"` → `unavailable`, `getStrokeData` không được gọi; chữ `"人"` có trong danh sách → `available` với `strokeData` của 人 — `stroke-order.service.test.ts`; kiểm: fail
 - [ ] 5.8 GREEN: Phần 1 `readStrokeIndex`/`readStrokeData`, Phần 2 `hasStrokeData` (comment "Rule: …"), Phần 3 nhánh danh sách; kiểm: test 5.7 pass
 - [ ] 5.9 RED: S6.1-AC1 "Chữ không có dữ liệu nét khi offline" — fake nguồn: `getStrokeIndex` trả danh sách, mọi `getStrokeData` throw lỗi mạng; `getStrokeOrder('龘')` vẫn trả `unavailable` (không throw) — `stroke-order.service.test.ts`; kiểm: chạy, nếu pass ngay thì xác nhận test đúng bằng cách tạm đảo nhánh 5.8 cho thấy fail rồi trả lại
@@ -44,17 +44,17 @@ Ba file hỗ trợ này tạo ở task RED đầu tiên cần đến chúng.
 
 ## 6. Adapter vẽ nét — `core/services/stroke-writer.service.ts` (design D5; nền cho "Mỗi lúc chỉ vẽ một nét")
 
-- [ ] 6.1 RED: test `createStrokeWriter` với fake hanzi-writer: tạo writer bằng dữ liệu được truyền vào (`charDataLoader`, không tự fetch, `showCharacter`/`showOutline` tắt); `animateStroke(i)` resolve `'completed'` khi nét xong, `'cancelled'` khi bị huỷ; `clear()` ẩn mọi nét; `destroy()` gỡ DOM khỏi target — Vitest, `apps/web/src/app/core/services/stroke-writer.service.test.ts`, tạo `src/test/mocks/hanzi-writer.ts` (`FakeHanziWriter` + `finishStroke()`); kiểm: fail vì chưa có adapter
-- [ ] 6.2 GREEN: viết adapter (chỉ file này import `hanzi-writer`); kiểm: test 6.1 pass, `pnpm --filter @csk/web lint` không báo vi phạm §2
+- [ ] 6.1 RED: test `createStrokeWriter` với fake hanzi-writer, đích là một `<g>` trong `<svg viewBox="0 0 1024 1024">`: tạo writer trên đúng `<g>` đó với `width: 1024`, `height: 1024`, `padding: 0`, dữ liệu được truyền vào (`charDataLoader`, không tự fetch, `showCharacter`/`showOutline` tắt); `animateStroke(i)` resolve `'completed'` khi nét xong, `'cancelled'` khi bị huỷ; `clear()` gọi `hideCharacter({ duration: 0 })`; `destroy()` gọi `hideCharacter({ duration: 0 })` **trước** rồi gỡ mọi con của `<g>` (chính `<g>` và `<svg>` vẫn còn, `width`/`height` của `<svg>` không đổi) — Vitest, `apps/web/src/app/core/services/stroke-writer.service.test.ts`, tạo `src/test/mocks/hanzi-writer.ts` (`FakeHanziWriter` + `finishStroke()`); kiểm: fail vì chưa có adapter
+- [ ] 6.2 GREEN: viết adapter (chỉ file này import `hanzi-writer`; type dữ liệu chữ là `import type { CharacterJson } from 'hanzi-writer'`); kiểm: test 6.1 pass, `pnpm --filter @csk/web lint` không báo vi phạm §2
 
 ## 7. Khối animation + Phát lại — `shared/components/StrokeOrderAnimation.tsx` + `core/hooks/useStrokeAnimation.ts` (design D6, D9)
 
 Test chung file `apps/web/src/app/shared/components/StrokeOrderAnimation.test.tsx` — Vitest + Testing Library, fake hanzi-writer điều khiển thời điểm từng nét, đếm nét qua `data-drawn-stroke-count` của figure. Tạo `src/test/stroke.fixtures.ts` ở 7.1.
 
 - [ ] 7.1 RED: S6.1-AC1 "Chữ hiện animation và tự phát khi mở" — render với 好: có figure tên "Thứ tự nét chữ 好"; ngay khi mount `data-drawn-stroke-count="0"` và nét 1 đã được yêu cầu vẽ mà không cần bấm; kiểm: fail vì chưa có component
-- [ ] 7.2 GREEN: `useStrokeAnimation` (tự phát một lần trong effect, cleanup `destroy`) + `StrokeOrderAnimation` (figure, đích writer); tạo `assets/i18n/vi/stroke-order.json` (key `figureLabel`), thêm `'stroke-order'` vào `I18N_NAMESPACES` và `src/test/i18n.ts`; kiểm: test 7.1 pass
-- [ ] 7.3 RED: S6.1-AC1 "Chữ mờ nền hiện trong lúc vẽ" — lớp chữ mờ có đủ 6 path của 好 ngay khi mở, giữa chừng và khi xong; số nét đã vẽ ngay khi mở là 0, khi xong là 6 (không cộng lớp mờ) — kiểm: fail
-- [ ] 7.4 GREEN: `shared/components/StrokeGlyph.tsx` (variant `outline`) + `shared/utils/stroke.utils.ts` (`STROKE_VIEWBOX`, `STROKE_PATH_TRANSFORM`), gắn vào figure; kiểm: test 7.3 pass
+- [ ] 7.2 GREEN: `useStrokeAnimation` (`targetRef: RefObject<SVGGElement | null>`, tự phát một lần trong effect, cleanup `destroy`) + `StrokeOrderAnimation` (figure, `<g ref>` đích writer trong `<svg viewBox="0 0 1024 1024">`); tạo `assets/i18n/vi/stroke-order.json` (key `figureLabel`), thêm `'stroke-order'` vào `I18N_NAMESPACES` và `src/test/i18n.ts`; kiểm: test 7.1 pass
+- [ ] 7.3 RED: S6.1-AC1 "Chữ mờ nền hiện trong lúc vẽ" — lớp chữ mờ có đủ 6 path của 好 ngay khi mở, giữa chừng và khi xong; số nét đã vẽ ngay khi mở là 0, khi xong là 6 (không cộng lớp mờ); `<g>` đích writer nằm trong cùng `<svg>` với lớp mờ, sau các path mờ — kiểm: fail
+- [ ] 7.4 GREEN: `shared/components/StrokeGlyph.tsx` (variant `outline`, render `children` sau nhóm path) + `shared/utils/stroke.utils.ts` (`STROKE_VIEWBOX`, `STROKE_PATH_TRANSFORM`), `StrokeOrderAnimation` đặt `<g ref>` làm `children` của `StrokeGlyph`; kiểm: test 7.3 pass
 - [ ] 7.5 RED: S6.1-AC1 "Mỗi lúc chỉ vẽ một nét" — với 好, sau mỗi `finishStroke()` số nét tăng đúng 1 (1…6) và fake không bao giờ có hơn một nét đang vẽ — kiểm: fail
 - [ ] 7.6 GREEN: vòng lặp tuần tự `await animateStroke(i)` rồi tăng `drawnStrokeCount`; kiểm: test 7.5 pass
 - [ ] 7.7 RED: S6.1-AC1 "Nét hiện đúng thứ tự viết" — với 人, nét 0 (phẩy) xong trước khi nét 1 (mác) được yêu cầu; xong có 2 nét — kiểm: chạy, nếu pass ngay thì tạm đảo thứ tự lặp để thấy fail rồi trả lại
@@ -75,7 +75,7 @@ Test chung file `apps/web/src/app/shared/components/StrokeOrderAnimation.test.ts
 ## 8. Thứ tự nét tĩnh — `shared/components/StrokeOrderStatic.tsx` + `core/hooks/useInitialReducedMotion.ts` (design D7, D9)
 
 - [ ] 8.1 RED: S6.1-AC1 "Giảm chuyển động hiện thứ tự nét tĩnh" (mức component) — render 白: ngay lập tức có 5 nét đậm và số 1…5 theo thứ tự nét, số đặt ở điểm đầu median; không có nút "Phát lại", fake hanzi-writer không được tạo — Vitest + Testing Library, `apps/web/src/app/shared/components/StrokeOrderStatic.test.tsx`; và `strokeLabelPoint` — `apps/web/src/app/shared/utils/stroke.utils.test.ts`; kiểm: fail vì chưa có component/hàm
-- [ ] 8.2 GREEN: `StrokeOrderStatic` (dùng `StrokeGlyph` variant `solid` + `<text>` số), `strokeLabelPoint`; kiểm: test 8.1 pass
+- [ ] 8.2 GREEN: `StrokeOrderStatic` (dùng `StrokeGlyph` variant `solid` + `<text>` số truyền qua `children`), `strokeLabelPoint`; kiểm: test 8.1 pass
 - [ ] 8.3 RED: `useInitialReducedMotion` đọc `matchMedia('(prefers-reduced-motion: reduce)')` một lần lúc mount, đổi media sau đó không đổi giá trị, thiếu `matchMedia` thì `false` — Vitest `renderHook`, stub `matchMedia`, `apps/web/src/app/core/hooks/useInitialReducedMotion.test.ts`; kiểm: fail vì chưa có hook
 - [ ] 8.4 GREEN: viết hook (`useState` initializer, không listener); kiểm: test 8.3 pass
 
@@ -108,17 +108,17 @@ Test chung `apps/web/src/app/pages/stroke-order/containers/StrokeOrderContainer.
 
 ## 10. Giao diện — `styles/tailwind/` (design D10)
 
-- [ ] 10.1 `apps/web/src/styles/tailwind/components/_stroke-order.css` (BEM gạch ngang: `.stroke-order-figure`, `-outline`, `-stroke`, `-label`, `-message`), import trong `main.css`, biến thể tối trong `themes/_dark.css`; JSX chỉ layout/spacing (§6); contrast ≥ 4.5:1 cho chữ, ≥ 3:1 cho nét/lớp mờ; focus thấy rõ trên "Phát lại"/"Thử lại" — ngoại lệ test-first: CSS thuần; kiểm: `pnpm --filter @csk/web test:run tokens` pass, xem preview `web-dev` ở 375×812 và 1280×800, sáng và tối, với 好, 白 (giảm chuyển động), 龘, lỗi tải
+- [ ] 10.1 `apps/web/src/styles/tailwind/components/_stroke-order.css` (BEM gạch ngang: `.stroke-order-figure`, `-outline`, `-stroke` (path tĩnh của app, `fill`), `-writer` (chỉ `.stroke-order-writer path { stroke: var(--color-…); }`, **không** đụng `fill`, `stroke-width`, `stroke-dasharray`/`dashoffset`, `clip-path` của hanzi-writer), `-label`, `-message`), import trong `main.css`, biến thể tối trong `themes/_dark.css` (màu `stroke` đổi theo theme); JSX chỉ layout/spacing (§6); contrast ≥ 4.5:1 cho chữ, ≥ 3:1 cho nét/lớp mờ; focus thấy rõ trên "Phát lại"/"Thử lại" — ngoại lệ test-first: CSS thuần; kiểm: `pnpm --filter @csk/web test:run tokens` pass, xem preview `web-dev` ở 375×812 và 1280×800, sáng và tối, với 好 (nét hiện dần theo animation, không tô khối tức thì; nét trùng khít chữ mờ khi đổi kích thước cửa sổ), 白 (giảm chuyển động), 龘, lỗi tải
 
 ## 11. Luồng thật và offline — e2e Playwright (`apps/web/e2e/E6/`)
 
-E2E viết sau nhóm 9 sẽ chạy trên màn đã có: với mỗi RED, nếu pass ngay thì tạm đổi route/hành vi để thấy fail rồi trả lại (như S3.1). Chỉ kiểm trạng thái ổn định bằng `expect.poll` trên `data-drawn-stroke-count`. Case chặn/làm chậm/thay phản hồi dùng `test.use({ serviceWorkers: 'block' })` + `page.route`.
+E2E viết sau nhóm 9 sẽ chạy trên màn đã có: với mỗi RED, nếu pass ngay thì tạm đổi route/hành vi để thấy fail rồi trả lại (như S3.1). Chỉ kiểm trạng thái ổn định bằng `expect.poll` trên `data-drawn-stroke-count`, mỗi `expect.poll` chờ số nét có `timeout: strokePollTimeout(strokeCount)` (`5_000 + strokeCount * 1_000` ms, design "Test") vì hanzi-writer thật vẽ mỗi nét ~0,3–0,7 s. Case chặn/làm chậm/thay phản hồi dùng `test.use({ serviceWorkers: 'block' })` + `page.route`.
 
 - [ ] 11.1 RED: `apps/web/e2e/E6/s6.1-stroke-order.spec.ts`, `test.describe('S6.1 Xem thứ tự nét')`, các test online theo cột `e2e` của test-cases: S6.1-AC1 "Chữ hiện animation và tự phát khi mở" (TC-AC1-2), "Số nét được vẽ bằng số nét của chữ" (AC1-10, 11), "Animation chỉ tự phát một lần" (AC1-12), "Màn chỉ hiện một chữ" (AC1-14), "Chữ không có dữ liệu nét" (AC1-15), "Chữ được yêu cầu rỗng" (AC1-18), "…không phải chữ Hán" (AC1-19), "…gồm nhiều chữ" (AC1-20), "Đang tải dữ liệu nét" (AC1-21), "Tải dữ liệu nét lỗi" (AC1-22), "Dữ liệu nét hỏng hoặc sai cấu trúc" (AC1-25, 26), "Thử lại sau khi tải lỗi" (AC1-27), "Giảm chuyển động hiện thứ tự nét tĩnh" (AC1-31, `emulateMedia`), "Đổi giảm chuyển động khi đang ở màn" (AC1-35); S6.1-AC2 "Có nút Phát lại bấm được" (AC2-1, 5), "Phát lại sau khi đã phát xong" (AC2-9), "Phát lại khi đang phát" (AC2-11, 12), "Phát lại nhiều lần" (AC2-13); kiểm: `pnpm e2e` fail đúng lý do
 - [ ] 11.2 GREEN: sửa code (không sửa kỳ vọng) đến khi pass, đặc biệt adapter hanzi-writer thật (huỷ lượt cũ, đếm nét); kiểm: `pnpm e2e` pass
 - [ ] 11.3 RED: S6.1-AC1 "Xem animation khi offline" (TC-AC1-29) — `apps/web/e2e/E6/s6.1-stroke-order-offline.spec.ts`, mẫu `openOnceWithServiceWorker` của `e2e/E1/s1.2-offline.spec.ts`, không mở màn nét trước khi tắt mạng; 人 phát đủ 2 nét, không "Có lỗi xảy ra"/"Chưa có dữ liệu nét cho chữ này."; kiểm: thấy fail (tạm loại `strokes/` khỏi precache nếu pass ngay) rồi trả lại
 - [ ] 11.4 GREEN: bảo đảm `content/strokes/*.json` và `index.json` trong precache (glob hiện có); kiểm: test 11.3 pass
-- [ ] 11.5 RED: S6.1-AC1 "Mọi chữ có dữ liệu nét đều xem được khi offline" (TC-AC1-37) — đọc danh sách từ `/content/strokes/index.json` và số nét từ file nét của bản build **trước** khi tắt mạng (qua `request` của Playwright, không qua trang), rồi offline mở từng chữ, chờ `data-drawn-stroke-count` bằng số nét; kiểm: thấy fail như 11.3 rồi trả lại
+- [ ] 11.5 RED: S6.1-AC1 "Mọi chữ có dữ liệu nét đều xem được khi offline" (TC-AC1-37) — trong `s6.1-stroke-order-offline.spec.ts`: lúc nạp file đọc `apps/web/src/assets/content/strokes/index.json` và parse bằng `strokeIndexSchema`, sinh **một test cho mỗi chữ** (tên chứa ID và chữ); một test chặn lệch: `/content/strokes/index.json` của bản build (qua `request`) bằng đúng danh sách đó; mỗi test chữ đọc số nét từ file nét của bản build **trước** khi tắt mạng (qua `request`, không qua trang), rồi offline mở chữ đó, `expect.poll` `data-drawn-stroke-count` bằng số nét với `timeout: strokePollTimeout(số nét)`; kiểm: thấy fail như 11.3 rồi trả lại
 - [ ] 11.6 GREEN: sửa đến khi pass; kiểm: test 11.5 pass
 - [ ] 11.7 RED: S6.1-AC1 "Chữ không có dữ liệu nét khi offline" (TC-AC1-38) — offline mở 龘: "Chưa có dữ liệu nét cho chữ này.", không "Có lỗi xảy ra", không "Thử lại", không figure, không "Phát lại"; kiểm: thấy fail (tạm cho service fetch file nét trước khi xét danh sách nếu pass ngay) rồi trả lại
 - [ ] 11.8 GREEN: sửa đến khi pass; kiểm: test 11.7 pass
