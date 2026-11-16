@@ -74,8 +74,8 @@ Test chung file `apps/web/src/app/shared/components/StrokeOrderAnimation.test.ts
 
 ## 8. Thứ tự nét tĩnh — `shared/components/StrokeOrderStatic.tsx` + `core/hooks/useInitialReducedMotion.ts` (design D7, D9)
 
-- [ ] 8.1 RED: S6.1-AC1 "Giảm chuyển động hiện thứ tự nét tĩnh" (mức component) — render 白: ngay lập tức có 5 nét đậm và số 1…5 theo thứ tự nét, số đặt ở điểm đầu median; không có nút "Phát lại", fake hanzi-writer không được tạo — Vitest + Testing Library, `apps/web/src/app/shared/components/StrokeOrderStatic.test.tsx`; và `strokeLabelPoint` — `apps/web/src/app/shared/utils/stroke.utils.test.ts`; kiểm: fail vì chưa có component/hàm
-- [ ] 8.2 GREEN: `StrokeOrderStatic` (dùng `StrokeGlyph` variant `solid` + `<text>` số truyền qua `children`), `strokeLabelPoint`; kiểm: test 8.1 pass
+- [x] 8.1 RED: S6.1-AC1 "Giảm chuyển động hiện thứ tự nét tĩnh" (mức component) — render 白: ngay lập tức có 5 nét đậm và số 1…5 theo thứ tự nét, số đặt ở điểm đầu median; không có nút "Phát lại", fake hanzi-writer không được tạo — Vitest + Testing Library, `apps/web/src/app/shared/components/StrokeOrderStatic.test.tsx`; và `strokeLabelPoint` — `apps/web/src/app/shared/utils/stroke.utils.test.ts`; kiểm: fail vì chưa có component/hàm
+- [x] 8.2 GREEN: `StrokeOrderStatic` (dùng `StrokeGlyph` variant `solid` + `<text>` số truyền qua `children`), `strokeLabelPoint`; kiểm: test 8.1 pass
 - [ ] 8.3 RED: `useInitialReducedMotion` đọc `matchMedia('(prefers-reduced-motion: reduce)')` một lần lúc mount, đổi media sau đó không đổi giá trị, thiếu `matchMedia` thì `false` — Vitest `renderHook`, stub `matchMedia`, `apps/web/src/app/core/hooks/useInitialReducedMotion.test.ts`; kiểm: fail vì chưa có hook
 - [ ] 8.4 GREEN: viết hook (`useState` initializer, không listener); kiểm: test 8.3 pass
 

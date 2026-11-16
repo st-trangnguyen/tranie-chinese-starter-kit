@@ -6,10 +6,11 @@ import {
   STROKE_VIEWBOX,
 } from '@shared/utils/stroke.utils';
 
-type StrokeGlyphVariant = 'outline';
+type StrokeGlyphVariant = 'outline' | 'solid';
 
 const VARIANT_CLASS_NAMES: Record<StrokeGlyphVariant, string> = {
   outline: 'stroke-order-outline',
+  solid: 'stroke-order-stroke',
 };
 
 interface StrokeGlyphProps {
