@@ -103,8 +103,8 @@ Test chung `apps/web/src/app/pages/stroke-order/containers/StrokeOrderContainer.
 - [x] 9.18 GREEN: `retry()` trong `useStrokeOrder` (tăng `attempt`, về `loading`); kiểm: test 9.17 pass
 - [x] 9.19 RED: S6.1-AC1 "Giảm chuyển động hiện thứ tự nét tĩnh" (mức màn) — stub `matchMedia` reduce, mở 白: thấy số 1…5, không có nút "Phát lại", hanzi-writer không được tạo — kiểm: fail
 - [x] 9.20 GREEN: `useStrokeOrder` trả `isReducedMotion` từ `useInitialReducedMotion`; container chọn `StrokeOrderStatic`/`StrokeOrderAnimation`; kiểm: test 9.19 pass
-- [ ] 9.21 RED: S6.1-AC1 "Đổi giảm chuyển động khi đang ở màn" — mở 人 (reduce tắt), đổi stub sang reduce và phát sự kiện `change`: vẫn có figure animation + "Phát lại"; unmount rồi mở lại 人: hiện tĩnh 1…2, không "Phát lại"; thêm case điều hướng 人 → 龘 → 人 trong cùng router cho thấy mỗi lần đổi chữ là mở màn mới — kiểm: chạy, nếu pass ngay thì tạm thêm listener `change` vào hook để thấy fail rồi trả lại
-- [ ] 9.22 GREEN: sửa đến khi pass; kiểm: test 9.21 pass
+- [x] 9.21 RED: S6.1-AC1 "Đổi giảm chuyển động khi đang ở màn" — mở 人 (reduce tắt), đổi stub sang reduce và phát sự kiện `change`: vẫn có figure animation + "Phát lại"; unmount rồi mở lại 人: hiện tĩnh 1…2, không "Phát lại"; thêm case điều hướng 人 → 龘 → 人 trong cùng router cho thấy mỗi lần đổi chữ là mở màn mới — kiểm: chạy, nếu pass ngay thì tạm thêm listener `change` vào hook để thấy fail rồi trả lại
+- [x] 9.22 GREEN: sửa đến khi pass; kiểm: test 9.21 pass
 
 ## 10. Giao diện — `styles/tailwind/` (design D10)
 

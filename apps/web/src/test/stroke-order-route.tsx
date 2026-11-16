@@ -20,23 +20,68 @@ import pageRoutes from '@app/pages/page.routes';
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
-/** Stub `matchMedia`: chỉ query giảm chuyển động trả `matches` theo tham số. */
-export const stubReducedMotion = (matches: boolean): void => {
+type MediaChangeListener = (event: { matches: boolean; media: string }) => void;
+
+export interface ReducedMotionStub {
+  /** Đổi cài đặt giảm chuyển động như người dùng bật/tắt trong hệ điều hành, phát sự kiện `change`. */
+  setReducedMotion: (matches: boolean) => void;
+}
+
+/**
+ * Stub `matchMedia`: chỉ query giảm chuyển động trả `matches` theo tham số. `matches` đọc giá trị
+ * hiện tại; `setReducedMotion` đổi giá trị và gọi mọi listener `change` đã đăng ký.
+ */
+export const stubReducedMotion = (
+  initialMatches: boolean,
+): ReducedMotionStub => {
+  let isReduced = initialMatches;
+  const listeners = new Set<MediaChangeListener>();
+
   vi.stubGlobal(
     'matchMedia',
-    vi.fn((query: string) => ({
-      matches: query === REDUCED_MOTION_QUERY ? matches : false,
-      media: query,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-    })),
+    vi.fn((query: string) => {
+      const isReducedQuery = query === REDUCED_MOTION_QUERY;
+      const register = (listener: MediaChangeListener): void => {
+        if (isReducedQuery) {
+          listeners.add(listener);
+        }
+      };
+      const unregister = (listener: MediaChangeListener): void => {
+        listeners.delete(listener);
+      };
+      return {
+        get matches() {
+          return isReducedQuery ? isReduced : false;
+        },
+        media: query,
+        onchange: null,
+        addEventListener: (_type: string, listener: MediaChangeListener) =>
+          register(listener),
+        removeEventListener: (_type: string, listener: MediaChangeListener) =>
+          unregister(listener),
+        addListener: register,
+        removeListener: unregister,
+        dispatchEvent: () => true,
+      };
+    }),
   );
+
+  return {
+    setReducedMotion: (matches) => {
+      isReduced = matches;
+      listeners.forEach((listener) =>
+        listener({ matches, media: REDUCED_MOTION_QUERY }),
+      );
+    },
+  };
 };
 
+export type TestRouter = ReturnType<typeof createMemoryRouter>;
+
 /** Mở một địa chỉ qua đúng bảng route của app (cùng cấu trúc Root trong App.tsx). */
-export const openRoute = (path: string): RenderResult => {
+export const openRoute = (
+  path: string,
+): RenderResult & { router: TestRouter } => {
   const router = createMemoryRouter(
     [
       {
@@ -51,11 +96,12 @@ export const openRoute = (path: string): RenderResult => {
     ],
     { initialEntries: [path] },
   );
-  return render(
+  const result = render(
     <I18nextProvider i18n={testI18n}>
       <RouterProvider router={router} />
     </I18nextProvider>,
   );
+  return { ...result, router };
 };
 
 export interface StrokeOrderRouteEnv {
