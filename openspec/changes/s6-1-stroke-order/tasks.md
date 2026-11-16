@@ -35,8 +35,8 @@ Ba file hỗ trợ này tạo ở task RED đầu tiên cần đến chúng.
 - [x] 5.4 GREEN: rule dùng `hanCharacterSchema` (phần chữ Hán); kiểm: test 5.3 pass
 - [x] 5.5 RED: S6.1-AC1 "Chữ được yêu cầu gồm nhiều chữ" — `"你好"` → `unavailable`, không đọc file nét của 你 hay 好 — `stroke-order.service.test.ts`; kiểm: như 5.3 (tạm cho rule chỉ kiểm có chữ Hán để thấy fail rồi trả lại)
 - [x] 5.6 GREEN: rule dùng `hanCharacterSchema` (phần đúng một ký tự); kiểm: test 5.5 pass
-- [ ] 5.7 RED: S6.1-AC1 "Chữ không có dữ liệu nét" — danh sách không có `"龘"` → `unavailable`, `getStrokeData` không được gọi; chữ `"人"` có trong danh sách → `available` với `strokeData` của 人 — `stroke-order.service.test.ts`; kiểm: fail
-- [ ] 5.8 GREEN: Phần 1 `readStrokeIndex`/`readStrokeData`, Phần 2 `hasStrokeData` (comment "Rule: …"), Phần 3 nhánh danh sách; kiểm: test 5.7 pass
+- [x] 5.7 RED: S6.1-AC1 "Chữ không có dữ liệu nét" — danh sách không có `"龘"` → `unavailable`, `getStrokeData` không được gọi; chữ `"人"` có trong danh sách → `available` với `strokeData` của 人 — `stroke-order.service.test.ts`; kiểm: fail
+- [x] 5.8 GREEN: Phần 1 `readStrokeIndex`/`readStrokeData`, Phần 2 `hasStrokeData` (comment "Rule: …"), Phần 3 nhánh danh sách; kiểm: test 5.7 pass
 - [ ] 5.9 RED: S6.1-AC1 "Chữ không có dữ liệu nét khi offline" — fake nguồn: `getStrokeIndex` trả danh sách, mọi `getStrokeData` throw lỗi mạng; `getStrokeOrder('龘')` vẫn trả `unavailable` (không throw) — `stroke-order.service.test.ts`; kiểm: chạy, nếu pass ngay thì xác nhận test đúng bằng cách tạm đảo nhánh 5.8 cho thấy fail rồi trả lại
 - [ ] 5.10 GREEN: giữ thứ tự "kiểm danh sách trước, chỉ đọc file nét khi có trong danh sách"; kiểm: test 5.9 pass
 - [ ] 5.11 RED: S6.1-AC1 "Tải dữ liệu nét lỗi" và "Dữ liệu nét hỏng hoặc sai cấu trúc" — nguồn throw ở `getStrokeIndex` hoặc ở `getStrokeData('人')` → `getStrokeOrder` throw `Error('Không tải được dữ liệu nét.')` có `cause` — `stroke-order.service.test.ts`; kiểm: fail

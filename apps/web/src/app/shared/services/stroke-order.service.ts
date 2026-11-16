@@ -1,4 +1,8 @@
-import { hanCharacterSchema } from '@csk/shared';
+import {
+  hanCharacterSchema,
+  type StrokeData,
+  type StrokeIndex,
+} from '@csk/shared';
 
 import {
   contentSource,
@@ -12,6 +16,14 @@ export class StrokeOrderService {
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
   // Đọc danh sách chữ và dữ liệu nét qua `this.source`.
 
+  private readStrokeIndex(): Promise<StrokeIndex> {
+    return this.source.getStrokeIndex();
+  }
+
+  private readStrokeData(character: string): Promise<StrokeData> {
+    return this.source.getStrokeData(character);
+  }
+
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
   // Rule: chữ được yêu cầu hợp lệ khi gồm đúng một ký tự Hán;
@@ -20,12 +32,22 @@ export class StrokeOrderService {
     return hanCharacterSchema.safeParse(input).success;
   }
 
+  // Rule: chỉ chữ có trong danh sách nét của bản app mới có dữ liệu nét.
+  hasStrokeData(character: string, index: StrokeIndex): boolean {
+    return index.includes(character);
+  }
+
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
   async getStrokeOrder(input: string): Promise<StrokeOrderResult> {
     if (!this.isSingleHanCharacter(input)) {
       return { status: 'unavailable' };
     }
-    throw new Error('Không tải được dữ liệu nét.');
+    const index = await this.readStrokeIndex();
+    if (!this.hasStrokeData(input, index)) {
+      return { status: 'unavailable' };
+    }
+    const strokeData = await this.readStrokeData(input);
+    return { status: 'available', character: input, strokeData };
   }
 }
