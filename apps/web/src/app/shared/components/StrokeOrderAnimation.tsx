@@ -1,0 +1,40 @@
+import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { StrokeData } from '@csk/shared';
+
+import { useStrokeAnimation } from '@core/hooks/useStrokeAnimation';
+
+interface StrokeOrderAnimationProps {
+  character: string;
+  strokeData: StrokeData;
+}
+
+export function StrokeOrderAnimation({
+  character,
+  strokeData,
+}: StrokeOrderAnimationProps) {
+  const { t } = useTranslation('stroke-order');
+  const targetRef = useRef<SVGGElement>(null);
+  const { drawnStrokeCount } = useStrokeAnimation(
+    targetRef,
+    character,
+    strokeData,
+  );
+
+  return (
+    <figure
+      role="img"
+      aria-label={t('figureLabel', { character })}
+      data-drawn-stroke-count={drawnStrokeCount}
+      className="stroke-order-figure flex flex-col"
+    >
+      <svg
+        viewBox="0 0 1024 1024"
+        aria-hidden="true"
+        className="block w-full h-auto"
+      >
+        <g ref={targetRef} className="stroke-order-writer" />
+      </svg>
+    </figure>
+  );
+}

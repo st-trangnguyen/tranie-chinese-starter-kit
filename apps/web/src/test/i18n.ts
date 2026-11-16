@@ -5,6 +5,7 @@ import common from '@assets/i18n/vi/common.json';
 import learningPath from '@assets/i18n/vi/learning-path.json';
 import lesson from '@assets/i18n/vi/lesson.json';
 import onboarding from '@assets/i18n/vi/onboarding.json';
+import strokeOrder from '@assets/i18n/vi/stroke-order.json';
 
 /**
  * Instance i18n chỉ dùng cho test, nạp thẳng file `vi` thật.
@@ -15,10 +16,10 @@ const testI18n = createInstance();
 testI18n.use(initReactI18next).init({
   lng: 'vi',
   fallbackLng: 'vi',
-  ns: ['common', 'onboarding', 'learning-path', 'lesson'],
+  ns: ['common', 'onboarding', 'learning-path', 'lesson', 'stroke-order'],
   defaultNS: 'common',
   resources: {
-    vi: { common, onboarding, 'learning-path': learningPath, lesson },
+    vi: { common, onboarding, 'learning-path': learningPath, lesson, 'stroke-order': strokeOrder },
   },
   interpolation: { escapeValue: false },
 });
