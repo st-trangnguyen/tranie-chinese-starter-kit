@@ -1,8 +1,13 @@
-# Cổng duyệt spec: PR spec chỉ merge được khi hết câu hỏi mở và đủ approve của ba vai BA / QA / Dev.
-# Quy trình: docs/05-standards/spec-driven.md §2 (Pha A) và "Các cổng".
+# Cổng duyệt spec: PR spec chỉ merge được khi (1) hết câu hỏi mở, (2) có test-cases.md, (3) hai agent duyệt spec
+# (qa, dev-lead) đã approve đúng commit đầu hiện tại, (4) một người thật approve.
+# Quy trình: docs/05-standards/spec-driven.md §2 (Pha A) và "Các cổng"; thiết kế:
+# docs/04-specs/2026-11-13-agent-spec-review.md.
 #
-# Danh sách người duyệt nằm ở repo variables (handle GitHub, cách nhau dấu phẩy):
-#   BA_APPROVERS, QA_APPROVERS, DEV_APPROVERS
+# Comment mới/sửa/xoá chỉ kích hoạt chạy lại check của PR (xem bước issue_comment bên dưới).
+# Verdict của hai agent ghi trong một comment PR có marker (do `/relay spec` đăng):
+#   <!-- csk-spec-agents sha=<commit> qa=approve dev-lead=approve -->
+# Chỉ tính comment của OWNER/MEMBER/COLLABORATOR, đúng sha đầu PR, comment mới nhất có marker.
+# Người thật: repo variable SPEC_APPROVERS (handle GitHub, cách nhau dấu phẩy).
 # Để cổng chặn thật: đặt check "Spec approvals" làm required trong branch protection của `main`.
 # Chỉ dùng API của GitHub và payload sự kiện, không checkout hay chạy code từ nhánh PR.
 name: Spec approvals
@@ -12,14 +17,19 @@ on:
     types: [opened, edited, synchronize, reopened, ready_for_review, converted_to_draft]
   pull_request_review:
     types: [submitted, dismissed]
+  issue_comment:
+    types: [created, edited, deleted]
 
 concurrency:
-  group: spec-approvals-${{ github.event.pull_request.number }}
+  # Comment dùng group riêng để không huỷ run `pull_request` đang chạy.
+  group: spec-approvals-${{ github.event_name == 'issue_comment' && 'comment-' || '' }}${{ github.event.pull_request.number || github.event.issue.number }}
   cancel-in-progress: true
 
 permissions:
   contents: read
   pull-requests: read
+  issues: read
+  actions: write
 
 jobs:
   check:
@@ -27,24 +37,42 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Kiểm tra Open Questions, test-cases.md và approve của ba vai
+      - name: Kiểm tra Open Questions, test-cases.md và approve của hai agent và người thật
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-          IS_DRAFT: ${{ github.event.pull_request.draft }}
-          BA_APPROVERS: ${{ vars.BA_APPROVERS }}
-          QA_APPROVERS: ${{ vars.QA_APPROVERS }}
-          DEV_APPROVERS: ${{ vars.DEV_APPROVERS }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          EVENT_NAME: ${{ github.event_name }}
+          SPEC_APPROVERS: ${{ vars.SPEC_APPROVERS }}
         run: |
           set -euo pipefail
+
+          # Lấy thông tin PR bằng API để dùng chung cho mọi loại sự kiện (cả issue_comment).
+          if ! pr=$(gh api "repos/$REPO/pulls/$PR_NUMBER" 2>/dev/null); then
+            echo "Không phải PR, bỏ qua."
+            exit 0
+          fi
+          HEAD_REF=$(jq -r '.head.ref' <<<"$pr")
+          HEAD_SHA=$(jq -r '.head.sha' <<<"$pr")
+          PR_AUTHOR=$(jq -r '.user.login' <<<"$pr")
+          IS_DRAFT=$(jq -r '.draft' <<<"$pr")
 
           # Chỉ PR spec (nhánh spec/*) cần cổng này. Job vẫn pass cho PR khác để check bắt buộc không treo.
           if [[ "$HEAD_REF" != spec/* ]]; then
             echo "Không phải PR spec, bỏ qua."
+            exit 0
+          fi
+
+          # issue_comment chạy ở ngữ cảnh nhánh mặc định nên check của nó không gắn vào commit của PR. Vì vậy
+          # comment chỉ dùng để chạy lại check `pull_request` mới nhất của đúng head SHA; check đó mới hiện trên PR.
+          if [[ "$EVENT_NAME" == "issue_comment" ]]; then
+            run_id=$(gh api "repos/$REPO/actions/workflows/spec-approvals-workflow.yml/runs?head_sha=$HEAD_SHA&event=pull_request" \
+              --jq '.workflow_runs | sort_by(.created_at) | last | .id // empty')
+            if [[ -n "$run_id" ]]; then
+              gh run rerun "$run_id" --repo "$REPO" || echo "Chưa chạy lại được run $run_id (đang chạy?); sẽ tự cập nhật ở sự kiện sau."
+            else
+              echo "Chưa có run pull_request cho commit này, bỏ qua."
+            fi
             exit 0
           fi
 
@@ -84,39 +112,46 @@ jobs:
             fi
           done
 
-          # Review mới nhất của từng người; chỉ APPROVED **trên commit đầu hiện tại** mới tính (push mới làm
-          # approve cũ hết hiệu lực). COMMENTED không đổi trạng thái.
+          # (3) Verdict của hai agent duyệt spec (qa, dev-lead): comment mới nhất có marker, đúng sha đầu PR, do thành viên repo đăng.
+          marker=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
+            | jq -rs '[.[][] | select(.author_association == "OWNER" or .author_association == "MEMBER" or .author_association == "COLLABORATOR")
+                        | select(.body | test("<!-- csk-spec-agents "))] | last | .body // ""' \
+            | grep -oE '<!-- csk-spec-agents [^>]*-->' | tail -1 || true)
+          if [[ -z "$marker" ]]; then
+            fail "Chưa có verdict của agent qa / dev-lead (chạy /relay spec và đăng kết quả lên PR)."
+          else
+            m_sha=$(sed -nE 's/.*sha=([0-9a-f]+).*/\1/p' <<<"$marker")
+            if [[ "$m_sha" != "$HEAD_SHA" ]]; then
+              fail "Verdict của agent chỉ áp dụng cho commit ${m_sha:-?}, PR đã có commit mới ($HEAD_SHA). Chạy lại /relay spec."
+            fi
+            for role in qa dev-lead; do
+              if grep -qE "[ ]$role=approve([ ]|$)" <<<"${marker% -->}"; then
+                echo "✓ Agent $role đã approve."
+              else
+                fail "Agent $role chưa approve."
+              fi
+            done
+          fi
+
+          # (4) Người thật: review APPROVED mới nhất trên commit đầu hiện tại; push mới làm approve cũ hết
+          # hiệu lực. COMMENTED không đổi trạng thái. GitHub không cho tác giả tự approve nên tác giả PR
+          # spec được tính là đã duyệt nếu nằm trong SPEC_APPROVERS.
           approvers=$(gh api "repos/$REPO/pulls/$PR_NUMBER/reviews" --paginate \
             | jq -rs --arg sha "$HEAD_SHA" '[.[][] | select(.state != "COMMENTED")]
                       | group_by(.user.login) | map(max_by(.submitted_at))
                       | .[] | select(.state == "APPROVED" and .commit_id == $sha) | .user.login')
-          # GitHub không cho tác giả tự approve: tác giả PR spec được tính là đã duyệt cho vai của mình.
           approvers="$approvers $PR_AUTHOR"
 
           lower() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
-
-          has_role() { # $1 = danh sách handle cách nhau dấu phẩy
-            local list login
-            list=$(lower "${1// /}")
+          if [[ -z "${SPEC_APPROVERS// /}" ]]; then
+            fail "Chưa cấu hình repo variable SPEC_APPROVERS (xem spec-driven.md, mục Cấu hình repo)."
+          else
+            list=$(lower "${SPEC_APPROVERS// /}"); ok=0
             for login in $approvers; do
-              if [[ ",$list," == *",$(lower "$login"),"* ]]; then return 0; fi
+              if [[ ",$list," == *",$(lower "$login"),"* ]]; then ok=1; fi
             done
-            return 1
-          }
-
-          check_role() { # $1 = tên vai, $2 = tên variable, $3 = giá trị
-            if [[ -z "${3// /}" ]]; then
-              fail "Chưa cấu hình repo variable $2 (xem spec-driven.md, mục Cấu hình repo)."
-            elif has_role "$3"; then
-              echo "✓ $1 đã approve."
-            else
-              fail "Thiếu approve của $1 (một người trong $2)."
-            fi
-          }
-
-          check_role "BA"  BA_APPROVERS  "$BA_APPROVERS"
-          check_role "QA"  QA_APPROVERS  "$QA_APPROVERS"
-          check_role "Dev" DEV_APPROVERS "$DEV_APPROVERS"
+            if [[ "$ok" -eq 1 ]]; then echo "✓ Người thật đã approve."; else fail "Thiếu approve của người thật (một người trong SPEC_APPROVERS)."; fi
+          fi
 
           if [[ "$failed" -ne 0 ]]; then exit 1; fi
           echo "PR spec đủ điều kiện merge."

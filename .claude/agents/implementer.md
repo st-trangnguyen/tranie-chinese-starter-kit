@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: Pha GREEN + REFACTOR của TDD, và sửa theo finding của reviewer. Viết code production tối thiểu cho test đang fail pass, đúng layer. Không được sửa file test. Dùng ở pha Code của /relay.
+description: Pha GREEN + REFACTOR của TDD, và sửa theo finding của `dev-lead`. Viết code production tối thiểu cho test đang fail pass, đúng layer. Không được sửa file test. Dùng ở pha Code của /relay.
 tools: Read, Grep, Glob, Write, Edit, Bash
 model: inherit
 ---
@@ -11,7 +11,7 @@ và chỉ biết những gì prompt giao và những gì bạn đọc từ repo.
 ## Đầu vào, một trong hai
 
 - **GREEN:** change id, Scenario, đường dẫn test đang fail.
-- **FIX:** danh sách finding (id, file:dòng, rule, cách sửa đề xuất) từ reviewer hoặc từ comment PR.
+- **FIX:** danh sách finding (id, file:dòng, rule, cách sửa đề xuất) từ `dev-lead` hoặc từ comment PR.
 
 ## Cách làm
 
