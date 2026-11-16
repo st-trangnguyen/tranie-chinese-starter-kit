@@ -8,25 +8,40 @@ interface StrokeOrderScreenProps {
   character: string;
 }
 
+/** Phần thân màn theo trạng thái tải dữ liệu nét. */
+function StrokeOrderBody({ character }: StrokeOrderScreenProps) {
+  const { t } = useTranslation('stroke-order');
+  const { view } = useStrokeOrder(character);
+
+  if (view.status === 'loading') {
+    return (
+      <p role="status" className="stroke-order-message">
+        {t('loading')}
+      </p>
+    );
+  }
+  if (view.status === 'unavailable') {
+    return <p className="stroke-order-message">{t('unavailable')}</p>;
+  }
+  if (view.status === 'ready') {
+    return (
+      <StrokeOrderAnimation
+        character={view.character}
+        strokeData={view.strokeData}
+      />
+    );
+  }
+  return null;
+}
+
 /** Một lần "mở màn" cho một chữ; container đổi `key` khi đổi chữ. */
 function StrokeOrderScreen({ character }: StrokeOrderScreenProps) {
   const { t } = useTranslation('stroke-order');
-  const { view } = useStrokeOrder(character);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-xl p-xl">
       <h1 className="stroke-order-title">{t('title')}</h1>
-      {view.status === 'loading' && (
-        <p role="status" className="stroke-order-message">
-          {t('loading')}
-        </p>
-      )}
-      {view.status === 'ready' && (
-        <StrokeOrderAnimation
-          character={view.character}
-          strokeData={view.strokeData}
-        />
-      )}
+      <StrokeOrderBody character={character} />
     </main>
   );
 }

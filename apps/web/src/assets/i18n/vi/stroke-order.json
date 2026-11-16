@@ -2,5 +2,6 @@
   "title": "Thứ tự nét",
   "figureLabel": "Thứ tự nét chữ {{character}}",
   "replay": "Phát lại",
-  "loading": "Đang tải…"
+  "loading": "Đang tải…",
+  "unavailable": "Chưa có dữ liệu nét cho chữ này."
 }
