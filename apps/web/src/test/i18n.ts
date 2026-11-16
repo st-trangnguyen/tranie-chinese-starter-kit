@@ -19,7 +19,13 @@ testI18n.use(initReactI18next).init({
   ns: ['common', 'onboarding', 'learning-path', 'lesson', 'stroke-order'],
   defaultNS: 'common',
   resources: {
-    vi: { common, onboarding, 'learning-path': learningPath, lesson, 'stroke-order': strokeOrder },
+    vi: {
+      common,
+      onboarding,
+      'learning-path': learningPath,
+      lesson,
+      'stroke-order': strokeOrder,
+    },
   },
   interpolation: { escapeValue: false },
 });

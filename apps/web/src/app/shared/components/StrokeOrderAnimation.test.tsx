@@ -110,4 +110,45 @@ describe('StrokeOrderAnimation', () => {
     }
     expectFullOutline(figure);
   });
+
+  it('S6.1-AC1: Mỗi lúc chỉ vẽ một nét', async () => {
+    renderWithProviders(
+      <StrokeOrderAnimation character="好" strokeData={STROKE_DATA_HAO} />,
+    );
+
+    const figure = screen.getByRole('img', { name: 'Thứ tự nét chữ 好' });
+    await vi.waitFor(() => {
+      expect(FakeHanziWriter.last().pendingStrokes).toHaveLength(1);
+    });
+    const writer = FakeHanziWriter.last();
+    expect(figure).toHaveAttribute('data-drawn-stroke-count', '0');
+
+    const strokeCount = STROKE_DATA_HAO.strokes.length;
+    for (let drawn = 1; drawn <= strokeCount; drawn += 1) {
+      await act(async () => {
+        writer.finishStroke();
+      });
+
+      // Mỗi bước chỉ tăng đúng một nét.
+      await vi.waitFor(() => {
+        expect(figure).toHaveAttribute(
+          'data-drawn-stroke-count',
+          String(drawn),
+        );
+      });
+      // Không bao giờ có hai nét cùng đang vẽ; còn nét thì nét kế tiếp đang vẽ.
+      expect(writer.pendingStrokes.length).toBeLessThanOrEqual(1);
+      if (drawn < strokeCount) {
+        await vi.waitFor(() => {
+          expect(writer.pendingStrokes).toHaveLength(1);
+        });
+      }
+    }
+
+    expect(figure).toHaveAttribute(
+      'data-drawn-stroke-count',
+      String(strokeCount),
+    );
+    expect(writer.pendingStrokes).toEqual([]);
+  });
 });
