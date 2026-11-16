@@ -10,7 +10,7 @@ Ba file hỗ trợ này tạo ở task RED đầu tiên cần đến chúng.
 
 ## 1. Dependency `hanzi-writer` (design D11)
 
-- [ ] 1.1 Thêm `hanzi-writer` (3.x) vào `catalog` của `pnpm-workspace.yaml` và `dependencies` của `apps/web/package.json` (`catalog:`), `pnpm install` — ngoại lệ test-first: config thuần; kiểm: `pnpm install` xong, `pnpm --filter @csk/web typecheck` pass, `pnpm-lock.yaml` có `hanzi-writer`
+- [x] 1.1 Thêm `hanzi-writer` (3.x) vào `catalog` của `pnpm-workspace.yaml` và `dependencies` của `apps/web/package.json` (`catalog:`), `pnpm install` — ngoại lệ test-first: config thuần; kiểm: `pnpm install` xong, `pnpm --filter @csk/web typecheck` pass, `pnpm-lock.yaml` có `hanzi-writer`
 
 ## 2. Schema dữ liệu nét — `@csk/shared` (design D3; nền cho S6.1-AC1 "Dữ liệu nét hỏng hoặc sai cấu trúc")
 
