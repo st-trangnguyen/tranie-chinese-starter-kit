@@ -39,6 +39,12 @@ describe('StrokeOrderService — quy tắc nghiệp vụ', () => {
 
     expect(service.isSingleHanCharacter('abc')).toBe(false);
   });
+
+  it('S6.1-AC1 Chữ được yêu cầu gồm nhiều chữ: "你好" không phải một chữ Hán hợp lệ', () => {
+    const service = new StrokeOrderService(makeSource());
+
+    expect(service.isSingleHanCharacter('你好')).toBe(false);
+  });
 });
 
 describe('StrokeOrderService — use cases', () => {
@@ -58,6 +64,17 @@ describe('StrokeOrderService — use cases', () => {
     const service = new StrokeOrderService(source);
 
     const result = await service.getStrokeOrder('abc');
+
+    expect(result).toEqual({ status: 'unavailable' });
+    expect(source.getStrokeIndex).not.toHaveBeenCalled();
+    expect(source.getStrokeData).not.toHaveBeenCalled();
+  });
+
+  it('S6.1-AC1 Chữ được yêu cầu gồm nhiều chữ: "你好" trả unavailable và không đọc file nét của 你 hay 好', async () => {
+    const source = makeSource();
+    const service = new StrokeOrderService(source);
+
+    const result = await service.getStrokeOrder('你好');
 
     expect(result).toEqual({ status: 'unavailable' });
     expect(source.getStrokeIndex).not.toHaveBeenCalled();
