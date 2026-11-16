@@ -99,8 +99,8 @@ Test chung `apps/web/src/app/pages/stroke-order/containers/StrokeOrderContainer.
 - [x] 9.14 GREEN: nhánh `error` (`role="alert"`, `common:error.title`, nút `common:error.retry`); kiểm: test 9.13 pass
 - [x] 9.15 RED: S6.1-AC1 "Dữ liệu nét hỏng hoặc sai cấu trúc" — file nét của 人 là chuỗi không phải JSON, rồi JSON thiếu `strokes`: cả hai thấy "Có lỗi xảy ra" + "Thử lại", không figure, không "Phát lại" — kiểm: chạy, nếu pass ngay nhờ 4.2/5.12 thì xác nhận bằng cách tạm nuốt lỗi validate rồi trả lại
 - [x] 9.16 GREEN: sửa đến khi pass; kiểm: test 9.15 pass
-- [ ] 9.17 RED: S6.1-AC1 "Thử lại sau khi tải lỗi" — lần 1 HTTP 500, bấm "Thử lại", lần 2 thành công: lỗi biến mất, có figure 人 và nút "Phát lại", tự phát và đạt 2 nét; thêm case lần 2 vẫn lỗi thì vẫn thấy "Có lỗi xảy ra" (TC-S6.1-AC1-28) — kiểm: fail
-- [ ] 9.18 GREEN: `retry()` trong `useStrokeOrder` (tăng `attempt`, về `loading`); kiểm: test 9.17 pass
+- [x] 9.17 RED: S6.1-AC1 "Thử lại sau khi tải lỗi" — lần 1 HTTP 500, bấm "Thử lại", lần 2 thành công: lỗi biến mất, có figure 人 và nút "Phát lại", tự phát và đạt 2 nét; thêm case lần 2 vẫn lỗi thì vẫn thấy "Có lỗi xảy ra" (TC-S6.1-AC1-28) — kiểm: fail
+- [x] 9.18 GREEN: `retry()` trong `useStrokeOrder` (tăng `attempt`, về `loading`); kiểm: test 9.17 pass
 - [ ] 9.19 RED: S6.1-AC1 "Giảm chuyển động hiện thứ tự nét tĩnh" (mức màn) — stub `matchMedia` reduce, mở 白: thấy số 1…5, không có nút "Phát lại", hanzi-writer không được tạo — kiểm: fail
 - [ ] 9.20 GREEN: `useStrokeOrder` trả `isReducedMotion` từ `useInitialReducedMotion`; container chọn `StrokeOrderStatic`/`StrokeOrderAnimation`; kiểm: test 9.19 pass
 - [ ] 9.21 RED: S6.1-AC1 "Đổi giảm chuyển động khi đang ở màn" — mở 人 (reduce tắt), đổi stub sang reduce và phát sự kiện `change`: vẫn có figure animation + "Phát lại"; unmount rồi mở lại 人: hiện tĩnh 1…2, không "Phát lại"; thêm case điều hướng 人 → 龘 → 人 trong cùng router cho thấy mỗi lần đổi chữ là mở màn mới — kiểm: chạy, nếu pass ngay thì tạm thêm listener `change` vào hook để thấy fail rồi trả lại

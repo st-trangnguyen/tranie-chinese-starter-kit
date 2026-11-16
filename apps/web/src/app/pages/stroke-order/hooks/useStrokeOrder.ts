@@ -1,16 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { StrokeOrderView } from '@shared/models/stroke-order.model';
 import { StrokeOrderService } from '@shared/services/stroke-order.service';
 
 export interface StrokeOrderState {
   view: StrokeOrderView;
+  retry: () => void;
 }
 
 /** Nạp dữ liệu nét của một chữ (S6.1); `view` giữ trong state nên `strokeData` ổn định giữa các lần render. */
 export const useStrokeOrder = (character: string): StrokeOrderState => {
   const strokeOrderService = useMemo(() => new StrokeOrderService(), []);
   const [view, setView] = useState<StrokeOrderView>({ status: 'loading' });
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let isActive = true;
@@ -38,7 +40,13 @@ export const useStrokeOrder = (character: string): StrokeOrderState => {
     return () => {
       isActive = false;
     };
-  }, [strokeOrderService, character]);
+  }, [strokeOrderService, character, attempt]);
 
-  return { view };
+  /** Tải lại dữ liệu nét: mỗi lần là một lượt đọc file mới, không giữ kết quả lỗi. */
+  const retry = useCallback(() => {
+    setView({ status: 'loading' });
+    setAttempt((previous) => previous + 1);
+  }, []);
+
+  return { view, retry };
 };

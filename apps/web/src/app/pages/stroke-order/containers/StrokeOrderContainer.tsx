@@ -11,7 +11,11 @@ interface StrokeOrderScreenProps {
 /** Phần thân màn theo trạng thái tải dữ liệu nét. */
 function StrokeOrderBody({ character }: StrokeOrderScreenProps) {
   const { t } = useTranslation(['stroke-order', 'common']);
-  const { view } = useStrokeOrder(character);
+  const { view, retry } = useStrokeOrder(character);
+
+  const handleRetry = () => {
+    retry();
+  };
 
   if (view.status === 'loading') {
     return (
@@ -26,7 +30,7 @@ function StrokeOrderBody({ character }: StrokeOrderScreenProps) {
         <p role="alert" className="stroke-order-message">
           {t('common:error.title')}
         </p>
-        <button type="button" className="btn btn-primary">
+        <button type="button" className="btn btn-primary" onClick={handleRetry}>
           {t('common:error.retry')}
         </button>
       </div>
