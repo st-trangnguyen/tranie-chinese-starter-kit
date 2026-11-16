@@ -71,4 +71,37 @@ describe('StrokeOrderAnimation — lượt phát', () => {
     });
     expect(currentFigure).toHaveAttribute('data-drawn-stroke-count', '2');
   });
+
+  it('S6.1-AC2: Có nút Phát lại bấm được', async () => {
+    renderWithProviders(
+      <StrokeOrderAnimation character="人" strokeData={STROKE_DATA_REN} />,
+    );
+
+    const figure = screen.getByRole('img', { name: 'Thứ tự nét chữ 人' });
+    await vi.waitFor(() => {
+      expect(FakeHanziWriter.last().pendingStrokes).toEqual([0]);
+    });
+    const writer = FakeHanziWriter.last();
+
+    // Đang phát: nét đầu tiên đang vẽ, nút đã có và bấm được.
+    const replayWhilePlaying = screen.getByRole('button', { name: 'Phát lại' });
+    expect(replayWhilePlaying).toBeEnabled();
+
+    // Phát xong cả 2 nét của 人.
+    for (let drawn = 1; drawn <= STROKE_DATA_REN.strokes.length; drawn += 1) {
+      await act(async () => {
+        writer.finishStroke();
+      });
+      await vi.waitFor(() => {
+        expect(figure).toHaveAttribute(
+          'data-drawn-stroke-count',
+          String(drawn),
+        );
+      });
+    }
+
+    // Sau khi phát xong: nút vẫn còn và bấm được.
+    const replayAfterDone = screen.getByRole('button', { name: 'Phát lại' });
+    expect(replayAfterDone).toBeEnabled();
+  });
 });
