@@ -6,6 +6,10 @@
  * yêu cầu vẽ. Test điều khiển thời điểm nét vẽ xong bằng `finishStroke()`. `hideCharacter` huỷ
  * mọi nét đang vẽ (`onComplete({ canceled: true })`), giống `cancelMutations` của bản thật.
  * Lúc `create` writer giả vẽ một `<path>` vào đích, như bản thật dựng các lớp SVG của nó.
+ *
+ * Đặt `FakeHanziWriter.cancelPendingOnHide = false` để mô phỏng nét cũ "kết thúc muộn":
+ * `hideCharacter` không huỷ nét đang vẽ, nét đó vẫn chờ và `finishStroke()` sau đó resolve nó
+ * là đã xong.
  */
 
 type CompleteResult = { canceled: boolean };
@@ -44,6 +48,8 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 
 export class FakeHanziWriter {
   static instances: FakeHanziWriter[] = [];
+  /** `hideCharacter`/`showCharacter` có huỷ nét đang vẽ không. Mặc định có; `reset()` đặt lại. */
+  static cancelPendingOnHide = true;
 
   static create(
     target: Element,
@@ -57,6 +63,7 @@ export class FakeHanziWriter {
 
   static reset(): void {
     FakeHanziWriter.instances = [];
+    FakeHanziWriter.cancelPendingOnHide = true;
   }
 
   static last(): FakeHanziWriter {
@@ -100,7 +107,7 @@ export class FakeHanziWriter {
     options: { duration?: number; onComplete?: OnComplete } = {},
   ): Promise<CompleteResult> {
     this.record('hideCharacter', [options]);
-    this.settleAll({ canceled: true });
+    this.cancelPending();
     const result = { canceled: false };
     options.onComplete?.(result);
     return Promise.resolve(result);
@@ -110,7 +117,7 @@ export class FakeHanziWriter {
     options: { duration?: number; onComplete?: OnComplete } = {},
   ): Promise<CompleteResult> {
     this.record('showCharacter', [options]);
-    this.settleAll({ canceled: true });
+    this.cancelPending();
     const result = { canceled: false };
     options.onComplete?.(result);
     return Promise.resolve(result);
@@ -123,6 +130,12 @@ export class FakeHanziWriter {
       throw new Error('Không có nét nào đang vẽ');
     }
     this.settle(stroke, { canceled: false });
+  }
+
+  private cancelPending(): void {
+    if (FakeHanziWriter.cancelPendingOnHide) {
+      this.settleAll({ canceled: true });
+    }
   }
 
   private settleAll(result: CompleteResult): void {

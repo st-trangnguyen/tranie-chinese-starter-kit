@@ -67,8 +67,8 @@ Test chung file `apps/web/src/app/shared/components/StrokeOrderAnimation.test.ts
 - [x] 7.14 GREEN: nút `type="button"`, key `replay` trong `stroke-order.json`; kiểm: test 7.13 pass
 - [x] 7.15 RED: S6.1-AC2 "Phát lại sau khi đã phát xong" — 人 xong, bấm "Phát lại": ngay sau bấm số nét 0 và lớp mờ vẫn còn; vẽ lại từ nét 0 rồi nét 1, xong có 2 nét — kiểm: fail
 - [x] 7.16 GREEN: `replay()` (event handler): `runId` mới, `clear()`, đặt 0, phát lại; kiểm: test 7.15 pass
-- [ ] 7.17 RED: S6.1-AC2 "Phát lại khi đang phát" — 好 đang ở nét thứ 3, bấm "Phát lại": ngay sau bấm 0 nét; `finishStroke()` của lượt cũ không làm tăng số nét; lượt mới vẽ từ nét 0, xong có đúng 6 nét — kiểm: fail
-- [ ] 7.18 GREEN: bỏ kết quả của lượt cũ theo `runId`/`'cancelled'`; kiểm: test 7.17 pass
+- [x] 7.17 RED: S6.1-AC2 "Phát lại khi đang phát" — 好 đang ở nét thứ 3, bấm "Phát lại": ngay sau bấm 0 nét; `finishStroke()` của lượt cũ không làm tăng số nét; lượt mới vẽ từ nét 0, xong có đúng 6 nét — kiểm: fail
+- [x] 7.18 GREEN: bỏ kết quả của lượt cũ theo `runId`/`'cancelled'`; kiểm: test 7.17 pass
 - [ ] 7.19 RED: S6.1-AC2 "Phát lại nhiều lần" — 人, bấm "Phát lại" 3 lần, mỗi lần chờ xong: cả 3 lần thứ tự nét 0 rồi 1, xong 2 nét — kiểm: chạy, nếu pass ngay thì tạm bỏ `clear()` để thấy fail rồi trả lại
 - [ ] 7.20 GREEN: sửa đến khi pass; kiểm: test 7.19 pass, file test < 300 dòng (tách `StrokeOrderAnimation.replay.test.tsx` nếu vượt)
 
