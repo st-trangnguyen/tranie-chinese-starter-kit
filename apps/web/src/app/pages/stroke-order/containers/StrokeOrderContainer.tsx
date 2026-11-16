@@ -16,6 +16,11 @@ function StrokeOrderScreen({ character }: StrokeOrderScreenProps) {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-xl p-xl">
       <h1 className="stroke-order-title">{t('title')}</h1>
+      {view.status === 'loading' && (
+        <p role="status" className="stroke-order-message">
+          {t('loading')}
+        </p>
+      )}
       {view.status === 'ready' && (
         <StrokeOrderAnimation
           character={view.character}

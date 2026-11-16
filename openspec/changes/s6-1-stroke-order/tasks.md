@@ -85,8 +85,8 @@ Test chung `apps/web/src/app/pages/stroke-order/containers/StrokeOrderContainer.
 
 - [x] 9.1 RED: S6.1-AC1 "Màn chỉ hiện một chữ" — mở `/characters/好/stroke-order`: đúng một figure "Thứ tự nét chữ 好", không có figure/nút chuyển chữ khác — kiểm: fail vì chưa có route/màn
 - [x] 9.2 GREEN: `ROUTE_PATHS.strokeOrder`, `stroke-order.routes.ts` (gom vào `page.routes.ts` trước `errorRoutes`), `useStrokeOrder`, `StrokeOrderContainer` (+ `StrokeOrderScreen` private, `key={character}`), key `title` trong `stroke-order.json`; kiểm: test 9.1 pass
-- [ ] 9.3 RED: S6.1-AC1 "Đang tải dữ liệu nét" — `fetch` file nét của 人 treo: thấy "Đang tải…", không có figure, không có nút "Phát lại" — kiểm: fail
-- [ ] 9.4 GREEN: nhánh `loading` (`role="status"`, key `loading`); kiểm: test 9.3 pass
+- [x] 9.3 RED: S6.1-AC1 "Đang tải dữ liệu nét" — `fetch` file nét của 人 treo: thấy "Đang tải…", không có figure, không có nút "Phát lại" — kiểm: fail
+- [x] 9.4 GREEN: nhánh `loading` (`role="status"`, key `loading`); kiểm: test 9.3 pass
 - [ ] 9.5 RED: S6.1-AC1 "Chữ không có dữ liệu nét" — mở 龘: thấy "Chưa có dữ liệu nét cho chữ này.", không figure, không "Phát lại", không "Có lỗi xảy ra" — kiểm: fail
 - [ ] 9.6 GREEN: nhánh `unavailable` (key `unavailable`); kiểm: test 9.5 pass
 - [ ] 9.7 RED: S6.1-AC1 "Chữ được yêu cầu rỗng" — mở `/characters/stroke-order`: thông báo không có dữ liệu, không figure, không "Phát lại", không có request nét nào — kiểm: fail nếu route không khớp (rơi vào NotFound)
