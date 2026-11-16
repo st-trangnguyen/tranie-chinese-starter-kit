@@ -127,7 +127,7 @@ E2E viết sau nhóm 9 sẽ chạy trên màn đã có: với mỗi RED, nếu p
 
 - [x] 12.1 Cập nhật `docs/03-architecture.md`: cây `pages/stroke-order`, `strokes/index.json` trong danh sách output nội dung, adapter `stroke-writer.service` + `useStrokeAnimation`, i18n `stroke-order.json`, route `/characters/:character?/stroke-order` — ngoại lệ test-first: docs thuần; kiểm: đọc lại diff
 - [x] 12.2 Refactor + self-review theo CLAUDE.md §0, §2, §7 (không `any`, không `eslint-disable`, dependency một chiều, file < 300 dòng, component < 5 props, effect có cleanup); kiểm: `pnpm lint` sạch
-- [ ] 12.3 Chạy `pnpm typecheck && pnpm lint && pnpm test:run && pnpm content:check && pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts && pnpm e2e`, ghi kết quả thật; kiểm: toàn bộ pass
+- [x] 12.3 Chạy `pnpm typecheck && pnpm lint && pnpm test:run && pnpm content:check && pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts && pnpm e2e`, ghi kết quả thật; kiểm: toàn bộ pass
 - [ ] 12.4 Chụp screenshot cho PR: màn 好 (đang/đã phát), 白 giảm chuyển động, 龘, lỗi tải — mobile 375×812 và desktop 1280×800, sáng và tối; kiểm: có file ảnh trên nhánh `pr-assets`
 - [ ] 12.5 Ghi vào mô tả PR code cho QA: địa chỉ mẫu `/characters/<chữ>/stroke-order`, địa chỉ không chỉ định chữ `/characters/stroke-order`, mẫu URL tải dữ liệu nét `/content/strokes/<chữ>.json` và `/content/strokes/index.json` (theo `test-cases.md` Ghi chú); kiểm: mô tả PR có đủ ba mục
 
