@@ -59,8 +59,8 @@ Test chung file `apps/web/src/app/shared/components/StrokeOrderAnimation.test.ts
 - [x] 7.6 GREEN: vòng lặp tuần tự `await animateStroke(i)` rồi tăng `drawnStrokeCount`; kiểm: test 7.5 pass
 - [x] 7.7 RED: S6.1-AC1 "Nét hiện đúng thứ tự viết" — với 人, nét 0 (phẩy) xong trước khi nét 1 (mác) được yêu cầu; xong có 2 nét — kiểm: chạy, nếu pass ngay thì tạm đảo thứ tự lặp để thấy fail rồi trả lại
 - [x] 7.8 GREEN: thứ tự theo chỉ số nét của dữ liệu; kiểm: test 7.7 pass
-- [ ] 7.9 RED: S6.1-AC1 "Số nét được vẽ bằng số nét của chữ" — 白 phát xong có đúng 5 nét, không có lần gọi vẽ nét thứ 6 — kiểm: fail nếu vòng lặp chưa dừng đúng, nếu pass ngay thì xác nhận bằng cách tạm đổi giới hạn vòng lặp
-- [ ] 7.10 GREEN: dừng đúng ở `strokes.length`; kiểm: test 7.9 pass
+- [x] 7.9 RED: S6.1-AC1 "Số nét được vẽ bằng số nét của chữ" — 白 phát xong có đúng 5 nét, không có lần gọi vẽ nét thứ 6 — kiểm: fail nếu vòng lặp chưa dừng đúng, nếu pass ngay thì xác nhận bằng cách tạm đổi giới hạn vòng lặp
+- [x] 7.10 GREEN: dừng đúng ở `strokes.length`; kiểm: test 7.9 pass
 - [ ] 7.11 RED: S6.1-AC1 "Animation chỉ tự phát một lần" — 人 phát xong, chạy hết timer giả/re-render: không có lượt phát mới, vẫn 2 nét — kiểm: fail nếu effect phát lại, nếu pass ngay thì tạm thêm dep sai để thấy fail rồi trả lại
 - [ ] 7.12 GREEN: effect chỉ phụ thuộc writer/dữ liệu; kiểm: test 7.11 pass
 - [ ] 7.13 RED: S6.1-AC2 "Có nút Phát lại bấm được" — có `button` tên "Phát lại", không `disabled`, cả khi đang phát và sau khi xong — kiểm: fail vì chưa có nút

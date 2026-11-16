@@ -2,7 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { act, renderWithProviders, screen } from '@test/render';
 import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
-import { STROKE_DATA_HAO, STROKE_DATA_REN } from '@test/stroke.fixtures';
+import {
+  STROKE_DATA_BAI,
+  STROKE_DATA_HAO,
+  STROKE_DATA_REN,
+} from '@test/stroke.fixtures';
 
 import { StrokeOrderAnimation } from './StrokeOrderAnimation';
 
@@ -184,6 +188,41 @@ describe('StrokeOrderAnimation', () => {
       expect(figure).toHaveAttribute('data-drawn-stroke-count', '2');
     });
     expect(writer.requestedStrokes).toEqual([0, 1]);
+    expect(writer.pendingStrokes).toEqual([]);
+  });
+
+  it('S6.1-AC1: Số nét được vẽ bằng số nét của chữ', async () => {
+    renderWithProviders(
+      <StrokeOrderAnimation character="白" strokeData={STROKE_DATA_BAI} />,
+    );
+
+    const figure = screen.getByRole('img', { name: 'Thứ tự nét chữ 白' });
+    const strokeCount = STROKE_DATA_BAI.strokes.length;
+    expect(strokeCount).toBe(5);
+
+    await vi.waitFor(() => {
+      expect(FakeHanziWriter.last().pendingStrokes).toEqual([0]);
+    });
+    const writer = FakeHanziWriter.last();
+
+    // Phát hết: mỗi nét đang vẽ thì cho xong, tới khi không còn nét nào được yêu cầu.
+    for (let drawn = 1; drawn <= strokeCount; drawn += 1) {
+      await act(async () => {
+        writer.finishStroke();
+      });
+      await vi.waitFor(() => {
+        expect(figure).toHaveAttribute('data-drawn-stroke-count', String(drawn));
+      });
+    }
+
+    // Chờ thêm: không có lần yêu cầu vẽ nét thứ 6 (chỉ số 5) nào xuất hiện sau đó.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    expect(figure).toHaveAttribute('data-drawn-stroke-count', '5');
+    expect(writer.requestedStrokes).toEqual([0, 1, 2, 3, 4]);
+    expect(writer.requestedStrokes).not.toContain(5);
     expect(writer.pendingStrokes).toEqual([]);
   });
 });
