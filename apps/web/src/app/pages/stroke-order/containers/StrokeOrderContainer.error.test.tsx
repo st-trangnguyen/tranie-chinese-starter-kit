@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { screen, within } from '@test/render';
+import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
+import { act, screen, userEvent, waitFor, within } from '@test/render';
+import { mockStrokeFetch } from '@test/mocks/stroke-fetch';
 import { openRoute, setupStrokeOrderRoute } from '@test/stroke-order-route';
 
 // Ranh giới ngoài: thư viện vẽ nét hanzi-writer được thay bằng bản giả điều khiển được.
@@ -81,5 +83,98 @@ describe('StrokeOrderContainer — dữ liệu nét hỏng hoặc sai cấu trú
     });
 
     await expectLoadErrorScreen();
+  });
+});
+
+/** Phản hồi file nét của 人 theo lượt gọi: `responders[i]` cho lần gọi thứ i+1 (lần cuối lặp lại). */
+const respondByAttempt = (
+  ...responders: ReadonlyArray<() => Response | Promise<Response>>
+): (() => Response | Promise<Response>) => {
+  let calls = 0;
+  return () => {
+    const responder = responders[Math.min(calls, responders.length - 1)];
+    calls += 1;
+    if (!responder) {
+      throw new Error('Thiếu phản hồi cho file nét');
+    }
+    return responder();
+  };
+};
+
+const fail500 = (): Response => new Response('', { status: 500 });
+
+/** Phản hồi thật (file nét build sẵn) bằng một mock fetch mặc định riêng. */
+const realStrokeResponse = (): Promise<Response> =>
+  mockStrokeFetch().fetch(`/content/strokes/${encodeURIComponent('人')}.json`);
+
+const strokeFileRequestsOfRen = (): string[] =>
+  env.strokeFetch.requests.filter(
+    (url) => url === `/content/strokes/${encodeURIComponent('人')}.json`,
+  );
+
+describe('StrokeOrderContainer — thử lại sau khi tải lỗi', () => {
+  it('S6.1-AC1 Thử lại sau khi tải lỗi: should hide the error and auto-play 2 strokes of 人 with "Phát lại" after clicking "Thử lại" when the second load succeeds', async () => {
+    env.replaceStrokeFetch({
+      '人.json': respondByAttempt(fail500, realStrokeResponse),
+    });
+    const user = userEvent.setup();
+
+    await expectLoadErrorScreen();
+    await user.click(screen.getByRole('button', { name: 'Thử lại' }));
+
+    // Lỗi biến mất, hiện khối animation của 人 và nút "Phát lại".
+    const figure = await screen.findByRole(
+      'img',
+      { name: 'Thứ tự nét chữ 人' },
+      { timeout: 3000 },
+    );
+    expect(screen.queryByText('Có lỗi xảy ra')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Thử lại' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Phát lại' }),
+    ).toBeInTheDocument();
+    expect(strokeFileRequestsOfRen()).toHaveLength(2);
+
+    // Animation tự phát và vẽ đủ 2 nét.
+    for (let drawn = 1; drawn <= 2; drawn += 1) {
+      await waitFor(() => {
+        expect(FakeHanziWriter.last().pendingStrokes).toHaveLength(1);
+      });
+      await act(async () => {
+        FakeHanziWriter.last().finishStroke();
+      });
+      await waitFor(() => {
+        expect(figure).toHaveAttribute(
+          'data-drawn-stroke-count',
+          String(drawn),
+        );
+      });
+    }
+    expect(figure).toHaveAttribute('data-drawn-stroke-count', '2');
+  });
+
+  it('S6.1-AC1 Thử lại sau khi tải lỗi: should still show "Có lỗi xảy ra" with "Thử lại" and no figure or "Phát lại" after clicking "Thử lại" when the second load also fails (TC-S6.1-AC1-28)', async () => {
+    env.replaceStrokeFetch({
+      '人.json': respondByAttempt(fail500, fail500),
+    });
+    const user = userEvent.setup();
+
+    await expectLoadErrorScreen();
+    await user.click(screen.getByRole('button', { name: 'Thử lại' }));
+
+    // Đã tải lại đúng một lần nữa, và lần này cũng lỗi.
+    await waitFor(() => {
+      expect(strokeFileRequestsOfRen()).toHaveLength(2);
+    });
+    const alert = await screen.findByRole('alert');
+    expect(within(alert).getByText('Có lỗi xảy ra')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Thử lại' })).toBeInTheDocument();
+    expect(document.querySelectorAll('figure')).toHaveLength(0);
+    expect(
+      screen.queryByRole('button', { name: 'Phát lại' }),
+    ).not.toBeInTheDocument();
   });
 });
