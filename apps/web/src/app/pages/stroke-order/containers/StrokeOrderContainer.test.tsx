@@ -207,4 +207,32 @@ describe('StrokeOrderContainer', () => {
     );
     expect(strokeRequests).toEqual([]);
   });
+
+  it('S6.1-AC1 Chữ được yêu cầu không phải chữ Hán: should show "Chưa có dữ liệu nét cho chữ này." without figure, replay button or stroke file request when opening /characters/abc/stroke-order', async () => {
+    openRoute('/characters/abc/stroke-order');
+
+    // Màn thứ tự nét được mở.
+    await screen.findByRole(
+      'heading',
+      { name: 'Thứ tự nét' },
+      { timeout: 3000 },
+    );
+
+    expect(
+      await screen.findByText('Chưa có dữ liệu nét cho chữ này.'),
+    ).toBeInTheDocument();
+
+    // Không hiện khối animation, không hiện nút "Phát lại".
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(document.querySelectorAll('figure')).toHaveLength(0);
+    expect(
+      screen.queryByRole('button', { name: 'Phát lại' }),
+    ).not.toBeInTheDocument();
+
+    // Chữ không hợp lệ bị loại trước khi đọc nguồn: không request nào tới dữ liệu nét.
+    const strokeRequests = strokeFetch.requests.filter((url) =>
+      url.startsWith('/content/strokes/'),
+    );
+    expect(strokeRequests).toEqual([]);
+  });
 });

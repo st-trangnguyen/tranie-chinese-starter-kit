@@ -91,8 +91,8 @@ Test chung `apps/web/src/app/pages/stroke-order/containers/StrokeOrderContainer.
 - [x] 9.6 GREEN: nhánh `unavailable` (key `unavailable`); kiểm: test 9.5 pass
 - [x] 9.7 RED: S6.1-AC1 "Chữ được yêu cầu rỗng" — mở `/characters/stroke-order`: thông báo không có dữ liệu, không figure, không "Phát lại", không có request nét nào — kiểm: fail nếu route không khớp (rơi vào NotFound)
 - [x] 9.8 GREEN: segment tùy chọn `:character?`, `useParams().character ?? ''`; kiểm: test 9.7 pass
-- [ ] 9.9 RED: S6.1-AC1 "Chữ được yêu cầu không phải chữ Hán" — mở `/characters/abc/stroke-order`: thông báo không có dữ liệu, không figure, không "Phát lại" — kiểm: chạy, nếu pass ngay nhờ 5.4 thì xác nhận bằng cách tạm cho container bỏ qua `unavailable` rồi trả lại
-- [ ] 9.10 GREEN: sửa đến khi pass; kiểm: test 9.9 pass
+- [x] 9.9 RED: S6.1-AC1 "Chữ được yêu cầu không phải chữ Hán" — mở `/characters/abc/stroke-order`: thông báo không có dữ liệu, không figure, không "Phát lại" — kiểm: chạy, nếu pass ngay nhờ 5.4 thì xác nhận bằng cách tạm cho container bỏ qua `unavailable` rồi trả lại
+- [x] 9.10 GREEN: sửa đến khi pass; kiểm: test 9.9 pass
 - [ ] 9.11 RED: S6.1-AC1 "Chữ được yêu cầu gồm nhiều chữ" — mở `/characters/你好/stroke-order` (URL encode): thông báo không có dữ liệu, không figure, không "Phát lại", không có text/figure riêng của 你 hay 好 — kiểm: như 9.9
 - [ ] 9.12 GREEN: tiêu đề không chèn chữ yêu cầu; kiểm: test 9.11 pass
 - [ ] 9.13 RED: S6.1-AC1 "Tải dữ liệu nét lỗi" — `fetch` file nét của 人 trả HTTP 500 (và một case lỗi mạng): thấy "Có lỗi xảy ra" và nút "Thử lại"; không figure, không "Phát lại", không "Chưa có dữ liệu nét cho chữ này." — kiểm: fail
