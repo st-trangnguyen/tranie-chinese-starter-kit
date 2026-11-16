@@ -19,8 +19,8 @@ Ba file hỗ trợ này tạo ở task RED đầu tiên cần đến chúng.
 
 ## 3. Danh sách chữ có dữ liệu nét — `content:build` (design D2; nền cho "Chữ không có dữ liệu nét khi offline")
 
-- [ ] 3.1 RED: test `assembleContent` sinh `strokes/index.json` gồm đúng các chữ có dữ liệu nét (sort, không có chữ thiếu dữ liệu) và parse được bằng `strokeIndexSchema` — Vitest, `content/scripts/content-build/assemble.test.ts`; kiểm: `pnpm --filter @csk/content test:run assemble` fail vì chưa có file
-- [ ] 3.2 GREEN: thêm `strokes/index.json` vào `files` trong `content/scripts/content-build/assemble.ts`; chạy `pnpm --filter @csk/content content:build` để sinh `apps/web/src/assets/content/strokes/index.json`; kiểm: test 3.1 pass, `pnpm content:check` pass (output khớp nguồn)
+- [x] 3.1 RED: test `assembleContent` sinh `strokes/index.json` gồm đúng các chữ có dữ liệu nét (sort, không có chữ thiếu dữ liệu) và parse được bằng `strokeIndexSchema` — Vitest, `content/scripts/content-build/assemble.test.ts`; kiểm: `pnpm --filter @csk/content test:run assemble` fail vì chưa có file
+- [x] 3.2 GREEN: thêm `strokes/index.json` vào `files` trong `content/scripts/content-build/assemble.ts`; chạy `pnpm --filter @csk/content content:build` để sinh `apps/web/src/assets/content/strokes/index.json`; kiểm: test 3.1 pass, `pnpm content:check` pass (output khớp nguồn)
 
 ## 4. Nạp dữ liệu nét — `core/services` (design D4)
 
