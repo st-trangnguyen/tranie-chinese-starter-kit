@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
+import { ROUTE_PATHS } from '@core/constants/app.constants';
 import { StrokeOrderAnimation } from '@shared/components/StrokeOrderAnimation';
 import { StrokeOrderStatic } from '@shared/components/StrokeOrderStatic';
 import { useStrokeOrder } from '../hooks/useStrokeOrder';
@@ -41,19 +42,26 @@ function StrokeOrderBody({ character }: StrokeOrderScreenProps) {
     return <p className="stroke-order-message">{t('unavailable')}</p>;
   }
   if (view.status === 'ready') {
-    if (isReducedMotion) {
-      return (
-        <StrokeOrderStatic
-          character={view.character}
-          strokeData={view.strokeData}
-        />
-      );
-    }
     return (
-      <StrokeOrderAnimation
-        character={view.character}
-        strokeData={view.strokeData}
-      />
+      <>
+        {isReducedMotion ? (
+          <StrokeOrderStatic
+            character={view.character}
+            strokeData={view.strokeData}
+          />
+        ) : (
+          <StrokeOrderAnimation
+            character={view.character}
+            strokeData={view.strokeData}
+          />
+        )}
+        <Link
+          to={ROUTE_PATHS.writingPractice(view.character)}
+          className="btn btn-primary self-center"
+        >
+          {t('writingPractice')}
+        </Link>
+      </>
     );
   }
   return null;
