@@ -1,11 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { createDatabase } from '@core/helpers/db.helper';
+import { DexieProgressStore } from '@core/services/progress-store.service';
 import {
+  LESSON_ID,
   PERSON,
+  TEN,
   answerToneChoiceAndContinue,
+  emitCorrectStroke,
   findLessonPad,
   renderLessonRunner,
   setupLessonStrokeWrite,
+  waitForActiveQuiz,
 } from '@test/lesson-stroke-write.helpers';
 import { screen, waitFor } from '@test/render';
 
@@ -16,6 +22,18 @@ vi.mock('hanzi-writer', async () => {
 });
 
 const env = setupLessonStrokeWrite();
+
+/** Đọc tiến độ đã ghi của bài thử trong IndexedDB. */
+const readSavedProgress = async (): Promise<
+  Awaited<ReturnType<DexieProgressStore['getLessonProgress']>>
+> => {
+  const db = createDatabase();
+  try {
+    return await new DexieProgressStore(db).getLessonProgress(LESSON_ID);
+  } finally {
+    db.close();
+  }
+};
 
 /** Phản hồi không bao giờ tới: dữ liệu nét của câu viết mãi ở trạng thái đang tải. */
 const neverResolves = (): Promise<Response> =>
@@ -133,5 +151,40 @@ describe('LessonRunnerContainer — trạng thái tải câu viết', () => {
     expect(
       screen.getByRole('link', { name: 'Xem thứ tự nét' }),
     ).toBeInTheDocument();
+  });
+
+  it('S7.1-AC1 Câu viết tải lỗi rồi bỏ qua: should show "Câu 3 / 3" after "Bỏ qua câu này" on the failed 人 exercise, then end with exactly "Bạn đã bỏ qua 1 câu, bài chưa hoàn thành." (no "dạng bài chưa có") and not save lessonProgress as "completed" after writing 十', async () => {
+    env.replaceFetch({
+      strokeOverrides: { '人.json': () => new Response('', { status: 500 }) },
+    });
+    const { user } = renderLessonRunner();
+    await answerToneChoiceAndContinue(user);
+
+    const alerts = await screen.findAllByRole('alert');
+    expect(alerts.map((alert) => alert.textContent).join(' ')).toContain(
+      'Có lỗi xảy ra',
+    );
+    await user.click(screen.getByRole('button', { name: 'Bỏ qua câu này' }));
+
+    expect(screen.getByRole('progressbar')).toHaveAccessibleName('Câu 3 / 3');
+    await findLessonPad(TEN);
+    const tenWriter = await waitForActiveQuiz(TEN);
+    emitCorrectStroke(tenWriter);
+    emitCorrectStroke(tenWriter);
+    await user.click(await screen.findByRole('button', { name: 'Tiếp tục' }));
+
+    const heading = await screen.findByRole('heading', {
+      level: 2,
+      name: /bỏ qua/,
+    });
+    expect(heading.textContent).toBe(
+      'Bạn đã bỏ qua 1 câu, bài chưa hoàn thành.',
+    );
+    expect(heading.textContent).not.toContain('dạng bài chưa có');
+    expect(
+      screen.queryByText('Bạn đã làm xong các câu của bài này.'),
+    ).not.toBeInTheDocument();
+    const progress = await readSavedProgress();
+    expect(progress?.status).not.toBe('completed');
   });
 });
