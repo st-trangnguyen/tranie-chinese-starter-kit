@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
-import { screen, userEvent, waitFor } from '@test/render';
+import { act, screen, userEvent, waitFor } from '@test/render';
 import { openRoute, setupStrokeOrderRoute } from '@test/stroke-order-route';
 
 // Ranh giới ngoài: thư viện vẽ/chấm nét hanzi-writer được thay bằng bản giả điều khiển được.
@@ -13,8 +13,27 @@ vi.mock('hanzi-writer', async () => {
 const env = setupStrokeOrderRoute();
 
 const PERSON = '人';
+const SHI = '十';
 // Chữ hợp lệ nhưng không có trong danh sách dữ liệu nét.
 const NO_STROKE_DATA = '龘';
+
+/** Nét dài (600 đơn vị hộp 1024, ≥ 30): đủ dài để tính là một lần viết sai. */
+const LONG_STROKE_POINTS = [
+  { x: 100, y: 100 },
+  { x: 100, y: 700 },
+];
+
+/** Mở màn luyện viết của 十, chờ khung viết hiện và quiz của writer kích hoạt. */
+const openShiPadWithActiveQuiz = async () => {
+  openRoute(`/characters/${encodeURIComponent(SHI)}/writing-practice`);
+  const pad = await screen.findByRole(
+    'figure',
+    { name: `Khung viết chữ ${SHI}` },
+    { timeout: 3000 },
+  );
+  await waitFor(() => expect(FakeHanziWriter.last().isQuizActive).toBe(true));
+  return { pad, writer: FakeHanziWriter.last() };
+};
 
 describe('WritingPracticeContainer', () => {
   it('S6.2-AC1 Màn luyện viết có liên kết về thứ tự nét: should open the stroke-order screen of 人 when clicking "Xem thứ tự nét" on /characters/人/writing-practice', async () => {
@@ -85,5 +104,21 @@ describe('WritingPracticeContainer', () => {
       'href',
       `/characters/${encodeURIComponent(NO_STROKE_DATA)}/stroke-order`,
     );
+  });
+
+  it('S6.2-AC2 Báo ngay khi viết sai nét: should show alert "Sai nét. Viết lại nét này." right after a long wrong stroke on 十, keeping no stroke', async () => {
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    // Trước khi viết sai: chưa có thông báo nào.
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+
+    // Ngay sau khi thả tay (không chờ thêm): thông báo viết sai hiện.
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Sai nét. Viết lại nét này.',
+    );
+    // Nét sai không được giữ: chưa có nét nào hoàn thành.
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '0');
   });
 });
