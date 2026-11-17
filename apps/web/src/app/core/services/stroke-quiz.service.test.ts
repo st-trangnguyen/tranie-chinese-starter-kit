@@ -1,6 +1,9 @@
 import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
 import { STROKE_DATA_SHI } from '@test/stroke.fixtures';
-import { createStrokeQuiz } from './stroke-writer.service';
+import {
+  createStrokeQuiz,
+  type StrokeAttemptEvent,
+} from './stroke-writer.service';
 
 // Ranh giới ngoài: thư viện chấm nét hanzi-writer được thay bằng bản giả điều khiển được.
 vi.mock('hanzi-writer', async () => {
@@ -157,5 +160,71 @@ describe('createStrokeQuiz', () => {
     expect(host.childNodes).toHaveLength(0);
     expect(host.parentNode).toBe(svg);
     expect(svg.getAttribute('viewBox')).toBe('0 0 1024 1024');
+  });
+});
+
+const IGNORE_SCENARIO = 'S6.2-AC1 Chạm một điểm thì bỏ qua';
+
+describe('createStrokeQuiz — lọc nét quá ngắn', () => {
+  beforeEach(() => {
+    FakeHanziWriter.reset();
+    document.body.innerHTML = '';
+  });
+
+  async function startWithSpy(): Promise<{
+    writer: FakeHanziWriter;
+    onAttempt: ReturnType<typeof vi.fn<(event: StrokeAttemptEvent) => void>>;
+  }> {
+    const { host } = createStage();
+    const onAttempt = vi.fn<(event: StrokeAttemptEvent) => void>();
+    createStrokeQuiz(host, '十', STROKE_DATA_SHI, {
+      isReducedMotion: false,
+      onAttempt,
+    });
+    await flushQuizStart();
+    return { writer: FakeHanziWriter.last(), onAttempt };
+  }
+
+  it(`${IGNORE_SCENARIO}: nét sai dài dưới 30 đơn vị (2 điểm cách 5) là 'ignored'`, async () => {
+    const { writer, onAttempt } = await startWithSpy();
+
+    writer.emitMistake({
+      points: [
+        { x: 500, y: 500 },
+        { x: 505, y: 500 },
+      ],
+    });
+
+    expect(onAttempt).toHaveBeenCalledTimes(1);
+    expect(onAttempt).toHaveBeenCalledWith('ignored');
+  });
+
+  it(`${IGNORE_SCENARIO}: nét sai dài đúng 30 đơn vị là 'mistake'`, async () => {
+    const { writer, onAttempt } = await startWithSpy();
+
+    writer.emitMistake({
+      points: [
+        { x: 500, y: 500 },
+        { x: 510, y: 500 },
+        { x: 510, y: 520 },
+      ],
+    });
+
+    expect(onAttempt).toHaveBeenCalledTimes(1);
+    expect(onAttempt).toHaveBeenCalledWith('mistake');
+  });
+
+  it(`${IGNORE_SCENARIO}: nét đúng dù ngắn vẫn là 'correct'`, async () => {
+    const { writer, onAttempt } = await startWithSpy();
+
+    writer.emitCorrectStroke({
+      points: [
+        { x: 500, y: 500 },
+        { x: 505, y: 500 },
+      ],
+    });
+
+    expect(onAttempt).toHaveBeenCalledTimes(1);
+    expect(onAttempt).toHaveBeenCalledWith('correct');
   });
 });
