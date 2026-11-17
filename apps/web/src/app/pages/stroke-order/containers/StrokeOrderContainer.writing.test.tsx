@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { screen, userEvent } from '@test/render';
+import { screen, userEvent, waitFor, within } from '@test/render';
 import {
   openRoute,
   setupStrokeOrderRoute,
@@ -14,7 +14,7 @@ vi.mock('hanzi-writer', async () => {
   return { default: mock.FakeHanziWriter };
 });
 
-setupStrokeOrderRoute();
+const env = setupStrokeOrderRoute();
 
 const PERSON = '人';
 const STROKE_ORDER_PATH = `/characters/${encodeURIComponent(PERSON)}/stroke-order`;
@@ -92,5 +92,65 @@ describe('StrokeOrderContainer — vào luyện viết', () => {
     expect(decodeURIComponent(router.state.location.pathname)).toBe(
       decodeURIComponent(WRITING_PRACTICE_PATH),
     );
+  });
+});
+
+/** Màn không có link hay nút nào tên "Tập viết", cũng không có chữ "Tập viết". */
+const expectNoWritingPracticeEntry = (): void => {
+  expect(
+    screen.queryByRole('link', { name: 'Tập viết' }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole('button', { name: 'Tập viết' }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText('Tập viết')).not.toBeInTheDocument();
+};
+
+describe('StrokeOrderContainer — không có Tập viết khi chưa có dữ liệu nét', () => {
+  it('S6.2-AC1 Không có nút Tập viết khi chữ không có dữ liệu nét: should show "Chưa có dữ liệu nét cho chữ này." and no "Tập viết" link or button when opening 龘', async () => {
+    openRoute(`/characters/${encodeURIComponent('龘')}/stroke-order`);
+
+    await screen.findByRole(
+      'heading',
+      { name: 'Thứ tự nét' },
+      { timeout: 3000 },
+    );
+    expect(
+      await screen.findByText('Chưa có dữ liệu nét cho chữ này.'),
+    ).toBeInTheDocument();
+
+    expectNoWritingPracticeEntry();
+  });
+
+  it('S6.2-AC1 Không có nút Tập viết khi chữ không có dữ liệu nét: should show no "Tập viết" link or button while stroke data of 人 is still loading', async () => {
+    // Ranh giới ngoài: file nét của 人 không bao giờ trả về (đang tải).
+    env.replaceStrokeFetch({
+      [`${PERSON}.json`]: () => new Promise<Response>(() => undefined),
+    });
+
+    openRoute(STROKE_ORDER_PATH);
+
+    await waitFor(() =>
+      expect(env.strokeFetch.requests).toContain(
+        `/content/strokes/${encodeURIComponent(PERSON)}.json`,
+      ),
+    );
+    expect(await screen.findByRole('status')).toHaveTextContent('Đang tải…');
+
+    expectNoWritingPracticeEntry();
+  });
+
+  it('S6.2-AC1 Không có nút Tập viết khi chữ không có dữ liệu nét: should show no "Tập viết" link or button when loading stroke data of 人 fails', async () => {
+    env.replaceStrokeFetch({
+      [`${PERSON}.json`]: () => new Response('', { status: 500 }),
+    });
+
+    openRoute(STROKE_ORDER_PATH);
+
+    const alert = await screen.findByRole('alert', {}, { timeout: 3000 });
+    expect(within(alert).getByText('Có lỗi xảy ra')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Thử lại' })).toBeInTheDocument();
+
+    expectNoWritingPracticeEntry();
   });
 });

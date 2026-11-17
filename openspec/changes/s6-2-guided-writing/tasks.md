@@ -100,8 +100,8 @@ route thật, `setupStrokeOrderRoute()`.
 - [x] 5.2 GREEN: `<Link to={ROUTE_PATHS.writingPractice(view.character)}>` trong nhánh `ready`, key `stroke-order:writingPractice`; kiểm: test 5.1 pass, test S6.1 hiện có vẫn pass
 - [x] 5.3 RED: S6.2-AC1 "Nút Tập viết bấm được bằng bàn phím" — `userEvent.tab()` đến "Tập viết", `{Enter}` → màn luyện viết của 人; kiểm: chạy, nếu pass ngay thì tạm đổi link thành phần tử không focus được để thấy fail rồi trả lại
 - [x] 5.4 GREEN: sửa đến khi pass; kiểm: test 5.3 pass
-- [ ] 5.5 RED: S6.2-AC1 "Không có nút Tập viết khi chữ không có dữ liệu nét" — mở 龘: không có link/nút "Tập viết"; cũng không có khi đang tải và khi lỗi tải; kiểm: chạy, nếu pass ngay thì tạm render nút ở mọi trạng thái để thấy fail rồi trả lại
-- [ ] 5.6 GREEN: nút chỉ ở nhánh `ready`; kiểm: test 5.5 pass
+- [x] 5.5 RED: S6.2-AC1 "Không có nút Tập viết khi chữ không có dữ liệu nét" — mở 龘: không có link/nút "Tập viết"; cũng không có khi đang tải và khi lỗi tải; kiểm: chạy, nếu pass ngay thì tạm render nút ở mọi trạng thái để thấy fail rồi trả lại
+- [x] 5.6 GREEN: nút chỉ ở nhánh `ready`; kiểm: test 5.5 pass
 
 ## 6. Giao diện — `styles/tailwind/` (design D9)
 
