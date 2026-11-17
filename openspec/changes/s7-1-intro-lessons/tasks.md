@@ -13,14 +13,14 @@ Vitest: `pnpm --filter @csk/content test:run <mẫu>`, `pnpm --filter @csk/web t
 Test chung `content/scripts/content-build/assemble.strokeWrite.test.ts` — Vitest, `assembleContent` với đầu vào thử (mẫu
 `assemble.test.ts`): từ điển thử có 爱, 爸爸, 人; `strokeData` thử có 人, **không** có 爱; một bài có câu `stroke-write`.
 
-- [ ] 1.1 RED: S7.1-AC3 "Câu viết dùng chữ không có dữ liệu nét thì kiểm tra nội dung báo lỗi" — câu viết `爱`: `lessonIssues` có issue `level: 'error'` nêu "爱" và "thiếu dữ liệu nét"; không issue nào chứa "không có trong từ điển"; `exitCodeOf(runChecks([lessonsCheck(lessonIssues)]))` là 1; kiểm: fail vì chưa có luật (chỉ có cảnh báo `missingStrokes`)
-- [ ] 1.2 GREEN: `lessonStrokeWriteIssues(parsed, wordsById, hasStrokeData)` nhánh thiếu nét + gắn vào `lessonIssues` trong `assembleContent`; kiểm: test 1.1 pass, `assemble.test.ts`, `lessons.test.ts` vẫn pass
-- [ ] 1.3 RED: S7.1-AC3 "Câu viết dùng từ nhiều chữ thì kiểm tra nội dung báo lỗi" — câu viết `爸爸`: error nêu "爸爸"; kiểm: fail
-- [ ] 1.4 GREEN: nhánh nhiều chữ; kiểm: test 1.3 pass
-- [ ] 1.5 RED: S7.1-AC3 "Câu viết rỗng thì kiểm tra nội dung báo lỗi" — `wordId: ''` và câu thiếu `wordId`: có error chứa "câu viết rỗng"; kiểm: fail (chỉ có lỗi schema chung)
-- [ ] 1.6 GREEN: nhánh rỗng; kiểm: test 1.5 pass
-- [ ] 1.7 RED: S7.1-AC3 "Câu viết không phải chữ Hán thì kiểm tra nội dung báo lỗi" — `wordId: abc`: có error của luật câu viết nêu "abc" (ngoài lỗi "không có trong từ điển"); kiểm: fail
-- [ ] 1.8 GREEN: nhánh không phải chữ Hán (`hanCharacterSchema`); kiểm: test 1.7 pass; câu viết `人` có nét không sinh issue nào; `pnpm content:check` trên nội dung hiện tại vẫn pass
+- [x] 1.1 RED: S7.1-AC3 "Câu viết dùng chữ không có dữ liệu nét thì kiểm tra nội dung báo lỗi" — câu viết `爱`: `lessonIssues` có issue `level: 'error'` nêu "爱" và "thiếu dữ liệu nét"; không issue nào chứa "không có trong từ điển"; `exitCodeOf(runChecks([lessonsCheck(lessonIssues)]))` là 1; kiểm: fail vì chưa có luật (chỉ có cảnh báo `missingStrokes`)
+- [x] 1.2 GREEN: `lessonStrokeWriteIssues(parsed, wordsById, hasStrokeData)` nhánh thiếu nét + gắn vào `lessonIssues` trong `assembleContent`; kiểm: test 1.1 pass, `assemble.test.ts`, `lessons.test.ts` vẫn pass
+- [x] 1.3 RED: S7.1-AC3 "Câu viết dùng từ nhiều chữ thì kiểm tra nội dung báo lỗi" — câu viết `爸爸`: error nêu "爸爸"; kiểm: fail
+- [x] 1.4 GREEN: nhánh nhiều chữ; kiểm: test 1.3 pass
+- [x] 1.5 RED: S7.1-AC3 "Câu viết rỗng thì kiểm tra nội dung báo lỗi" — `wordId: ''` và câu thiếu `wordId`: có error chứa "câu viết rỗng"; kiểm: fail (chỉ có lỗi schema chung)
+- [x] 1.6 GREEN: nhánh rỗng; kiểm: test 1.5 pass
+- [x] 1.7 RED: S7.1-AC3 "Câu viết không phải chữ Hán thì kiểm tra nội dung báo lỗi" — `wordId: abc`: có error của luật câu viết nêu "abc" (ngoài lỗi "không có trong từ điển"); kiểm: fail
+- [x] 1.8 GREEN: nhánh không phải chữ Hán (`hanCharacterSchema`); kiểm: test 1.7 pass; câu viết `人` có nét không sinh issue nào; `pnpm content:check` trên nội dung hiện tại vẫn pass
 
 ## 2. Rule kết quả câu viết — `shared/services/writing-practice.service.ts` (design D5)
 
