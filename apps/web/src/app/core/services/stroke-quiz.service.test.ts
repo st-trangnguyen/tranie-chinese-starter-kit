@@ -301,3 +301,46 @@ describe('createStrokeQuiz — viết nét khác', () => {
     expect(onAttempt).not.toHaveBeenCalledWith('correct');
   });
 });
+
+const REDUCED_MOTION_SCENARIO = 'S6.2-AC1 Giảm chuyển động trên khung viết';
+
+describe('createStrokeQuiz — giảm chuyển động', () => {
+  beforeEach(() => {
+    FakeHanziWriter.reset();
+    document.body.innerHTML = '';
+  });
+
+  async function startWithMotion(
+    isReducedMotion: boolean,
+  ): Promise<FakeHanziWriter> {
+    const { host } = createStage();
+    createStrokeQuiz(host, '十', STROKE_DATA_SHI, {
+      isReducedMotion,
+      onAttempt: vi.fn(),
+    });
+    await flushQuizStart();
+    return FakeHanziWriter.last();
+  }
+
+  it(`${REDUCED_MOTION_SCENARIO}: bật giảm chuyển động thì quiz không mờ dần, không nháy khi xong`, async () => {
+    const writer = await startWithMotion(true);
+
+    expect(writer.isQuizActive).toBe(true);
+    expect(writer.quizOptions).toMatchObject({
+      strokeFadeDuration: 0,
+      drawingFadeDuration: 0,
+      highlightOnComplete: false,
+    });
+  });
+
+  it(`${REDUCED_MOTION_SCENARIO}: tắt giảm chuyển động thì quiz mờ dần 400/300 ms và nháy khi xong`, async () => {
+    const writer = await startWithMotion(false);
+
+    expect(writer.isQuizActive).toBe(true);
+    expect(writer.quizOptions).toMatchObject({
+      strokeFadeDuration: 400,
+      drawingFadeDuration: 300,
+      highlightOnComplete: true,
+    });
+  });
+});

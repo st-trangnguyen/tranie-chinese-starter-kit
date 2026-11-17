@@ -56,6 +56,12 @@ export interface FakeQuizOptions {
   onCorrectStroke?: (data: FakeStrokeData) => void;
   onMistake?: (data: FakeStrokeData) => void;
   onComplete?: (data: unknown) => void;
+  showHintAfterMisses?: number | false;
+  markStrokeCorrectAfterMisses?: number | false;
+  acceptBackwardsStrokes?: boolean;
+  highlightOnComplete?: boolean;
+  strokeFadeDuration?: number;
+  drawingFadeDuration?: number;
   [key: string]: unknown;
 }
 
