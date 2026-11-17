@@ -186,4 +186,21 @@ describe('WritingPracticeContainer', () => {
     await waitFor(() => expect(document.activeElement).toBe(pad));
     expect(pad).toHaveFocus();
   });
+
+  it('S6.2-AC2 Lần sai liên tiếp sau cũng được đọc lại: should render a new alert node with the same text on the second consecutive long wrong stroke on 十', async () => {
+    const { writer } = await openShiPadWithActiveQuiz();
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+    const firstAlert = screen.getByRole('alert');
+    expect(firstAlert).toHaveTextContent('Sai nét. Viết lại nét này.');
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+    const secondAlert = screen.getByRole('alert');
+
+    // Cùng nội dung, nhưng là live region mới chèn vào DOM, nên trình đọc màn hình
+    // đọc lại; giữ nguyên nút cũ thì lần sai thứ hai không được đọc.
+    expect(secondAlert).toHaveTextContent('Sai nét. Viết lại nét này.');
+    expect(secondAlert).not.toBe(firstAlert);
+    expect(firstAlert).not.toBeInTheDocument();
+  });
 });
