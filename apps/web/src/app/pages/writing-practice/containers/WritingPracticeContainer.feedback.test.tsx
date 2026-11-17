@@ -135,4 +135,23 @@ describe('WritingPracticeContainer: phản hồi khi viết', () => {
     expect(pad.querySelector('.writing-pad-hint')).toBeNull();
     expect(pad).not.toHaveAttribute('data-hint-stroke-index');
   });
+
+  it('S6.2-AC3 Viết đúng thì gợi ý ẩn: should hide the hint of the horizontal stroke of 十 and count 1 written stroke when the stroke is written correctly after 3 wrong strokes', async () => {
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    // Sai 3 lần liên tiếp ở nét ngang (nét 0): gợi ý hiện.
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+    expect(pad.querySelector('.writing-pad-hint')).not.toBeNull();
+    expect(pad).toHaveAttribute('data-hint-stroke-index', '0');
+
+    // Viết đúng nét ngang.
+    act(() => writer.emitCorrectStroke());
+
+    // Nét được nhận, gợi ý ẩn và không chuyển sang gợi ý nét kế tiếp.
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '1');
+    expect(pad.querySelector('.writing-pad-hint')).toBeNull();
+    expect(pad).not.toHaveAttribute('data-hint-stroke-index');
+  });
 });

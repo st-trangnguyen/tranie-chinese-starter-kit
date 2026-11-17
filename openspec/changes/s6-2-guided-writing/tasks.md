@@ -88,8 +88,8 @@ Tách `WritingPracticeContainer.feedback.test.tsx` nếu > 300 dòng.
 - [x] 4.18 GREEN: `WritingPracticeFeedback` nhánh `isComplete` (`role="status"`, key `complete`, nút `restart`); kiểm: test 4.17 pass
 - [x] 4.19 RED: S6.2-AC1 "Viết lại sau khi hoàn thành" — hoàn thành 十, bấm "Viết lại": không còn status hoàn thành, `data-completed-stroke-count="0"`, writer cũ bị `cancelQuiz`, một writer mới được tạo; 2 lần `emitMistake` ở nét sổ trước khi xong rồi "Viết lại" + 1 `emitMistake` → chưa có gợi ý (TC-S6.2-AC1-16); kiểm: fail vì chưa có `restart`
 - [x] 4.20 GREEN: `restart()` trong `useWritingPractice` (`startPractice`, `padKey + 1`), `key={padKey}` trên khung; kiểm: test 4.19 pass
-- [ ] 4.21 RED: S6.2-AC3 "Viết đúng thì gợi ý ẩn" (mức màn) — 3 `emitMistake` rồi `emitCorrectStroke`: không còn `.writing-pad-hint`, `data-completed-stroke-count="1"`, không có `data-hint-stroke-index`; kiểm: chạy, nếu pass ngay thì tạm cho khung giữ gợi ý theo chỉ số cũ để thấy fail rồi trả lại
-- [ ] 4.22 GREEN: sửa đến khi pass; kiểm: test 4.21 pass, mọi file < 300 dòng
+- [x] 4.21 RED: S6.2-AC3 "Viết đúng thì gợi ý ẩn" (mức màn) — 3 `emitMistake` rồi `emitCorrectStroke`: không còn `.writing-pad-hint`, `data-completed-stroke-count="1"`, không có `data-hint-stroke-index`; kiểm: chạy, nếu pass ngay thì tạm cho khung giữ gợi ý theo chỉ số cũ để thấy fail rồi trả lại
+- [x] 4.22 GREEN: sửa đến khi pass; kiểm: test 4.21 pass, mọi file < 300 dòng
 
 ## 5. Nút "Tập viết" trên màn S6.1 — `pages/stroke-order/containers/StrokeOrderContainer.tsx` (design D8)
 
