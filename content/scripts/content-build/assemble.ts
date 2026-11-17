@@ -227,12 +227,19 @@ export function assembleContent(inputs: BuildInputs): BuildResult {
     .slice(0, 12);
   const root: ContentRoot = { contentVersion, stages };
 
+  // S6.1 AC1: danh sách chữ có dữ liệu nét (đã sắp xếp vì `usedChars` đã sort).
+  const strokeFiles = strokes.flatMap(({ char, data }) =>
+    data === undefined ? [] : [{ char, data }],
+  );
+
   const files = new Map<string, string>([
     ['content.json', json(root)],
     ...contentFiles,
-    ...strokes.flatMap(({ char, data }): [string, string][] =>
-      data === undefined ? [] : [[`strokes/${char}.json`, data]],
-    ),
+    ...strokeFiles.map(({ char, data }): [string, string] => [
+      `strokes/${char}.json`,
+      data,
+    ]),
+    ['strokes/index.json', json(strokeFiles.map(({ char }) => char))],
   ]);
 
   const audioJobs = [...wordAudio, ...sentenceAudio];

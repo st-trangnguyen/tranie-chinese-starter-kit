@@ -19,6 +19,7 @@
     "@fontsource/baloo-2": "catalog:",
     "@fontsource/quicksand": "catalog:",
     "dexie": "catalog:",
+    "hanzi-writer": "catalog:",
     "i18next": "catalog:",
     "i18next-http-backend": "catalog:",
     "react": "catalog:",

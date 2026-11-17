@@ -8,4 +8,6 @@ export const ROUTE_PATHS = {
   learningPaths: '/learning-paths',
   lesson: (lessonId: string): string => `/lessons/${lessonId}`,
   placementTest: (unitId: string): string => `/units/${unitId}/placement-test`,
+  strokeOrder: (character: string): string =>
+    `/characters/${encodeURIComponent(character)}/stroke-order`,
 } as const;

@@ -20,6 +20,7 @@
 @import "./components/_tone-choice.css";
 @import "./components/_sound-pair.css";
 @import "./components/_speak-rating.css";
+@import "./components/_stroke-order.css";
 @import "./components/_update-banner.css";
 
 @import "./themes/_dark.css";
