@@ -5,6 +5,7 @@ import {
   STROKE_WRITE_LESSON,
   TEN,
   answerToneChoiceAndContinue,
+  emitCorrectStroke,
   emitMistake,
   findLessonPad,
   outlinePathsOf,
@@ -30,6 +31,16 @@ const TEN_FIRST_LESSON = {
   exercises: [
     { id: 'e1', kind: 'tone-choice', wordId: '八' },
     { id: 'e3', kind: 'stroke-write', wordId: TEN },
+  ],
+};
+
+/** Bài thử có câu viết 十 ở giữa, theo sau là câu chọn thanh khác. */
+const TEN_THEN_TONE_LESSON = {
+  ...STROKE_WRITE_LESSON,
+  exercises: [
+    { id: 'e1', kind: 'tone-choice', wordId: '八' },
+    { id: 'e3', kind: 'stroke-write', wordId: TEN },
+    { id: 'e4', kind: 'tone-choice', wordId: '八' },
   ],
 };
 
@@ -84,5 +95,25 @@ describe('LessonRunnerContainer — câu viết', () => {
     expect(
       screen.queryByRole('button', { name: 'Tiếp tục' }),
     ).not.toBeInTheDocument();
+  });
+
+  it('S7.1-AC1 Viết xong chữ thì câu được tính đúng: should show "Đúng" and a "Tiếp tục" button after 1 mistake then 2 correct strokes on 十, and go to "Câu 3 / 3" when clicking "Tiếp tục"', async () => {
+    env.replaceFetch({ lesson: TEN_THEN_TONE_LESSON });
+    const { user } = renderLessonRunner();
+    await answerToneChoiceAndContinue(user);
+    await findLessonPad(TEN);
+    const writer = await waitForActiveQuiz(TEN);
+
+    emitMistake(writer);
+    emitCorrectStroke(writer);
+    emitCorrectStroke(writer);
+
+    expect(await screen.findByText('Đúng')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+
+    expect(screen.getByRole('progressbar')).toHaveAccessibleName('Câu 3 / 3');
+    expect(
+      await screen.findByRole('button', { name: 'Thanh 1' }),
+    ).toBeInTheDocument();
   });
 });
