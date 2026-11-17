@@ -116,4 +116,28 @@ describe('LessonRunnerContainer — câu viết', () => {
       await screen.findByRole('button', { name: 'Thanh 1' }),
     ).toBeInTheDocument();
   });
+  it('S7.1-AC1 Câu viết chỉ có kết quả Đúng: should show only "Đúng" with a "Tiếp tục" button, without "Sai" or any explanation, after 4 mistakes then 2 correct strokes on 十', async () => {
+    env.replaceFetch({ lesson: TEN_FIRST_LESSON });
+    const { user } = renderLessonRunner();
+    await answerToneChoiceAndContinue(user);
+    await findLessonPad(TEN);
+    const writer = await waitForActiveQuiz(TEN);
+
+    for (let mistake = 0; mistake < 4; mistake += 1) {
+      emitMistake(writer);
+    }
+    emitCorrectStroke(writer);
+    emitCorrectStroke(writer);
+
+    expect(
+      await screen.findByRole('button', { name: 'Tiếp tục' }),
+    ).toBeInTheDocument();
+    const verdict = screen.getByText('Đúng');
+    expect(verdict).toBeInTheDocument();
+    expect(screen.queryByText('Sai')).not.toBeInTheDocument();
+    // Vùng kết quả chỉ có lời "Đúng" (ngoài biểu tượng), không có câu giải thích nào.
+    const feedbackStatus = verdict.closest('[role="status"]');
+    expect(feedbackStatus).not.toBeNull();
+    expect(feedbackStatus).toHaveTextContent(/^[^\p{L}]*Đúng$/u);
+  });
 });
