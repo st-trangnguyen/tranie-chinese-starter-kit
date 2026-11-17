@@ -69,8 +69,8 @@ Test chung `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.strok
 - [x] 4.8 GREEN: nút bỏ qua gọi `onSkip`; sửa `finishedWithSkipped` (design D8); kiểm: test 4.7 pass
 - [x] 4.9 RED: S7.1-AC1 "Câu viết gặp chữ không có dữ liệu nét khi chạy app" — câu viết có `hanzi` 龘 (không có trong `strokes/index.json` thật): "Chưa có dữ liệu nét cho chữ này.", không figure, không link, có "Bỏ qua câu này"; bỏ qua → câu kế; cuối bài báo bỏ qua 1 câu và chưa hoàn thành; kiểm: fail vì nhánh `unavailable` chưa render
 - [x] 4.10 GREEN: nhánh `unavailable`; kiểm: test 4.9 pass
-- [ ] 4.11 RED: lesson-runner S7.1-AC1 "Bỏ qua câu viết thiếu dữ liệu nét thì bài chưa hoàn thành" — câu 1 làm, câu 2 (龘) bỏ qua, câu 3 làm: tiêu đề cuối bài báo bỏ qua 1 câu, chưa hoàn thành, **không** chứa "dạng bài chưa có"; kiểm: chạy, nếu pass ngay nhờ 4.8 thì tạm trả câu chữ cũ để thấy fail rồi trả lại
-- [ ] 4.12 GREEN: sửa đến khi pass; kiểm: test 4.11 pass
+- [x] 4.11 RED: lesson-runner S7.1-AC1 "Bỏ qua câu viết thiếu dữ liệu nét thì bài chưa hoàn thành" — câu 1 làm, câu 2 (龘) bỏ qua, câu 3 làm: tiêu đề cuối bài báo bỏ qua 1 câu, chưa hoàn thành, **không** chứa "dạng bài chưa có"; kiểm: chạy, nếu pass ngay nhờ 4.8 thì tạm trả câu chữ cũ để thấy fail rồi trả lại
+- [x] 4.12 GREEN: sửa đến khi pass; kiểm: test 4.11 pass
 - [ ] 4.13 RED: S7.1-AC1 "Mọi câu thuộc dạng đã hỗ trợ" (phần màn bài) — với `exerciseRegistry` thật, mỗi kind trong `exerciseSchema.options` render qua `LessonRunner` không hiện "Dạng bài này chưa có."; file `apps/web/src/app/pages/lesson/components/LessonRunner.kinds.test.tsx`; kiểm: chạy, nếu pass ngay nhờ 3.2 thì tạm bỏ nhánh `stroke-write` để thấy fail rồi trả lại
 - [ ] 4.14 GREEN: sửa đến khi pass; kiểm: test 4.13 pass
 
