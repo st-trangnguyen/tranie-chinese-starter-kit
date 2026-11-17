@@ -1,6 +1,7 @@
 import { waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { ROUTE_PATHS } from '@core/constants/app.constants';
 import { screen } from '@test/render';
 import { openRoute, setupStrokeOrderRoute } from '@test/stroke-order-route';
 import strokeIndex from '@assets/content/strokes/index.json';
@@ -27,8 +28,12 @@ describe('StrokeOrderContainer', () => {
     expect(screen.getAllByRole('img')).toEqual([figure]);
     expect(document.querySelectorAll('figure')).toHaveLength(1);
 
-    // Không có cách chuyển sang chữ khác: không link, nút duy nhất là "Phát lại".
-    expect(screen.queryAllByRole('link')).toHaveLength(0);
+    // Không có cách chuyển sang chữ khác: link duy nhất là "Tập viết" dẫn tới màn luyện viết
+    // của chính chữ 好 (S6.2), nút duy nhất là "Phát lại".
+    const links = screen.getAllByRole('link');
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAccessibleName('Tập viết');
+    expect(links[0]).toHaveAttribute('href', ROUTE_PATHS.writingPractice('好'));
     expect(
       screen.getAllByRole('button').map((button) => button.textContent),
     ).toEqual(['Phát lại']);
