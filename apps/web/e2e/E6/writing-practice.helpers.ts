@@ -8,6 +8,8 @@ export const MOBILE_VIEWPORT = { width: 375, height: 812 };
 const MIN_TOUCH_TARGET_PX = 44;
 export const MIN_PAD_SIDE_PX = 240;
 const MIN_FOCUS_CONTRAST = 3;
+/** Thời gian tối đa chờ màu viền focus ổn định sau transition. */
+const FOCUS_RING_SETTLE_TIMEOUT_MS = 2000;
 const MAX_TAB_PRESSES = 20;
 
 export const writingPracticePath = (character: string): string =>
@@ -150,13 +152,21 @@ const readFocusRing = (target: Locator): Promise<FocusRing> =>
     };
   });
 
+/**
+ * Viền focus nhìn thấy được. `.btn` chuyển màu (`transition-colors` gồm cả `outline-color`) nên
+ * ngay sau khi focus màu viền có thể đang giữa chừng: đọc lại đến khi mọi điều kiện đạt hoặc hết
+ * `FOCUS_RING_SETTLE_TIMEOUT_MS` (dư so với thời lượng transition). Viền thật sự kém tương phản
+ * vẫn fail sau timeout.
+ */
 export const expectVisibleFocusRing = async (
   target: Locator,
 ): Promise<void> => {
-  const ring = await readFocusRing(target);
-  expect(ring.outlineStyle).not.toBe('none');
-  expect(ring.outlineWidth).toBeGreaterThan(0);
-  expect(ring.contrast).toBeGreaterThanOrEqual(MIN_FOCUS_CONTRAST);
+  await expect(async () => {
+    const ring = await readFocusRing(target);
+    expect(ring.outlineStyle).not.toBe('none');
+    expect(ring.outlineWidth).toBeGreaterThan(0);
+    expect(ring.contrast).toBeGreaterThanOrEqual(MIN_FOCUS_CONTRAST);
+  }).toPass({ timeout: FOCUS_RING_SETTLE_TIMEOUT_MS });
 };
 
 /** Một điểm median trong toạ độ dữ liệu nét (hộp 1024, trục y hướng lên). */
