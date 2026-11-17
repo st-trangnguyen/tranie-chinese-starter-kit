@@ -20,6 +20,9 @@ function WritingPracticeBody({ character }: WritingPracticeScreenProps) {
     retry();
   };
 
+  /** Chưa có hành vi: `restart()` của hook (lượt mới + dựng lại khung) làm ở task 4.20. */
+  const handleRestart = () => undefined;
+
   if (view.status === 'error') {
     return (
       <div className="flex flex-col items-start gap-md">
@@ -44,7 +47,11 @@ function WritingPracticeBody({ character }: WritingPracticeScreenProps) {
           practice={practice}
           onStrokeAttempt={recordStrokeAttempt}
         />
-        <WritingPracticeFeedback practice={practice} />
+        <WritingPracticeFeedback
+          character={view.character}
+          practice={practice}
+          onRestart={handleRestart}
+        />
       </>
     );
   }
