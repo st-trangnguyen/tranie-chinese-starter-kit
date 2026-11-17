@@ -1,0 +1,199 @@
+/** Helper e2e của 12 bài Nhập môn S7.1 (design mục Test). */
+import { readFileSync } from 'node:fs';
+
+import {
+  lessonSchema,
+  sentenceSchema,
+  wordSchema,
+  type Lesson,
+  type Sentence,
+  type Word,
+} from '@csk/shared';
+import { expect, type Locator, type Page } from '@playwright/test';
+
+import {
+  drawMedian,
+  readBuiltMedians,
+  waitForWriterReady,
+} from '../E6/writing-practice.helpers';
+
+/** Tiêu đề 12 bài Nhập môn, nguyên văn và đúng thứ tự (test-cases "Điều kiện đầu chung"). */
+export const INTRO_LESSON_TITLES = [
+  'Thanh 1–4',
+  'Thanh nhẹ và biến điệu (3-3, 不, 一)',
+  'Vận mẫu đơn',
+  'Thanh mẫu b p m f d t n l',
+  'Thanh mẫu g k h j q x',
+  'Thanh mẫu zh ch sh r z c s',
+  'Vận mẫu kép',
+  'Vận mẫu mũi',
+  'Quy tắc viết pinyin',
+  'Nét cơ bản và thứ tự nét',
+  '30 bộ thủ phổ biến',
+  'Ôn tổng hợp + câu chào đầu tiên',
+] as const;
+
+/** ID 12 bài Nhập môn theo thứ tự lộ trình (design D1). */
+export const INTRO_LESSON_IDS = INTRO_LESSON_TITLES.map(
+  (_, index) => `intro-${String(index + 1).padStart(2, '0')}`,
+);
+
+export const INTRO_STAGE_TITLE = 'Nhập môn';
+export const INTRO_UNIT_TITLE = 'Pinyin và chữ Hán cơ bản';
+export const FINISHED_MESSAGE = 'Bạn đã làm xong các câu của bài này.';
+export const LEARNING_PATH_URL = '/learning-paths';
+
+const DB_NAME = 'tranie-chinese';
+const LISTEN_LABEL = 'Nghe';
+const CONTINUE_LABEL = 'Tiếp tục';
+const ANY_PINYIN = 'ma1';
+const PAD_LABEL_PREFIX = 'Khung viết chữ ';
+
+const builtContentUrl = (path: string): URL =>
+  new URL(`../../src/assets/content/${path}`, import.meta.url);
+
+const readBuiltJson = (path: string): unknown =>
+  JSON.parse(readFileSync(builtContentUrl(path), 'utf-8'));
+
+/** Bài đã build trong `apps/web/src/assets/content/lessons/`, validate bằng Zod (§0.4). */
+export const readBuiltLesson = (lessonId: string): Lesson =>
+  lessonSchema.parse(readBuiltJson(`lessons/${lessonId}.json`));
+
+export const readBuiltWords = (): Word[] =>
+  wordSchema.array().parse(readBuiltJson('words.json'));
+
+export const readBuiltSentences = (): Sentence[] =>
+  sentenceSchema.array().parse(readBuiltJson('sentences.json'));
+
+/** Làm onboarding qua giao diện như người học mới (mẫu `e2e/E3/s3.1-learning-path.spec.ts`). */
+export const completeOnboarding = async (page: Page): Promise<void> => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Bắt đầu' }).click();
+  await page.getByRole('button', { name: 'Tiếp tục' }).click();
+  await page.getByRole('button', { name: /Bỏ qua|Vào học/ }).click();
+};
+
+/** Giai đoạn đầu tiên trên màn Lộ trình (`<section>` con trực tiếp của `<main>`). */
+export const firstStage = (page: Page): Locator =>
+  page.locator('main > section').first();
+
+export const pathLessonItems = (page: Page): Locator =>
+  firstStage(page).getByRole('listitem');
+
+export const pathLessonTitles = (page: Page): Locator =>
+  firstStage(page).locator('.learning-path-lesson-title');
+
+export const pathLessonStatuses = (page: Page): Locator =>
+  firstStage(page).locator('.learning-path-lesson-status');
+
+export const listenButton = (page: Page): Locator =>
+  page.getByRole('button', { name: LISTEN_LABEL, exact: true });
+
+/**
+ * Nạp sẵn tiến độ: mở app một lần (app tạo DB `tranie-chinese` với bảng `lessonProgress`), ghi
+ * `hasCompletedOnboarding` và các bài đã xong thẳng vào IndexedDB, rồi tải lại.
+ */
+export const seedCompletedLessons = async (
+  page: Page,
+  lessonIds: readonly string[],
+): Promise<void> => {
+  await page.goto('/');
+  await expect
+    .poll(() =>
+      page.evaluate(
+        (dbName) =>
+          new Promise<boolean>((resolve) => {
+            const request = indexedDB.open(dbName);
+            request.onsuccess = () => {
+              const db = request.result;
+              const isReady = db.objectStoreNames.contains('lessonProgress');
+              db.close();
+              resolve(isReady);
+            };
+            request.onerror = () => resolve(false);
+          }),
+        DB_NAME,
+      ),
+    )
+    .toBe(true);
+
+  await page.evaluate(
+    ({ dbName, ids }) =>
+      new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open(dbName);
+        request.onerror = () => reject(new Error('Không mở được IndexedDB.'));
+        request.onsuccess = () => {
+          const db = request.result;
+          const transaction = db.transaction(
+            ['settings', 'lessonProgress'],
+            'readwrite',
+          );
+          transaction
+            .objectStore('settings')
+            .put({ key: 'hasCompletedOnboarding', value: true });
+          const progress = transaction.objectStore('lessonProgress');
+          ids.forEach((lessonId) => {
+            progress.put({ lessonId, status: 'completed' });
+          });
+          transaction.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          transaction.onerror = () => {
+            db.close();
+            reject(new Error('Không ghi được tiến độ.'));
+          };
+        };
+      }),
+    { dbName: DB_NAME, ids: [...lessonIds] },
+  );
+  await page.reload();
+};
+
+const answerStrokeWrite = async (page: Page, pad: Locator): Promise<void> => {
+  const label = await pad.getAttribute('aria-label');
+  const character = label?.replace(PAD_LABEL_PREFIX, '') ?? '';
+  const medians = await readBuiltMedians(page, character);
+  await waitForWriterReady(pad);
+  for (const median of medians) {
+    await drawMedian(page, pad, median);
+  }
+};
+
+/**
+ * Trả lời câu đang hiện theo dạng nhìn thấy trên màn rồi bấm "Tiếp tục": chọn đáp án đầu, gõ
+ * pinyin bất kỳ rồi "Kiểm tra", câu nói chọn mức tự đánh giá đầu, câu viết vẽ đủ nét theo median.
+ * Trả lời sai vẫn hợp lệ.
+ */
+export const answerCurrentQuestion = async (page: Page): Promise<void> => {
+  const toneGroup = page.getByRole('group', {
+    name: 'Chọn thanh của âm tiết vừa nghe',
+  });
+  const soundPairGroup = page.getByRole('group', { name: 'Chọn âm vừa nghe' });
+  const pinyinInput = page.getByRole('textbox', {
+    name: 'Gõ pinyin của âm vừa nghe',
+  });
+  const speakGroup = page.getByRole('group', { name: 'Tự đánh giá phát âm' });
+  const pad = page.getByRole('figure', {
+    name: new RegExp(`^${PAD_LABEL_PREFIX}`),
+  });
+
+  await expect(
+    toneGroup.or(soundPairGroup).or(pinyinInput).or(speakGroup).or(pad),
+  ).toBeVisible();
+
+  if (await toneGroup.isVisible()) {
+    await toneGroup.getByRole('button').first().click();
+  } else if (await soundPairGroup.isVisible()) {
+    await soundPairGroup.getByRole('button').first().click();
+  } else if (await pinyinInput.isVisible()) {
+    await pinyinInput.fill(ANY_PINYIN);
+    await page.getByRole('button', { name: 'Kiểm tra' }).click();
+  } else if (await speakGroup.isVisible()) {
+    await speakGroup.getByRole('button').first().click();
+  } else {
+    await answerStrokeWrite(page, pad);
+  }
+
+  await page.getByRole('button', { name: CONTINUE_LABEL }).click();
+};

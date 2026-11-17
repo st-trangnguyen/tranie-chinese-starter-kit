@@ -13,7 +13,7 @@ test.describe('S3.1 Bản đồ lộ trình', () => {
     await expect(
       page.getByRole('heading', { level: 2, name: 'Nhập môn' }),
     ).toBeVisible();
-    const firstLesson = page.getByRole('link', { name: /Bốn thanh điệu/ });
+    const firstLesson = page.getByRole('link', { name: /Thanh 1–4/ });
     await expect(firstLesson).toContainText('Đang mở');
 
     await firstLesson.click();
