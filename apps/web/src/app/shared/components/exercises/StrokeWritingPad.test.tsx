@@ -88,4 +88,37 @@ describe('StrokeWritingPad', () => {
     // Mở khung không phát kết quả chấm nào.
     expect(onStrokeAttempt).not.toHaveBeenCalled();
   });
+
+  it('S6.2-AC1: Khung viết nhận focus bàn phím', async () => {
+    const onStrokeAttempt = vi.fn<(result: StrokeAttemptResult) => void>();
+    const { user } = renderWithProviders(
+      <StrokeWritingPad
+        character="十"
+        strokeData={STROKE_DATA_SHI}
+        practice={practiceService.startPractice(STROKE_DATA_SHI.strokes.length)}
+        onStrokeAttempt={onStrokeAttempt}
+      />,
+    );
+    await flushQuizStart();
+
+    // Tab đưa focus vào khung viết; tên đọc được nêu chữ đang viết.
+    await user.tab();
+    const figure = screen.getByRole('figure', { name: /十/ });
+    expect(figure).toHaveFocus();
+
+    // Viết không cần bàn phím: phím chữ, số, Space, Enter, mũi tên không làm gì.
+    const writer = FakeHanziWriter.last();
+    const callCountBefore = writer.calls.length;
+    await user.keyboard(
+      'a5 {Enter}{ArrowUp}{ArrowDown}{ArrowLeft}{ArrowRight}',
+    );
+
+    expect(figure).toHaveFocus();
+    expect(FakeHanziWriter.instances).toHaveLength(1);
+    expect(writer.calls).toHaveLength(callCountBefore);
+    expect(writer.isQuizActive).toBe(true);
+    expect(onStrokeAttempt).not.toHaveBeenCalled();
+    expect(figure).toHaveAttribute('data-completed-stroke-count', '0');
+    expect(figure.querySelector('.writing-pad-hint')).toBeNull();
+  });
 });
