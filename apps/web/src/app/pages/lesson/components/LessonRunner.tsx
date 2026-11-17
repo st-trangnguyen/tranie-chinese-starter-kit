@@ -39,7 +39,11 @@ export const LessonRunner = ({
   /** Câu viết đi nhánh riêng, không qua registry (D4); chưa có dữ liệu thì hiện như đang tải. */
   const renderStrokeWrite = () =>
     strokeWrite ? (
-      <LessonStrokeWrite key={exercise.id} strokeWrite={strokeWrite} />
+      <LessonStrokeWrite
+        key={exercise.id}
+        strokeWrite={strokeWrite}
+        isAnswered={feedback !== null}
+      />
     ) : (
       <p role="status">{t('writing-practice:loading')}</p>
     );

@@ -50,6 +50,14 @@
     @apply text-body text-fg;
   }
 
+  .lesson-stroke-write-link {
+    @apply inline-flex min-h-11 min-w-11 items-center text-body text-accent underline underline-offset-4;
+  }
+
+  .lesson-stroke-write-link:hover {
+    @apply text-accent-hover;
+  }
+
   /* Màn tổng kết — S3.4. Cảnh báo chưa lưu có viền + chữ, không chỉ dựa vào màu. */
   .lesson-summary-title {
     @apply text-title text-fg;
