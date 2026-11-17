@@ -7,6 +7,7 @@ import type {
   StrokeAttemptResult,
   WritingPracticeState,
 } from '@shared/models/writing-practice.model';
+import { STROKE_PATH_TRANSFORM } from '@shared/utils/stroke.utils';
 
 import { StrokeGlyph } from '../StrokeGlyph';
 
@@ -30,15 +31,25 @@ export function StrokeWritingPad({
   const { t } = useTranslation('writing-practice');
   const hostRef = useRef<SVGGElement>(null);
   useStrokeQuiz(hostRef, character, strokeData, onStrokeAttempt);
+  const hintStrokeIndex =
+    practice.isHintVisible && !practice.isComplete
+      ? practice.completedStrokeCount
+      : null;
 
   return (
     <figure
       tabIndex={0}
       aria-label={t('padLabel', { character })}
       data-completed-stroke-count={practice.completedStrokeCount}
+      data-hint-stroke-index={hintStrokeIndex ?? undefined}
       className="writing-pad flex flex-col"
     >
       <StrokeGlyph strokeData={strokeData} variant="outline">
+        {hintStrokeIndex !== null && (
+          <g transform={STROKE_PATH_TRANSFORM} className="writing-pad-hint">
+            <path d={strokeData.strokes[hintStrokeIndex]} />
+          </g>
+        )}
         <g ref={hostRef} className="writing-pad-writer-host" />
       </StrokeGlyph>
     </figure>
