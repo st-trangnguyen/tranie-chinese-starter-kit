@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { createDatabase } from '@core/helpers/db.helper';
+import { DexieProgressStore } from '@core/services/progress-store.service';
 import {
+  LESSON_ID,
   PERSON,
   STROKE_WRITE_LESSON,
   TEN,
@@ -13,7 +16,7 @@ import {
   setupLessonStrokeWrite,
   waitForActiveQuiz,
 } from '@test/lesson-stroke-write.helpers';
-import { screen } from '@test/render';
+import { screen, waitFor } from '@test/render';
 
 // Ranh giới ngoài: thư viện vẽ/chấm nét hanzi-writer được thay bằng bản giả điều khiển được.
 vi.mock('hanzi-writer', async () => {
@@ -24,6 +27,18 @@ vi.mock('hanzi-writer', async () => {
 const env = setupLessonStrokeWrite();
 
 const MAX_TABS = 20;
+
+/** Đọc tiến độ đã ghi của bài thử trong IndexedDB. */
+const readSavedProgress = async (): Promise<
+  Awaited<ReturnType<DexieProgressStore['getLessonProgress']>>
+> => {
+  const db = createDatabase();
+  try {
+    return await new DexieProgressStore(db).getLessonProgress(LESSON_ID);
+  } finally {
+    db.close();
+  }
+};
 
 /** Bài thử đưa câu viết 十 lên ngay sau câu chọn thanh. */
 const TEN_FIRST_LESSON = {
@@ -185,5 +200,32 @@ describe('LessonRunnerContainer — câu viết', () => {
     expect(
       screen.queryByRole('link', { name: 'Xem thứ tự nét' }),
     ).not.toBeInTheDocument();
+  });
+
+  it('S7.1-AC1 Làm hết bài có câu viết thì bài Đã xong: should show the summary with "Đúng 3 / 3 câu", counting both stroke-write exercises as correct, and save lessonProgress status "completed" after finishing tone-choice 八, writing 人 and writing 十', async () => {
+    const { user } = renderLessonRunner();
+    await answerToneChoiceAndContinue(user);
+
+    await findLessonPad(PERSON);
+    const personWriter = await waitForActiveQuiz(PERSON);
+    emitCorrectStroke(personWriter);
+    emitCorrectStroke(personWriter);
+    await user.click(await screen.findByRole('button', { name: 'Tiếp tục' }));
+
+    await findLessonPad(TEN);
+    const tenWriter = await waitForActiveQuiz(TEN);
+    emitCorrectStroke(tenWriter);
+    emitCorrectStroke(tenWriter);
+    await user.click(await screen.findByRole('button', { name: 'Tiếp tục' }));
+
+    expect(
+      await screen.findByText('Bạn đã làm xong các câu của bài này.'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Đúng 3 / 3 câu')).toBeInTheDocument();
+    expect(screen.getByText('Sai 0 câu')).toBeInTheDocument();
+    await waitFor(async () => {
+      const progress = await readSavedProgress();
+      expect(progress?.status).toBe('completed');
+    });
   });
 });

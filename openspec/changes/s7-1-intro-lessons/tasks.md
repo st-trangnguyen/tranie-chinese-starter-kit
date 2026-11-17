@@ -51,8 +51,8 @@ file nét thật, design mục Test). Bài thử: `[tone-choice 八, stroke-writ
 - [x] 3.12 GREEN: sửa đến khi pass (không render `WritingPracticeFeedback`); kiểm: test 3.11 pass
 - [x] 3.13 RED: S7.1-AC2 "Câu viết đã Đúng thì không còn liên kết Xem thứ tự nét" — trước khi viết có link "Xem thứ tự nét"; viết xong 人 → không còn link, có "Tiếp tục"; kiểm: fail vì chưa có link
 - [x] 3.14 GREEN: link `ROUTE_PATHS.strokeOrder(character)` khi `!isAnswered && !practice.isComplete`, dùng lại key `writing-practice:strokeOrderLink` (design D8); kiểm: test 3.13 pass
-- [ ] 3.15 RED: S7.1-AC1 "Làm hết bài có câu viết thì bài Đã xong" (mức màn) — bài `[tone-choice, stroke-write 人, stroke-write 十]` làm hết: "Bạn đã làm xong các câu của bài này.", "Đúng k / 3 câu" tính 2 câu viết là đúng; IndexedDB `lessonProgress` của bài có `status: 'completed'`; kiểm: chạy, nếu pass ngay thì tạm cho câu viết gọi `onSkip` thay `onResult` để thấy fail rồi trả lại
-- [ ] 3.16 GREEN: sửa đến khi pass; kiểm: test 3.15 pass, file test < 300 dòng (tách nếu cần)
+- [x] 3.15 RED: S7.1-AC1 "Làm hết bài có câu viết thì bài Đã xong" (mức màn) — bài `[tone-choice, stroke-write 人, stroke-write 十]` làm hết: "Bạn đã làm xong các câu của bài này.", "Đúng k / 3 câu" tính 2 câu viết là đúng; IndexedDB `lessonProgress` của bài có `status: 'completed'`; kiểm: chạy, nếu pass ngay thì tạm cho câu viết gọi `onSkip` thay `onResult` để thấy fail rồi trả lại
+- [x] 3.16 GREEN: sửa đến khi pass; kiểm: test 3.15 pass, file test < 300 dòng (tách nếu cần)
 
 ## 4. Trạng thái tải câu viết và bỏ qua — `LessonStrokeWrite` + `lesson.json` (design D7, D8)
 
