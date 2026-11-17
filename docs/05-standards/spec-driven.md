@@ -46,13 +46,13 @@ Các vai do agent đảm nhiệm: `ba` viết spec (và sửa theo review), `qa`
 |---|---|---|---|
 | B1 | Cắt nhánh `feat/s<epic>-<n>-<slug>` từ `main` đã có spec | | PR spec đã merge |
 | B1a | **Plan** | `/relay code <id>` (bước plan): `planner` tạo `design.md` (cách làm, layer, file) và `tasks.md` (cặp RED/GREEN cho mỗi Scenario). Mở **PR code ở dạng draft chỉ chứa hai file này**. Spec sai/thiếu thì dừng, mở PR spec fix | `openspec validate --all --strict` pass |
-| B1b | **Duyệt plan** | Dev lead review `design.md` + `tasks.md` rồi gắn label `plan-approved`. Chỉ người trong `PLAN_APPROVERS` được tính. Sửa `design.md` sau đó thì label bị gỡ và phải duyệt lại; chỉ tick `tasks.md` thì không | `Plan đã duyệt` xanh; **chưa có label thì chưa viết code** (`/relay code` từ chối chạy) |
+| B1b | **Duyệt plan** | Agent `dev-lead` (chế độ DUYỆT PLAN, tối đa 3 vòng với `planner`) duyệt `design.md` + `tasks.md`; `/relay code` đăng comment `<!-- csk-plan-agent sha=… dev-lead=approve\|escalate -->`. `escalate` (dependency chưa chốt, phá §0/§2, quyết định khó đảo ngược, spec không lập plan được) thì người trong `PLAN_APPROVERS` quyết và gắn label `plan-approved`. Sửa `design.md` sau đó thì verdict và label hết hiệu lực, phải duyệt lại; chỉ tick `tasks.md` thì không | `Plan đã duyệt` xanh; **chưa xanh thì chưa viết code** (`/relay code` từ chối chạy) |
 | B2 | **RED** | Viết test cho một Scenario, chạy, thấy fail đúng lý do. Commit `test(...)` | Phải có output fail |
 | B3 | **GREEN** | `/opsx:apply`: code tối thiểu, đúng layer (CLAUDE.md §1–§3). Commit `feat(...)` | Test pass |
 | B4 | **REFACTOR** | Dọn code, giữ xanh | |
 | B5 | **Verify** | `pnpm typecheck && pnpm lint && pnpm test:run` (+ `content:check`, `e2e` theo CLAUDE.md §8) | Toàn bộ pass |
 | B6 | Chuyển **PR code** sang ready | Theo template, ghi `Spec PR: #<số PR spec>`. `Closes #<story>` nếu xong mọi AC, ngược lại `Refs #<story>` | `Spec PR đã merge` (bên dưới) xanh |
-| B6a | **QA nghiệm thu** | QA chạy `test-cases.md` trên artifact `web-dist` của CI: tải về, giải nén vào `apps/web/dist`, chạy `pnpm --filter @csk/web exec vite preview --port 4173`. Kết quả ghi trong **một comment** (bảng `TC \| Pass/Fail \| Ghi chú`). Case Fail: Dev sửa trong PR, QA chạy lại case đó. Pass hết thì gắn label `qa-approved` (chỉ `QA_APPROVERS`). Push code mới thì label bị gỡ | `QA sign-off` xanh |
+| B6a | **QA nghiệm thu** | QA chạy `test-cases.md` trên artifact `web-dist` của CI: tải về, giải nén vào `apps/web/dist`, chạy `pnpm --filter @csk/web exec vite preview --port 4173`. Kết quả ghi trong **một comment** (bảng `TC \| Pass/Fail \| Ghi chú`) mở đầu bằng `<!-- csk-qa-agent sha=… qa=approve\|escalate -->`. Case Fail sửa được: Dev sửa trong PR, QA chạy lại case đó. Pass hết thì `approve`. Case cần người (sửa phải đổi spec, đánh giá chủ quan, chỉ chạy được trên máy thật) thì `escalate`, QA người thật (`QA_APPROVERS`) quyết và gắn label `qa-approved`. Push code mới thì verdict và label hết hiệu lực | `QA sign-off` xanh |
 
 Lặp B2–B4 cho từng Scenario, không viết hết test rồi mới code. Case của `test-cases.md` có cột
 Tự động = `e2e` do `test-writer` viết ở `apps/web/e2e/E<n>/`, tên test mang ID `TC-…`. **Không archive trong PR code.**
@@ -73,8 +73,8 @@ cấu hình secret `ARCHIVE_PR_TOKEN` (PR tạo bằng `GITHUB_TOKEN` không kí
 |---|---|---|
 | `Spec approvals` | PR spec (nhánh `spec/*`) | PR còn draft; `proposal.md` còn `- [ ]` trong `## Open Questions`; PR thêm `proposal.md` mới mà thiếu `test-cases.md`; thiếu verdict `approve` của cả hai agent `qa` và `dev-lead` trong comment có marker đúng **commit đầu hiện tại** (comment của OWNER/MEMBER/COLLABORATOR, mới nhất); thiếu approve của một người trong `SPEC_APPROVERS` (cũng chỉ tính trên commit đầu hiện tại; tác giả PR được tính nếu nằm trong danh sách, vì GitHub không cho tự approve) |
 | `Spec PR đã merge` | PR code | Thiếu dòng `Spec PR:`, số PR sai, hoặc PR spec chưa merge (chi tiết bên dưới) |
-| `Plan đã duyệt` | PR đổi file dưới `apps/` hoặc `packages/` | Chưa có label `plan-approved`, hoặc người gắn không thuộc `PLAN_APPROVERS`, hoặc chính là tác giả PR |
-| `QA sign-off` | PR đổi file dưới `apps/` hoặc `packages/` | PR còn draft, chưa có label `qa-approved`, hoặc người gắn không thuộc `QA_APPROVERS`, hoặc chính là tác giả PR |
+| `Plan đã duyệt` | PR đổi file dưới `apps/` hoặc `packages/` | Không có verdict `dev-lead=approve` còn hiệu lực (comment mới nhất có marker `csk-plan-agent`, của OWNER/MEMBER/COLLABORATOR, `sha` là tổ tiên của đầu PR và từ đó không đổi `design.md` của change trong PR), **và** không có label `plan-approved` do người trong `PLAN_APPROVERS` gắn |
+| `QA sign-off` | PR đổi file dưới `apps/` hoặc `packages/` | PR còn draft; hoặc không có verdict `qa=approve` còn hiệu lực (marker `csk-qa-agent`, từ `sha` tới đầu PR chỉ đổi `openspec/`, `docs/`) **và** không có label `qa-approved` do người trong `QA_APPROVERS` gắn |
 
 **Phạm vi của `Plan đã duyệt` và `QA sign-off` tính theo FILE đổi, không theo tên nhánh hay dòng `Spec PR:`**
 (hai thứ đó tự khai được). PR không đổi file nào dưới `apps/` hoặc `packages/` (PR spec, PR archive, docs, config,
@@ -86,26 +86,29 @@ cần dev lead và QA duyệt.
 thái **merged**. Check `Spec PR đã merge` (`spec-gate-workflow.yml`) fail nếu thiếu dòng, số PR sai, hoặc PR
 spec chưa merge. PR ghi `Closes #<story>` (PR cuối của story) còn phải có dòng `OpenSpec change:` và mọi task
 trong `tasks.md` đã tick, nếu không workflow archive sẽ bỏ qua change; PR một phần dùng `Refs #<story>`.
-Khi PR spec merge, workflow tự chạy lại check cho các PR code đang chờ. Dùng `Spec PR: N/A`
+Khi PR spec merge, workflow tự chạy lại check cho các PR code đang chờ. Comment có marker `csk-plan-agent` hoặc
+`csk-qa-agent` tự chạy lại job cổng đang fail của PR (`gates-workflow.yml`). Rebase hoặc force-push làm verdict của
+agent hết hiệu lực (commit cũ không còn là tổ tiên): chạy lại agent và đăng marker mới. Dùng `Spec PR: N/A`
 cho PR không có spec đi kèm (docs, config, asset thuần) và cho chính PR spec và PR archive.
 
 **Giới hạn đã biết.** GitHub không chặn được việc push commit lên nhánh. Các cổng chặn **merge**; agent
 (`/relay code`) tuân thủ cổng plan. Dev cố tình code trước vẫn push được nhưng PR không merge được. Một người nằm
-trong nhiều danh sách vẫn được tính đủ nhiều vai.
+trong nhiều danh sách vẫn được tính đủ nhiều vai. Tác giả PR được tính nếu nằm trong danh sách (GitHub không cho tự
+approve, và repo một người cần quyết được khi agent `escalate`).
 
 **Cấu hình repo (làm tay, không nằm trong file):**
 
 1. Tạo label: `gh label create plan-approved --color 0E8A16` và `gh label create qa-approved --color 1D76DB`.
 2. Đặt repo variables (Settings → Secrets and variables → Actions → Variables), giá trị là handle GitHub cách nhau
-   dấu phẩy: `SPEC_APPROVERS` (người thật duyệt spec), `QA_APPROVERS`, `PLAN_APPROVERS`. (`BA_APPROVERS`, `DEV_APPROVERS` không còn dùng.) Giới hạn: verdict của agent là comment do tài khoản của người chạy `/relay spec` đăng, nên cổng chỉ chắc chắn rằng quy trình đã chạy, không chứng minh agent thật sự duyệt; vì thế người thật vẫn bắt buộc approve.
+   dấu phẩy: `SPEC_APPROVERS` (người thật duyệt spec), `QA_APPROVERS`, `PLAN_APPROVERS`. (`BA_APPROVERS`, `DEV_APPROVERS` không còn dùng.) Giới hạn: verdict của agent là comment do tài khoản của người chạy `/relay` đăng, nên cổng chỉ chắc chắn rằng quy trình đã chạy, không chứng minh agent thật sự duyệt. Vì thế PR spec vẫn bắt buộc người thật approve; cổng plan và QA tin verdict của agent và chỉ gọi người khi agent `escalate`.
 3. Điền handle thật vào `.github/CODEOWNERS` (BA, QA, Dev, dev lead).
 4. Branch protection của `main`: bắt buộc approval và đặt `Spec PR đã merge`, `Spec approvals`,
    `Plan đã duyệt`, `QA sign-off`, `Review` làm required. Bật **Require review from Code Owners** và
    **Dismiss stale pull request approvals**.
 5. CODEOWNERS gán `/.github/` cho dev lead: PR đổi workflow chạy workflow của chính nó, nên không có bước này thì
    một PR có thể sửa cổng thành luôn xanh.
-6. Repo chỉ có một người thì không ai thỏa "khác tác giả": hai cổng label sẽ không pass với PR của người đó. Khi chạy
-   thử, dùng tài khoản thứ hai, hoặc chưa đặt hai check này làm required.
+6. Repo một người vẫn chạy được: cổng plan/QA xanh nhờ verdict của agent, và tác giả PR trong `PLAN_APPROVERS`/`QA_APPROVERS`
+   tự gắn label được khi agent `escalate`.
 7. PR archive do `GITHUB_TOKEN` tạo không kích hoạt workflow, nên các check required treo pending nếu thiếu
    secret `ARCHIVE_PR_TOKEN` (xem Pha C).
 
@@ -263,7 +266,8 @@ nhận lời giải thích của `implementer`, chỉ nhận diff, spec và `CLA
 - **Sửa theo feedback:** sau khi mở PR, phiên gắn PR (`bind_pr`, `set_monitor`); có review comment
   hoặc CI đỏ thì app đánh thức agent chạy lại `/relay code <id>` (bước sửa theo review; subagent mới cho mỗi việc). Phiên mới vẫn
   chạy được: trạng thái nằm ở nhánh, `tasks.md` và comment PR.
-- **Cổng plan:** `/relay code` dừng ở bước plan và từ chối code khi PR của nhánh chưa có label `plan-approved` (trừ change không có
-  Scenario: docs, config, asset thuần).
-- **Nghiệm thu:** `qa` (chế độ NGHIỆM THU) chạy `test-cases.md` trên bản build và đăng bảng kết quả; label `qa-approved` vẫn do QA người thật gắn.
+- **Cổng plan:** `dev-lead` (DUYỆT PLAN) duyệt plan và `/relay code` đăng verdict có marker. `/relay code` từ chối code khi check
+  `Plan đã duyệt` chưa xanh (trừ change không có Scenario: docs, config, asset thuần).
+- **Nghiệm thu:** `qa` (chế độ NGHIỆM THU) chạy `test-cases.md` trên bản build và đăng bảng kết quả kèm verdict có marker; label
+  `qa-approved` chỉ cần khi `qa` `escalate`.
 - `/relay` dừng trước khi commit/mở PR; người dùng quyết.
