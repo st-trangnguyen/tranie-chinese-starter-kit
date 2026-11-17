@@ -11,6 +11,7 @@ export interface WritingPracticeScreenState {
   view: StrokeOrderView;
   /** Lượt viết hiện tại; `null` khi chưa có dữ liệu nét. */
   practice: WritingPracticeState | null;
+  retry: () => void;
   recordStrokeAttempt: (result: StrokeAttemptResult) => void;
 }
 
@@ -24,13 +25,18 @@ export const useWritingPractice = (
   );
   const [view, setView] = useState<StrokeOrderView>({ status: 'loading' });
   const [practice, setPractice] = useState<WritingPracticeState | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let isActive = true;
     writingPracticeService
       .loadCharacter(character)
       .then((result) => {
-        if (!isActive || result.status !== 'available') {
+        if (!isActive) {
+          return;
+        }
+        if (result.status !== 'available') {
+          setView({ status: 'unavailable' });
           return;
         }
         setView({
@@ -44,12 +50,21 @@ export const useWritingPractice = (
           ),
         );
       })
-      // Lỗi tải chưa có nhánh riêng (unavailable/error làm ở task 4.4): giữ trạng thái đang tải.
-      .catch(() => undefined);
+      .catch(() => {
+        if (isActive) {
+          setView({ status: 'error' });
+        }
+      });
     return () => {
       isActive = false;
     };
-  }, [writingPracticeService, character]);
+  }, [writingPracticeService, character, attempt]);
+
+  /** Tải lại dữ liệu nét: mỗi lần là một lượt đọc file mới, không giữ kết quả lỗi. */
+  const retry = useCallback(() => {
+    setView({ status: 'loading' });
+    setAttempt((previous) => previous + 1);
+  }, []);
 
   /** Ổn định giữa các lần render để khung không tạo lại writer chấm nét. */
   const recordStrokeAttempt = useCallback(
@@ -63,5 +78,5 @@ export const useWritingPractice = (
     [writingPracticeService],
   );
 
-  return { view, practice, recordStrokeAttempt };
+  return { view, practice, retry, recordStrokeAttempt };
 };

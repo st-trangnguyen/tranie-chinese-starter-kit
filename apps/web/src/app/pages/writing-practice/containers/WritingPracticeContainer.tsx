@@ -11,9 +11,29 @@ interface WritingPracticeScreenProps {
 
 /** Phần thân màn theo trạng thái tải dữ liệu nét. */
 function WritingPracticeBody({ character }: WritingPracticeScreenProps) {
-  const { t } = useTranslation('writing-practice');
-  const { view, practice, recordStrokeAttempt } = useWritingPractice(character);
+  const { t } = useTranslation(['writing-practice', 'common']);
+  const { view, practice, retry, recordStrokeAttempt } =
+    useWritingPractice(character);
 
+  const handleRetry = () => {
+    retry();
+  };
+
+  if (view.status === 'error') {
+    return (
+      <div className="flex flex-col items-start gap-md">
+        <p role="alert" className="writing-practice-message">
+          {t('common:error.title')}
+        </p>
+        <button type="button" className="btn btn-primary" onClick={handleRetry}>
+          {t('common:error.retry')}
+        </button>
+      </div>
+    );
+  }
+  if (view.status === 'unavailable') {
+    return <p className="writing-practice-message">{t('unavailable')}</p>;
+  }
   if (view.status === 'ready' && practice) {
     return (
       <StrokeWritingPad
