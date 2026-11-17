@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { StrokeAttemptResult } from '@shared/models/writing-practice.model';
+import type {
+  StrokeAttemptResult,
+  WritingPracticeState,
+} from '@shared/models/writing-practice.model';
 import { WritingPracticeService } from '@shared/services/writing-practice.service';
 import { act, renderWithProviders, screen } from '@test/render';
 import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
@@ -27,6 +30,13 @@ const getOutlinePaths = (figure: HTMLElement): SVGPathElement[] =>
 const flushQuizStart = async (): Promise<void> => {
   await act(async () => {});
 };
+
+/** Trạng thái sai 3 lần liên tiếp ở nét 0 của 十, gợi ý đang hiện ở nét 0. */
+const practiceWithHintAtFirstStroke = (): WritingPracticeState =>
+  [1, 2, 3].reduce(
+    (state) => practiceService.recordStrokeAttempt(state, 'mistake'),
+    practiceService.startPractice(STROKE_DATA_SHI.strokes.length),
+  );
 
 describe('StrokeWritingPad', () => {
   beforeEach(() => {
@@ -121,4 +131,47 @@ describe('StrokeWritingPad', () => {
     expect(figure).toHaveAttribute('data-completed-stroke-count', '0');
     expect(figure.querySelector('.writing-pad-hint')).toBeNull();
   });
+
+  it.each([
+    { isReducedMotion: true, label: 'bật giảm chuyển động' },
+    { isReducedMotion: false, label: 'không giảm chuyển động' },
+  ])(
+    'S6.2-AC3: Gợi ý không phụ thuộc chuyển động ($label)',
+    async ({ isReducedMotion }) => {
+      stubReducedMotion(isReducedMotion);
+      const practice = practiceWithHintAtFirstStroke();
+      expect(practice.isHintVisible).toBe(true);
+
+      renderWithProviders(
+        <StrokeWritingPad
+          character="十"
+          strokeData={STROKE_DATA_SHI}
+          practice={practice}
+          onStrokeAttempt={vi.fn<(result: StrokeAttemptResult) => void>()}
+        />,
+      );
+      await flushQuizStart();
+
+      const figure = screen.getByRole('figure', { name: 'Khung viết chữ 十' });
+      expect(figure).toHaveAttribute('data-hint-stroke-index', '0');
+
+      // Đúng một nét gợi ý: nét hiện tại (nét 0 của 十).
+      const hintPaths = [
+        ...figure.querySelectorAll<SVGPathElement>('.writing-pad-hint path'),
+      ];
+      expect(hintPaths.map((path) => path.getAttribute('d'))).toEqual([
+        STROKE_DATA_SHI.strokes[0],
+      ]);
+
+      // Gợi ý tĩnh: không có phần tử animation SVG trong lớp gợi ý.
+      const hintLayer = figure.querySelector('.writing-pad-hint');
+      expect(hintLayer).not.toBeNull();
+      expect(
+        hintLayer?.querySelectorAll('animate, animateTransform'),
+      ).toHaveLength(0);
+
+      // Phân biệt với nét mờ cả chữ: lớp gợi ý không nằm trong nhóm nét mờ.
+      expect(hintLayer?.closest('.stroke-order-outline')).toBeNull();
+    },
+  );
 });
