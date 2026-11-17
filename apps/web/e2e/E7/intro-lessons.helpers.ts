@@ -220,3 +220,61 @@ export const answerCurrentQuestion = async (
   await page.getByRole('button', { name: CONTINUE_LABEL }).click();
   return character;
 };
+
+/** Một lần gọi `HTMLMediaElement.play` mà trang thực hiện, ghi bởi `installAudioRecorder`. */
+export interface AudioPlayRecord {
+  src: string;
+  /** Thời lượng (giây) đọc được khi phát đã bắt đầu; `null` khi chưa bắt đầu hoặc lỗi. */
+  duration: number | null;
+  error: string | null;
+}
+
+declare global {
+  interface Window {
+    cskAudioPlays?: AudioPlayRecord[];
+    cskLastAudio?: HTMLMediaElement;
+  }
+}
+
+/**
+ * Bọc `HTMLMediaElement.prototype.play` trước khi trang chạy: mỗi lần phát ghi `src`, rồi khi
+ * phát bắt đầu ghi `duration` (hoặc `error` khi không phát được). Gọi trước `page.goto`.
+ */
+export const installAudioRecorder = async (page: Page): Promise<void> => {
+  await page.addInitScript(() => {
+    const plays: AudioPlayRecord[] = [];
+    window.cskAudioPlays = plays;
+    const originalPlay = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function play(
+      this: HTMLMediaElement,
+    ): Promise<void> {
+      const record: AudioPlayRecord = {
+        src: this.src,
+        duration: null,
+        error: null,
+      };
+      plays.push(record);
+      window.cskLastAudio = this;
+      const result = originalPlay.call(this);
+      result.then(
+        () => {
+          record.duration = this.duration;
+        },
+        (error: unknown) => {
+          record.error = error instanceof Error ? error.message : String(error);
+        },
+      );
+      return result;
+    };
+  });
+};
+
+export const readAudioPlays = (page: Page): Promise<AudioPlayRecord[]> =>
+  page.evaluate(() => [...(window.cskAudioPlays ?? [])]);
+
+/** Phần tử audio vừa được gọi `play` còn đang phát (chưa dừng, chưa hết). */
+export const isLastAudioPlaying = (page: Page): Promise<boolean> =>
+  page.evaluate(() => {
+    const audio = window.cskLastAudio;
+    return audio !== undefined && !audio.paused && !audio.ended;
+  });

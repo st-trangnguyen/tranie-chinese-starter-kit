@@ -6,7 +6,11 @@ import {
   readBuiltLesson,
   readBuiltWords,
 } from './intro-lessons.helpers';
-import { continueButton, openStrokeWrite } from './intro-writing.helpers';
+import {
+  continueButton,
+  openStrokeWrite,
+  verdict,
+} from './intro-writing.helpers';
 
 const LESSON_ID = 'intro-01';
 const TONE_LABELS: Record<Tone, string> = {
@@ -70,13 +74,6 @@ const openFirstToneQuestion = async (page: Page): Promise<number> => {
   await expect(toneGroup(page)).toBeVisible();
   return position;
 };
-
-/**
- * Dòng kết quả "Đúng"/"Sai" trong vùng trạng thái (có thể kèm biểu tượng phía trước); câu sai
- * còn kèm dòng đáp án đúng nên không so cả vùng.
- */
-const verdict = (page: Page, text: 'Đúng' | 'Sai'): Locator =>
-  page.getByRole('status').getByText(new RegExp(`^\\W*${text}$`));
 
 const expectNoResult = async (page: Page): Promise<void> => {
   await expect(verdict(page, 'Đúng')).toHaveCount(0);

@@ -67,9 +67,12 @@ const anyProgressText = (page: Page): Locator =>
 export const continueButton = (page: Page): Locator =>
   page.getByRole('button', { name: 'Tiếp tục' });
 
-/** Kết quả của câu ("Đúng"/"Sai") hiện trong vùng trạng thái sau khi trả lời. */
+/**
+ * Dòng kết quả "Đúng"/"Sai" trong vùng trạng thái (có thể kèm biểu tượng phía trước). Câu sai còn
+ * kèm dòng giải thích ("Đáp án đúng: …") nên bắt đúng phần tử kết quả, không so cả vùng.
+ */
 export const verdict = (page: Page, text: 'Đúng' | 'Sai'): Locator =>
-  page.getByRole('status').filter({ hasText: new RegExp(`(^|\\s)${text}$`) });
+  page.getByRole('status').getByText(new RegExp(`^\\W*${text}$`));
 
 export const mistakeAlert = (page: Page): Locator =>
   page.getByRole('alert').filter({ hasText: MISTAKE_MESSAGE });
