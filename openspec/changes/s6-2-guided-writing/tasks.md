@@ -76,8 +76,8 @@ Tách `WritingPracticeContainer.feedback.test.tsx` nếu > 300 dòng.
 - [x] 4.6 GREEN: `useWritingPractice` giữ `practice`, `recordStrokeAttempt` (`useCallback`), `components/WritingPracticeFeedback.tsx` nhánh `mistake` (`role="alert"`), key `mistake`; kiểm: test 4.5 pass
 - [x] 4.7 RED: S6.2-AC2 "Nét sai bị xoá và được viết lại" — sau `emitMistake` chưa có nét nào được giữ (`data-completed-stroke-count="0"`), quiz vẫn chạy (không `cancelQuiz`, không màn kết thúc); `emitCorrectStroke` sau đó → 1; sai 5 lần liên tiếp vẫn viết tiếp được (TC-S6.2-AC2-7); kiểm: chạy, nếu pass ngay thì tạm cho hook huỷ quiz khi sai để thấy fail rồi trả lại
 - [x] 4.8 GREEN: sửa đến khi pass; kiểm: test 4.7 pass
-- [ ] 4.9 RED: S6.2-AC2 "Thông báo sai đọc được bằng trình đọc màn hình" — đưa focus vào khung bằng Tab, `emitMistake`: thông báo có `role="alert"`, `document.activeElement` vẫn là figure khung viết; kiểm: chạy, nếu pass ngay thì tạm đặt focus vào thông báo để thấy fail rồi trả lại
-- [ ] 4.10 GREEN: không chuyển focus khi hiện thông báo; kiểm: test 4.9 pass
+- [x] 4.9 RED: S6.2-AC2 "Thông báo sai đọc được bằng trình đọc màn hình" — đưa focus vào khung bằng Tab, `emitMistake`: thông báo có `role="alert"`, `document.activeElement` vẫn là figure khung viết; kiểm: chạy, nếu pass ngay thì tạm đặt focus vào thông báo để thấy fail rồi trả lại
+- [x] 4.10 GREEN: không chuyển focus khi hiện thông báo; kiểm: test 4.9 pass
 - [ ] 4.11 RED: S6.2-AC2 "Lần sai liên tiếp sau cũng được đọc lại" — 2 lần `emitMistake`: nút alert sau lần 2 là nút DOM mới (`not.toBe` nút sau lần 1), nội dung giống nhau; kiểm: fail vì alert được giữ nguyên nút
 - [ ] 4.12 GREEN: `key={practice.mistakeSerial}` trên alert (D7); kiểm: test 4.11 pass
 - [ ] 4.13 RED: S6.2-AC2 "Viết đúng thì thông báo sai biến mất" — `emitMistake` rồi `emitCorrectStroke`: không còn alert sai; kiểm: chạy, nếu pass ngay thì tạm hiện alert khi `mistakeSerial > 0` để thấy fail rồi trả lại

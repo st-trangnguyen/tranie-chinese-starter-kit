@@ -161,4 +161,29 @@ describe('WritingPracticeContainer', () => {
     expect(writer.calls.map((call) => call.method)).not.toContain('cancelQuiz');
     expect(screen.queryByText(/Đã viết xong/)).not.toBeInTheDocument();
   });
+
+  it('S6.2-AC2 Thông báo sai đọc được bằng trình đọc màn hình: should announce the mistake via role="alert" while keeping keyboard focus on the writing pad of 十', async () => {
+    const user = userEvent.setup();
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    // Đưa focus vào khung viết bằng Tab (giới hạn số lần để không lặp vô hạn).
+    for (
+      let press = 0;
+      press < 20 && document.activeElement !== pad;
+      press += 1
+    ) {
+      await user.tab();
+    }
+    expect(pad).toHaveFocus();
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+
+    // Thông báo được đọc cho trình đọc màn hình (live region role="alert").
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Sai nét. Viết lại nét này.',
+    );
+    // Focus không bị mất khỏi khung viết.
+    await waitFor(() => expect(document.activeElement).toBe(pad));
+    expect(pad).toHaveFocus();
+  });
 });
