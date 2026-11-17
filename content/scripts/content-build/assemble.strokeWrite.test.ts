@@ -92,6 +92,7 @@ describe('assembleContent — luật câu viết (stroke-write)', () => {
     const report = await runChecks([lessonsCheck(lessonIssues)]);
     expect(exitCodeOf(report)).toBe(1);
   });
+
   it.each([
     { label: "wordId: ''", wordIdYaml: "''" },
     { label: 'thiếu wordId', wordIdYaml: '' },
