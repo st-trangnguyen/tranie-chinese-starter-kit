@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
 import { screen, userEvent, waitFor } from '@test/render';
 import { openRoute, setupStrokeOrderRoute } from '@test/stroke-order-route';
 
@@ -9,9 +10,11 @@ vi.mock('hanzi-writer', async () => {
   return { default: mock.FakeHanziWriter };
 });
 
-setupStrokeOrderRoute();
+const env = setupStrokeOrderRoute();
 
 const PERSON = '人';
+// Chữ hợp lệ nhưng không có trong danh sách dữ liệu nét.
+const NO_STROKE_DATA = '龘';
 
 describe('WritingPracticeContainer', () => {
   it('S6.2-AC1 Màn luyện viết có liên kết về thứ tự nét: should open the stroke-order screen of 人 when clicking "Xem thứ tự nét" on /characters/人/writing-practice', async () => {
@@ -53,5 +56,34 @@ describe('WritingPracticeContainer', () => {
     expect(
       screen.queryByRole('figure', { name: `Khung viết chữ ${PERSON}` }),
     ).not.toBeInTheDocument();
+  });
+
+  it('S6.2-AC1 Chữ không có dữ liệu nét: should show "Chưa có dữ liệu nét cho chữ này." without writing pad or hanzi-writer, keeping "Xem thứ tự nét" link, when opening /characters/龘/writing-practice', async () => {
+    openRoute(
+      `/characters/${encodeURIComponent(NO_STROKE_DATA)}/writing-practice`,
+    );
+
+    // Màn đã mở và đã đọc danh sách chữ có dữ liệu nét.
+    await screen.findByRole('heading', { name: 'Tập viết' }, { timeout: 3000 });
+    await waitFor(() =>
+      expect(env.strokeFetch.requests).toContain('/content/strokes/index.json'),
+    );
+
+    expect(
+      await screen.findByText('Chưa có dữ liệu nét cho chữ này.'),
+    ).toBeInTheDocument();
+
+    // Không có khung viết, không tạo hanzi-writer.
+    expect(screen.queryByRole('figure')).not.toBeInTheDocument();
+    expect(document.querySelectorAll('figure')).toHaveLength(0);
+    expect(FakeHanziWriter.instances).toHaveLength(0);
+
+    // Liên kết về màn xem thứ tự nét của đúng chữ vẫn có.
+    expect(
+      screen.getByRole('link', { name: 'Xem thứ tự nét' }),
+    ).toHaveAttribute(
+      'href',
+      `/characters/${encodeURIComponent(NO_STROKE_DATA)}/stroke-order`,
+    );
   });
 });
