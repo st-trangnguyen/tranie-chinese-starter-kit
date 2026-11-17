@@ -53,6 +53,35 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
  */
 const MIN_STROKE_LENGTH = 30;
 
+/** Thời gian (ms) nét đúng mờ dần thành nét đã vẽ, khi không giảm chuyển động. */
+const STROKE_FADE_DURATION = 400;
+
+/** Thời gian (ms) nét người viết vẽ mờ đi, khi không giảm chuyển động. */
+const DRAWING_FADE_DURATION = 300;
+
+/**
+ * Scenario "Giảm chuyển động trên khung viết" (S6.2-AC1): giảm chuyển động thì không mờ dần và
+ * không nháy sáng khi viết xong (D4).
+ */
+function createQuizMotionOptions(
+  isReducedMotion: boolean,
+): Pick<
+  HanziWriterOptions,
+  'strokeFadeDuration' | 'drawingFadeDuration' | 'highlightOnComplete'
+> {
+  return isReducedMotion
+    ? {
+        strokeFadeDuration: 0,
+        drawingFadeDuration: 0,
+        highlightOnComplete: false,
+      }
+    : {
+        strokeFadeDuration: STROKE_FADE_DURATION,
+        drawingFadeDuration: DRAWING_FADE_DURATION,
+        highlightOnComplete: true,
+      };
+}
+
 /** Độ dài đường vẽ = tổng độ dài các đoạn thẳng nối các điểm liên tiếp. */
 function measurePathLength(points: readonly Point[]): number {
   return points.reduce((total, point, index) => {
@@ -161,6 +190,7 @@ export function createStrokeQuiz(
     showHintAfterMisses: false,
     markStrokeCorrectAfterMisses: false,
     acceptBackwardsStrokes: false,
+    ...createQuizMotionOptions(options.isReducedMotion),
     onCorrectStroke: () => options.onAttempt('correct'),
     onMistake: ({ drawnPath }) =>
       options.onAttempt(
