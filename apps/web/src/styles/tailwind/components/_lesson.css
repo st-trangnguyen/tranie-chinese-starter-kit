@@ -45,6 +45,11 @@
     @apply text-body;
   }
 
+  /* Câu viết — S7.1. Thông báo sai nét: fg trên bg ≥ 4.5:1 ở cả hai theme. */
+  .lesson-stroke-write-message {
+    @apply text-body text-fg;
+  }
+
   /* Màn tổng kết — S3.4. Cảnh báo chưa lưu có viền + chữ, không chỉ dựa vào màu. */
   .lesson-summary-title {
     @apply text-title text-fg;
