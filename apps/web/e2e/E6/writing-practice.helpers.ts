@@ -302,3 +302,50 @@ export const visibleUserStrokeCount = (pad: Locator): Promise<number> =>
       return opacity > 0;
     }).length;
   });
+
+/**
+ * Kéo cảm ứng theo median qua CDP `Input.dispatchTouchEvent` (touchStart → nhiều touchMove →
+ * touchEnd), đi qua pipeline input thật của Chromium nên trình duyệt áp `touch-action` và có thể
+ * cuộn trang như ngón tay thật. Cần context có touch (Pixel 7).
+ */
+export const touchDragMedian = async (
+  page: Page,
+  pad: Locator,
+  median: readonly MedianPoint[],
+  steps: number = DEFAULT_DRAW_STEPS,
+): Promise<void> => {
+  const screenPoints = await toPadScreenPoints(pad, median);
+  const [start, ...rest] = screenPoints;
+  if (!start) {
+    throw new Error('Median rỗng.');
+  }
+  const session = await page.context().newCDPSession(page);
+  try {
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: start.x, y: start.y }],
+    });
+    let previous = start;
+    for (const point of rest) {
+      for (let step = 1; step <= steps; step += 1) {
+        const ratio = step / steps;
+        await session.send('Input.dispatchTouchEvent', {
+          type: 'touchMove',
+          touchPoints: [
+            {
+              x: previous.x + (point.x - previous.x) * ratio,
+              y: previous.y + (point.y - previous.y) * ratio,
+            },
+          ],
+        });
+      }
+      previous = point;
+    }
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchEnd',
+      touchPoints: [],
+    });
+  } finally {
+    await session.detach();
+  }
+};

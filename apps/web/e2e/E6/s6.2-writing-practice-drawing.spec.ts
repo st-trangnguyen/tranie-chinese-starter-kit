@@ -11,6 +11,7 @@ import {
   tapPadPoint,
   toPadScreenPoints,
   visibleUserStrokeCount,
+  touchDragMedian,
 } from './writing-practice.helpers';
 
 /**
@@ -200,3 +201,54 @@ for (const layout of LAYOUTS) {
     });
   });
 }
+
+/** Đủ để trang cuộn được hẳn trên và dưới khung khi khung nằm giữa màn. */
+const LONG_PAGE_MIN_HEIGHT = '3000px';
+/** Khoảng từ mép trên màn tới khung sau khi cuộn (px). */
+const PAD_TOP_OFFSET_PX = 40;
+
+test.describe('S6.2 viết bằng ngón tay — Pixel 7 (cảm ứng)', () => {
+  test('TC-S6.2-AC1-8, TC-S6.2-AC1-9: S6.2-AC1 Viết bằng ngón tay — kéo cảm ứng nét ngang rồi nét sổ (dọc) trong khung: cả hai nét được nhận, trang không cuộn, khung touch-action none', async ({
+    page,
+  }) => {
+    const { pad, strokes } = await openTen(page);
+
+    await page.evaluate((minHeight) => {
+      document.body.style.minHeight = minHeight;
+    }, LONG_PAGE_MIN_HEIGHT);
+    // Khung ở gần đầu trang nên không cuộn được tới đúng giữa màn: cuộn để khung cách mép trên
+    // một đoạn, nằm trọn trong màn, và trang còn cuộn được cả lên lẫn xuống.
+    await pad.evaluate((figure, offset) => {
+      const top = figure.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: top - offset, behavior: 'instant' });
+    }, PAD_TOP_OFFSET_PX);
+    await expect(pad).toBeInViewport({ ratio: 1 });
+    const scrollYBefore = await page.evaluate(() => window.scrollY);
+    expect(scrollYBefore).toBeGreaterThan(0);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollHeight - window.innerHeight,
+      ),
+    ).toBeGreaterThan(scrollYBefore);
+
+    await touchDragMedian(page, pad, strokes.horizontal);
+
+    await expect(pad).toHaveAttribute('data-completed-stroke-count', '1');
+    await page.waitForTimeout(SETTLE_MS);
+    expect(await page.evaluate(() => window.scrollY)).toBe(scrollYBefore);
+
+    // TC-S6.2-AC1-9: kéo dọc từ trên xuống trong khung — hướng mà trình duyệt sẽ cuộn trang
+    // nếu khung không chặn cử chỉ.
+    const scrollYBeforeVertical = await page.evaluate(() => window.scrollY);
+    await touchDragMedian(page, pad, strokes.vertical);
+
+    await expect(pad).toHaveAttribute('data-completed-stroke-count', '2');
+    await page.waitForTimeout(SETTLE_MS);
+    expect(await page.evaluate(() => window.scrollY)).toBe(
+      scrollYBeforeVertical,
+    );
+    expect(
+      await pad.evaluate((figure) => getComputedStyle(figure).touchAction),
+    ).toBe('none');
+  });
+});
