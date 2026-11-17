@@ -1,3 +1,4 @@
+import type { StrokeOrderResult } from '@shared/models/stroke-order.model';
 import type {
   StrokeAttemptResult,
   WritingPracticeState,
@@ -15,6 +16,11 @@ export class WritingPracticeService {
 
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
   // Nạp chữ qua `this.strokeOrder`.
+
+  // Ủy quyền cho StrokeOrderService: rule chữ hợp lệ / có dữ liệu nét giữ một chỗ (S6.1, D2).
+  private readCharacter(input: string): Promise<StrokeOrderResult> {
+    return this.strokeOrder.getStrokeOrder(input);
+  }
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
@@ -97,4 +103,9 @@ export class WritingPracticeService {
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
+
+  /** Nạp dữ liệu nét của chữ cần luyện viết; không có dữ liệu thì `unavailable` như S6.1. */
+  loadCharacter(input: string): Promise<StrokeOrderResult> {
+    return this.readCharacter(input);
+  }
 }

@@ -1,3 +1,6 @@
 {
-  "padLabel": "Khung viết chữ {{character}}"
+  "title": "Tập viết",
+  "padLabel": "Khung viết chữ {{character}}",
+  "strokeOrderLink": "Xem thứ tự nét",
+  "loading": "Đang tải…"
 }

@@ -69,7 +69,7 @@ Test chung `apps/web/src/app/pages/writing-practice/containers/WritingPracticeCo
 Tách `WritingPracticeContainer.feedback.test.tsx` nếu > 300 dòng.
 
 - [x] 4.1 RED: S6.2-AC1 "Màn luyện viết có liên kết về thứ tự nét" — mở 人: có link "Xem thứ tự nét", bấm thì vị trí là `/characters/%E4%BA%BA/stroke-order` và màn S6.1 của 人 hiện (`LocationProbe` hoặc figure "Thứ tự nét chữ 人"); chỉ có một khung viết; kiểm: fail vì chưa có route/màn
-- [ ] 4.2 GREEN: `ROUTE_PATHS.writingPractice`, `writing-practice.routes.ts` (gom vào `page.routes.ts`), Phần 1 `readCharacter` + Phần 3 `loadCharacter` của `WritingPracticeService` (ủy quyền `StrokeOrderService`) dùng trong `useWritingPractice`, `WritingPracticeContainer` (+ `WritingPracticeScreen key={character}`), key `title`, `strokeOrderLink`, `loading`; kiểm: test 4.1 pass
+- [x] 4.2 GREEN: `ROUTE_PATHS.writingPractice`, `writing-practice.routes.ts` (gom vào `page.routes.ts`), Phần 1 `readCharacter` + Phần 3 `loadCharacter` của `WritingPracticeService` (ủy quyền `StrokeOrderService`) dùng trong `useWritingPractice`, `WritingPracticeContainer` (+ `WritingPracticeScreen key={character}`), key `title`, `strokeOrderLink`, `loading`; kiểm: test 4.1 pass
 - [ ] 4.3 RED: S6.2-AC1 "Chữ không có dữ liệu nét" — mở `/characters/龘/writing-practice`: "Chưa có dữ liệu nét cho chữ này.", không có figure khung viết, hanzi-writer không được tạo, link "Xem thứ tự nét" vẫn có; kiểm: fail
 - [ ] 4.4 GREEN: nhánh `unavailable` (+ `loading`, `error` với "Thử lại" theo mẫu S6.1); kiểm: test 4.3 pass
 - [ ] 4.5 RED: S6.2-AC2 "Báo ngay khi viết sai nét" — `emitMistake` (đường dài): alert "Sai nét. Viết lại nét này." hiện; trước sự kiện không có alert; `data-completed-stroke-count` vẫn 0; kiểm: fail vì chưa có phản hồi
