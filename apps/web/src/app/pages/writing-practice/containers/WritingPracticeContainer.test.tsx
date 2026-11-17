@@ -4,6 +4,10 @@ import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
 import { act, screen, userEvent, waitFor } from '@test/render';
 import { openRoute, setupStrokeOrderRoute } from '@test/stroke-order-route';
 import { STROKE_DATA_SHI } from '@test/stroke.fixtures';
+import {
+  LONG_STROKE_POINTS,
+  openShiPadWithActiveQuiz,
+} from '@test/writing-practice-route';
 
 // Ranh giới ngoài: thư viện vẽ/chấm nét hanzi-writer được thay bằng bản giả điều khiển được.
 vi.mock('hanzi-writer', async () => {
@@ -14,27 +18,8 @@ vi.mock('hanzi-writer', async () => {
 const env = setupStrokeOrderRoute();
 
 const PERSON = '人';
-const SHI = '十';
 // Chữ hợp lệ nhưng không có trong danh sách dữ liệu nét.
 const NO_STROKE_DATA = '龘';
-
-/** Nét dài (600 đơn vị hộp 1024, ≥ 30): đủ dài để tính là một lần viết sai. */
-const LONG_STROKE_POINTS = [
-  { x: 100, y: 100 },
-  { x: 100, y: 700 },
-];
-
-/** Mở màn luyện viết của 十, chờ khung viết hiện và quiz của writer kích hoạt. */
-const openShiPadWithActiveQuiz = async () => {
-  openRoute(`/characters/${encodeURIComponent(SHI)}/writing-practice`);
-  const pad = await screen.findByRole(
-    'figure',
-    { name: `Khung viết chữ ${SHI}` },
-    { timeout: 3000 },
-  );
-  await waitFor(() => expect(FakeHanziWriter.last().isQuizActive).toBe(true));
-  return { pad, writer: FakeHanziWriter.last() };
-};
 
 describe('WritingPracticeContainer', () => {
   it('S6.2-AC1 Màn luyện viết có liên kết về thứ tự nét: should open the stroke-order screen of 人 when clicking "Xem thứ tự nét" on /characters/人/writing-practice', async () => {
