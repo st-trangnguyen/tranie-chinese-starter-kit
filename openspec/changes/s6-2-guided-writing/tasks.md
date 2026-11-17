@@ -120,8 +120,8 @@ mang ID Scenario và ID TC. `test.describe('S6.2 Viết theo nét có gợi ý')
 - [x] 7.6 GREEN: sửa adapter/khung (không sửa kỳ vọng) đến khi pass; kiểm: test 7.5 pass
 - [x] 7.7 RED: S6.2-AC1 "Viết bằng ngón tay" — trong `s6.2-writing-practice-drawing.spec.ts`: kéo dài trang (`min-height` qua `page.evaluate`), cuộn để khung nằm giữa, kéo cảm ứng nét ngang của 十 trong khung bằng CDP `Input.dispatchTouchEvent`: `window.scrollY` không đổi và nét được nhận (`data-completed-stroke-count="1"`); `touch-action` của khung là `none`; kiểm: fail đúng lý do
 - [x] 7.8 GREEN: sửa đến khi pass (CSS `touch-action`, đích nhận `touchstart`); kiểm: test 7.7 pass
-- [ ] 7.9 RED: S6.2-AC1 "Giảm chuyển động trên khung viết" và S6.2-AC3 "Gợi ý không phụ thuộc chuyển động" — trong `s6.2-writing-practice-drawing.spec.ts`, `page.emulateMedia({ reducedMotion: 'reduce' })`: ngay sau khi nhả nét ngang đúng, path nét đúng của thư viện đã `opacity` 1 (không hiện dần); sau nét sai không còn path nét người viết hiện ra; sau 3 lần sai `.writing-pad-hint path` có `animation-name`/`transition-duration` là `none`/`0s` và vẫn còn sau 2 s; kiểm: fail đúng lý do
-- [ ] 7.10 GREEN: sửa đến khi pass; kiểm: test 7.9 pass
+- [x] 7.9 RED: S6.2-AC1 "Giảm chuyển động trên khung viết" và S6.2-AC3 "Gợi ý không phụ thuộc chuyển động" — trong `s6.2-writing-practice-drawing.spec.ts`, `page.emulateMedia({ reducedMotion: 'reduce' })`: ngay sau khi nhả nét ngang đúng, path nét đúng của thư viện đã `opacity` 1 (không hiện dần); sau nét sai không còn path nét người viết hiện ra; sau 3 lần sai `.writing-pad-hint path` có `animation-name`/`transition-duration` là `none`/`0s` và vẫn còn sau 2 s; kiểm: fail đúng lý do
+- [x] 7.10 GREEN: sửa đến khi pass; kiểm: test 7.9 pass
 
 ## 8. Tài liệu và kiểm tra
 
