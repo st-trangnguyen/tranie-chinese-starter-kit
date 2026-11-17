@@ -165,4 +165,25 @@ describe('LessonRunnerContainer — câu viết', () => {
       screen.queryByRole('button', { name: 'Viết lại' }),
     ).not.toBeInTheDocument();
   });
+
+  it('S7.1-AC2 Câu viết đã Đúng thì không còn liên kết Xem thứ tự nét: should show a "Xem thứ tự nét" link before writing 人, then no such link but a "Tiếp tục" button after writing both strokes of 人', async () => {
+    const { user } = renderLessonRunner();
+    await answerToneChoiceAndContinue(user);
+    await findLessonPad(PERSON);
+    const writer = await waitForActiveQuiz(PERSON);
+
+    expect(
+      screen.getByRole('link', { name: 'Xem thứ tự nét' }),
+    ).toBeInTheDocument();
+
+    emitCorrectStroke(writer);
+    emitCorrectStroke(writer);
+
+    expect(
+      await screen.findByRole('button', { name: 'Tiếp tục' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Xem thứ tự nét' }),
+    ).not.toBeInTheDocument();
+  });
 });
