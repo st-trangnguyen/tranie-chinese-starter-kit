@@ -34,8 +34,8 @@
 - [ ] All new and changes have enough test suites.
 - [ ] Mỗi Scenario có một test mang ID `S<epic>.<n>-AC<k>`, test được viết trước và đã thấy fail (RED).
 - [ ] PR spec đã review và merge, mọi task trong `tasks.md` đã tick. Archive do workflow tự mở PR sau khi PR này merge.
-- [ ] Plan đã được dev lead duyệt (label `plan-approved`), hoặc `N/A` nếu PR không có spec.
-- [ ] QA đã nghiệm thu theo `test-cases.md` (label `qa-approved`), hoặc `N/A` nếu PR không có spec.
+- [ ] Plan đã được dev lead duyệt (check `Plan đã duyệt`: verdict agent hoặc label `plan-approved`), hoặc `N/A` nếu PR không có spec.
+- [ ] QA đã nghiệm thu theo `test-cases.md` (check `QA sign-off`: verdict agent hoặc label `qa-approved`), hoặc `N/A` nếu PR không có spec.
 
 ##### Coding:
 

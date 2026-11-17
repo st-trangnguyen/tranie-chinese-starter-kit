@@ -24,7 +24,7 @@ Vai và agent (`.claude/agents/`):
 |---|---|---|
 | BA | `ba` | viết spec, sửa spec theo review |
 | QA | `qa` | duyệt spec, viết test case (và sửa), nghiệm thu app |
-| Dev lead | `dev-lead` | duyệt spec, duyệt code (chạy trên CI, check `Review`) |
+| Dev lead | `dev-lead` | duyệt spec, duyệt plan, duyệt code (chạy trên CI, check `Review`) |
 | Dev | `planner`, `test-writer`, `implementer` | lập plan; RED; GREEN và sửa theo review |
 
 Luật của dự án (`CLAUDE.md`, `docs/05-standards/spec-driven.md`) vẫn áp dụng nguyên. Lệnh này chỉ là
@@ -40,7 +40,7 @@ cách chạy chúng bằng agent.
   |---|---|---|
   | `ba` | `openspec/changes/<id>/proposal.md`, `specs/**`, `.openspec.yaml` | `design.md`, `tasks.md`, `test-cases.md`, mọi thứ khác |
   | `qa` (VIẾT/SỬA) | `openspec/changes/<id>/test-cases.md` | mọi file khác |
-  | `qa` (DUYỆT SPEC, NGHIỆM THU), `dev-lead` | không gì cả (chỉ đọc) | mọi thứ |
+  | `qa` (DUYỆT SPEC, NGHIỆM THU), `dev-lead` (mọi chế độ) | không gì cả (chỉ đọc) | mọi thứ |
   | `planner` | `openspec/changes/<id>/design.md`, `tasks.md` | `proposal.md`, `specs/**`, code, test |
   | `test-writer` | `*.test.ts(x)`, `apps/web/e2e/**`, `apps/web/src/test/**` | code production, `openspec/` |
   | `implementer` | code production | file test (kể cả e2e, helper test), `openspec/` |
@@ -106,9 +106,26 @@ chưa cần là `feat/<id>` (xem "Nhánh và worktree").
 
 1. **Plan** (chưa có `design.md` + `tasks.md`): gọi `planner`, kiểm vùng ghi. Báo cáo có "Vấn đề với spec" thì **dừng**, không tự
    sửa spec; báo cần PR spec fix (`spec/<id>-fix`) cho BA duyệt, rồi rebase. Có "Câu hỏi mở" thì hỏi người dùng rồi gọi lại `planner`.
-   Chạy `openspec validate`. Rồi **dừng**: mở **PR code draft chỉ chứa hai file này** (`Spec PR: #<số>`) và chờ dev lead gắn label `plan-approved`.
-2. **Cổng duyệt plan:** PR của nhánh phải có label `plan-approved` (`gh pr view --json labels --jq '.labels[].name'`). Chưa có thì **dừng**; không gọi
-   `test-writer` hay `implementer`. Ngoại lệ có tên: change không có Scenario (docs, config, asset thuần) bỏ cổng này.
+   Chạy `openspec validate`.
+   **Duyệt plan** (tối đa **3 vòng**): gọi `dev-lead` ở **chế độ DUYỆT PLAN** (agent mới, chỉ nhận change id; vòng sau nhận thêm finding
+   vòng trước và cách đã xử lý). `approve` thì thoát. `blocker`/`major` giao `planner` sửa, kiểm vùng ghi, chạy `openspec validate`.
+   Finding `human` hoặc hết 3 vòng vẫn còn `blocker`/`major` thì verdict là `escalate`.
+   Khi người dùng đồng ý: commit, push, mở **PR code draft chỉ chứa hai file này** (`Spec PR: #<số>`), rồi đăng **một** comment
+   (sha = commit đầu PR **sau khi push**):
+
+   ```
+   <!-- csk-plan-agent sha=<HEAD_SHA> dev-lead=<approve|escalate> -->
+   ## Duyệt plan bởi agent dev-lead
+   | Vòng | Verdict | Finding chính |
+   |---|---|---|
+   | 1 | … | … |
+   **Cần người quyết:** (chỉ khi escalate: từng câu hỏi, kèm đề xuất mặc định)
+   ```
+
+   Check `Plan đã duyệt` tự chạy lại khi có comment này. Sửa `design.md` sau đó thì marker hết hiệu lực: duyệt lại và đăng marker mới.
+2. **Cổng duyệt plan:** check `Plan đã duyệt` của PR phải xanh (`gh pr checks --json name,state`): marker `dev-lead=approve` còn hiệu
+   lực, hoặc label `plan-approved` do người trong `PLAN_APPROVERS` gắn. Chưa xanh thì **dừng** (`escalate`: nêu câu hỏi cho người dùng);
+   không gọi `test-writer` hay `implementer`. Ngoại lệ có tên: change không có Scenario (docs, config, asset thuần) bỏ cổng này.
 3. **RED/GREEN từng Scenario** chưa xong trong `tasks.md`, theo thứ tự:
    1. **RED:** gọi `test-writer` (id + đúng một Scenario). Kiểm vùng ghi. Báo cáo phải có output test fail đúng lý do; không có thì
       gọi lại. Chạy lại test đó và tự xác nhận nó fail.
@@ -122,7 +139,14 @@ chưa cần là `feat/<id>` (xem "Nhánh và worktree").
 6. **Duyệt code:** `dev-lead` chạy trên CI (`review-workflow.yml`, check `Review`); bạn không gọi nó local. Khi app đánh thức vì finding
    của `Review`, comment người hoặc CI đỏ, chạy bước **Sửa theo review** dưới đây.
 7. **Nghiệm thu:** khi CI xanh và PR ready, gọi `qa` (NGHIỆM THU) trên bản build; đăng bảng `TC | Pass/Fail | Ghi chú` thành một comment PR.
-   Case Fail: xử lý như finding. Label `qa-approved` do QA người thật gắn (push mới gỡ label, chạy nghiệm thu lại case liên quan).
+   Case Fail: xử lý như finding rồi chạy lại đúng case đó. Comment kết quả mở đầu bằng marker
+   `<!-- csk-qa-agent sha=<HEAD_SHA> qa=<approve|escalate> -->` (sha = commit đã nghiệm thu, đã push):
+   - `approve`: mọi case Pass trên commit này.
+   - `escalate`: còn case cần người quyết (Fail mà sửa sẽ phải đổi spec hoặc là đánh giá chủ quan, hoặc case chỉ chạy được trên
+     máy thật). Liệt kê từng case kèm đề xuất mặc định. QA người thật gắn label `qa-approved` khi chấp nhận.
+   - Còn case Fail sửa được trong PR: chưa đăng marker, sửa trước.
+   Check `QA sign-off` tự chạy lại khi có comment. Push code mới (ngoài `openspec/`, `docs/`) làm marker và label hết hiệu lực:
+   nghiệm thu lại case liên quan và đăng marker mới.
 
 ### Sửa theo review (một phần của pha `code`)
 

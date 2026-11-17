@@ -207,8 +207,9 @@ Mỗi story đi qua **ba pha, hai PR**: **Spec** (agent BA + QA + Dev → ngư�
 **Pha B — Code (nhánh `feat/s<epic>-<n>-<slug>` cắt từ `main` sau khi PR spec merge):**
 
 3. **Plan** rồi tìm pattern: tạo `design.md` và `tasks.md` (`/relay code <id>`, bước plan; hai file này đi cùng
-   PR code). Mở PR code ở dạng **draft chỉ chứa hai file này**; **dev lead duyệt và gắn label `plan-approved`
-   (check `Plan đã duyệt`) thì mới được code**. Tìm code tương tự đã có trong repo và theo đúng pattern đó —
+   PR code). Agent `dev-lead` duyệt plan; mở PR code ở dạng **draft chỉ chứa hai file này** kèm comment verdict có marker.
+   **Check `Plan đã duyệt` xanh thì mới được code**: verdict `approve` của agent, hoặc label `plan-approved` của người
+   khi agent `escalate`. Tìm code tương tự đã có trong repo và theo đúng pattern đó —
    nhất quán với codebase hiện tại quan trọng hơn áp dụng máy móc ví dụ trong tài liệu.
 4. **RED**: viết test cho một Scenario (tên test chứa ID), chạy, thấy nó fail vì thiếu hành vi.
    Commit `test(...)`.
@@ -219,8 +220,9 @@ Mỗi story đi qua **ba pha, hai PR**: **Spec** (agent BA + QA + Dev → ngư�
    thấy kết quả pass.** Tick các task đã làm trong `tasks.md`.
 8. Chuyển PR code sang ready, ghi `Spec PR: #<số PR spec>`. PR code **không merge được** khi PR spec chưa
    review + merge (check `Spec PR đã merge`), plan chưa duyệt (`Plan đã duyệt`), **QA chưa nghiệm thu theo
-   `test-cases.md` trên bản build của CI và gắn `qa-approved`** (`QA sign-off`), và check `Review` (CI dev-lead
-   độc lập, xem bên dưới) phải pass. Push code mới sau khi QA đã ký thì label bị gỡ, QA chạy lại case liên quan.
+   `test-cases.md` trên bản build** (`QA sign-off`: verdict `approve` của agent `qa`, hoặc label `qa-approved` của QA
+   người thật khi agent `escalate`), và check `Review` (CI dev-lead độc lập, xem bên dưới) phải pass. Push code mới
+   sau khi QA đã ký thì verdict và label hết hiệu lực, QA chạy lại case liên quan.
    Sau khi mở PR, agent theo dõi PR và chạy `/relay code` (bước sửa theo review) khi có finding. **Không archive trong PR code.**
 
 **Pha C — Archive (tự động):** sau khi PR code merge, workflow `archive-spec-workflow.yml` mở PR

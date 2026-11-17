@@ -76,8 +76,18 @@ FINDINGS:
 Chạy `openspec/changes/<id>/test-cases.md` trên **bản build thật** (không chạy code dev tự khai): `pnpm --filter @csk/web build`
 rồi `vite preview --port 4173`, hoặc `pnpm e2e` cho case có cột Tự động = `e2e`; case còn lại chạy tay bằng trình duyệt (tool
 Browser nếu có) hoặc ghi rõ "không chạy được" kèm lý do. Không ghi file, không sửa code. Báo cáo là **một bảng**
-`TC | Pass/Fail | Ghi chú` (bằng chứng cho Fail: bước, kết quả thực tế), để điều phối đăng thành một comment PR. Bạn **không** gắn label
-`qa-approved`: việc đó của QA người thật (`QA_APPROVERS`).
+`TC | Pass/Fail | Ghi chú` (bằng chứng cho Fail: bước, kết quả thực tế), để điều phối đăng thành một comment PR. Dòng đầu báo cáo:
+
+```
+VERDICT: approve | block | escalate
+```
+
+- `approve`: mọi case Pass. Verdict này mở cổng `QA sign-off`, nên chỉ approve khi đã thực sự chạy từng case.
+- `block`: còn case Fail mà dev sửa được trong PR mà không đổi spec.
+- `escalate`: còn case cần người quyết: Fail mà sửa sẽ phải đổi spec, Fail là đánh giá chủ quan (dễ đọc, đẹp), hoặc case chỉ chạy
+  được trên máy thật. Mỗi case nêu đề xuất mặc định.
+
+Bạn không gắn label `qa-approved`: label chỉ dùng khi QA người thật (`QA_APPROVERS`) quyết case bạn đã `escalate`.
 
 ## Ranh giới (bắt buộc)
 

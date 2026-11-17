@@ -1,14 +1,28 @@
-# Hai cổng của PR code: dev lead duyệt plan (label plan-approved) và QA nghiệm thu (label qa-approved).
+# Hai cổng của PR code: duyệt plan (check "Plan đã duyệt") và QA nghiệm thu (check "QA sign-off").
 # Quy trình: docs/05-standards/spec-driven.md §2 (B1b, B6a) và "Các cổng".
 #
 # Phạm vi: cổng chỉ áp dụng khi PR đổi file dưới apps/ hoặc packages/. Phân loại theo FILE, không theo
 # nhánh hay dòng `Spec PR:` trong mô tả (hai thứ đó tự khai được).
-# Label chỉ hợp lệ khi người gắn gần nhất nằm trong repo variable tương ứng (handle GitHub, cách nhau dấu phẩy)
-# và KHÔNG phải tác giả PR:
-#   plan-approved → PLAN_APPROVERS      qa-approved → QA_APPROVERS
+#
+# Mỗi cổng xanh khi có MỘT trong hai:
+#   1. Verdict `approve` của agent, trong comment mới nhất có marker (do `/relay code` đăng, tác giả comment là
+#      OWNER/MEMBER/COLLABORATOR), và còn đúng với commit đầu hiện tại:
+#        <!-- csk-plan-agent sha=<commit> dev-lead=approve|escalate -->
+#            còn đúng khi từ <commit> tới đầu PR không đổi design.md nào của change trong PR.
+#        <!-- csk-qa-agent sha=<commit> qa=approve|escalate -->
+#            còn đúng khi từ <commit> tới đầu PR chỉ đổi file trong openspec/ và docs/.
+#      `escalate` nghĩa là agent cần người quyết: cổng chờ label của người.
+#      <commit> phải là tổ tiên của đầu PR; rebase/force-push làm verdict hết hiệu lực, chạy lại agent.
+#   2. Label do người thuộc repo variable tương ứng gắn (handle GitHub, cách nhau dấu phẩy):
+#        plan-approved → PLAN_APPROVERS      qa-approved → QA_APPROVERS
+#      Tác giả PR được tính nếu nằm trong danh sách (như cổng Spec approvals): repo một người vẫn quyết được.
 # Push mới gỡ label khi kết quả duyệt không còn đúng:
 #   nội dung design.md của change trong PR đổi → gỡ plan-approved;  đổi file ngoài openspec/ và docs/ → gỡ qa-approved.
 #   Chỉ tick tasks.md thì không gỡ gì.
+# Comment có marker chạy lại các job cổng đang fail của run `pull_request` mới nhất (check của issue_comment không
+# gắn vào commit của PR). Workflow cho issue_comment lấy từ nhánh mặc định: chỉ có hiệu lực sau khi merge vào main.
+# Giới hạn: marker là comment do tài khoản người chạy `/relay` đăng, nên cổng chỉ chắc chắn quy trình agent đã chạy,
+# không chứng minh agent thật sự duyệt (như cổng Spec approvals).
 # Để cổng chặn thật: đặt check "Plan đã duyệt" và "QA sign-off" làm required trong branch protection của `main`,
 # và bật "Require review from Code Owners" để PR không tự sửa được chính workflow này (CODEOWNERS: /.github/).
 # Chỉ dùng API của GitHub và payload sự kiện, không checkout hay chạy code từ nhánh PR.
@@ -18,11 +32,14 @@ name: Gates
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened, labeled, unlabeled, ready_for_review, converted_to_draft]
+  issue_comment:
+    types: [created, edited, deleted]
 
 permissions:
   contents: read
   pull-requests: write
   issues: write
+  actions: write
 
 jobs:
   invalidate:
@@ -73,25 +90,42 @@ jobs:
             fi
           done
 
-  plan-gate:
-    name: Plan đã duyệt
+  gate:
+    name: ${{ matrix.check }}
     needs: invalidate
     # Luôn chạy (kể cả khi invalidate fail) để không fail-open: job bị skip do điều kiện được tính là xanh.
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - kind: plan
+            check: Plan đã duyệt
+            label: plan-approved
+            approvers_var: PLAN_APPROVERS
+            agent: dev-lead
+            role: dev lead
+          - kind: qa
+            check: QA sign-off
+            label: qa-approved
+            approvers_var: QA_APPROVERS
+            agent: qa
+            role: QA
     steps:
-      - name: Kiểm tra label plan-approved do dev lead (không phải tác giả) gắn
+      - name: Kiểm tra verdict của agent hoặc label của người
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           INVALIDATE_RESULT: ${{ needs.invalidate.result }}
-          LABEL: plan-approved
-          APPROVERS_VAR: PLAN_APPROVERS
-          APPROVERS: ${{ vars.PLAN_APPROVERS }}
-          ROLE: dev lead
+          KIND: ${{ matrix.kind }}
+          LABEL: ${{ matrix.label }}
+          AGENT: ${{ matrix.agent }}
+          ROLE: ${{ matrix.role }}
+          APPROVERS_VAR: ${{ matrix.approvers_var }}
+          APPROVERS: ${{ vars[matrix.approvers_var] }}
         run: |
           set -euo pipefail
 
@@ -106,88 +140,104 @@ jobs:
             echo "PR không đổi apps/ hoặc packages/, bỏ qua."; exit 0
           fi
 
-          labels=$(gh api "repos/$REPO/issues/$PR_NUMBER/labels" --jq '.[].name')
-          if ! grep -qxF "$LABEL" <<<"$labels"; then
-            echo "::error::Chưa có label $LABEL: $ROLE chưa duyệt."
-            exit 1
-          fi
-
-          if [[ -z "${APPROVERS// /}" ]]; then
-            echo "::error::Chưa cấu hình repo variable $APPROVERS_VAR."; exit 1
-          fi
-          actor=$(gh api "repos/$REPO/issues/$PR_NUMBER/events" --paginate \
-            | jq -rs --arg l "$LABEL" '[.[][] | select(.event == "labeled" and .label.name == $l)] | last | .actor.login // ""')
-          lower() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
-          list=$(lower "${APPROVERS// /}")
-          if [[ -z "$actor" ]]; then
-            echo "::error::Không xác định được người gắn label $LABEL."; exit 1
-          fi
-          if [[ "$(lower "$actor")" == "$(lower "$PR_AUTHOR")" ]]; then
-            echo "::error::Label $LABEL do chính tác giả PR ($actor) gắn. Cần người khác duyệt."; exit 1
-          fi
-          if [[ ",$list," != *",$(lower "$actor"),"* ]]; then
-            echo "::error::Label $LABEL do '$actor' gắn, không thuộc $APPROVERS_VAR ($ROLE)."; exit 1
-          fi
-          echo "$LABEL do $actor gắn."
-
-  qa-gate:
-    name: QA sign-off
-    needs: invalidate
-    if: ${{ !cancelled() }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Kiểm tra label qa-approved do QA (không phải tác giả) gắn
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-          INVALIDATE_RESULT: ${{ needs.invalidate.result }}
-          LABEL: qa-approved
-          APPROVERS_VAR: QA_APPROVERS
-          APPROVERS: ${{ vars.QA_APPROVERS }}
-          ROLE: QA
-        run: |
-          set -euo pipefail
-
-          if [[ "$INVALIDATE_RESULT" == "failure" ]]; then
-            echo "::error::Bước gỡ label lỗi, không thể xác nhận label còn hợp lệ. Chạy lại workflow."
-            exit 1
-          fi
-
-          files=$(gh api "repos/$REPO/pulls/$PR_NUMBER/files" --paginate --jq '.[].filename')
-          if ! grep -qE '^(apps|packages)/' <<<"$files"; then
-            echo "PR không đổi apps/ hoặc packages/, bỏ qua."; exit 0
-          fi
-
-          # Lấy trạng thái draft hiện tại từ API (payload của lần re-run có thể cũ).
-          is_draft=$(gh api "repos/$REPO/pulls/$PR_NUMBER" --jq '.draft')
-          if [[ "$is_draft" == "true" ]]; then
+          # Lấy trạng thái từ API (payload của lần re-run có thể cũ).
+          pr=$(gh api "repos/$REPO/pulls/$PR_NUMBER")
+          head_sha=$(jq -r '.head.sha' <<<"$pr")
+          if [[ "$KIND" == "qa" && "$(jq -r '.draft' <<<"$pr")" == "true" ]]; then
             echo "::error::PR đang draft. Chuyển sang ready trước khi QA nghiệm thu."
             exit 1
           fi
 
-          labels=$(gh api "repos/$REPO/issues/$PR_NUMBER/labels" --jq '.[].name')
-          if ! grep -qxF "$LABEL" <<<"$labels"; then
-            echo "::error::Chưa có label $LABEL: $ROLE chưa nghiệm thu."
-            exit 1
+          # --- 1. Verdict của agent ---
+          marker=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
+            | jq -rs --arg m "<!-- csk-$KIND-agent " '[.[][]
+                | select(.author_association == "OWNER" or .author_association == "MEMBER" or .author_association == "COLLABORATOR")
+                | select(.body | contains($m))] | last | .body // ""' \
+            | grep -oE "<!-- csk-$KIND-agent [^>]*-->" | tail -1 || true)
+          verdict=""
+          if [[ -n "$marker" ]]; then
+            m_sha=$(sed -nE 's/.* sha=([0-9a-f]{7,40}).*/\1/p' <<<"$marker")
+            verdict=$(sed -nE "s/.* $AGENT=([a-z]+).*/\1/p" <<<"$marker")
+            stale=""
+            if [[ -z "$m_sha" ]]; then
+              stale="marker thiếu sha"
+            elif ! cmp=$(gh api "repos/$REPO/compare/$m_sha...$head_sha" 2>/dev/null); then
+              stale="không so được commit $m_sha với đầu PR"
+            elif [[ ! "$(jq -r '.status' <<<"$cmp")" =~ ^(ahead|identical)$ ]]; then
+              stale="commit $m_sha không còn là tổ tiên của đầu PR (rebase/force-push)"
+            elif [[ "$(jq '.files | length' <<<"$cmp")" -ge 300 ]]; then
+              stale="quá nhiều file đổi từ $m_sha, không kiểm hết được"
+            else
+              changed=$(jq -r '.files[].filename' <<<"$cmp")
+              if [[ "$KIND" == "plan" ]]; then
+                designs=$(grep -E '^openspec/changes/[a-z0-9][a-z0-9-]*/design\.md$' <<<"$files" || true)
+                if [[ -n "$designs" && -n "$changed" ]] && grep -qxFf <(printf '%s\n' "$designs") <<<"$changed"; then
+                  stale="design.md đổi sau commit $m_sha"
+                fi
+              elif [[ -n "$changed" ]] && grep -qvE '^(openspec|docs)/' <<<"$changed"; then
+                stale="có code mới sau commit $m_sha"
+              fi
+            fi
+
+            if [[ -n "$stale" ]]; then
+              echo "::warning::Verdict của agent $AGENT hết hiệu lực: $stale. Chạy lại agent và đăng marker mới."
+            elif [[ "$verdict" == "approve" ]]; then
+              echo "Agent $AGENT approve tại $m_sha, còn đúng với $head_sha."
+              exit 0
+            elif [[ "$verdict" == "escalate" ]]; then
+              echo "::warning::Agent $AGENT cần $ROLE người thật quyết (xem comment của agent). Chờ label $LABEL."
+            else
+              echo "::warning::Marker của agent $AGENT không có verdict hợp lệ ($AGENT=approve|escalate)."
+            fi
           fi
 
+          # --- 2. Label của người ---
+          labels=$(gh api "repos/$REPO/issues/$PR_NUMBER/labels" --jq '.[].name')
+          if ! grep -qxF "$LABEL" <<<"$labels"; then
+            echo "::error::Chưa có verdict approve còn hiệu lực của agent $AGENT, cũng chưa có label $LABEL của $ROLE."
+            exit 1
+          fi
           if [[ -z "${APPROVERS// /}" ]]; then
             echo "::error::Chưa cấu hình repo variable $APPROVERS_VAR."; exit 1
           fi
           actor=$(gh api "repos/$REPO/issues/$PR_NUMBER/events" --paginate \
             | jq -rs --arg l "$LABEL" '[.[][] | select(.event == "labeled" and .label.name == $l)] | last | .actor.login // ""')
-          lower() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
-          list=$(lower "${APPROVERS// /}")
           if [[ -z "$actor" ]]; then
             echo "::error::Không xác định được người gắn label $LABEL."; exit 1
           fi
-          if [[ "$(lower "$actor")" == "$(lower "$PR_AUTHOR")" ]]; then
-            echo "::error::Label $LABEL do chính tác giả PR ($actor) gắn. Cần người khác nghiệm thu."; exit 1
-          fi
-          if [[ ",$list," != *",$(lower "$actor"),"* ]]; then
+          lower() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
+          if [[ ",$(lower "${APPROVERS// /}")," != *",$(lower "$actor"),"* ]]; then
             echo "::error::Label $LABEL do '$actor' gắn, không thuộc $APPROVERS_VAR ($ROLE)."; exit 1
           fi
           echo "$LABEL do $actor gắn."
+
+  rerun-on-comment:
+    name: Chạy lại cổng khi có verdict của agent
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      (contains(github.event.comment.body, '<!-- csk-plan-agent ') ||
+       contains(github.event.comment.body, '<!-- csk-qa-agent '))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Chạy lại job cổng đang fail của run pull_request mới nhất
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          head_sha=$(gh api "repos/$REPO/pulls/$PR_NUMBER" --jq '.head.sha')
+          run=$(gh api "repos/$REPO/actions/workflows/gates-workflow.yml/runs?head_sha=$head_sha&event=pull_request" \
+            --jq '.workflow_runs | sort_by(.created_at) | last | "\(.id // "") \(.status // "")"')
+          read -r run_id status <<<"$run"
+          if [[ -z "$run_id" ]]; then
+            echo "Chưa có run pull_request cho commit này, bỏ qua."; exit 0
+          fi
+          if [[ "$status" != "completed" ]]; then
+            echo "Run $run_id đang chạy, nó sẽ đọc comment mới."; exit 0
+          fi
+          # Chỉ chạy lại job fail: không chạy lại bước gỡ label của một push cũ.
+          gh run rerun "$run_id" --failed --repo "$REPO" \
+            || echo "Không có job fail để chạy lại, hoặc chưa chạy lại được run $run_id."
