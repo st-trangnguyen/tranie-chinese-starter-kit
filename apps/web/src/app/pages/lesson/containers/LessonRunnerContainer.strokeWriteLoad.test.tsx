@@ -4,7 +4,9 @@ import { createDatabase } from '@core/helpers/db.helper';
 import { DexieProgressStore } from '@core/services/progress-store.service';
 import {
   LESSON_ID,
+  NO_STROKE_DATA,
   PERSON,
+  STROKE_WRITE_LESSON,
   TEN,
   answerToneChoiceAndContinue,
   emitCorrectStroke,
@@ -184,6 +186,56 @@ describe('LessonRunnerContainer — trạng thái tải câu viết', () => {
     expect(
       screen.queryByText('Bạn đã làm xong các câu của bài này.'),
     ).not.toBeInTheDocument();
+    const progress = await readSavedProgress();
+    expect(progress?.status).not.toBe('completed');
+  });
+
+  it('S7.1-AC1 Câu viết gặp chữ không có dữ liệu nét khi chạy app: should show "Chưa có dữ liệu nét cho chữ này." with "Bỏ qua câu này" and no writing pad or "Xem thứ tự nét" link for 龘, then "Câu 3 / 3" after skipping and end with "Bạn đã bỏ qua 1 câu, bài chưa hoàn thành." after writing 十', async () => {
+    // Câu 2 viết chữ 龘: không có trong `strokes/index.json` thật.
+    env.replaceFetch({
+      lesson: {
+        ...STROKE_WRITE_LESSON,
+        exercises: [
+          { id: 'e1', kind: 'tone-choice', wordId: '八' },
+          { id: 'e2', kind: 'stroke-write', wordId: NO_STROKE_DATA },
+          { id: 'e3', kind: 'stroke-write', wordId: TEN },
+        ],
+      },
+    });
+    const { user } = renderLessonRunner();
+    await answerToneChoiceAndContinue(user);
+
+    expect(screen.getByRole('progressbar')).toHaveAccessibleName('Câu 2 / 3');
+    expect(
+      await screen.findByText('Chưa có dữ liệu nét cho chữ này.', undefined, {
+        timeout: 3000,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('figure', {
+        name: `Khung viết chữ ${NO_STROKE_DATA}`,
+      }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Xem thứ tự nét' }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Bỏ qua câu này' }));
+
+    expect(screen.getByRole('progressbar')).toHaveAccessibleName('Câu 3 / 3');
+    await findLessonPad(TEN);
+    const tenWriter = await waitForActiveQuiz(TEN);
+    emitCorrectStroke(tenWriter);
+    emitCorrectStroke(tenWriter);
+    await user.click(await screen.findByRole('button', { name: 'Tiếp tục' }));
+
+    const heading = await screen.findByRole('heading', {
+      level: 2,
+      name: /bỏ qua/,
+    });
+    expect(heading.textContent).toBe(
+      'Bạn đã bỏ qua 1 câu, bài chưa hoàn thành.',
+    );
     const progress = await readSavedProgress();
     expect(progress?.status).not.toBe('completed');
   });
