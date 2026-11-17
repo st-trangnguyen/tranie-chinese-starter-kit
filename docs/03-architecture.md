@@ -115,7 +115,7 @@ chinese-starter-kit/
     ├── index.html  index.css               # index.css nạp styles/tailwind/main.css
     ├── styles/tailwind/                    # design system: tokens/ (màu, spacing, chữ), base/ (font, nền), themes/_dark.css
     ├── assets/
-    │   ├── i18n/vi/{common,home,learning-path,lesson,review,settings,stroke-order}.json
+    │   ├── i18n/vi/{common,home,learning-path,lesson,review,settings,stroke-order,writing-practice}.json
     │   ├── icons/  images/
     │   ├── fonts/                          # ← LXGW WenKai đã cắt (content: font:subset)
     │   ├── content/                        # ← output JSON của pipeline
@@ -132,7 +132,8 @@ chinese-starter-kit/
         │   ├── constants/                  # DB_NAME, giới hạn mỗi ngày, ngưỡng mở khóa 80%…
         │   ├── helpers/db.helper.ts        # khai báo schema và migration Dexie
         │   ├── hooks/                      # useAudioPlayer, useRecorder, useOnlineStatus,
-        │   │                               # useStrokeAnimation (phát từng nét), useInitialReducedMotion
+        │   │                               # useStrokeAnimation (phát từng nét), useInitialReducedMotion,
+        │   │                               # useStrokeQuiz (chấm nét người viết vẽ, huỷ khi unmount/đổi chữ)
         │   ├── modules/
         │   │   ├── custom-router-dom/      # giữ từ boilerplate, bỏ PrivateRoute
         │   │   └── pwa/                    # đăng ký service worker, banner "Có bản mới"
@@ -142,23 +143,30 @@ chinese-starter-kit/
         │       ├── audio.service.ts            # phát audio, ghi âm
         │       ├── speech.service.ts           # adapter Web Speech
         │       ├── content-source.service.ts   # fetch + validate JSON nội dung (cả strokes/index.json, strokes/<chữ>.json)
-        │       └── stroke-writer.service.ts    # adapter hanzi-writer, file duy nhất import `hanzi-writer`
+        │       └── stroke-writer.service.ts    # adapter hanzi-writer, file duy nhất import `hanzi-writer`:
+        │                                       # createStrokeWriter (S6.1), createStrokeQuiz (S6.2)
         ├── pages/
         │   ├── Page.tsx  page.routes.ts    # khung app: header + <Outlet/> + thanh điều hướng dưới
         │   ├── onboarding/ home/ learning-path/ lesson/ review/ practice/ dictionary/ settings/ error/
         │   │   └── (mỗi feature) <feature>.routes.ts · containers/ · components/ · hooks/
-        │   └── stroke-order/
-        │       ├── stroke-order.routes.ts      # /characters/:character?/stroke-order
-        │       ├── containers/StrokeOrderContainer.tsx
-        │       └── hooks/useStrokeOrder.ts     # nạp dữ liệu nét, trạng thái tải/lỗi/chưa có, retry
+        │   ├── stroke-order/
+        │   │   ├── stroke-order.routes.ts      # /characters/:character?/stroke-order
+        │   │   ├── containers/StrokeOrderContainer.tsx   # + link "Tập viết" sang writing-practice
+        │   │   └── hooks/useStrokeOrder.ts     # nạp dữ liệu nét, trạng thái tải/lỗi/chưa có, retry
+        │   └── writing-practice/
+        │       ├── writing-practice.routes.ts  # /characters/:character/writing-practice
+        │       ├── containers/WritingPracticeContainer.tsx
+        │       ├── components/WritingPracticeFeedback.tsx   # báo sai nét, xong chữ + "Viết lại"
+        │       └── hooks/useWritingPractice.ts # nạp dữ liệu nét, state lượt viết, retry, viết lại
         └── shared/
             ├── components/
             │   ├── common/  layout/  partials/
-            │   ├── exercises/              # mỗi dạng bài tập 1 component + exercise.registry.ts
+            │   ├── exercises/              # mỗi dạng bài tập 1 component + exercise.registry.ts;
+            │   │                           # StrokeWritingPad (khung viết theo nét, S6.2)
             │   └── StrokeGlyph · StrokeOrderAnimation · StrokeOrderStatic   # thứ tự nét (S6.1), nhận props
             ├── contexts/settings.context.tsx   # bật/tắt pinyin, tốc độ audio…
             ├── models/                     # type riêng của UI; schema nội dung và tiến độ lấy từ @csk/shared
-            ├── services/                   # content · srs · progress · backup · stroke-order (.service.ts)
+            ├── services/                   # content · srs · progress · backup · stroke-order · writing-practice (.service.ts)
             └── utils/                      # date.utils.ts
 ```
 
@@ -182,14 +190,16 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
 | `core/services/progress-store` + `core/helpers/db.helper` | Nơi duy nhất đọc/ghi IndexedDB | E3, E8, E9 |
 | `core/services/audio`, `core/services/speech`, `core/hooks/*` | Phát audio, ghi âm, chấm Web Speech, trạng thái online | E4, E5, E10 |
 | `core/services/stroke-writer` + `core/hooks/useStrokeAnimation`, `core/hooks/useInitialReducedMotion` | Adapter hanzi-writer (file duy nhất import `hanzi-writer`): vẽ từng nét vào `<g>` SVG; hook phát tuần tự, tự phát khi mở, "Phát lại", huỷ khi unmount; chốt `prefers-reduced-motion` lúc mở màn | E6 |
+| `core/services/stroke-writer` (`createStrokeQuiz`) + `core/hooks/useStrokeQuiz` | Chấm nét người viết vẽ: mỗi lần chấm tạo `<svg>` riêng trong `<g>` host, có `rect` trong suốt làm vùng chạm để nhấn vào chỗ trống vẫn nhận; báo `correct` / `mistake` / `ignored` (chạm một điểm, nét quá ngắn); sau `destroy()` không báo nữa, an toàn khi StrictMode mount hai lần; hook tạo quiz khi mount, huỷ khi unmount hoặc đổi chữ | E6 |
 | `shared/services/content.service` | Nạp JSON nội dung, tra từ và câu theo ID, tìm kiếm từ điển | E3, E10 |
 | `shared/services/progress.service` | Quy tắc mở khóa, chấm điểm bài, cursor học dở, phút học mỗi ngày, streak | E3, E8 |
 | `shared/services/srs.service` | Bọc ts-fsrs: tạo thẻ, chấm, lấy thẻ đến hạn trong giới hạn mỗi ngày, thống kê | E9 |
 | `shared/services/backup.service` | Export/import, kiểm tra file trước khi ghi đè | E8 |
 | `shared/services/stroke-order.service` | Rule chữ hợp lệ (đúng một chữ Hán), chữ có trong `strokes/index.json` mới có dữ liệu nét; nạp dữ liệu nét qua `ContentSource` | E6 |
+| `shared/services/writing-practice.service` | Phần 2: rule bắt đầu lượt viết, đếm sai liên tiếp ở nét hiện tại, hiện gợi ý sau 3 lần sai, đúng hết các nét là xong chữ, bỏ qua sự kiện sau khi xong; Phần 3: `loadCharacter` ủy quyền `StrokeOrderService` (rule chữ hợp lệ và có dữ liệu nét giữ một chỗ) | E6 |
 | `shared/components/StrokeGlyph`, `StrokeOrderAnimation`, `StrokeOrderStatic` | Vẽ chữ từ dữ liệu nét: animation có chữ mờ nền + nút "Phát lại"; bản tĩnh đánh số nét khi giảm chuyển động | E6 |
-| `shared/components/exercises` | Các dạng bài tập + registry theo `kind` | E4, E5, E6, E10 |
-| `pages/*` | Màn hình: onboarding, home, learning-path, lesson, review, practice, dictionary, settings, stroke-order | E1, E3, E6, E8, E9, E10 |
+| `shared/components/exercises` | Các dạng bài tập + registry theo `kind`; `StrokeWritingPad` (khung viết có nét mờ cả chữ, nét gợi ý; chấm nét qua `core/hooks/useStrokeQuiz`, chỉ nhận props) | E4, E5, E6, E10 |
+| `pages/*` | Màn hình: onboarding, home, learning-path, lesson, review, practice, dictionary, settings, stroke-order (có link "Tập viết" sang writing-practice), writing-practice | E1, E3, E6, E8, E9, E10 |
 
 ## 5. Pattern (theo boilerplate)
 
@@ -201,7 +211,7 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
   - Service không import React hay router.
 - **Component bài tập** chỉ nhận dữ liệu qua props (`exercise`, `onResult`, `isLocked`). Audio và ghi âm lấy qua hook trong `core/hooks`, không import service trực tiếp.
 - **Route:** mỗi feature export `PageRoute[]` (container lazy-load) từ `<feature>.routes.ts`, gom về `pages/page.routes.ts` rồi về `app.routes.ts`.
-  - URL theo RESTful: danh từ tài nguyên, kebab-case, collection số nhiều, tên cụ thể (`/learning-paths`, `/lessons/:lessonId`, `/units/:unitId/placement-test`, `/characters/:character?/stroke-order`). `ROUTE_PATHS` trong `core/constants/app.constants.ts` là nguồn duy nhất của URL.
+  - URL theo RESTful: danh từ tài nguyên, kebab-case, collection số nhiều, tên cụ thể (`/learning-paths`, `/lessons/:lessonId`, `/units/:unitId/placement-test`, `/characters/:character?/stroke-order`, `/characters/:character/writing-practice`). `ROUTE_PATHS` trong `core/constants/app.constants.ts` là nguồn duy nhất của URL.
 - **i18n:** chuỗi giao diện đặt trong `apps/web/src/assets/i18n/vi/<namespace>.json`, dùng `useTranslation(namespace)`. Nội dung bài học không nằm trong i18n mà nằm trong JSON của pipeline.
 - **Alias:** trong `apps/web`, `aliases.ts` là nguồn duy nhất, giữ đồng bộ với `apps/web/tsconfig.json`. Sang package khác thì import bằng tên package (xem 3.1).
 

@@ -1,6 +1,10 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
 import { strokeOrderPath, strokePollTimeout } from './stroke-order.helpers';
+import {
+  WRITING_PRACTICE_LINK,
+  writingPracticePath,
+} from './writing-practice.helpers';
 
 declare global {
   interface Window {
@@ -163,7 +167,12 @@ test.describe('S6.1 Xem thứ tự nét', () => {
     const main = page.getByRole('main');
     await expect(main.getByRole('button')).toHaveCount(1);
     await expect(main.getByRole('button')).toHaveText('Phát lại');
-    await expect(main.getByRole('link')).toHaveCount(0);
+    // Không có cách chuyển sang chữ khác: link duy nhất là "Tập viết" (S6.2) dẫn tới màn
+    // luyện viết của chính chữ đang xem.
+    const links = main.getByRole('link');
+    await expect(links).toHaveCount(1);
+    await expect(links).toHaveAccessibleName(WRITING_PRACTICE_LINK);
+    await expect(links).toHaveAttribute('href', writingPracticePath('好'));
   });
 
   test('TC-S6.1-AC1-15: S6.1-AC1 Chữ không có dữ liệu nét — 龘 hiện thông báo, không animation', async ({

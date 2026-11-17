@@ -1,4 +1,4 @@
-import { act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
@@ -71,6 +71,12 @@ describe('StrokeOrderContainer — giảm chuyển động', () => {
     const motion = stubReducedMotion(false);
     const firstVisit = openRoute(PATH_REN);
     expectAnimation(await findRenFigure());
+    // Writer được tạo trong effect sau khi khối hiện: chờ đúng một writer của 人 rồi mới đếm.
+    await waitFor(() =>
+      expect(
+        FakeHanziWriter.instances.map((writer) => writer.character),
+      ).toEqual(['人']),
+    );
     const writerCount = FakeHanziWriter.instances.length;
 
     // Bật giảm chuyển động mà không rời màn: hệ điều hành phát sự kiện `change`.

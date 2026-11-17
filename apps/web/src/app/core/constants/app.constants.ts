@@ -10,4 +10,6 @@ export const ROUTE_PATHS = {
   placementTest: (unitId: string): string => `/units/${unitId}/placement-test`,
   strokeOrder: (character: string): string =>
     `/characters/${encodeURIComponent(character)}/stroke-order`,
+  writingPractice: (character: string): string =>
+    `/characters/${encodeURIComponent(character)}/writing-practice`,
 } as const;

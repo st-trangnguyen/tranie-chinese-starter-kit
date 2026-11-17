@@ -1,10 +1,24 @@
 import HanziWriter, {
   type CharacterJson,
   type HanziWriterOptions,
+  type Point,
 } from 'hanzi-writer';
 import type { StrokeData } from '@csk/shared';
 
 export type StrokeAnimationResult = 'completed' | 'cancelled';
+
+/** Kết quả một lần người viết vẽ nét (S6.2 D4). Cùng union với `StrokeAttemptResult` của model. */
+export type StrokeAttemptEvent = 'correct' | 'mistake' | 'ignored';
+
+export interface StrokeQuizOptions {
+  isReducedMotion: boolean;
+  onAttempt: (event: StrokeAttemptEvent) => void;
+}
+
+/** Phiên chấm nét trên một `<svg>` riêng do adapter tạo trong host (S6.2 D4). */
+export interface StrokeQuiz {
+  destroy(): void;
+}
 
 /** Vẽ từng nét của một chữ vào một `<g>` SVG. Adapter duy nhất bọc hanzi-writer (S6.1 D5). */
 export interface StrokeWriter {
@@ -31,6 +45,68 @@ interface HanziWriterFactory {
 
 const hanziWriterFactory: HanziWriterFactory = HanziWriter;
 
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/**
+ * Scenario "Chạm một điểm thì bỏ qua" (S6.2-AC1): nét sai ngắn hơn ngưỡng này (đơn vị hộp 1024,
+ * khoảng 3 % cạnh khung) là chạm nhầm, báo `'ignored'` thay vì `'mistake'` (D4).
+ */
+const MIN_STROKE_LENGTH = 30;
+
+/** Thời gian (ms) nét đúng mờ dần thành nét đã vẽ, khi không giảm chuyển động. */
+const STROKE_FADE_DURATION = 400;
+
+/** Thời gian (ms) nét người viết vẽ mờ đi, khi không giảm chuyển động. */
+const DRAWING_FADE_DURATION = 300;
+
+/**
+ * Scenario "Giảm chuyển động trên khung viết" (S6.2-AC1): giảm chuyển động thì không mờ dần và
+ * không nháy sáng khi viết xong (D4).
+ */
+function createQuizMotionOptions(
+  isReducedMotion: boolean,
+): Pick<
+  HanziWriterOptions,
+  'strokeFadeDuration' | 'drawingFadeDuration' | 'highlightOnComplete'
+> {
+  return isReducedMotion
+    ? {
+        strokeFadeDuration: 0,
+        drawingFadeDuration: 0,
+        highlightOnComplete: false,
+      }
+    : {
+        strokeFadeDuration: STROKE_FADE_DURATION,
+        drawingFadeDuration: DRAWING_FADE_DURATION,
+        highlightOnComplete: true,
+      };
+}
+
+/** Độ dài đường vẽ = tổng độ dài các đoạn thẳng nối các điểm liên tiếp. */
+function measurePathLength(points: readonly Point[]): number {
+  return points.reduce((total, point, index) => {
+    const previous = index > 0 ? points[index - 1] : undefined;
+    if (!previous) {
+      return total;
+    }
+    return total + Math.hypot(point.x - previous.x, point.y - previous.y);
+  }, 0);
+}
+
+function createWriterOptions(
+  strokeData: StrokeData,
+): Partial<HanziWriterOptions> {
+  const characterJson = toCharacterJson(strokeData);
+  return {
+    charDataLoader: (_character, onLoad) => onLoad(characterJson),
+    showCharacter: false,
+    showOutline: false,
+    width: WRITER_BOX_SIZE,
+    height: WRITER_BOX_SIZE,
+    padding: 0,
+  };
+}
+
 function toCharacterJson(strokeData: StrokeData): CharacterJson {
   return {
     strokes: [...strokeData.strokes],
@@ -45,15 +121,11 @@ export function createStrokeWriter(
   character: string,
   strokeData: StrokeData,
 ): StrokeWriter {
-  const characterJson = toCharacterJson(strokeData);
-  const writer = hanziWriterFactory.create(target, character, {
-    charDataLoader: (_character, onLoad) => onLoad(characterJson),
-    showCharacter: false,
-    showOutline: false,
-    width: WRITER_BOX_SIZE,
-    height: WRITER_BOX_SIZE,
-    padding: 0,
-  });
+  const writer = hanziWriterFactory.create(
+    target,
+    character,
+    createWriterOptions(strokeData),
+  );
 
   const clear = (): void => {
     void writer.hideCharacter({ duration: 0 });
@@ -71,6 +143,85 @@ export function createStrokeWriter(
     destroy: () => {
       clear();
       target.replaceChildren();
+    },
+  };
+}
+
+/** Đặt các thuộc tính hộp 1024 tại gốc cho phần tử SVG. */
+function setBox(element: Element): void {
+  element.setAttribute('x', '0');
+  element.setAttribute('y', '0');
+  element.setAttribute('width', String(WRITER_BOX_SIZE));
+  element.setAttribute('height', String(WRITER_BOX_SIZE));
+}
+
+/**
+ * `<svg class="writing-pad-writer">` riêng cho mỗi lần chấm: `<svg>` có `createSVGPoint` nên
+ * hanzi-writer đổi toạ độ con trỏ ra đơn vị hộp 1024; con đầu là `rect` trong suốt để nhấn vào
+ * vùng trống cũng tới được nút đích (D4).
+ */
+function createOwnSvg(host: SVGGElement): SVGSVGElement {
+  const ownSvg = host.ownerDocument.createElementNS(SVG_NS, 'svg');
+  ownSvg.setAttribute('class', 'writing-pad-writer');
+  setBox(ownSvg);
+  const hitArea = host.ownerDocument.createElementNS(SVG_NS, 'rect');
+  setBox(hitArea);
+  hitArea.setAttribute('fill', 'transparent');
+  hitArea.setAttribute('data-writing-hit-area', '');
+  ownSvg.appendChild(hitArea);
+  return ownSvg;
+}
+
+export function createStrokeQuiz(
+  host: SVGGElement,
+  character: string,
+  strokeData: StrokeData,
+  options: StrokeQuizOptions,
+): StrokeQuiz {
+  const ownSvg = createOwnSvg(host);
+  host.appendChild(ownSvg);
+  const writer = hanziWriterFactory.create(
+    ownSvg,
+    character,
+    createWriterOptions(strokeData),
+  );
+
+  let isDestroyed = false;
+
+  /** Sau `destroy()` không còn `onAttempt` nào (D4). */
+  const emit = (event: StrokeAttemptEvent): void => {
+    if (!isDestroyed) {
+      options.onAttempt(event);
+    }
+  };
+
+  // `quiz()` chỉ bắt đầu ở microtask sau: destroy trước đó (StrictMode) thì huỷ ngay khi nó
+  // resolve. Không `.catch`: `charDataLoader` gọi `onLoad` đồng bộ với dữ liệu đã validate (D4).
+  void writer
+    .quiz({
+      showHintAfterMisses: false,
+      markStrokeCorrectAfterMisses: false,
+      acceptBackwardsStrokes: false,
+      ...createQuizMotionOptions(options.isReducedMotion),
+      onCorrectStroke: () => emit('correct'),
+      onMistake: ({ drawnPath }) =>
+        emit(
+          measurePathLength(drawnPath.points) < MIN_STROKE_LENGTH
+            ? 'ignored'
+            : 'mistake',
+        ),
+    })
+    .then(() => {
+      if (isDestroyed) {
+        writer.cancelQuiz();
+      }
+    });
+
+  return {
+    destroy: () => {
+      isDestroyed = true;
+      writer.cancelQuiz();
+      ownSvg.remove();
     },
   };
 }

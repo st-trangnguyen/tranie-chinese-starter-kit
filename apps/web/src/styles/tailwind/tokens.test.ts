@@ -65,6 +65,25 @@ const TEXT_PAIRS: ReadonlyArray<readonly [string, string]> = [
   ]),
 ];
 
+/** Tên Tailwind `--color-<name>` → tên token `--csk-*` theo khối `@theme inline` của `_colors.css`. */
+function themeColorSource(name: string): string {
+  const match = COLORS_CSS.match(
+    new RegExp(`--color-${name}\\s*:\\s*var\\(--csk-([\\w-]+)\\)\\s*;`),
+  );
+  if (!match?.[1]) {
+    throw new Error(`Thiếu token --color-${name}`);
+  }
+  return match[1];
+}
+
+// S6.2 khung viết: nét gợi ý (`fg`) trên nét mờ (`line-strong`), nét đúng (`accent`) và nét mờ
+// trên nền khung (`surface`). Đồ hoạ không phải chữ → ngưỡng 3:1 (WCAG 1.4.11).
+const WRITING_PAD_PAIRS: ReadonlyArray<readonly [string, string]> = [
+  ['fg', 'line-strong'],
+  ['accent', 'surface'],
+  ['line-strong', 'surface'],
+];
+
 const THEMES = [
   ['light', light],
   ['dark', darkAttr],
@@ -113,5 +132,17 @@ describe('tokens.css', () => {
         contrastRatio(token(vars, 'border-strong'), token(vars, 'surface')),
       ).toBeGreaterThanOrEqual(3);
     });
+
+    it.each(WRITING_PAD_PAIRS)(
+      'S6.2 writing pad (hint, correct and outline strokes): should reach 3:1 when %s sits on %s',
+      (fg, bg) => {
+        expect(
+          contrastRatio(
+            token(vars, themeColorSource(fg)),
+            token(vars, themeColorSource(bg)),
+          ),
+        ).toBeGreaterThanOrEqual(3);
+      },
+    );
   });
 });

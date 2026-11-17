@@ -1,0 +1,56 @@
+/*
+ * Màn luyện viết theo nét — S6.2 (design D9). Màu chỉ dùng token semantic nên tự đổi theo theme
+ * (themes/_dark.css đổi giá trị --csk-*), không cần khối tối riêng.
+ * Nét mờ cả chữ dùng lại .stroke-order-outline (line-strong trên surface ≥ 3:1).
+ * Focus của khung viết: giữ :focus-visible toàn cục (base/_base.css, viền accent 2px).
+ */
+
+@layer components {
+  .writing-practice-title {
+    @apply text-title-lg text-fg;
+  }
+
+  /*
+   * Khung vuông như .stroke-order-figure. touch-action: none để trang không cuộn khi viết trong
+   * khung; user-select: none để kéo nét không bôi đen chữ.
+   */
+  .writing-pad {
+    @apply cursor-crosshair touch-none rounded-lg border-2 border-line bg-surface select-none;
+  }
+
+  /*
+   * Nét đúng và nét đang viết của hanzi-writer (svg riêng do adapter gắn). CHỈ đổi màu `stroke`;
+   * không đụng fill, stroke-width, dasharray, clip-path — sẽ hỏng cách thư viện vẽ.
+   * accent trên surface = 7.56:1 / 7.96:1.
+   */
+  .writing-pad-writer path {
+    @apply stroke-accent;
+  }
+
+  /*
+   * Gợi ý nét kế tiếp: fg (fill + stroke dày, đơn vị theo viewBox 1024) nên khác nét mờ cả ở màu
+   * (fg vs line-strong ≈ 4:1 / 3.9:1) lẫn độ đậm. Tĩnh luôn: không transition/animation.
+   */
+  .writing-pad-hint path {
+    @apply fill-fg stroke-fg;
+    stroke-width: 24px;
+    stroke-linejoin: round;
+  }
+
+  /* Đang tải / lỗi / chưa có dữ liệu / sai nét / xong: fg trên bg = 12.94:1 / 15.08:1. */
+  .writing-practice-message {
+    @apply text-body text-fg;
+  }
+
+  /*
+   * Link "Xem thứ tự nét": vùng chạm ≥ 44×44 px, gạch chân là tín hiệu ngoài màu.
+   * accent trên bg ≥ 4.5:1 ở cả hai theme.
+   */
+  .writing-practice-link {
+    @apply inline-flex min-h-11 min-w-11 items-center text-body text-accent underline underline-offset-4;
+  }
+
+  .writing-practice-link:hover {
+    @apply text-accent-hover;
+  }
+}

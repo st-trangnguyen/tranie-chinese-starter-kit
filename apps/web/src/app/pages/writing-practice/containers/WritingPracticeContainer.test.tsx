@@ -1,0 +1,234 @@
+import { describe, expect, it, vi } from 'vitest';
+
+import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
+import { act, screen, userEvent, waitFor } from '@test/render';
+import { openRoute, setupStrokeOrderRoute } from '@test/stroke-order-route';
+import { STROKE_DATA_SHI } from '@test/stroke.fixtures';
+import {
+  LONG_STROKE_POINTS,
+  openShiPadWithActiveQuiz,
+} from '@test/writing-practice-route';
+
+// Ranh giới ngoài: thư viện vẽ/chấm nét hanzi-writer được thay bằng bản giả điều khiển được.
+vi.mock('hanzi-writer', async () => {
+  const mock = await import('@test/mocks/hanzi-writer');
+  return { default: mock.FakeHanziWriter };
+});
+
+const env = setupStrokeOrderRoute();
+
+const PERSON = '人';
+// Chữ hợp lệ nhưng không có trong danh sách dữ liệu nét.
+const NO_STROKE_DATA = '龘';
+
+describe('WritingPracticeContainer', () => {
+  it('S6.2-AC1 Màn luyện viết có liên kết về thứ tự nét: should open the stroke-order screen of 人 when clicking "Xem thứ tự nét" on /characters/人/writing-practice', async () => {
+    const user = userEvent.setup();
+    const { router } = openRoute(
+      `/characters/${encodeURIComponent(PERSON)}/writing-practice`,
+    );
+
+    const link = await screen.findByRole(
+      'link',
+      { name: 'Xem thứ tự nét' },
+      { timeout: 3000 },
+    );
+
+    // Màn luyện viết đúng một chữ: chỉ một khung viết, của chữ 人.
+    const pad = await screen.findByRole(
+      'figure',
+      { name: `Khung viết chữ ${PERSON}` },
+      { timeout: 3000 },
+    );
+    expect(screen.getAllByRole('figure')).toEqual([pad]);
+
+    await user.click(link);
+
+    await waitFor(() =>
+      expect(router.state.location.pathname).toBe(
+        `/characters/${encodeURIComponent(PERSON)}/stroke-order`,
+      ),
+    );
+
+    // Màn xem thứ tự nét (S6.1) của đúng chữ 人 hiện, khung viết không còn.
+    expect(
+      await screen.findByRole(
+        'img',
+        { name: `Thứ tự nét chữ ${PERSON}` },
+        { timeout: 3000 },
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('figure', { name: `Khung viết chữ ${PERSON}` }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('S6.2-AC1 Chữ không có dữ liệu nét: should show "Chưa có dữ liệu nét cho chữ này." without writing pad or hanzi-writer, keeping "Xem thứ tự nét" link, when opening /characters/龘/writing-practice', async () => {
+    openRoute(
+      `/characters/${encodeURIComponent(NO_STROKE_DATA)}/writing-practice`,
+    );
+
+    // Màn đã mở và đã đọc danh sách chữ có dữ liệu nét.
+    await screen.findByRole('heading', { name: 'Tập viết' }, { timeout: 3000 });
+    await waitFor(() =>
+      expect(env.strokeFetch.requests).toContain('/content/strokes/index.json'),
+    );
+
+    expect(
+      await screen.findByText('Chưa có dữ liệu nét cho chữ này.'),
+    ).toBeInTheDocument();
+
+    // Không có khung viết, không tạo hanzi-writer.
+    expect(screen.queryByRole('figure')).not.toBeInTheDocument();
+    expect(document.querySelectorAll('figure')).toHaveLength(0);
+    expect(FakeHanziWriter.instances).toHaveLength(0);
+
+    // Liên kết về màn xem thứ tự nét của đúng chữ vẫn có.
+    expect(
+      screen.getByRole('link', { name: 'Xem thứ tự nét' }),
+    ).toHaveAttribute(
+      'href',
+      `/characters/${encodeURIComponent(NO_STROKE_DATA)}/stroke-order`,
+    );
+  });
+
+  it('S6.2-AC2 Báo ngay khi viết sai nét: should show alert "Sai nét. Viết lại nét này." right after a long wrong stroke on 十, keeping no stroke', async () => {
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    // Trước khi viết sai: chưa có thông báo nào.
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+
+    // Ngay sau khi thả tay (không chờ thêm): thông báo viết sai hiện.
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Sai nét. Viết lại nét này.',
+    );
+    // Nét sai không được giữ: chưa có nét nào hoàn thành.
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '0');
+  });
+
+  it('S6.2-AC2 Nét sai bị xoá và được viết lại: should keep no stroke after a long wrong stroke on 十 and keep the quiz running, then accept the redrawn stroke (count 1)', async () => {
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+
+    // Nét sai không được giữ.
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '0');
+    // Bài không bị chặn hay kết thúc: quiz vẫn chạy, không có màn hoàn thành.
+    expect(writer.isQuizActive).toBe(true);
+    expect(writer.calls.map((call) => call.method)).not.toContain('cancelQuiz');
+    expect(screen.queryByText(/Đã viết xong/)).not.toBeInTheDocument();
+
+    // Viết lại nét đó, lần này đúng: được nhận.
+    act(() => writer.emitCorrectStroke());
+
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '1');
+    expect(writer.isQuizActive).toBe(true);
+  });
+
+  it('S6.2-AC2 Nét sai bị xoá và được viết lại: should still accept the redrawn first stroke of 十 after 5 consecutive wrong strokes, without ending the quiz (TC-S6.2-AC2-7)', async () => {
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    for (let attempt = 1; attempt <= 5; attempt += 1) {
+      act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+
+      // Sau mỗi lần sai: không nét nào tồn đọng, bài vẫn chạy.
+      expect(pad).toHaveAttribute('data-completed-stroke-count', '0');
+      expect(writer.isQuizActive).toBe(true);
+    }
+    expect(writer.calls.map((call) => call.method)).not.toContain('cancelQuiz');
+    expect(screen.queryByText(/Đã viết xong/)).not.toBeInTheDocument();
+
+    act(() => writer.emitCorrectStroke());
+
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '1');
+    expect(writer.isQuizActive).toBe(true);
+    expect(writer.calls.map((call) => call.method)).not.toContain('cancelQuiz');
+    expect(screen.queryByText(/Đã viết xong/)).not.toBeInTheDocument();
+  });
+
+  it('S6.2-AC2 Thông báo sai đọc được bằng trình đọc màn hình: should announce the mistake via role="alert" while keeping keyboard focus on the writing pad of 十', async () => {
+    const user = userEvent.setup();
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    // Đưa focus vào khung viết bằng Tab (giới hạn số lần để không lặp vô hạn).
+    for (
+      let press = 0;
+      press < 20 && document.activeElement !== pad;
+      press += 1
+    ) {
+      await user.tab();
+    }
+    expect(pad).toHaveFocus();
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+
+    // Thông báo được đọc cho trình đọc màn hình (live region role="alert").
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Sai nét. Viết lại nét này.',
+    );
+    // Focus không bị mất khỏi khung viết.
+    await waitFor(() => expect(document.activeElement).toBe(pad));
+    expect(pad).toHaveFocus();
+  });
+
+  it('S6.2-AC2 Lần sai liên tiếp sau cũng được đọc lại: should render a new alert node with the same text on the second consecutive long wrong stroke on 十', async () => {
+    const { writer } = await openShiPadWithActiveQuiz();
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+    const firstAlert = screen.getByRole('alert');
+    expect(firstAlert).toHaveTextContent('Sai nét. Viết lại nét này.');
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+    const secondAlert = screen.getByRole('alert');
+
+    // Cùng nội dung, nhưng là live region mới chèn vào DOM, nên trình đọc màn hình
+    // đọc lại; giữ nguyên nút cũ thì lần sai thứ hai không được đọc.
+    expect(secondAlert).toHaveTextContent('Sai nét. Viết lại nét này.');
+    expect(secondAlert).not.toBe(firstAlert);
+    expect(firstAlert).not.toBeInTheDocument();
+  });
+
+  it('S6.2-AC2 Viết đúng thì thông báo sai biến mất: should remove the mistake alert after a long wrong stroke on 十 is followed by the correct stroke', async () => {
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Sai nét. Viết lại nét này.',
+    );
+
+    act(() => writer.emitCorrectStroke());
+
+    // Nét được nhận và thông báo sai không còn hiện.
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '1');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Sai nét. Viết lại nét này.'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('S6.2-AC3 Sai 3 lần liên tiếp thì hiện gợi ý: should show exactly one hint path for the vertical stroke of 十 (index 1) on the third consecutive wrong stroke, not before', async () => {
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    // Nét ngang (nét 0) viết đúng; nét hiện tại là nét sổ (nét 1).
+    act(() => writer.emitCorrectStroke());
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '1');
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+
+    // Sau 2 lần sai: chưa có gợi ý.
+    expect(pad.querySelector('.writing-pad-hint')).toBeNull();
+    expect(pad).not.toHaveAttribute('data-hint-stroke-index');
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+
+    // Lần sai thứ 3: gợi ý đúng một nét, là nét sổ đang phải viết.
+    const hintPaths = pad.querySelectorAll('.writing-pad-hint path');
+    expect(hintPaths).toHaveLength(1);
+    expect(hintPaths[0]).toHaveAttribute('d', STROKE_DATA_SHI.strokes[1]);
+    expect(pad).toHaveAttribute('data-hint-stroke-index', '1');
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '1');
+  });
+});
