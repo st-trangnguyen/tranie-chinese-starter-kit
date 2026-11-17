@@ -96,19 +96,19 @@ Test chung `content/scripts/content-check/introLessons.test.ts` (+ `introLessons
 đọc output build trong `apps/web/src/assets/` qua `PATHS`, parse Zod. Viết các RED 6.1–6.13 trên nội dung hiện có (1 bài mẫu)
 nên fail vì thiếu nội dung; GREEN là soạn YAML + sinh lại (task 6.14–6.16).
 
-- [ ] 6.1 RED: S7.1-AC2 "Lộ trình có đủ 12 bài Nhập môn đúng thứ tự" (phần nội dung) — `content.json`: stage đầu "Nhập môn", đúng một unit (`id` `intro-basics`, `title` "Pinyin và chữ Hán cơ bản", design D1), 12 lessonIds; title các bài khớp `INTRO_LESSON_TITLES` từng ký tự; kiểm: fail (1 bài)
-- [ ] 6.2 RED: S7.1-AC2 "Không còn bài mẫu cũ" — không bài nào title "Bốn thanh điệu"; kiểm: fail
-- [ ] 6.3 RED: S7.1-AC1 "Mỗi bài có ít nhất 2 dạng bài tập" — mỗi bài ≥ 2 kind khác nhau; kiểm: fail (thiếu bài)
-- [ ] 6.4 RED: S7.1-AC1 "Mỗi bài có câu nghe" (phần nội dung) — mỗi bài ≥ 1 câu thuộc `LISTEN_KINDS`; kiểm: fail
-- [ ] 6.5 RED: S7.1-AC1 "Mọi câu thuộc dạng đã hỗ trợ" (phần nội dung) — mọi kind ∈ `SUPPORTED_KINDS`; kiểm: fail (thiếu bài)
-- [ ] 6.6 RED: S7.1-AC1 "Mọi từ và câu của bài đều có audio" — mọi từ/câu mà câu `AUDIO_KINDS` dùng có file mp3 trong `apps/web/src/assets/` kích thước > 0; kiểm: fail
-- [ ] 6.7 RED: S7.1-AC1 "Bài 2 không hỏi từ có biến điệu trong câu chọn thanh và gõ pinyin" — `intro-02`: không câu `tone-choice`/`pinyin-type` có từ chứa 不, 一, hoặc hai âm tiết thanh 3 liền nhau (`parsePinyin`); kiểm: fail vì chưa có `intro-02`
-- [ ] 6.8 RED: S7.1-AC1 "Bài 2 có câu nói theo mẫu với từ có biến điệu" — `intro-02` có ≥ 1 câu `speak` dùng từ/câu có 不, 一, hoặc hai thanh 3 liền nhau; kiểm: fail
-- [ ] 6.9 RED: S7.1-AC2 "Bài "Nét cơ bản và thứ tự nét" có câu viết" — `intro-10` có câu viết 人 và câu viết 十 (theo `word.hanzi`); kiểm: fail
-- [ ] 6.10 RED: S7.1-AC2 "Bài "30 bộ thủ phổ biến" có câu viết" — `intro-11` có ≥ 1 câu `stroke-write`; kiểm: fail
-- [ ] 6.11 RED: S7.1-AC2 "Câu viết của bài "30 bộ thủ phổ biến" là chữ trong từ điển" — mỗi câu viết `intro-11` trỏ tới từ trong `words.json` (HSK 1), `hanzi` một chữ, có trong `strokes/index.json`; kiểm: fail
-- [ ] 6.12 RED: S7.1-AC3 "Mọi câu viết của 12 bài có dữ liệu nét" — mọi câu viết của 12 bài: `hanCharacterSchema` khớp `word.hanzi`, chữ có trong `strokes/index.json` và có file `strokes/<chữ>.json`; kiểm: fail (bài mẫu có 1 câu viết nhưng chưa đủ 12 bài — assertion số bài đứng trước)
-- [ ] 6.13 Commit các RED 6.1–6.12 một lần `test(content): …`, ghi output fail
+- [x] 6.1 RED: S7.1-AC2 "Lộ trình có đủ 12 bài Nhập môn đúng thứ tự" (phần nội dung) — `content.json`: stage đầu "Nhập môn", đúng một unit (`id` `intro-basics`, `title` "Pinyin và chữ Hán cơ bản", design D1), 12 lessonIds; title các bài khớp `INTRO_LESSON_TITLES` từng ký tự; kiểm: fail (1 bài)
+- [x] 6.2 RED: S7.1-AC2 "Không còn bài mẫu cũ" — không bài nào title "Bốn thanh điệu"; kiểm: fail
+- [x] 6.3 RED: S7.1-AC1 "Mỗi bài có ít nhất 2 dạng bài tập" — mỗi bài ≥ 2 kind khác nhau; kiểm: fail (thiếu bài)
+- [x] 6.4 RED: S7.1-AC1 "Mỗi bài có câu nghe" (phần nội dung) — mỗi bài ≥ 1 câu thuộc `LISTEN_KINDS`; kiểm: fail
+- [x] 6.5 RED: S7.1-AC1 "Mọi câu thuộc dạng đã hỗ trợ" (phần nội dung) — mọi kind ∈ `SUPPORTED_KINDS`; kiểm: fail (thiếu bài)
+- [x] 6.6 RED: S7.1-AC1 "Mọi từ và câu của bài đều có audio" — mọi từ/câu mà câu `AUDIO_KINDS` dùng có file mp3 trong `apps/web/src/assets/` kích thước > 0; kiểm: fail
+- [x] 6.7 RED: S7.1-AC1 "Bài 2 không hỏi từ có biến điệu trong câu chọn thanh và gõ pinyin" — `intro-02`: không câu `tone-choice`/`pinyin-type` có từ chứa 不, 一, hoặc hai âm tiết thanh 3 liền nhau (`parsePinyin`); kiểm: fail vì chưa có `intro-02`
+- [x] 6.8 RED: S7.1-AC1 "Bài 2 có câu nói theo mẫu với từ có biến điệu" — `intro-02` có ≥ 1 câu `speak` dùng từ/câu có 不, 一, hoặc hai thanh 3 liền nhau; kiểm: fail
+- [x] 6.9 RED: S7.1-AC2 "Bài "Nét cơ bản và thứ tự nét" có câu viết" — `intro-10` có câu viết 人 và câu viết 十 (theo `word.hanzi`); kiểm: fail
+- [x] 6.10 RED: S7.1-AC2 "Bài "30 bộ thủ phổ biến" có câu viết" — `intro-11` có ≥ 1 câu `stroke-write`; kiểm: fail
+- [x] 6.11 RED: S7.1-AC2 "Câu viết của bài "30 bộ thủ phổ biến" là chữ trong từ điển" — mỗi câu viết `intro-11` trỏ tới từ trong `words.json` (HSK 1), `hanzi` một chữ, có trong `strokes/index.json`; kiểm: fail
+- [x] 6.12 RED: S7.1-AC3 "Mọi câu viết của 12 bài có dữ liệu nét" — mọi câu viết của 12 bài: `hanCharacterSchema` khớp `word.hanzi`, chữ có trong `strokes/index.json` và có file `strokes/<chữ>.json`; kiểm: fail (bài mẫu có 1 câu viết nhưng chưa đủ 12 bài — assertion số bài đứng trước)
+- [x] 6.13 Commit các RED 6.1–6.12 một lần `test(content): …`, ghi output fail
 - [ ] 6.14 GREEN (nội dung): soạn 12 file `content/authored/lessons/intro/NN-<slug>.yaml` theo D1 (đổi `01-thanh-dieu.yaml` → `01-thanh-1-4.yaml`), sửa `path.yaml` (một unit `intro-basics` "Pinyin và chữ Hán cơ bản" thay `intro-pronunciation` "Phát âm", 12 bài), thêm nghĩa/override TTS nếu cần; chạy `pnpm --filter @csk/content content:build`; kiểm: không lỗi build
 - [ ] 6.15 GREEN (audio + font): `pnpm --filter @csk/content content:audio` (cần mạng) và `pnpm --filter @csk/content font:subset`; kiểm: không còn audio thiếu, font có chữ mới
 - [ ] 6.16 GREEN: kiểm: test 6.1–6.12 pass
