@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   PERSON,
   answerToneChoiceAndContinue,
+  findLessonPad,
   renderLessonRunner,
   setupLessonStrokeWrite,
 } from '@test/lesson-stroke-write.helpers';
@@ -106,4 +107,31 @@ describe('LessonRunnerContainer — trạng thái tải câu viết', () => {
       ).not.toBeInTheDocument();
     },
   );
+  it('S7.1-AC1 Câu viết thử lại sau khi tải lỗi: should hide the alert and show the writing pad with the "Xem thứ tự nét" link after "Thử lại" once 人.json loads', async () => {
+    env.replaceFetch({
+      strokeOverrides: { '人.json': () => new Response('', { status: 500 }) },
+    });
+    const { user } = renderLessonRunner();
+    await answerToneChoiceAndContinue(user);
+
+    const alerts = await screen.findAllByRole('alert');
+    expect(alerts.map((alert) => alert.textContent).join(' ')).toContain(
+      'Có lỗi xảy ra',
+    );
+
+    // Mạng đã ổn: file nét của 人 tải được bình thường.
+    const strokeFetch = env.replaceFetch({});
+    await user.click(screen.getByRole('button', { name: 'Thử lại' }));
+
+    expect(await findLessonPad(PERSON)).toBeInTheDocument();
+    expect(
+      strokeFetch.requests.some((url) =>
+        decodeURIComponent(url).endsWith(`/${PERSON}.json`),
+      ),
+    ).toBe(true);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Xem thứ tự nét' }),
+    ).toBeInTheDocument();
+  });
 });
