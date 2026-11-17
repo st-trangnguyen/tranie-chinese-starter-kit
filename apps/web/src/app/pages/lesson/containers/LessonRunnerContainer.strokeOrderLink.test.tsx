@@ -4,10 +4,12 @@ import {
   LESSON_ID,
   PERSON,
   answerToneChoiceAndContinue,
+  emitCorrectStroke,
   findLessonPad,
   setupLessonStrokeWrite,
+  waitForActiveQuiz,
 } from '@test/lesson-stroke-write.helpers';
-import { screen, userEvent } from '@test/render';
+import { act, screen, userEvent, waitFor } from '@test/render';
 import { openRoute, type TestRouter } from '@test/stroke-order-route';
 
 // Ranh giới ngoài: thư viện vẽ/chấm nét hanzi-writer được thay bằng bản giả điều khiển được.
@@ -103,5 +105,28 @@ describe('LessonRunnerContainer — lối vào thứ tự nét từ câu viết'
     await user.keyboard('{Enter}');
 
     await expectPersonStrokeOrderScreen(router);
+  });
+
+  it('S7.1-AC2 Quay lại bài từ màn thứ tự nét: should show "Câu 2 / 3" with an empty 人 writing pad after opening the stroke order screen from question 2 and going back', async () => {
+    const { router, user } = await openLessonAtPersonWrite();
+    const writer = await waitForActiveQuiz(PERSON);
+    emitCorrectStroke(writer);
+    await waitFor(() => {
+      expect(
+        screen.getByRole('figure', { name: `Khung viết chữ ${PERSON}` }),
+      ).toHaveAttribute('data-completed-stroke-count', '1');
+    });
+
+    await user.click(getStrokeOrderLink());
+    await expectPersonStrokeOrderScreen(router);
+
+    await act(async () => {
+      await router.navigate(-1);
+    });
+
+    const pad = await findLessonPad(PERSON);
+    expect(router.state.location.pathname).toBe(LESSON_PATH);
+    expect(screen.getByRole('progressbar')).toHaveAccessibleName('Câu 2 / 3');
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '0');
   });
 });
