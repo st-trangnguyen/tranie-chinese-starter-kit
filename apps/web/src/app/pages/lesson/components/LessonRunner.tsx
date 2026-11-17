@@ -13,7 +13,7 @@ import { LessonStrokeWrite } from './LessonStrokeWrite';
 export interface LessonRunnerHandlers {
   onResult: (result: ExerciseResult) => void;
   onContinue: () => void;
-  /** Bỏ qua câu có dạng bài chưa được hỗ trợ. */
+  /** Bỏ qua câu hiện tại (dạng bài chưa hỗ trợ, hoặc câu viết không tải được dữ liệu nét). */
   onSkip: () => void;
 }
 
@@ -43,6 +43,7 @@ export const LessonRunner = ({
         key={exercise.id}
         strokeWrite={strokeWrite}
         isAnswered={feedback !== null}
+        onSkip={handlers.onSkip}
       />
     ) : (
       <p role="status">{t('writing-practice:loading')}</p>
@@ -65,7 +66,7 @@ export const LessonRunner = ({
           className="btn btn-ghost"
           onClick={handlers.onSkip}
         >
-          {t('unsupported.skip')}
+          {t('skip')}
         </button>
       </div>
     );

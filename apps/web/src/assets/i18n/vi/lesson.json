@@ -7,9 +7,9 @@
     "incorrect": "Sai",
     "continue": "Tiếp tục"
   },
+  "skip": "Bỏ qua câu này",
   "unsupported": {
-    "message": "Dạng bài này chưa có.",
-    "skip": "Bỏ qua câu này"
+    "message": "Dạng bài này chưa có."
   },
   "listen": {
     "play": "Nghe",

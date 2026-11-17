@@ -61,8 +61,8 @@ Test chung `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.strok
 
 - [x] 4.1 RED: S7.1-AC1 "Câu viết đang tải dữ liệu nét" — override trả `Promise` chưa resolve: status "Đang tải…"; không figure, không link "Xem thứ tự nét", không "Tiếp tục"; kiểm: fail vì nhánh `loading` chưa render
 - [x] 4.2 GREEN: nhánh `loading`; kiểm: test 4.1 pass
-- [ ] 4.3 RED: S7.1-AC1 "Câu viết tải dữ liệu nét lỗi" — override 500 (và JSON hỏng): alert "Có lỗi xảy ra", nút "Thử lại", nút "Bỏ qua câu này"; không figure, không link, không "Chưa có dữ liệu nét cho chữ này."; kiểm: fail
-- [ ] 4.4 GREEN: nhánh `error`; thêm key `lesson:skip`, `LessonRunner` nhánh dạng chưa hỗ trợ chuyển sang `skip`; kiểm: test 4.3 pass, test S3.2-X1 cũ vẫn pass
+- [x] 4.3 RED: S7.1-AC1 "Câu viết tải dữ liệu nét lỗi" — override 500 (và JSON hỏng): alert "Có lỗi xảy ra", nút "Thử lại", nút "Bỏ qua câu này"; không figure, không link, không "Chưa có dữ liệu nét cho chữ này."; kiểm: fail
+- [x] 4.4 GREEN: nhánh `error`; thêm key `lesson:skip`, `LessonRunner` nhánh dạng chưa hỗ trợ chuyển sang `skip`; kiểm: test 4.3 pass, test S3.2-X1 cũ vẫn pass
 - [ ] 4.5 RED: S7.1-AC1 "Câu viết thử lại sau khi tải lỗi" — lỗi lần đầu, thay mock bằng bản thành công, bấm "Thử lại": hết alert, có figure "Khung viết chữ 人" và link "Xem thứ tự nét"; kiểm: fail vì chưa nối `retry`
 - [ ] 4.6 GREEN: `retry` trong hook (`attempt`), nối nút; kiểm: test 4.5 pass
 - [ ] 4.7 RED: S7.1-AC1 "Câu viết tải lỗi rồi bỏ qua" — bài 3 câu, câu 2 là câu viết lỗi: "Bỏ qua câu này" → "Câu 3 / 3"; làm câu 3 → cuối bài "Bạn đã bỏ qua 1 câu, bài chưa hoàn thành."; IndexedDB không `completed`; kiểm: fail vì chưa nối `onSkip`/câu chữ cũ

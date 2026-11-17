@@ -9,6 +9,8 @@ interface LessonStrokeWriteProps {
   strokeWrite: LessonStrokeWriteView;
   /** Câu đã có kết quả (đang hiện "Đúng" + "Tiếp tục"). */
   isAnswered: boolean;
+  /** Bỏ qua câu viết khi không tải được dữ liệu nét. */
+  onSkip: () => void;
 }
 
 /**
@@ -18,9 +20,29 @@ interface LessonStrokeWriteProps {
 export const LessonStrokeWrite = ({
   strokeWrite,
   isAnswered,
+  onSkip,
 }: LessonStrokeWriteProps) => {
-  const { t } = useTranslation('writing-practice');
-  const { exerciseId, view, practice, recordStrokeAttempt } = strokeWrite;
+  const { t } = useTranslation(['writing-practice', 'lesson', 'common']);
+  const { exerciseId, view, practice, retry, recordStrokeAttempt } =
+    strokeWrite;
+
+  if (view.status === 'error') {
+    return (
+      <div className="flex flex-col items-start gap-md">
+        <p role="alert" className="lesson-stroke-write-message">
+          {t('common:error.title')}
+        </p>
+        <div className="flex flex-wrap gap-sm">
+          <button type="button" className="btn btn-primary" onClick={retry}>
+            {t('common:error.retry')}
+          </button>
+          <button type="button" className="btn btn-ghost" onClick={onSkip}>
+            {t('lesson:skip')}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (view.status === 'ready' && practice) {
     const isMistake =
