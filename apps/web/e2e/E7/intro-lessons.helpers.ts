@@ -48,6 +48,8 @@ const LISTEN_LABEL = 'Nghe';
 const CONTINUE_LABEL = 'Tiếp tục';
 const ANY_PINYIN = 'ma1';
 const PAD_LABEL_PREFIX = 'Khung viết chữ ';
+const UNSUPPORTED_MESSAGE = 'Dạng bài này chưa có.';
+const SKIP_LABEL = 'Bỏ qua câu này';
 
 const builtContentUrl = (path: string): URL =>
   new URL(`../../src/assets/content/${path}`, import.meta.url);
@@ -150,7 +152,7 @@ export const seedCompletedLessons = async (
   await page.reload();
 };
 
-const answerStrokeWrite = async (page: Page, pad: Locator): Promise<void> => {
+const answerStrokeWrite = async (page: Page, pad: Locator): Promise<string> => {
   const label = await pad.getAttribute('aria-label');
   const character = label?.replace(PAD_LABEL_PREFIX, '') ?? '';
   const medians = await readBuiltMedians(page, character);
@@ -158,30 +160,50 @@ const answerStrokeWrite = async (page: Page, pad: Locator): Promise<void> => {
   for (const median of medians) {
     await drawMedian(page, pad, median);
   }
+  return character;
 };
+
+const questionLocators = (page: Page) => ({
+  toneGroup: page.getByRole('group', {
+    name: 'Chọn thanh của âm tiết vừa nghe',
+  }),
+  soundPairGroup: page.getByRole('group', { name: 'Chọn âm vừa nghe' }),
+  pinyinInput: page.getByRole('textbox', {
+    name: 'Gõ pinyin của âm vừa nghe',
+  }),
+  speakGroup: page.getByRole('group', { name: 'Tự đánh giá phát âm' }),
+  pad: page.getByRole('figure', {
+    name: new RegExp(`^${PAD_LABEL_PREFIX}`),
+  }),
+});
+
+/** Phần trả lời của câu đang hiện, thuộc một trong 5 dạng màn bài hỗ trợ. */
+export const currentQuestion = (page: Page): Locator => {
+  const { toneGroup, soundPairGroup, pinyinInput, speakGroup, pad } =
+    questionLocators(page);
+  return toneGroup.or(soundPairGroup).or(pinyinInput).or(speakGroup).or(pad);
+};
+
+export const unsupportedMessage = (page: Page): Locator =>
+  page.getByText(UNSUPPORTED_MESSAGE);
+
+export const skipButton = (page: Page): Locator =>
+  page.getByRole('button', { name: SKIP_LABEL });
 
 /**
  * Trả lời câu đang hiện theo dạng nhìn thấy trên màn rồi bấm "Tiếp tục": chọn đáp án đầu, gõ
  * pinyin bất kỳ rồi "Kiểm tra", câu nói chọn mức tự đánh giá đầu, câu viết vẽ đủ nét theo median.
- * Trả lời sai vẫn hợp lệ.
+ * Trả lời sai vẫn hợp lệ. Trả về chữ của khung viết nếu là câu viết, ngược lại `null`.
  */
-export const answerCurrentQuestion = async (page: Page): Promise<void> => {
-  const toneGroup = page.getByRole('group', {
-    name: 'Chọn thanh của âm tiết vừa nghe',
-  });
-  const soundPairGroup = page.getByRole('group', { name: 'Chọn âm vừa nghe' });
-  const pinyinInput = page.getByRole('textbox', {
-    name: 'Gõ pinyin của âm vừa nghe',
-  });
-  const speakGroup = page.getByRole('group', { name: 'Tự đánh giá phát âm' });
-  const pad = page.getByRole('figure', {
-    name: new RegExp(`^${PAD_LABEL_PREFIX}`),
-  });
+export const answerCurrentQuestion = async (
+  page: Page,
+): Promise<string | null> => {
+  const { toneGroup, soundPairGroup, pinyinInput, speakGroup, pad } =
+    questionLocators(page);
 
-  await expect(
-    toneGroup.or(soundPairGroup).or(pinyinInput).or(speakGroup).or(pad),
-  ).toBeVisible();
+  await expect(currentQuestion(page)).toBeVisible();
 
+  let character: string | null = null;
   if (await toneGroup.isVisible()) {
     await toneGroup.getByRole('button').first().click();
   } else if (await soundPairGroup.isVisible()) {
@@ -192,8 +214,9 @@ export const answerCurrentQuestion = async (page: Page): Promise<void> => {
   } else if (await speakGroup.isVisible()) {
     await speakGroup.getByRole('button').first().click();
   } else {
-    await answerStrokeWrite(page, pad);
+    character = await answerStrokeWrite(page, pad);
   }
 
   await page.getByRole('button', { name: CONTINUE_LABEL }).click();
+  return character;
 };
