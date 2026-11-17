@@ -1,13 +1,15 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   LESSON_ID,
   PERSON,
+  TEN,
   answerToneChoiceAndContinue,
   emitCorrectStroke,
   findLessonPad,
   setupLessonStrokeWrite,
   waitForActiveQuiz,
+  type TestLesson,
 } from '@test/lesson-stroke-write.helpers';
 import { act, screen, userEvent, waitFor } from '@test/render';
 import { openRoute, type TestRouter } from '@test/stroke-order-route';
@@ -18,10 +20,25 @@ vi.mock('hanzi-writer', async () => {
   return { default: mock.FakeHanziWriter };
 });
 
-setupLessonStrokeWrite();
+const env = setupLessonStrokeWrite();
 
 const LESSON_PATH = `/lessons/${LESSON_ID}`;
 const STROKE_ORDER_PATH = `/characters/${encodeURIComponent(PERSON)}/stroke-order`;
+/** Bài 5 câu: câu 1, 2 chọn thanh 八; câu 3 viết 人; câu 4 viết 十; câu 5 chọn thanh 八. */
+const FIVE_EXERCISE_LESSON: TestLesson = {
+  id: LESSON_ID,
+  type: 'lesson',
+  title: 'Bài 5 câu có câu viết',
+  exercises: [
+    { id: 'e1', kind: 'tone-choice', wordId: '八' },
+    { id: 'e2', kind: 'tone-choice', wordId: '八' },
+    { id: 'e3', kind: 'stroke-write', wordId: PERSON },
+    { id: 'e4', kind: 'stroke-write', wordId: TEN },
+    { id: 'e5', kind: 'tone-choice', wordId: '八' },
+  ],
+};
+const START_TIME = new Date('2026-11-17T08:00:00Z');
+const SECOND = 1000;
 /** Số lần Tab tối đa từ đầu trang tới link, đủ rộng cho header + câu viết. */
 const MAX_TAB_PRESSES = 30;
 
@@ -128,5 +145,60 @@ describe('LessonRunnerContainer — lối vào thứ tự nét từ câu viết'
     expect(router.state.location.pathname).toBe(LESSON_PATH);
     expect(screen.getByRole('progressbar')).toHaveAccessibleName('Câu 2 / 3');
     expect(pad).toHaveAttribute('data-completed-stroke-count', '0');
+  });
+
+  describe('quay lại bài từ màn thứ tự nét rồi làm tiếp', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    /** Viết đủ 2 nét đúng của `character` rồi bấm "Tiếp tục". */
+    const writeTwoStrokesAndContinue = async (
+      user: User,
+      character: string,
+    ): Promise<void> => {
+      await findLessonPad(character);
+      const writer = await waitForActiveQuiz(character);
+      emitCorrectStroke(writer);
+      emitCorrectStroke(writer);
+      await user.click(await screen.findByRole('button', { name: 'Tiếp tục' }));
+    };
+
+    it('S7.1-AC2 Quay lại bài thì tổng kết chỉ tính từ câu viết đó: should show "Đúng 3 / 3 câu", "Sai 0 câu" and time 1:00 (not 3:00) after answering questions 1-2, spending 120 s on the 人 writing question, opening "Xem thứ tự nét", going back and finishing questions 3-5 in 60 s', async () => {
+      // Chỉ giả đồng hồ Date; setTimeout thật để user-event và waitFor chạy bình thường.
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(START_TIME);
+      env.replaceFetch({ lesson: FIVE_EXERCISE_LESSON });
+      const { router } = openRoute(LESSON_PATH);
+      const user = userEvent.setup();
+
+      await answerToneChoiceAndContinue(user);
+      await answerToneChoiceAndContinue(user);
+      await findLessonPad(PERSON);
+      expect(screen.getByRole('progressbar')).toHaveAccessibleName('Câu 3 / 5');
+
+      vi.setSystemTime(START_TIME.getTime() + 120 * SECOND);
+      await user.click(getStrokeOrderLink());
+      await expectPersonStrokeOrderScreen(router);
+      await act(async () => {
+        await router.navigate(-1);
+      });
+
+      await writeTwoStrokesAndContinue(user, PERSON);
+      await writeTwoStrokesAndContinue(user, TEN);
+      await user.click(await screen.findByRole('button', { name: 'Thanh 1' }));
+      vi.setSystemTime(START_TIME.getTime() + 180 * SECOND);
+      await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+
+      expect(
+        await screen.findByText('Bạn đã làm xong các câu của bài này.'),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Đúng 3 / 3 câu')).toBeInTheDocument();
+      expect(screen.getByText('Sai 0 câu')).toBeInTheDocument();
+      // Mục "Thời gian" (m:ss): 60 s từ lúc mở lại bài, không phải 180 s từ lúc mở lần đầu.
+      const timeItem = screen.getByText('Thời gian').closest('div');
+      expect(timeItem).toHaveTextContent('1:00');
+      expect(timeItem).not.toHaveTextContent('3:00');
+    });
   });
 });

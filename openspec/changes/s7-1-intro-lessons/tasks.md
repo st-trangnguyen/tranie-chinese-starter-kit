@@ -85,8 +85,8 @@ qua bảng route thật (`src/test/stroke-order-route.tsx`), `LocationProbe` ho�
 - [x] 5.4 GREEN: sửa đến khi pass; kiểm: test 5.3 pass
 - [x] 5.5 RED: S7.1-AC2 "Quay lại bài từ màn thứ tự nét" — bài 3 câu, làm câu 1, tới câu viết 2 vẽ 1 nét đúng, bấm link, `router.navigate(-1)`: "Câu 2 / 3", figure 人 `data-completed-stroke-count="0"`; kiểm: chạy, nếu pass ngay (luật làm tiếp S3.3) thì tạm bỏ lưu `cursor` khi đổi câu để thấy fail rồi trả lại
 - [x] 5.6 GREEN: sửa đến khi pass (không thêm code nếu luật làm tiếp đã đủ); kiểm: test 5.5 pass
-- [ ] 5.7 RED: S7.1-AC2 "Quay lại bài thì tổng kết chỉ tính từ câu viết đó" — bài 5 câu, đúng câu 1, 2; câu 3 câu viết: bấm link, back, rồi đúng câu 3, 4, 5: "Đúng 3 / 3 câu", "Sai 0 câu"; thời gian: `vi.setSystemTime` +120 s trước khi bấm link, +60 s trước khi xong → hiện thời gian 1 phút (không phải 3 phút); kiểm: chạy, nếu pass ngay thì tạm giữ `startedAt` cũ khi mở lại bài để thấy fail rồi trả lại
-- [ ] 5.8 GREEN: sửa đến khi pass; kiểm: test 5.7 pass
+- [x] 5.7 RED: S7.1-AC2 "Quay lại bài thì tổng kết chỉ tính từ câu viết đó" — bài 5 câu, đúng câu 1, 2; câu 3 câu viết: bấm link, back, rồi đúng câu 3, 4, 5: "Đúng 3 / 3 câu", "Sai 0 câu"; thời gian: `vi.setSystemTime` +120 s trước khi bấm link, +60 s trước khi xong → hiện thời gian 1 phút (không phải 3 phút); kiểm: chạy, nếu pass ngay thì tạm giữ `startedAt` cũ khi mở lại bài để thấy fail rồi trả lại
+- [x] 5.8 GREEN: sửa đến khi pass; kiểm: test 5.7 pass
 - [ ] 5.9 RED: S7.1-AC1 "Nút Nghe phát đúng từ hoặc câu đang hiện" — `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.audio.test.tsx`, registry thật, FakeAudio (mẫu `ListenButton.test.tsx`), từ thử có `audio` khác nhau: ở câu `tone-choice`, `sound-pair`, `pinyin-type` bấm "Nghe" → `src` là audio của đúng từ câu đó hỏi; câu `speak` bấm "Nghe mẫu" → audio của câu; sau "Tiếp tục" bấm "Nghe" ở câu mới → không phải audio câu trước; kiểm: chạy, nếu pass ngay (hành vi S4.4) thì tạm bỏ `key={exercise.id}` và truyền `content` của câu trước để thấy fail rồi trả lại
 - [ ] 5.10 GREEN: sửa đến khi pass; kiểm: test 5.9 pass
 
