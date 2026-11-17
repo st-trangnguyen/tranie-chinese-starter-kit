@@ -13,15 +13,16 @@ interface WritingPracticeScreenProps {
 /** Phần thân màn theo trạng thái tải dữ liệu nét. */
 function WritingPracticeBody({ character }: WritingPracticeScreenProps) {
   const { t } = useTranslation(['writing-practice', 'common']);
-  const { view, practice, retry, recordStrokeAttempt } =
+  const { view, practice, padKey, retry, recordStrokeAttempt, restart } =
     useWritingPractice(character);
 
   const handleRetry = () => {
     retry();
   };
 
-  /** Chưa có hành vi: `restart()` của hook (lượt mới + dựng lại khung) làm ở task 4.20. */
-  const handleRestart = () => undefined;
+  const handleRestart = () => {
+    restart();
+  };
 
   if (view.status === 'error') {
     return (
@@ -42,6 +43,7 @@ function WritingPracticeBody({ character }: WritingPracticeScreenProps) {
     return (
       <>
         <StrokeWritingPad
+          key={padKey}
           character={view.character}
           strokeData={view.strokeData}
           practice={practice}
