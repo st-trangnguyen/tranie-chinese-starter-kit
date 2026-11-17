@@ -158,3 +158,147 @@ export const expectVisibleFocusRing = async (
   expect(ring.outlineWidth).toBeGreaterThan(0);
   expect(ring.contrast).toBeGreaterThanOrEqual(MIN_FOCUS_CONTRAST);
 };
+
+/** Một điểm median trong toạ độ dữ liệu nét (hộp 1024, trục y hướng lên). */
+export type MedianPoint = readonly [number, number];
+
+interface ScreenPoint {
+  x: number;
+  y: number;
+}
+
+interface DrawOptions {
+  /** `false`: giữ chuột sau khi kéo hết median (đang viết, chưa nhả). */
+  isReleased?: boolean;
+  steps?: number;
+}
+
+/** Đường gốc của trục y lật trong `STROKE_PATH_TRANSFORM` (`translate(0, 900) scale(1, -1)`). */
+const STROKE_BASELINE_Y = 900;
+const DEFAULT_DRAW_STEPS = 8;
+
+const isMedianPoint = (value: unknown): value is MedianPoint =>
+  Array.isArray(value) &&
+  value.length === 2 &&
+  typeof value[0] === 'number' &&
+  typeof value[1] === 'number';
+
+const isMedian = (value: unknown): value is MedianPoint[] =>
+  Array.isArray(value) && value.every(isMedianPoint);
+
+/** Median từng nét trong file nét bản build — đường đi đúng của mỗi nét. */
+export const readBuiltMedians = async (
+  page: Page,
+  character: string,
+): Promise<MedianPoint[][]> => {
+  const response = await page.request.get(
+    `/content/strokes/${encodeURIComponent(character)}.json`,
+  );
+  expect(response.ok()).toBe(true);
+  const body: unknown = await response.json();
+  if (
+    typeof body !== 'object' ||
+    body === null ||
+    !('medians' in body) ||
+    !Array.isArray(body.medians) ||
+    !body.medians.every(isMedian)
+  ) {
+    throw new Error(`File nét của ${character} không có "medians" hợp lệ.`);
+  }
+  return body.medians;
+};
+
+/** `<svg viewBox="0 0 1024 1024">` của khung (StrokeGlyph), cùng hệ toạ độ với lớp nét mờ. */
+const padSvg = (pad: Locator): Locator =>
+  pad.locator('svg[viewBox="0 0 1024 1024"]').first();
+
+/** `<svg>` đích của thư viện chấm nét (adapter tạo trong host). */
+export const writerSvg = (pad: Locator): Locator =>
+  pad.locator('svg.writing-pad-writer');
+
+/** Chờ thư viện mount renderer vào đích (quiz bắt đầu sau microtask). */
+export const waitForWriterReady = async (pad: Locator): Promise<void> => {
+  await expect(writerSvg(pad)).toHaveCount(1);
+  await expect(writerSvg(pad).locator('g').first()).toBeAttached();
+};
+
+/**
+ * Đổi điểm median (hộp 1024, y lật qua `900 - y`) sang toạ độ màn (CSS px của viewport)
+ * bằng `getScreenCTM()` của `<svg>` khung — độc lập với đích của thư viện.
+ */
+export const toPadScreenPoints = (
+  pad: Locator,
+  points: readonly MedianPoint[],
+): Promise<ScreenPoint[]> =>
+  padSvg(pad).evaluate(
+    (svg, { medianPoints, baselineY }) => {
+      if (!(svg instanceof SVGSVGElement)) {
+        throw new Error('Khung viết không có <svg>.');
+      }
+      const matrix = svg.getScreenCTM();
+      if (!matrix) {
+        throw new Error('<svg> khung không có screen CTM.');
+      }
+      return medianPoints.map(([x, y]) => {
+        const point = new DOMPoint(x, baselineY - y).matrixTransform(matrix);
+        return { x: point.x, y: point.y };
+      });
+    },
+    {
+      medianPoints: points.map(([x, y]) => [x, y]),
+      baselineY: STROKE_BASELINE_Y,
+    },
+  );
+
+/** Vẽ bằng chuột theo median: nhấn ở điểm đầu, kéo qua từng điểm (có `steps`), nhả ở điểm cuối. */
+export const drawMedian = async (
+  page: Page,
+  pad: Locator,
+  median: readonly MedianPoint[],
+  { isReleased = true, steps = DEFAULT_DRAW_STEPS }: DrawOptions = {},
+): Promise<ScreenPoint[]> => {
+  const screenPoints = await toPadScreenPoints(pad, median);
+  const [start, ...rest] = screenPoints;
+  if (!start) {
+    throw new Error('Median rỗng.');
+  }
+  await page.mouse.move(start.x, start.y);
+  await page.mouse.down();
+  for (const point of rest) {
+    await page.mouse.move(point.x, point.y, { steps });
+  }
+  if (isReleased) {
+    await page.mouse.up();
+  }
+  return screenPoints;
+};
+
+/** Nhấp một điểm (hộp 1024) trong khung, không kéo. */
+export const tapPadPoint = async (
+  page: Page,
+  pad: Locator,
+  point: MedianPoint,
+): Promise<void> => {
+  const [screenPoint] = await toPadScreenPoints(pad, [point]);
+  if (!screenPoint) {
+    throw new Error('Không đổi được toạ độ điểm chạm.');
+  }
+  await page.mouse.click(screenPoint.x, screenPoint.y);
+};
+
+/** Số nét người viết còn nhìn thấy: còn trong DOM và tích `opacity` tới khung > 0. */
+export const visibleUserStrokeCount = (pad: Locator): Promise<number> =>
+  pad.evaluate((figure) => {
+    const paths = figure.querySelectorAll(
+      'svg.writing-pad-writer path[stroke-linejoin="round"]',
+    );
+    return Array.from(paths).filter((path) => {
+      let opacity = 1;
+      let node: Element | null = path;
+      while (node && node !== figure) {
+        opacity *= Number.parseFloat(getComputedStyle(node).opacity);
+        node = node.parentElement;
+      }
+      return opacity > 0;
+    }).length;
+  });
