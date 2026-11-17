@@ -110,8 +110,8 @@ nên fail vì thiếu nội dung; GREEN là soạn YAML + sinh lại (task 6.14�
 - [x] 6.12 RED: S7.1-AC3 "Mọi câu viết của 12 bài có dữ liệu nét" — mọi câu viết của 12 bài: `hanCharacterSchema` khớp `word.hanzi`, chữ có trong `strokes/index.json` và có file `strokes/<chữ>.json`; kiểm: fail (bài mẫu có 1 câu viết nhưng chưa đủ 12 bài — assertion số bài đứng trước)
 - [x] 6.13 Commit các RED 6.1–6.12 một lần `test(content): …`, ghi output fail
 - [x] 6.14 GREEN (nội dung): soạn 12 file `content/authored/lessons/intro/NN-<slug>.yaml` theo D1 (đổi `01-thanh-dieu.yaml` → `01-thanh-1-4.yaml`), sửa `path.yaml` (một unit `intro-basics` "Pinyin và chữ Hán cơ bản" thay `intro-pronunciation` "Phát âm", 12 bài), thêm nghĩa/override TTS nếu cần; chạy `pnpm --filter @csk/content content:build`; kiểm: không lỗi build
-- [ ] 6.15 GREEN (audio + font): `pnpm --filter @csk/content content:audio` (cần mạng) và `pnpm --filter @csk/content font:subset`; kiểm: không còn audio thiếu, font có chữ mới
-- [ ] 6.16 GREEN: kiểm: test 6.1–6.12 pass
+- [x] 6.15 GREEN (audio + font): `pnpm --filter @csk/content content:audio` (cần mạng) và `pnpm --filter @csk/content font:subset`; kiểm: không còn audio thiếu, font có chữ mới
+- [x] 6.16 GREEN: kiểm: test 6.1–6.12 pass
 - [ ] 6.17 RED/GREEN: S7.1-AC3 "Kiểm tra nội dung chạy qua" và "Nội dung đã build khớp file soạn" — RED: sau 6.14 sửa một YAML (vd thêm câu) mà chưa build lại, `pnpm content:check` exit 1 với "Output chưa khớp nguồn"; hoàn tác; GREEN: `pnpm content:check` exit 0, 0 lỗi (cảnh báo nghĩa chưa review được phép) — ngoại lệ test-first: lệnh kiểm tra của pipeline là test; kiểm: ghi output thật
 
 ## 7. Luồng thật, offline — e2e Playwright (`apps/web/e2e/E7/`)
