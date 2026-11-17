@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import { ROUTE_PATHS } from '@core/constants/app.constants';
 import { StrokeWritingPad } from '@shared/components/exercises/StrokeWritingPad';
+import { WritingPracticeFeedback } from '../components/WritingPracticeFeedback';
 import { useWritingPractice } from '../hooks/useWritingPractice';
 
 interface WritingPracticeScreenProps {
@@ -36,12 +37,15 @@ function WritingPracticeBody({ character }: WritingPracticeScreenProps) {
   }
   if (view.status === 'ready' && practice) {
     return (
-      <StrokeWritingPad
-        character={view.character}
-        strokeData={view.strokeData}
-        practice={practice}
-        onStrokeAttempt={recordStrokeAttempt}
-      />
+      <>
+        <StrokeWritingPad
+          character={view.character}
+          strokeData={view.strokeData}
+          practice={practice}
+          onStrokeAttempt={recordStrokeAttempt}
+        />
+        <WritingPracticeFeedback practice={practice} />
+      </>
     );
   }
   return (

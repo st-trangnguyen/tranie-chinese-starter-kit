@@ -1,6 +1,7 @@
 {
   "title": "Tập viết",
   "padLabel": "Khung viết chữ {{character}}",
+  "mistake": "Sai nét. Viết lại nét này.",
   "strokeOrderLink": "Xem thứ tự nét",
   "loading": "Đang tải…",
   "unavailable": "Chưa có dữ liệu nét cho chữ này."
