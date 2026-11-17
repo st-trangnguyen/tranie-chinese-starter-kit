@@ -33,6 +33,7 @@ export function StrokeWritingPad({
 
   return (
     <figure
+      tabIndex={0}
       aria-label={t('padLabel', { character })}
       data-completed-stroke-count={practice.completedStrokeCount}
       className="writing-pad flex flex-col"
