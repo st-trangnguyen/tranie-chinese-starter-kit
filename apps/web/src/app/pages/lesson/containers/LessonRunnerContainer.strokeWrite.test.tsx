@@ -2,11 +2,15 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   PERSON,
+  STROKE_WRITE_LESSON,
+  TEN,
   answerToneChoiceAndContinue,
+  emitMistake,
   findLessonPad,
   outlinePathsOf,
   renderLessonRunner,
   setupLessonStrokeWrite,
+  waitForActiveQuiz,
 } from '@test/lesson-stroke-write.helpers';
 import { screen } from '@test/render';
 
@@ -16,9 +20,18 @@ vi.mock('hanzi-writer', async () => {
   return { default: mock.FakeHanziWriter };
 });
 
-setupLessonStrokeWrite();
+const env = setupLessonStrokeWrite();
 
 const MAX_TABS = 20;
+
+/** Bài thử đưa câu viết 十 lên ngay sau câu chọn thanh. */
+const TEN_FIRST_LESSON = {
+  ...STROKE_WRITE_LESSON,
+  exercises: [
+    { id: 'e1', kind: 'tone-choice', wordId: '八' },
+    { id: 'e3', kind: 'stroke-write', wordId: TEN },
+  ],
+};
 
 describe('LessonRunnerContainer — câu viết', () => {
   it('S7.1-AC1 Câu viết hiện khung viết của đúng chữ: should show the empty writing pad of 人 with its 2-stroke outline, without the unsupported-kind fallback, when reaching the stroke-write exercise', async () => {
@@ -52,5 +65,24 @@ describe('LessonRunnerContainer — câu viết', () => {
 
     expect(document.activeElement).toBe(pad);
     expect(pad).toHaveAccessibleName(expect.stringContaining(PERSON));
+  });
+
+  it('S7.1-AC1 Viết sai nét trong câu viết chưa kết thúc câu: should show alert "Sai nét. Viết lại nét này." without "Đúng", "Sai" or a "Tiếp tục" button after a long wrong stroke on 十', async () => {
+    env.replaceFetch({ lesson: TEN_FIRST_LESSON });
+    const { user } = renderLessonRunner();
+    await answerToneChoiceAndContinue(user);
+    await findLessonPad(TEN);
+    const writer = await waitForActiveQuiz(TEN);
+
+    emitMistake(writer);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Sai nét. Viết lại nét này.',
+    );
+    expect(screen.queryByText('Đúng')).not.toBeInTheDocument();
+    expect(screen.queryByText('Sai')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Tiếp tục' }),
+    ).not.toBeInTheDocument();
   });
 });
