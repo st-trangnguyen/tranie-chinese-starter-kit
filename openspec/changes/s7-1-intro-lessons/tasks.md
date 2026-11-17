@@ -79,8 +79,8 @@ Test chung `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.strok
 Test chung `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.strokeOrderLink.test.tsx` — `openRoute('/lessons/l1')`
 qua bảng route thật (`src/test/stroke-order-route.tsx`), `LocationProbe` hoặc heading màn S6.1, `router.navigate(-1)` cho back.
 
-- [ ] 5.1 RED: S7.1-AC2 "Từ câu viết mở màn xem thứ tự nét" — bấm link "Xem thứ tự nét" ở câu viết 人: vị trí `/characters/%E4%BA%BA/stroke-order`, figure "Thứ tự nét chữ 人", link "Tập viết"; kiểm: chạy, nếu pass ngay nhờ 3.14 thì tạm đổi đích link để thấy fail rồi trả lại
-- [ ] 5.2 GREEN: sửa đến khi pass; kiểm: test 5.1 pass
+- [x] 5.1 RED: S7.1-AC2 "Từ câu viết mở màn xem thứ tự nét" — bấm link "Xem thứ tự nét" ở câu viết 人: vị trí `/characters/%E4%BA%BA/stroke-order`, figure "Thứ tự nét chữ 人", link "Tập viết"; kiểm: chạy, nếu pass ngay nhờ 3.14 thì tạm đổi đích link để thấy fail rồi trả lại
+- [x] 5.2 GREEN: sửa đến khi pass; kiểm: test 5.1 pass
 - [ ] 5.3 RED: S7.1-AC2 "Liên kết Xem thứ tự nét dùng được bằng bàn phím" — Tab tới link (đi qua khung viết), `{Enter}` → màn thứ tự nét của 人; kiểm: chạy, nếu pass ngay thì tạm đổi link thành `<span>` để thấy fail rồi trả lại
 - [ ] 5.4 GREEN: sửa đến khi pass; kiểm: test 5.3 pass
 - [ ] 5.5 RED: S7.1-AC2 "Quay lại bài từ màn thứ tự nét" — bài 3 câu, làm câu 1, tới câu viết 2 vẽ 1 nét đúng, bấm link, `router.navigate(-1)`: "Câu 2 / 3", figure 人 `data-completed-stroke-count="0"`; kiểm: chạy, nếu pass ngay (luật làm tiếp S3.3) thì tạm bỏ lưu `cursor` khi đổi câu để thấy fail rồi trả lại
