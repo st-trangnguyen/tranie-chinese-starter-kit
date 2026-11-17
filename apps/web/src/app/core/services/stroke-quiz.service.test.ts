@@ -269,3 +269,35 @@ describe('createStrokeQuiz — nét ngược hướng', () => {
     expect(onAttempt).toHaveBeenCalledWith('mistake');
   });
 });
+
+const OTHER_STROKE_SCENARIO = 'S6.2-AC2 Viết nét của một nét khác thì sai';
+
+describe('createStrokeQuiz — viết nét khác', () => {
+  beforeEach(() => {
+    FakeHanziWriter.reset();
+    document.body.innerHTML = '';
+  });
+
+  it(`${OTHER_STROKE_SCENARIO}: nét sai đủ dài, đúng hướng báo đúng một 'mistake', không 'correct'`, async () => {
+    const { host } = createStage();
+    const onAttempt = vi.fn<(event: StrokeAttemptEvent) => void>();
+    createStrokeQuiz(host, '十', STROKE_DATA_SHI, {
+      isReducedMotion: false,
+      onAttempt,
+    });
+    await flushQuizStart();
+
+    // Nét hiện tại của 十 là nét ngang; người viết vẽ nét dọc (nét khác), dài 600 đơn vị.
+    FakeHanziWriter.last().emitMistake({
+      isBackwards: false,
+      points: [
+        { x: 512, y: 200 },
+        { x: 512, y: 800 },
+      ],
+    });
+
+    expect(onAttempt).toHaveBeenCalledTimes(1);
+    expect(onAttempt).toHaveBeenCalledWith('mistake');
+    expect(onAttempt).not.toHaveBeenCalledWith('correct');
+  });
+});
