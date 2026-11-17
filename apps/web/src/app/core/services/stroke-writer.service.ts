@@ -1,6 +1,7 @@
 import HanziWriter, {
   type CharacterJson,
   type HanziWriterOptions,
+  type Point,
 } from 'hanzi-writer';
 import type { StrokeData } from '@csk/shared';
 
@@ -45,6 +46,23 @@ interface HanziWriterFactory {
 const hanziWriterFactory: HanziWriterFactory = HanziWriter;
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/**
+ * Scenario "Chạm một điểm thì bỏ qua" (S6.2-AC1): nét sai ngắn hơn ngưỡng này (đơn vị hộp 1024,
+ * khoảng 3 % cạnh khung) là chạm nhầm, báo `'ignored'` thay vì `'mistake'` (D4).
+ */
+const MIN_STROKE_LENGTH = 30;
+
+/** Độ dài đường vẽ = tổng độ dài các đoạn thẳng nối các điểm liên tiếp. */
+function measurePathLength(points: readonly Point[]): number {
+  return points.reduce((total, point, index) => {
+    const previous = index > 0 ? points[index - 1] : undefined;
+    if (!previous) {
+      return total;
+    }
+    return total + Math.hypot(point.x - previous.x, point.y - previous.y);
+  }, 0);
+}
 
 function createWriterOptions(
   strokeData: StrokeData,
@@ -144,6 +162,12 @@ export function createStrokeQuiz(
     markStrokeCorrectAfterMisses: false,
     acceptBackwardsStrokes: false,
     onCorrectStroke: () => options.onAttempt('correct'),
+    onMistake: ({ drawnPath }) =>
+      options.onAttempt(
+        measurePathLength(drawnPath.points) < MIN_STROKE_LENGTH
+          ? 'ignored'
+          : 'mistake',
+      ),
   });
 
   return {
