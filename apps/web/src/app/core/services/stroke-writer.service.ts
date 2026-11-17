@@ -186,22 +186,40 @@ export function createStrokeQuiz(
     createWriterOptions(strokeData),
   );
 
-  void writer.quiz({
-    showHintAfterMisses: false,
-    markStrokeCorrectAfterMisses: false,
-    acceptBackwardsStrokes: false,
-    ...createQuizMotionOptions(options.isReducedMotion),
-    onCorrectStroke: () => options.onAttempt('correct'),
-    onMistake: ({ drawnPath }) =>
-      options.onAttempt(
-        measurePathLength(drawnPath.points) < MIN_STROKE_LENGTH
-          ? 'ignored'
-          : 'mistake',
-      ),
-  });
+  let isDestroyed = false;
+
+  /** Sau `destroy()` không còn `onAttempt` nào (D4). */
+  const emit = (event: StrokeAttemptEvent): void => {
+    if (!isDestroyed) {
+      options.onAttempt(event);
+    }
+  };
+
+  // `quiz()` chỉ bắt đầu ở microtask sau: destroy trước đó (StrictMode) thì huỷ ngay khi nó
+  // resolve. Không `.catch`: `charDataLoader` gọi `onLoad` đồng bộ với dữ liệu đã validate (D4).
+  void writer
+    .quiz({
+      showHintAfterMisses: false,
+      markStrokeCorrectAfterMisses: false,
+      acceptBackwardsStrokes: false,
+      ...createQuizMotionOptions(options.isReducedMotion),
+      onCorrectStroke: () => emit('correct'),
+      onMistake: ({ drawnPath }) =>
+        emit(
+          measurePathLength(drawnPath.points) < MIN_STROKE_LENGTH
+            ? 'ignored'
+            : 'mistake',
+        ),
+    })
+    .then(() => {
+      if (isDestroyed) {
+        writer.cancelQuiz();
+      }
+    });
 
   return {
     destroy: () => {
+      isDestroyed = true;
       writer.cancelQuiz();
       ownSvg.remove();
     },
