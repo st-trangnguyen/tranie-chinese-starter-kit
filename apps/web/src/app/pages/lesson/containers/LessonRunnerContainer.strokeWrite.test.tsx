@@ -140,4 +140,29 @@ describe('LessonRunnerContainer — câu viết', () => {
     expect(feedbackStatus).not.toBeNull();
     expect(feedbackStatus).toHaveTextContent(/^[^\p{L}]*Đúng$/u);
   });
+
+  it('S7.1-AC1 Câu viết đã Đúng thì khung bị khóa: should keep "Đúng", the "Tiếp tục" button and 2 completed strokes, without a wrong-stroke alert or a "Viết lại" button, when drawing more strokes after finishing 十', async () => {
+    env.replaceFetch({ lesson: TEN_FIRST_LESSON });
+    const { user } = renderLessonRunner();
+    await answerToneChoiceAndContinue(user);
+    const pad = await findLessonPad(TEN);
+    const writer = await waitForActiveQuiz(TEN);
+    emitCorrectStroke(writer);
+    emitCorrectStroke(writer);
+    expect(await screen.findByText('Đúng')).toBeInTheDocument();
+
+    emitMistake(writer);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    emitCorrectStroke(writer);
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '2');
+    expect(screen.getByText('Đúng')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Tiếp tục' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Viết lại' }),
+    ).not.toBeInTheDocument();
+  });
 });
