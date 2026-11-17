@@ -1,0 +1,20 @@
+# Bài 11 giai đoạn Nhập môn (S7.1): bộ thủ phổ biến. Câu viết chỉ dùng bộ thủ tự đứng được
+# thành chữ HSK 1 (không viết dạng biến thể như 氵, 扌, 亻).
+id: intro-11
+type: lesson
+title: 30 bộ thủ phổ biến
+exercises:
+  - { id: e1, kind: tone-choice, wordId: 口 }
+  - { id: e2, kind: stroke-write, wordId: 口 }
+  - { id: e3, kind: tone-choice, wordId: 日 }
+  - { id: e4, kind: stroke-write, wordId: 日 }
+  - { id: e5, kind: tone-choice, wordId: 月 }
+  - { id: e6, kind: stroke-write, wordId: 月 }
+  - { id: e7, kind: tone-choice, wordId: 女 }
+  - { id: e8, kind: stroke-write, wordId: 女 }
+  - { id: e9, kind: tone-choice, wordId: 山 }
+  - { id: e10, kind: stroke-write, wordId: 山 }
+  - { id: e11, kind: tone-choice, wordId: 水 }
+  - { id: e12, kind: stroke-write, wordId: 水 }
+  - { id: e13, kind: sound-pair, wordIds: [手, 口], answerWordId: 手 }
+  - { id: e14, kind: pinyin-type, wordId: 门口 }

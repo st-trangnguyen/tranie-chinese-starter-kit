@@ -1,0 +1,17 @@
+# Bài 6 giai đoạn Nhập môn (S7.1): thanh mẫu zh ch sh r z c s.
+id: intro-06
+type: lesson
+title: Thanh mẫu zh ch sh r z c s
+exercises:
+  - { id: e1, kind: tone-choice, wordId: 中 }
+  - { id: e2, kind: tone-choice, wordId: 吃 }
+  - { id: e3, kind: tone-choice, wordId: 书 }
+  - { id: e4, kind: tone-choice, wordId: 热 }
+  - { id: e5, kind: tone-choice, wordId: 字 }
+  - { id: e6, kind: tone-choice, wordId: 菜 }
+  - { id: e7, kind: sound-pair, wordIds: [四, 是], answerWordId: 是 }
+  - { id: e8, kind: sound-pair, wordIds: [早, 找], answerWordId: 找 }
+  - { id: e9, kind: sound-pair, wordIds: [次, 吃], answerWordId: 次 }
+  - { id: e10, kind: pinyin-type, wordId: 老师 }
+  - { id: e11, kind: pinyin-type, wordId: 认识 }
+  - { id: e12, kind: speak, wordId: 吃饭 }

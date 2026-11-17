@@ -1,0 +1,29 @@
+# Bài 12 giai đoạn Nhập môn (S7.1): ôn tổng hợp thanh điệu, pinyin, chữ Hán và câu chào đầu tiên.
+id: intro-12
+type: lesson
+title: Ôn tổng hợp + câu chào đầu tiên
+sentences:
+  - id: intro-12-laoshi-hao
+    hanzi: 老师好！
+    pinyin: lǎoshī hǎo!
+    vi: Em chào thầy/cô!
+  - id: intro-12-ni-hao-ma
+    hanzi: 你好吗？
+    pinyin: nǐ hǎo ma?
+    vi: Bạn khỏe không?
+  - id: intro-12-wo-hen-hao
+    hanzi: 我很好，谢谢！
+    pinyin: wǒ hěn hǎo, xièxie!
+    vi: Tôi rất khỏe, cảm ơn!
+exercises:
+  - { id: e1, kind: tone-choice, wordId: 好 }
+  - { id: e2, kind: tone-choice, wordId: 我 }
+  - { id: e3, kind: sound-pair, wordIds: [四, 十], answerWordId: 十 }
+  - { id: e4, kind: pinyin-type, wordId: 你们 }
+  - { id: e5, kind: pinyin-type, wordId: 再见 }
+  - { id: e6, kind: speak, sentenceId: intro-02-nihao }
+  - { id: e7, kind: speak, sentenceId: intro-12-laoshi-hao }
+  - { id: e8, kind: speak, sentenceId: intro-12-ni-hao-ma }
+  - { id: e9, kind: speak, sentenceId: intro-12-wo-hen-hao }
+  - { id: e10, kind: speak, wordId: 再见 }
+  - { id: e11, kind: stroke-write, wordId: 好 }

@@ -1,0 +1,17 @@
+# Bài 10 giai đoạn Nhập môn (S7.1): nét cơ bản (ngang, sổ, phẩy, mác) và thứ tự nét.
+# Câu viết dùng khung viết có gợi ý (S6.2); mỗi câu viết đúng một chữ có dữ liệu nét.
+id: intro-10
+type: lesson
+title: Nét cơ bản và thứ tự nét
+exercises:
+  - { id: e1, kind: tone-choice, wordId: 一 }
+  - { id: e2, kind: stroke-write, wordId: 一 }
+  - { id: e3, kind: stroke-write, wordId: 二 }
+  - { id: e4, kind: tone-choice, wordId: 十 }
+  - { id: e5, kind: stroke-write, wordId: 十 }
+  - { id: e6, kind: tone-choice, wordId: 人 }
+  - { id: e7, kind: stroke-write, wordId: 人 }
+  - { id: e8, kind: tone-choice, wordId: 八 }
+  - { id: e9, kind: stroke-write, wordId: 八 }
+  - { id: e10, kind: tone-choice, wordId: 大 }
+  - { id: e11, kind: stroke-write, wordId: 大 }
