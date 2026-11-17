@@ -228,3 +228,44 @@ describe('createStrokeQuiz — lọc nét quá ngắn', () => {
     expect(onAttempt).toHaveBeenCalledWith('correct');
   });
 });
+
+const BACKWARDS_SCENARIO = 'S6.2-AC2 Viết ngược hướng thì sai';
+
+describe('createStrokeQuiz — nét ngược hướng', () => {
+  beforeEach(() => {
+    FakeHanziWriter.reset();
+    document.body.innerHTML = '';
+  });
+
+  it(`${BACKWARDS_SCENARIO}: quiz không nhận nét ngược (acceptBackwardsStrokes là false)`, async () => {
+    const { host } = createStage();
+
+    startQuiz(host);
+    await flushQuizStart();
+
+    expect(FakeHanziWriter.last().quizOptions?.acceptBackwardsStrokes).toBe(
+      false,
+    );
+  });
+
+  it(`${BACKWARDS_SCENARIO}: nét ngược đủ dài báo đúng một 'mistake'`, async () => {
+    const { host } = createStage();
+    const onAttempt = vi.fn<(event: StrokeAttemptEvent) => void>();
+    createStrokeQuiz(host, '十', STROKE_DATA_SHI, {
+      isReducedMotion: false,
+      onAttempt,
+    });
+    await flushQuizStart();
+
+    FakeHanziWriter.last().emitMistake({
+      isBackwards: true,
+      points: [
+        { x: 800, y: 500 },
+        { x: 200, y: 500 },
+      ],
+    });
+
+    expect(onAttempt).toHaveBeenCalledTimes(1);
+    expect(onAttempt).toHaveBeenCalledWith('mistake');
+  });
+});

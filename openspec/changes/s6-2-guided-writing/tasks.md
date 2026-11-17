@@ -39,8 +39,8 @@ host là `<g>` trong `<svg viewBox="0 0 1024 1024">`; test `await` một microta
 - [x] 2.2 GREEN: viết `createStrokeQuiz` (vẫn là file duy nhất import `hanzi-writer`); kiểm: test 2.1 pass, test S6.1 `stroke-writer.service.test.ts` vẫn pass
 - [x] 2.3 RED: S6.2-AC1 "Chạm một điểm thì bỏ qua" (phần adapter) — `emitMistake` với đường dài < `MIN_STROKE_LENGTH` (2 điểm cách 5 đơn vị) → `onAttempt('ignored')`; đúng ngưỡng 30 → `'mistake'`; `emitCorrectStroke` với đường ngắn vẫn `'correct'`; kiểm: fail vì chưa lọc độ dài
 - [x] 2.4 GREEN: hằng `MIN_STROKE_LENGTH = 30` + tính độ dài đường trong adapter, `onCorrectStroke` → `'correct'`; kiểm: test 2.3 pass
-- [ ] 2.5 RED: S6.2-AC2 "Viết ngược hướng thì sai" (phần adapter) — `emitMistake({ isBackwards: true, points dài })` → `'mistake'`; option `acceptBackwardsStrokes` là false; kiểm: chạy, nếu pass ngay thì tạm đặt `acceptBackwardsStrokes: true` và nhánh bỏ qua `isBackwards` để thấy fail rồi trả lại
-- [ ] 2.6 GREEN: sửa đến khi pass; kiểm: test 2.5 pass
+- [x] 2.5 RED: S6.2-AC2 "Viết ngược hướng thì sai" (phần adapter) — `emitMistake({ isBackwards: true, points dài })` → `'mistake'`; option `acceptBackwardsStrokes` là false; kiểm: chạy, nếu pass ngay thì tạm đặt `acceptBackwardsStrokes: true` và nhánh bỏ qua `isBackwards` để thấy fail rồi trả lại
+- [x] 2.6 GREEN: sửa đến khi pass; kiểm: test 2.5 pass
 - [ ] 2.7 RED: S6.2-AC2 "Viết nét của một nét khác thì sai" (phần adapter) — `emitMistake({ isBackwards: false, points dài })` → đúng một `'mistake'`, không `'correct'`; kiểm: chạy, nếu pass ngay thì tạm ánh xạ mọi `onMistake` thành `'ignored'` để thấy fail rồi trả lại
 - [ ] 2.8 GREEN: sửa đến khi pass; kiểm: test 2.7 pass
 - [ ] 2.9 RED: S6.2-AC1 "Giảm chuyển động trên khung viết" (phần adapter) — `isReducedMotion: true` → `quiz` nhận `strokeFadeDuration: 0`, `drawingFadeDuration: 0`, `highlightOnComplete: false`; `false` → 400, 300, `true`; kiểm: fail vì chưa truyền option theo giảm chuyển động
