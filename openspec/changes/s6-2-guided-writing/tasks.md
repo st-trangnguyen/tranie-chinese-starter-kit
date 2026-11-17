@@ -74,8 +74,8 @@ Tách `WritingPracticeContainer.feedback.test.tsx` nếu > 300 dòng.
 - [x] 4.4 GREEN: nhánh `unavailable` (+ `loading`, `error` với "Thử lại" theo mẫu S6.1); kiểm: test 4.3 pass
 - [x] 4.5 RED: S6.2-AC2 "Báo ngay khi viết sai nét" — `emitMistake` (đường dài): alert "Sai nét. Viết lại nét này." hiện; trước sự kiện không có alert; `data-completed-stroke-count` vẫn 0; kiểm: fail vì chưa có phản hồi
 - [x] 4.6 GREEN: `useWritingPractice` giữ `practice`, `recordStrokeAttempt` (`useCallback`), `components/WritingPracticeFeedback.tsx` nhánh `mistake` (`role="alert"`), key `mistake`; kiểm: test 4.5 pass
-- [ ] 4.7 RED: S6.2-AC2 "Nét sai bị xoá và được viết lại" — sau `emitMistake` chưa có nét nào được giữ (`data-completed-stroke-count="0"`), quiz vẫn chạy (không `cancelQuiz`, không màn kết thúc); `emitCorrectStroke` sau đó → 1; sai 5 lần liên tiếp vẫn viết tiếp được (TC-S6.2-AC2-7); kiểm: chạy, nếu pass ngay thì tạm cho hook huỷ quiz khi sai để thấy fail rồi trả lại
-- [ ] 4.8 GREEN: sửa đến khi pass; kiểm: test 4.7 pass
+- [x] 4.7 RED: S6.2-AC2 "Nét sai bị xoá và được viết lại" — sau `emitMistake` chưa có nét nào được giữ (`data-completed-stroke-count="0"`), quiz vẫn chạy (không `cancelQuiz`, không màn kết thúc); `emitCorrectStroke` sau đó → 1; sai 5 lần liên tiếp vẫn viết tiếp được (TC-S6.2-AC2-7); kiểm: chạy, nếu pass ngay thì tạm cho hook huỷ quiz khi sai để thấy fail rồi trả lại
+- [x] 4.8 GREEN: sửa đến khi pass; kiểm: test 4.7 pass
 - [ ] 4.9 RED: S6.2-AC2 "Thông báo sai đọc được bằng trình đọc màn hình" — đưa focus vào khung bằng Tab, `emitMistake`: thông báo có `role="alert"`, `document.activeElement` vẫn là figure khung viết; kiểm: chạy, nếu pass ngay thì tạm đặt focus vào thông báo để thấy fail rồi trả lại
 - [ ] 4.10 GREEN: không chuyển focus khi hiện thông báo; kiểm: test 4.9 pass
 - [ ] 4.11 RED: S6.2-AC2 "Lần sai liên tiếp sau cũng được đọc lại" — 2 lần `emitMistake`: nút alert sau lần 2 là nút DOM mới (`not.toBe` nút sau lần 1), nội dung giống nhau; kiểm: fail vì alert được giữ nguyên nút

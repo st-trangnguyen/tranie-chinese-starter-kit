@@ -121,4 +121,44 @@ describe('WritingPracticeContainer', () => {
     // Nét sai không được giữ: chưa có nét nào hoàn thành.
     expect(pad).toHaveAttribute('data-completed-stroke-count', '0');
   });
+
+  it('S6.2-AC2 Nét sai bị xoá và được viết lại: should keep no stroke after a long wrong stroke on 十 and keep the quiz running, then accept the redrawn stroke (count 1)', async () => {
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+
+    // Nét sai không được giữ.
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '0');
+    // Bài không bị chặn hay kết thúc: quiz vẫn chạy, không có màn hoàn thành.
+    expect(writer.isQuizActive).toBe(true);
+    expect(writer.calls.map((call) => call.method)).not.toContain('cancelQuiz');
+    expect(screen.queryByText(/Đã viết xong/)).not.toBeInTheDocument();
+
+    // Viết lại nét đó, lần này đúng: được nhận.
+    act(() => writer.emitCorrectStroke());
+
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '1');
+    expect(writer.isQuizActive).toBe(true);
+  });
+
+  it('S6.2-AC2 Nét sai bị xoá và được viết lại: should still accept the redrawn first stroke of 十 after 5 consecutive wrong strokes, without ending the quiz (TC-S6.2-AC2-7)', async () => {
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    for (let attempt = 1; attempt <= 5; attempt += 1) {
+      act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+
+      // Sau mỗi lần sai: không nét nào tồn đọng, bài vẫn chạy.
+      expect(pad).toHaveAttribute('data-completed-stroke-count', '0');
+      expect(writer.isQuizActive).toBe(true);
+    }
+    expect(writer.calls.map((call) => call.method)).not.toContain('cancelQuiz');
+    expect(screen.queryByText(/Đã viết xong/)).not.toBeInTheDocument();
+
+    act(() => writer.emitCorrectStroke());
+
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '1');
+    expect(writer.isQuizActive).toBe(true);
+    expect(writer.calls.map((call) => call.method)).not.toContain('cancelQuiz');
+    expect(screen.queryByText(/Đã viết xong/)).not.toBeInTheDocument();
+  });
 });
