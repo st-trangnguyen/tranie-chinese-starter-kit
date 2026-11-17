@@ -1,6 +1,11 @@
 import type { Exercise } from '@csk/shared';
 
 import type { ExerciseContent, ExerciseResult } from './exercise.model';
+import type { StrokeOrderView } from './stroke-order.model';
+import type {
+  StrokeAttemptResult,
+  WritingPracticeState,
+} from './writing-practice.model';
 
 export type LessonPhase = 'answering' | 'feedback' | 'finished';
 
@@ -56,4 +61,17 @@ export interface LessonRunnerView {
   total: number;
   /** null khi chưa trả lời. */
   feedback: LessonFeedbackView | null;
+  /** Dữ liệu câu viết (S7.1); vắng mặt thì câu viết hiện như đang tải. */
+  strokeWrite?: LessonStrokeWriteView | null;
+}
+
+/** Những gì câu viết (`stroke-write`) trong màn bài cần để vẽ khung viết (S7.1). */
+export interface LessonStrokeWriteView {
+  exerciseId: string;
+  character: string;
+  view: StrokeOrderView;
+  /** Lượt viết hiện tại; `null` khi chưa có dữ liệu nét. */
+  practice: WritingPracticeState | null;
+  retry: () => void;
+  recordStrokeAttempt: (result: StrokeAttemptResult) => void;
 }

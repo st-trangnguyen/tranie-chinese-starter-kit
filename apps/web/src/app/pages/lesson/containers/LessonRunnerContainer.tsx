@@ -11,6 +11,7 @@ import { RecordingModeProvider } from '@shared/contexts/RecordingModeContext';
 import { LessonRunner } from '../components/LessonRunner';
 import { LessonSummary } from '../components/LessonSummary';
 import { useLessonRunner } from '../hooks/useLessonRunner';
+import { useLessonStrokeWrite } from '../hooks/useLessonStrokeWrite';
 
 interface LessonRunnerContainerProps {
   /** Mặc định là registry thật; test truyền registry giả. */
@@ -53,6 +54,13 @@ const LessonRunnerContainer = ({
   };
   const exercise = lesson?.exercises[session?.currentIndex ?? 0];
   const content = exercise ? contents.get(exercise.id) : undefined;
+  const strokeWriteWord =
+    exercise?.kind === 'stroke-write' ? content?.words[0] : undefined;
+  const strokeWrite = useLessonStrokeWrite(
+    strokeWriteWord && exercise ? exercise.id : null,
+    strokeWriteWord?.hanzi ?? null,
+    submitResult,
+  );
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-lg p-xl">
@@ -80,6 +88,7 @@ const LessonRunnerContainer = ({
                 current: session.currentIndex + 1,
                 total: session.exerciseIds.length,
                 feedback,
+                strokeWrite,
               }}
               registry={registry}
               shouldFocusProgress={isRestarted}
