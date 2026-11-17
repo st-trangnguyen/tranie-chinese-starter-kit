@@ -44,6 +44,17 @@ export const LessonStrokeWrite = ({
     );
   }
 
+  if (view.status === 'unavailable') {
+    return (
+      <div className="flex flex-col items-start gap-md">
+        <p className="lesson-stroke-write-message">{t('unavailable')}</p>
+        <button type="button" className="btn btn-ghost" onClick={onSkip}>
+          {t('lesson:skip')}
+        </button>
+      </div>
+    );
+  }
+
   if (view.status === 'ready' && practice) {
     const isMistake =
       practice.lastAttempt === 'mistake' && !practice.isComplete;
