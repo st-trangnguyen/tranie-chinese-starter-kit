@@ -59,8 +59,8 @@ Test chung `apps/web/src/app/shared/components/exercises/StrokeWritingPad.test.t
 - [x] 3.4 GREEN: `tabIndex={0}` trên figure, không handler bàn phím; kiểm: test 3.3 pass
 - [x] 3.5 RED: S6.2-AC3 "Gợi ý không phụ thuộc chuyển động" (mức khung) — `practice` có gợi ý ở nét 0 của 十, `stubReducedMotion(true)` và `(false)`: có đúng một `.writing-pad-hint path` với `d` = nét 0, không có `<animate>`/`<animateTransform>`, nằm ngoài nhóm `.stroke-order-outline`; `data-hint-stroke-index="0"`; kiểm: fail vì chưa có lớp gợi ý
 - [x] 3.6 GREEN: lớp gợi ý derive từ `practice` (D6); kiểm: test 3.5 pass
-- [ ] 3.7 RED: nền, không phủ Scenario (tên test kỹ thuật, không mang Scenario ID: `StrokeWritingPad nối sự kiện quiz tới onStrokeAttempt`; Scenario "Báo ngay khi viết sai nét" phủ ở 4.5) — sự kiện từ fake (`emitCorrectStroke`, `emitMistake`) tới `onStrokeAttempt` đúng giá trị; re-render với `onStrokeAttempt` ổn định không tạo writer mới; unmount gọi `cancelQuiz` và gỡ `svg.writing-pad-writer`; render trong `<StrictMode>` thì mỗi `emit*` của writer hiện tại gọi `onStrokeAttempt` đúng một lần và host chỉ có một `svg.writing-pad-writer`; kiểm: fail nếu hook chưa nối callback
-- [ ] 3.8 GREEN: nối `onAttempt` trong `useStrokeQuiz`, deps đủ; kiểm: test 3.7 pass, file test < 300 dòng
+- [x] 3.7 RED: nền, không phủ Scenario (tên test kỹ thuật, không mang Scenario ID: `StrokeWritingPad nối sự kiện quiz tới onStrokeAttempt`; Scenario "Báo ngay khi viết sai nét" phủ ở 4.5) — sự kiện từ fake (`emitCorrectStroke`, `emitMistake`) tới `onStrokeAttempt` đúng giá trị; re-render với `onStrokeAttempt` ổn định không tạo writer mới; unmount gọi `cancelQuiz` và gỡ `svg.writing-pad-writer`; render trong `<StrictMode>` thì mỗi `emit*` của writer hiện tại gọi `onStrokeAttempt` đúng một lần và host chỉ có một `svg.writing-pad-writer`; kiểm: fail nếu hook chưa nối callback
+- [x] 3.8 GREEN: nối `onAttempt` trong `useStrokeQuiz`, deps đủ; kiểm: test 3.7 pass, file test < 300 dòng
 
 ## 4. Màn luyện viết — `pages/writing-practice/` (design D1, D7)
 
