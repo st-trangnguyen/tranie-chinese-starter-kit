@@ -59,8 +59,8 @@ file nét thật, design mục Test). Bài thử: `[tone-choice 八, stroke-writ
 Test chung `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.strokeWriteLoad.test.tsx` — cùng helper, override
 `mockStrokeFetch` cho `人.json`.
 
-- [ ] 4.1 RED: S7.1-AC1 "Câu viết đang tải dữ liệu nét" — override trả `Promise` chưa resolve: status "Đang tải…"; không figure, không link "Xem thứ tự nét", không "Tiếp tục"; kiểm: fail vì nhánh `loading` chưa render
-- [ ] 4.2 GREEN: nhánh `loading`; kiểm: test 4.1 pass
+- [x] 4.1 RED: S7.1-AC1 "Câu viết đang tải dữ liệu nét" — override trả `Promise` chưa resolve: status "Đang tải…"; không figure, không link "Xem thứ tự nét", không "Tiếp tục"; kiểm: fail vì nhánh `loading` chưa render
+- [x] 4.2 GREEN: nhánh `loading`; kiểm: test 4.1 pass
 - [ ] 4.3 RED: S7.1-AC1 "Câu viết tải dữ liệu nét lỗi" — override 500 (và JSON hỏng): alert "Có lỗi xảy ra", nút "Thử lại", nút "Bỏ qua câu này"; không figure, không link, không "Chưa có dữ liệu nét cho chữ này."; kiểm: fail
 - [ ] 4.4 GREEN: nhánh `error`; thêm key `lesson:skip`, `LessonRunner` nhánh dạng chưa hỗ trợ chuyển sang `skip`; kiểm: test 4.3 pass, test S3.2-X1 cũ vẫn pass
 - [ ] 4.5 RED: S7.1-AC1 "Câu viết thử lại sau khi tải lỗi" — lỗi lần đầu, thay mock bằng bản thành công, bấm "Thử lại": hết alert, có figure "Khung viết chữ 人" và link "Xem thứ tự nét"; kiểm: fail vì chưa nối `retry`

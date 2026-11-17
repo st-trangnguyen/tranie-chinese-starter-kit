@@ -1,0 +1,53 @@
+import { describe, expect, it, vi } from 'vitest';
+
+import {
+  PERSON,
+  answerToneChoiceAndContinue,
+  renderLessonRunner,
+  setupLessonStrokeWrite,
+} from '@test/lesson-stroke-write.helpers';
+import { screen, waitFor } from '@test/render';
+
+// Ranh giới ngoài: thư viện vẽ/chấm nét hanzi-writer được thay bằng bản giả điều khiển được.
+vi.mock('hanzi-writer', async () => {
+  const mock = await import('@test/mocks/hanzi-writer');
+  return { default: mock.FakeHanziWriter };
+});
+
+const env = setupLessonStrokeWrite();
+
+/** Phản hồi không bao giờ tới: dữ liệu nét của câu viết mãi ở trạng thái đang tải. */
+const neverResolves = (): Promise<Response> =>
+  new Promise<Response>(() => undefined);
+
+describe('LessonRunnerContainer — trạng thái tải câu viết', () => {
+  it('S7.1-AC1 Câu viết đang tải dữ liệu nét: should show status "Đang tải…" without the writing pad, the "Xem thứ tự nét" link or a "Tiếp tục" button while 人.json is still loading', async () => {
+    const strokeFetch = env.replaceFetch({
+      strokeOverrides: { '人.json': neverResolves },
+    });
+    const { user } = renderLessonRunner();
+    await answerToneChoiceAndContinue(user);
+
+    expect(screen.getByRole('progressbar')).toHaveAccessibleName('Câu 2 / 3');
+    // Đã thực sự gọi file nét của 人 (và phản hồi chưa về).
+    await waitFor(() => {
+      expect(
+        strokeFetch.requests.some((url) =>
+          decodeURIComponent(url).endsWith(`/${PERSON}.json`),
+        ),
+      ).toBe(true);
+    });
+
+    const statuses = await screen.findAllByRole('status');
+    expect(statuses.map((status) => status.textContent)).toContain('Đang tải…');
+    expect(
+      screen.queryByRole('figure', { name: `Khung viết chữ ${PERSON}` }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Xem thứ tự nét' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Tiếp tục' }),
+    ).not.toBeInTheDocument();
+  });
+});
