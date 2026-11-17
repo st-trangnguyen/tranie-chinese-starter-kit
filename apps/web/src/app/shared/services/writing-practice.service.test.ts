@@ -217,3 +217,42 @@ describe('WritingPracticeService — quy tắc nghiệp vụ', () => {
     expect(next.isComplete).toBe(false);
   });
 });
+
+describe('WritingPracticeService — kết quả câu viết trong bài (S7.1)', () => {
+  it('S7.1-AC1 Viết xong chữ thì câu được tính đúng: viết sai nét chưa cho kết quả', () => {
+    const service = new WritingPracticeService();
+    const initial = service.startPractice(2);
+
+    const afterMistake = service.recordStrokeAttempt(initial, 'mistake');
+
+    expect(service.lessonResultOf(initial, afterMistake)).toBeNull();
+  });
+
+  it('S7.1-AC1 Viết xong chữ thì câu được tính đúng: viết đúng nét cuối thì câu Đúng, không có giải thích', () => {
+    const service = new WritingPracticeService();
+    const initial = service.startPractice(2);
+
+    const afterFirst = service.recordStrokeAttempt(initial, 'correct');
+    const afterSecond = service.recordStrokeAttempt(afterFirst, 'correct');
+
+    expect(service.lessonResultOf(initial, afterFirst)).toBeNull();
+    const result = service.lessonResultOf(afterFirst, afterSecond);
+    expect(result).toEqual({ isCorrect: true });
+    expect(result).not.toHaveProperty('explanation');
+  });
+
+  it.each(['correct', 'mistake', 'ignored'] as const)(
+    'S7.1-AC1 Viết xong chữ thì câu được tính đúng: sự kiện %s sau khi đã xong chữ không cho kết quả lần nữa',
+    (attempt) => {
+      const service = new WritingPracticeService();
+      const complete = service.recordStrokeAttempt(
+        service.recordStrokeAttempt(service.startPractice(2), 'correct'),
+        'correct',
+      );
+
+      const next = service.recordStrokeAttempt(complete, attempt);
+
+      expect(service.lessonResultOf(complete, next)).toBeNull();
+    },
+  );
+});
