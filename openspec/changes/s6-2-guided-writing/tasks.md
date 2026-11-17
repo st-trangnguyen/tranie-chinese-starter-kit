@@ -82,8 +82,8 @@ Tách `WritingPracticeContainer.feedback.test.tsx` nếu > 300 dòng.
 - [x] 4.12 GREEN: `key={practice.mistakeSerial}` trên alert (D7); kiểm: test 4.11 pass
 - [x] 4.13 RED: S6.2-AC2 "Viết đúng thì thông báo sai biến mất" — `emitMistake` rồi `emitCorrectStroke`: không còn alert sai; kiểm: chạy, nếu pass ngay thì tạm hiện alert khi `mistakeSerial > 0` để thấy fail rồi trả lại
 - [x] 4.14 GREEN: thông báo chỉ khi `lastAttempt === 'mistake'`; kiểm: test 4.13 pass
-- [ ] 4.15 RED: S6.2-AC3 "Sai 3 lần liên tiếp thì hiện gợi ý" (mức màn) — 十 đã `emitCorrectStroke` nét ngang, rồi 3 lần `emitMistake`: đúng một `.writing-pad-hint path` với `d` = nét sổ, `data-hint-stroke-index="1"`; sau 2 lần chưa có; kiểm: fail nếu container chưa truyền `practice` xuống khung
-- [ ] 4.16 GREEN: truyền `practice` vào `StrokeWritingPad`; kiểm: test 4.15 pass
+- [x] 4.15 RED: S6.2-AC3 "Sai 3 lần liên tiếp thì hiện gợi ý" (mức màn) — 十 đã `emitCorrectStroke` nét ngang, rồi 3 lần `emitMistake`: đúng một `.writing-pad-hint path` với `d` = nét sổ, `data-hint-stroke-index="1"`; sau 2 lần chưa có; kiểm: fail nếu container chưa truyền `practice` xuống khung
+- [x] 4.16 GREEN: truyền `practice` vào `StrokeWritingPad`; kiểm: test 4.15 pass
 - [ ] 4.17 RED: S6.2-AC1 "Viết đúng hết các nét thì hoàn thành chữ" (mức màn) — 十: 2 lần `emitCorrectStroke` → status "Đã viết xong chữ 十.", nút "Viết lại", vị trí vẫn `/characters/十/writing-practice`; `fetch` không có request nào ngoài file nét và IndexedDB không có bản ghi tiến độ nào (không ghi điểm/tiến độ); kiểm: fail vì chưa có nhánh hoàn thành
 - [ ] 4.18 GREEN: `WritingPracticeFeedback` nhánh `isComplete` (`role="status"`, key `complete`, nút `restart`); kiểm: test 4.17 pass
 - [ ] 4.19 RED: S6.2-AC1 "Viết lại sau khi hoàn thành" — hoàn thành 十, bấm "Viết lại": không còn status hoàn thành, `data-completed-stroke-count="0"`, writer cũ bị `cancelQuiz`, một writer mới được tạo; 2 lần `emitMistake` ở nét sổ trước khi xong rồi "Viết lại" + 1 `emitMistake` → chưa có gợi ý (TC-S6.2-AC1-16); kiểm: fail vì chưa có `restart`

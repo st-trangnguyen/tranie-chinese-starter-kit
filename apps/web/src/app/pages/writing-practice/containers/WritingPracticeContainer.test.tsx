@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
 import { act, screen, userEvent, waitFor } from '@test/render';
 import { openRoute, setupStrokeOrderRoute } from '@test/stroke-order-route';
+import { STROKE_DATA_SHI } from '@test/stroke.fixtures';
 
 // Ranh giới ngoài: thư viện vẽ/chấm nét hanzi-writer được thay bằng bản giả điều khiển được.
 vi.mock('hanzi-writer', async () => {
@@ -220,5 +221,29 @@ describe('WritingPracticeContainer', () => {
     expect(
       screen.queryByText('Sai nét. Viết lại nét này.'),
     ).not.toBeInTheDocument();
+  });
+
+  it('S6.2-AC3 Sai 3 lần liên tiếp thì hiện gợi ý: should show exactly one hint path for the vertical stroke of 十 (index 1) on the third consecutive wrong stroke, not before', async () => {
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    // Nét ngang (nét 0) viết đúng; nét hiện tại là nét sổ (nét 1).
+    act(() => writer.emitCorrectStroke());
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '1');
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+
+    // Sau 2 lần sai: chưa có gợi ý.
+    expect(pad.querySelector('.writing-pad-hint')).toBeNull();
+    expect(pad).not.toHaveAttribute('data-hint-stroke-index');
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+
+    // Lần sai thứ 3: gợi ý đúng một nét, là nét sổ đang phải viết.
+    const hintPaths = pad.querySelectorAll('.writing-pad-hint path');
+    expect(hintPaths).toHaveLength(1);
+    expect(hintPaths[0]).toHaveAttribute('d', STROKE_DATA_SHI.strokes[1]);
+    expect(pad).toHaveAttribute('data-hint-stroke-index', '1');
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '1');
   });
 });
