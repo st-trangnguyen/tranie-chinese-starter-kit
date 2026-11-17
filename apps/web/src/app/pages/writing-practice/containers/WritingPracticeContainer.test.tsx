@@ -203,4 +203,22 @@ describe('WritingPracticeContainer', () => {
     expect(secondAlert).not.toBe(firstAlert);
     expect(firstAlert).not.toBeInTheDocument();
   });
+
+  it('S6.2-AC2 Viết đúng thì thông báo sai biến mất: should remove the mistake alert after a long wrong stroke on 十 is followed by the correct stroke', async () => {
+    const { pad, writer } = await openShiPadWithActiveQuiz();
+
+    act(() => writer.emitMistake({ points: LONG_STROKE_POINTS }));
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Sai nét. Viết lại nét này.',
+    );
+
+    act(() => writer.emitCorrectStroke());
+
+    // Nét được nhận và thông báo sai không còn hiện.
+    expect(pad).toHaveAttribute('data-completed-stroke-count', '1');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Sai nét. Viết lại nét này.'),
+    ).not.toBeInTheDocument();
+  });
 });
