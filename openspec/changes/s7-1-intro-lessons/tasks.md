@@ -28,8 +28,8 @@ Test `apps/web/src/app/shared/services/writing-practice.service.test.ts` (thêm 
 
 - [x] 2.1 RED: S7.1-AC1 "Viết xong chữ thì câu được tính đúng" (phần rule) — `startPractice(2)`: `mistake` → `lessonResultOf(prev, next)` là `null`; `correct` rồi `correct` → lần thứ hai trả `{ isCorrect: true }` không `explanation`; sự kiện sau khi xong → `null`; kiểm: fail vì chưa có method
 - [x] 2.2 GREEN: Phần 2 `lessonResultOf` kèm comment `Rule: …`; kiểm: test 2.1 pass, file < 300 dòng
-- [ ] 2.3 RED: lesson-runner S7.1-AC1 "Câu viết chỉ có kết quả Đúng" (phần rule) — 4 `mistake` rồi 2 `correct`: mọi lần trước trả `null`, không lần nào `isCorrect: false`; kiểm: chạy, nếu pass ngay thì tạm cho `mistake` trả `{ isCorrect: false }` để thấy fail rồi trả lại
-- [ ] 2.4 GREEN: sửa đến khi pass; kiểm: test 2.3 pass
+- [x] 2.3 RED: lesson-runner S7.1-AC1 "Câu viết chỉ có kết quả Đúng" (phần rule) — 4 `mistake` rồi 2 `correct`: mọi lần trước trả `null`, không lần nào `isCorrect: false`; kiểm: chạy, nếu pass ngay thì tạm cho `mistake` trả `{ isCorrect: false }` để thấy fail rồi trả lại
+- [x] 2.4 GREEN: sửa đến khi pass; kiểm: test 2.3 pass
 
 ## 3. Câu viết trong màn bài — hook, container, component (design D4, D6, D7, D8)
 

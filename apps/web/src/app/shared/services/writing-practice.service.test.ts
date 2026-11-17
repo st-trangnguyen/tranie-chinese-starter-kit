@@ -255,4 +255,30 @@ describe('WritingPracticeService — kết quả câu viết trong bài (S7.1)',
       expect(service.lessonResultOf(complete, next)).toBeNull();
     },
   );
+
+  it('S7.1-AC1 Câu viết chỉ có kết quả Đúng: viết sai nét nhiều lần không bao giờ cho kết quả Sai', () => {
+    const service = new WritingPracticeService();
+    const attempts = [
+      'mistake',
+      'mistake',
+      'mistake',
+      'mistake',
+      'correct',
+      'correct',
+    ] as const;
+
+    let state = service.startPractice(2);
+    const results = attempts.map((attempt) => {
+      const next = service.recordStrokeAttempt(state, attempt);
+      const result = service.lessonResultOf(state, next);
+      state = next;
+      return result;
+    });
+
+    expect(results.slice(0, -1)).toEqual([null, null, null, null, null]);
+    expect(results).not.toContainEqual(
+      expect.objectContaining({ isCorrect: false }),
+    );
+    expect(results.at(-1)).toEqual({ isCorrect: true });
+  });
 });
