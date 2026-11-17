@@ -1,3 +1,4 @@
+import type { ExerciseResult } from '@shared/models/exercise.model';
 import type { StrokeOrderResult } from '@shared/models/stroke-order.model';
 import type {
   StrokeAttemptResult,
@@ -100,6 +101,18 @@ export class WritingPracticeService {
       default:
         return state;
     }
+  }
+
+  // Rule: trong màn bài, câu viết chỉ có kết quả "Đúng", đúng một lần lúc vừa xong chữ; viết sai
+  // nét không cho kết quả. Không có giải thích.
+  lessonResultOf(
+    previous: WritingPracticeState,
+    next: WritingPracticeState,
+  ): ExerciseResult | null {
+    if (!previous.isComplete && next.isComplete) {
+      return { isCorrect: true };
+    }
+    return null;
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
