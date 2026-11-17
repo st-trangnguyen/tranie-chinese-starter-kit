@@ -14,7 +14,11 @@ export function WritingPracticeFeedback({
 
   if (practice.lastAttempt === 'mistake') {
     return (
-      <p role="alert" className="writing-practice-message">
+      <p
+        key={practice.mistakeSerial}
+        role="alert"
+        className="writing-practice-message"
+      >
         {t('mistake')}
       </p>
     );
