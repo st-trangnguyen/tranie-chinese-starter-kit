@@ -191,4 +191,24 @@ describe('ProgressService — countStudyStreak', () => {
 
     expect(service.countStudyStreak(stats, TODAY, 15)).toBe(0);
   });
+
+  it('S8.3-AC1 Ngày đã qua không có mục tiêu đọc được: mục tiêu 15, hôm qua 20 phút không có mục tiêu, hôm nay 20 phút thì streak là 2', () => {
+    const stats: DailyStat[] = [
+      day(-2, 0),
+      { date: dateKey(-1), studySeconds: REACHED },
+      day(0, REACHED),
+    ];
+
+    expect(service.countStudyStreak(stats, TODAY, 15)).toBe(2);
+  });
+
+  it('S8.3-AC1 Ngày đã qua không có mục tiêu đọc được: mục tiêu 30, hôm qua 35 phút không có mục tiêu, hôm nay 30 phút thì streak là 2', () => {
+    const stats: DailyStat[] = [
+      day(-2, 0, 30),
+      { date: dateKey(-1), studySeconds: 2100 },
+      day(0, 1800, 30),
+    ];
+
+    expect(service.countStudyStreak(stats, TODAY, 30)).toBe(2);
+  });
 });
