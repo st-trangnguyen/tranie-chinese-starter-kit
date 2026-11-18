@@ -6,6 +6,8 @@ import {
   type ProgressStore,
 } from '@core/services/progress-store.service';
 
+import { toLocalDateKey } from '@shared/utils/date.utils';
+
 import { ProgressService } from './progress.service';
 
 const unavailable = (): Promise<never> =>
@@ -47,5 +49,18 @@ describe('ProgressService — getStudyStreak', () => {
     const service = new ProgressService(unavailableStore);
 
     await expect(service.getStudyStreak(at(18, 9, 0))).resolves.toBe(0);
+  });
+
+  it('S8.3-AC1 Mục tiêu đang chọn bị hỏng: mục tiêu không đọc được, hôm nay học 15 phút, chưa đạt ngày nào trước đó thì streak 1', async () => {
+    const db = createDatabase(`test-${crypto.randomUUID()}`);
+    const service = new ProgressService(new DexieProgressStore(db));
+    await db.settings.put({ key: 'dailyGoalMinutes', value: 'abc' });
+    await db.settings.put({ key: 'hasCompletedOnboarding', value: true });
+    await db.dailyStats.put({
+      date: toLocalDateKey(at(18, 8, 0)),
+      studySeconds: 900,
+    });
+
+    await expect(service.getStudyStreak(at(18, 9, 0))).resolves.toBe(1);
   });
 });
