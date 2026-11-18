@@ -21,6 +21,7 @@ import {
 } from '@shared/utils/learning-path.utils';
 import { startOfNextLocalDay, toLocalDateKey } from '@shared/utils/date.utils';
 import type { StudyTimeShare, TodayStudy } from '@shared/models/home.model';
+import type { LearningPreferences } from '@shared/models/settings.model';
 
 type LessonType = (typeof LESSON_TYPES)[number];
 
@@ -33,8 +34,8 @@ export class ProgressService {
     return this.store.getSettings();
   }
 
-  private writeSettings(settings: Settings): Promise<void> {
-    return this.store.saveSettings(settings);
+  private writeSettings(patch: Partial<Settings>): Promise<void> {
+    return this.store.saveSettings(patch);
   }
 
   private readAllLessonProgress(): Promise<LessonProgress[]> {
@@ -167,6 +168,26 @@ export class ProgressService {
       dailyGoalMinutes: minutes,
       hasCompletedOnboarding: true,
     });
+  }
+
+  /** Không throw: đọc settings lỗi → tùy chọn mặc định (design D3). */
+  async getLearningPreferences(): Promise<LearningPreferences> {
+    const settings = await this.readSettings().catch(
+      (): Settings => DEFAULT_SETTINGS,
+    );
+    return {
+      dailyGoalMinutes: settings.dailyGoalMinutes,
+      defaultAudioSpeed: settings.defaultAudioSpeed,
+      isPinyinVisible: settings.isPinyinVisible,
+    };
+  }
+
+  /** Chỉ ghi khóa mục tiêu, không đọc–gộp–ghi; lỗi ghi đi thẳng lên hook (design D2, D3). */
+  async changeDailyGoal(minutes: number): Promise<void> {
+    if (!this.isValidDailyGoal(minutes)) {
+      throw new Error('Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.');
+    }
+    await this.writeSettings({ dailyGoalMinutes: minutes });
   }
 
   async getCompletedLessonIds(): Promise<Set<string>> {
