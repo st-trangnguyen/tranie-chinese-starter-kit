@@ -9,6 +9,7 @@ import {
   TIMEZONE,
 } from './home.helpers';
 
+const DB_NAME = 'tranie-chinese';
 const DAY = 24 * 60 * MINUTE;
 /** Một ngày "đạt" trong test-cases: học 20 phút. */
 const REACHED_SECONDS = (20 * MINUTE) / SECOND;
@@ -46,3 +47,54 @@ export const studiedDay = (
 /** Ngày "đạt": học 20 phút, mục tiêu của ngày `goal` phút. */
 export const reachedDay = (offset: number, goal = 15): DailyStatSeed =>
   studiedDay(offset, REACHED_SECONDS, goal);
+
+/** Mốc giờ máy `time` (`HH:MM`) của ngày cách `NOW` `offset` ngày, theo `TIMEZONE` (Asia/Ho_Chi_Minh, +07:00). */
+export const atDayTime = (offset: number, time: string): Date =>
+  new Date(`${dayKey(offset)}T${time}:00+07:00`);
+
+/**
+ * Đổi mục tiêu đang chọn khi chưa có màn Cài đặt (S8.2): ghi thẳng `settings.dailyGoalMinutes` bằng API IndexedDB thô,
+ * kiểu `seedProgress`. Ghi riêng settings KHÔNG cập nhật mục tiêu của dòng hôm nay như `changeDailyGoal` làm (design D2:
+ * cùng transaction, dòng hôm nay có thì đổi `goalMinutes`, không có thì không tạo). Nên helper làm đủ cả hai việc đó cho
+ * ngày `today`, để dữ liệu giống hệt khi người học đổi mục tiêu qua use case thật. Cần tải lại/mở lại Trang chủ sau đó.
+ */
+export const changeDailyGoalInStorage = async (
+  page: Page,
+  goalMinutes: number,
+  today: string,
+): Promise<void> => {
+  await page.evaluate(
+    ({ dbName, goal, date }) =>
+      new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open(dbName);
+        request.onerror = () => reject(new Error('Không mở được IndexedDB.'));
+        request.onsuccess = () => {
+          const db = request.result;
+          const transaction = db.transaction(
+            ['settings', 'dailyStats'],
+            'readwrite',
+          );
+          transaction
+            .objectStore('settings')
+            .put({ key: 'dailyGoalMinutes', value: goal });
+          const statStore = transaction.objectStore('dailyStats');
+          const readToday = statStore.get(date);
+          readToday.onsuccess = () => {
+            const row: unknown = readToday.result;
+            if (typeof row === 'object' && row !== null) {
+              statStore.put({ ...row, goalMinutes: goal });
+            }
+          };
+          transaction.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          transaction.onerror = () => {
+            db.close();
+            reject(new Error('Không ghi được mục tiêu mới.'));
+          };
+        };
+      }),
+    { dbName: DB_NAME, goal: goalMinutes, date: today },
+  );
+};
