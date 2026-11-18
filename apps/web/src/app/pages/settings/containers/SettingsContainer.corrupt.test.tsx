@@ -87,4 +87,29 @@ describe('SettingsContainer — dữ liệu lưu bị hỏng', () => {
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
+  it('S8.2-AC3 Tùy chọn pinyin đã lưu bị hỏng thì về bật: pinyin "yes" → công tắc bật, mục tiêu 30 giữ "30 phút"', async () => {
+    await writeRawSettings([
+      { key: 'dailyGoalMinutes', value: 30 },
+      { key: 'isPinyinVisible', value: 'yes' },
+    ]);
+
+    renderWithProviders(<SettingsContainer />, { route: '/settings' });
+
+    const pinyinGroup = await screen.findByRole('group', {
+      name: 'Hiện pinyin',
+    });
+    expect(
+      within(pinyinGroup).getByRole('switch', { name: 'Hiện pinyin' }),
+    ).toBeChecked();
+
+    const goalGroup = screen.getByRole('group', { name: 'Mục tiêu mỗi ngày' });
+    expect(
+      within(goalGroup).getByRole('radio', { name: '30 phút' }),
+    ).toBeChecked();
+    expect(
+      within(goalGroup).getByRole('radio', { name: '15 phút' }),
+    ).not.toBeChecked();
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
 });
