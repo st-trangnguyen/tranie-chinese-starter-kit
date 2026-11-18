@@ -97,9 +97,12 @@ export class DexieProgressStore implements ProgressStore {
     return result.success ? result.data : undefined;
   }
 
-  // Skeleton S8.3 (tasks 1.1): hành vi thêm ở 1.8.
   async getAllDailyStats(): Promise<DailyStat[]> {
-    return [];
+    const rows = await this.db.dailyStats.toArray();
+    return rows.flatMap((row) => {
+      const result = dailyStatSchema.safeParse(row);
+      return result.success ? [result.data] : [];
+    });
   }
 
   saveDailyGoal(date: string, goalMinutes: DailyGoalMinutes): Promise<void> {
