@@ -142,8 +142,8 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.test.tsx` — `openR
 - [x] 8.8 GREEN: sửa đến khi pass; kiểm: test 8.7 pass
 - [x] 8.9 RED: S8.1-AC1 "Đã học xong mọi bài" (mức màn) — "Bạn đã học xong lộ trình hiện có.", không có "Vào học"; link "Xem lộ trình" và dòng "Hôm nay: …" vẫn có (dòng phút kiểm sau 9.2, ở đây chỉ link); kiểm: fail
 - [x] 8.10 GREEN: `NextLessonCard` nhánh `all-completed`, key `allCompleted`; link "Xem lộ trình" luôn render (key `learningPathLink`); kiểm: test 8.9 pass
-- [ ] 8.11 RED: S8.1-AC1 "Tiến độ lưu bị hỏng" (mức màn) — dòng `lessonProgress` bài 1 `{ status: 'xyz' }` (và bài 2 `completed`) → Trang chủ hiện bình thường, bài tiếp theo là bài 1, không `role="alert"`; kiểm: chạy, nếu pass ngay thì tạm coi dòng hỏng là `completed` trong store để thấy fail rồi trả lại
-- [ ] 8.12 GREEN: sửa đến khi pass; kiểm: test 8.11 pass
+- [x] 8.11 RED: S8.1-AC1 "Tiến độ lưu bị hỏng" (mức màn) — dòng `lessonProgress` bài 1 `{ status: 'xyz' }` (và bài 2 `completed`) → Trang chủ hiện bình thường, bài tiếp theo là bài 1, không `role="alert"`; kiểm: chạy, nếu pass ngay thì tạm coi dòng hỏng là `completed` trong store để thấy fail rồi trả lại
+- [x] 8.12 GREEN: sửa đến khi pass; kiểm: test 8.11 pass
 - [ ] 8.13 RED: S8.1-AC1 "Bấm "Vào học" thì vào bài" — bấm "Vào học" → vị trí `/lessons/<id bài tiếp theo>`, màn bài hiện tiêu đề bài đó; kiểm: fail nếu link chưa trỏ đúng bài
 - [ ] 8.14 GREEN: `to={ROUTE_PATHS.lesson(lessonId)}`; kiểm: test 8.13 pass
 - [ ] 8.15 RED: S8.1-AC1 "Bài tiếp theo đang làm dở" — bài 1 `in-progress`, `cursor: 2` → bấm "Vào học" → "Câu 3 / N"; kiểm: chạy, nếu pass ngay thì tạm cho `LessonService.resolveStartIndex` trả 0 để thấy fail rồi trả lại

@@ -154,7 +154,25 @@ describe('HomeContainer — bài tiếp theo', () => {
     expect(
       await screen.findByText('Bạn đã học xong lộ trình hiện có.'),
     ).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Vào học' })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Xem lộ trình' })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Vào học' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Xem lộ trình' }),
+    ).toBeInTheDocument();
+  });
+
+  it('S8.1-AC1 Tiến độ lưu bị hỏng: should show the first lesson without an alert when its stored progress row is malformed', async () => {
+    await seedProgress(['l2']);
+    const db = createDatabase();
+    await db.table('lessonProgress').put({ lessonId: 'l1', status: 'xyz' });
+    db.close();
+
+    openRoute('/home');
+
+    expect(await screen.findByText(LESSON_TITLES.l1)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Vào học' })).toBeInTheDocument();
+    expect(screen.queryByText(LESSON_TITLES.l3)).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });
