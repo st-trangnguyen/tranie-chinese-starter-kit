@@ -47,4 +47,27 @@ describe('HomeContainer — chuỗi ngày học', () => {
     expect(streak).not.toHaveAttribute('aria-hidden');
     expect(streak.closest('[aria-hidden="true"]')).toBeNull();
   });
+  it('S8.3-AC2 Streak bằng 0 vẫn hiện: should show "Chuỗi ngày học: 0 ngày" when the day before yesterday had 0 minutes and yesterday and today are below the goal', async () => {
+    await seedProgress();
+    await seedGoal(GOAL_MINUTES);
+    await seedDailyStat(dayKey(-2), 0, GOAL_MINUTES);
+    await seedDailyStat(dayKey(-1), 300, GOAL_MINUTES);
+    await seedDailyStat(dayKey(0), 180, GOAL_MINUTES);
+
+    openRoute('/home');
+
+    const streak = await screen.findByText('Chuỗi ngày học: 0 ngày');
+    expect(streak.tagName).toBe('P');
+    expect(streak.closest('[aria-hidden="true"]')).toBeNull();
+  });
+
+  it('S8.3-AC2 Streak bằng 0 vẫn hiện: should show "Chuỗi ngày học: 0 ngày" for a new learner who only finished onboarding and has no study days', async () => {
+    await seedProgress();
+
+    openRoute('/home');
+
+    const streak = await screen.findByText('Chuỗi ngày học: 0 ngày');
+    expect(streak.tagName).toBe('P');
+    expect(streak.closest('[aria-hidden="true"]')).toBeNull();
+  });
 });
