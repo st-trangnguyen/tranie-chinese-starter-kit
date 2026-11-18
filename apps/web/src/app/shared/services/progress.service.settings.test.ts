@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { DEFAULT_SETTINGS } from '@csk/shared';
+
 import { createDatabase } from '@core/helpers/db.helper';
 import { DexieProgressStore } from '@core/services/progress-store.service';
 
@@ -93,6 +95,40 @@ describe('ProgressService — tốc độ audio mặc định', () => {
 
     expect(saveSpy).not.toHaveBeenCalled();
     expect((await store.getSettings()).defaultAudioSpeed).toBe('normal');
+  });
+});
+
+describe('ProgressService — tùy chọn khi mở bài', () => {
+  it.each([
+    ['normal', true, false],
+    ['slow', true, true],
+    ['normal', false, false],
+    ['slow', false, true],
+  ] as const)(
+    'S8.2-AC2 Chọn Chậm thì mở bài là phát chậm: toLessonPreferences(%j, pinyin %s) → isSlowAudio %s',
+    (defaultAudioSpeed, isPinyinVisible, isSlowAudio) => {
+      const service = new ProgressService(createStore());
+
+      expect(
+        service.toLessonPreferences({
+          ...DEFAULT_SETTINGS,
+          defaultAudioSpeed,
+          isPinyinVisible,
+        }),
+      ).toStrictEqual({ isSlowAudio, isPinyinVisible });
+    },
+  );
+
+  it('S8.2-AC2 Chọn Chậm thì mở bài là phát chậm: đổi sang Chậm, mở bài thì nghe chậm và hiện pinyin', async () => {
+    const store = await createOnboardedStore();
+    await new ProgressService(store).changeDefaultAudioSpeed('slow');
+
+    const preferences = await new ProgressService(store).getLessonPreferences();
+
+    expect(preferences).toStrictEqual({
+      isSlowAudio: true,
+      isPinyinVisible: true,
+    });
   });
 });
 
