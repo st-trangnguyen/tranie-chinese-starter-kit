@@ -15,8 +15,8 @@ giả: `apps/web/src/test/cache-storage.fake.ts` (tạo ở 4.1).
 
 Test: `packages/shared/src/audio-index.schema.test.ts`.
 
-- [ ] 1.1 RED: S8.4-AC1 "Chủ đề chưa tải có nút tải kèm dung lượng" (tầng schema) — `audioIndexSchema` nhận index hợp lệ (2 nhóm, 1 nhóm `[]`, `precached` ⊆ `bytes`); từ chối: byte âm / không nguyên / chuỗi, path không dạng `audio/<16 hex>.mp3`, path trong `units` hoặc `precached` thiếu trong `bytes`; `INTRO_STAGE_ID === 'intro'`. Skeleton trong commit test: `audioIndexSchema` lỏng (chỉ `z.object` không ràng buộc), `idSchema`/`audioPathSchema` export từ `content.schema.ts`; kiểm: fail ở các ca từ chối
-- [ ] 1.2 GREEN: ràng buộc đủ + `superRefine` path phải có byte; export `audioIndexSchema`, `AudioIndex`, `INTRO_STAGE_ID` qua `index.ts`; kiểm: test 1.1 pass, `content.schema.test.ts` cũ pass
+- [x] 1.1 RED: S8.4-AC1 "Chủ đề chưa tải có nút tải kèm dung lượng" (tầng schema) — `audioIndexSchema` nhận index hợp lệ (2 nhóm, 1 nhóm `[]`, `precached` ⊆ `bytes`); từ chối: byte âm / không nguyên / chuỗi, path không dạng `audio/<16 hex>.mp3`, path trong `units` hoặc `precached` thiếu trong `bytes`; `INTRO_STAGE_ID === 'intro'`. Skeleton trong commit test: `audioIndexSchema` lỏng (chỉ `z.object` không ràng buộc), `idSchema`/`audioPathSchema` export từ `content.schema.ts`; kiểm: fail ở các ca từ chối
+- [x] 1.2 GREEN: ràng buộc đủ + `superRefine` path phải có byte; export `audioIndexSchema`, `AudioIndex`, `INTRO_STAGE_ID` qua `index.ts`; kiểm: test 1.1 pass, `content.schema.test.ts` cũ pass
 
 ## 2. Pipeline sinh `audio-index.json` — `content/scripts` (design D2)
 

@@ -62,3 +62,5 @@ export {
   strokeIndexSchema,
 } from './stroke.schema';
 export type { StrokeData, StrokeIndex } from './stroke.schema';
+export { INTRO_STAGE_ID, audioIndexSchema } from './audio-index.schema';
+export type { AudioIndex } from './audio-index.schema';
