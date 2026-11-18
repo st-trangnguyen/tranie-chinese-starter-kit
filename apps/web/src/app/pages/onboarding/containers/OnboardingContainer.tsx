@@ -26,9 +26,9 @@ const OnboardingContainer = () => {
   if (needsOnboarding === null) {
     return null;
   }
-  // S1.3 AC3: onboarding chỉ hiện một lần.
+  // S1.3 AC3: onboarding chỉ hiện một lần. S8.1 AC1: đã xong thì về Trang chủ.
   if (!needsOnboarding && step === 'welcome') {
-    return <Navigate replace to={FIRST_LESSON_PATH} />;
+    return <Navigate replace to={ROUTE_PATHS.home} />;
   }
 
   const goToFirstLesson = () => navigate(FIRST_LESSON_PATH, { replace: true });
