@@ -134,12 +134,12 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.test.tsx` — `openR
 
 - [x] 8.1 RED: S8.1-AC1 "Chưa học bài nào" (mức màn) — tiêu đề bài đầu + link "Vào học"; kiểm: fail vì Trang chủ chưa có nội dung
 - [x] 8.2 GREEN: `useHome` (effect bài tiếp theo, mẫu `useLearningPath`), `NextLessonCard` nhánh `available`, key `nextLesson`, `startLesson`, `loading`; kiểm: test 8.1 pass
-- [ ] 8.3 RED: S8.1-AC1 "Đã xong vài bài thì hiện bài kế tiếp" (mức màn) — xong bài 1, 2 → tiêu đề bài 3; kiểm: chạy, nếu pass ngay thì tạm bỏ đọc tiến độ trong `useHome` để thấy fail rồi trả lại
-- [ ] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass
-- [ ] 8.5 RED: S8.1-AC1 "Bài kế tiếp ở nhóm hoặc giai đoạn sau" (mức màn) — xong mọi bài nhóm 1 → tiêu đề bài đầu nhóm 2; kiểm: như 8.3
-- [ ] 8.6 GREEN: sửa đến khi pass; kiểm: test 8.5 pass
-- [ ] 8.7 RED: S8.1-AC1 "Còn bài đang mở ở trước một bài đã xong" (mức màn) — chỉ xong một bài ở chủ đề sau → tiêu đề bài đầu lộ trình; kiểm: như 8.3
-- [ ] 8.8 GREEN: sửa đến khi pass; kiểm: test 8.7 pass
+- [x] 8.3 RED: S8.1-AC1 "Đã xong vài bài thì hiện bài kế tiếp" (mức màn) — xong bài 1, 2 → tiêu đề bài 3; kiểm: chạy, nếu pass ngay thì tạm bỏ đọc tiến độ trong `useHome` để thấy fail rồi trả lại
+- [x] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass
+- [x] 8.5 RED: S8.1-AC1 "Bài kế tiếp ở nhóm hoặc giai đoạn sau" (mức màn) — xong mọi bài nhóm 1 → tiêu đề bài đầu nhóm 2; kiểm: như 8.3
+- [x] 8.6 GREEN: sửa đến khi pass; kiểm: test 8.5 pass
+- [x] 8.7 RED: S8.1-AC1 "Còn bài đang mở ở trước một bài đã xong" (mức màn) — chỉ xong một bài ở chủ đề sau → tiêu đề bài đầu lộ trình; kiểm: như 8.3
+- [x] 8.8 GREEN: sửa đến khi pass; kiểm: test 8.7 pass
 - [ ] 8.9 RED: S8.1-AC1 "Đã học xong mọi bài" (mức màn) — "Bạn đã học xong lộ trình hiện có.", không có "Vào học"; link "Xem lộ trình" và dòng "Hôm nay: …" vẫn có (dòng phút kiểm sau 9.2, ở đây chỉ link); kiểm: fail
 - [ ] 8.10 GREEN: `NextLessonCard` nhánh `all-completed`, key `allCompleted`; link "Xem lộ trình" luôn render (key `learningPathLink`); kiểm: test 8.9 pass
 - [ ] 8.11 RED: S8.1-AC1 "Tiến độ lưu bị hỏng" (mức màn) — dòng `lessonProgress` bài 1 `{ status: 'xyz' }` (và bài 2 `completed`) → Trang chủ hiện bình thường, bài tiếp theo là bài 1, không `role="alert"`; kiểm: chạy, nếu pass ngay thì tạm coi dòng hỏng là `completed` trong store để thấy fail rồi trả lại

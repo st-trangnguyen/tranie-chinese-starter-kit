@@ -109,4 +109,40 @@ describe('HomeContainer — bài tiếp theo', () => {
     expect(screen.getByRole('link', { name: 'Vào học' })).toBeInTheDocument();
     expect(screen.queryByText(LESSON_TITLES.l2)).not.toBeInTheDocument();
   });
+
+  it('S8.1-AC1 Đã xong vài bài thì hiện bài kế tiếp: should show the third lesson when lessons 1 and 2 are completed', async () => {
+    await seedProgress(['l1', 'l2']);
+
+    openRoute('/home');
+
+    expect(await screen.findByText(LESSON_TITLES.l3)).toBeInTheDocument();
+    expect(screen.queryByText(LESSON_TITLES.l1)).not.toBeInTheDocument();
+  });
+
+  it('S8.1-AC1 Bài kế tiếp ở nhóm hoặc giai đoạn sau: should show the first lesson of the next unit when a unit is completed', async () => {
+    await seedProgress(['l1', 'l2', 'l3', 't1', 'l4', 'l5']);
+
+    openRoute('/home');
+
+    expect(await screen.findByText(LESSON_TITLES.l6)).toBeInTheDocument();
+    expect(screen.queryByText(LESSON_TITLES.l1)).not.toBeInTheDocument();
+  });
+
+  it('S8.1-AC1 Bài kế tiếp ở nhóm hoặc giai đoạn sau: should show the first lesson of the next stage when the first stage is completed', async () => {
+    await seedProgress(['l1', 'l2', 'l3', 't1']);
+
+    openRoute('/home');
+
+    expect(await screen.findByText(LESSON_TITLES.l4)).toBeInTheDocument();
+    expect(screen.queryByText(LESSON_TITLES.l1)).not.toBeInTheDocument();
+  });
+
+  it('S8.1-AC1 Còn bài đang mở ở trước một bài đã xong: should show the first lesson of the path when only a later unit lesson is completed', async () => {
+    await seedProgress(['l4']);
+
+    openRoute('/home');
+
+    expect(await screen.findByText(LESSON_TITLES.l1)).toBeInTheDocument();
+    expect(screen.queryByText(LESSON_TITLES.l5)).not.toBeInTheDocument();
+  });
 });
