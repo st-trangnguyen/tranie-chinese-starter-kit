@@ -17,6 +17,7 @@ import {
   findConfirmedPlacementTestLessonId,
   listLessonIdsInOrder,
 } from '@shared/utils/learning-path.utils';
+import type { StudyTimeShare } from '@shared/models/home.model';
 
 type LessonType = (typeof LESSON_TYPES)[number];
 
@@ -95,6 +96,16 @@ export class ProgressService {
     }
     // Có bài chưa biết loại (nạp lỗi) thì không có nút (rule trong findConfirmedPlacementTestLessonId).
     return findConfirmedPlacementTestLessonId(unit.lessonIds, lessonTypes);
+  }
+
+  /**
+   * Rule: mỗi phần thời gian học tính vào ngày (giờ máy) nó diễn ra; qua 0 giờ thì cắt tại 0 giờ.
+   * Đồng hồ lùi hoặc đoạn rỗng thì không tính (S8.1 AC2).
+   */
+  splitStudyTimeByDay(startMs: number, endMs: number): StudyTimeShare[] {
+    void startMs;
+    void endMs;
+    return [];
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
