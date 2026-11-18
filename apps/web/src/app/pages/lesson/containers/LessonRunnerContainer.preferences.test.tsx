@@ -370,4 +370,34 @@ describe('LessonRunnerContainer — theo Cài đặt của người học', () =
       expect(explanation).toHaveTextContent(NIHAO.vi);
     });
   });
+  describe('S8.2-AC2 Không đọc được cài đặt thì bài vẫn mở với tốc độ thường và hiện pinyin', () => {
+    /** Cài đặt "Chậm" + tắt pinyin đã lưu, nhưng mọi lần đọc cài đặt đều lỗi. */
+    const seedUnreadableSettings = async (): Promise<void> => {
+      await seedSettings({ defaultAudioSpeed: 'slow', isPinyinVisible: false });
+      vi.spyOn(progressStore, 'getSettings').mockRejectedValue(
+        new Error('IndexedDB không đọc được'),
+      );
+    };
+
+    it('S8.2-AC2 Không đọc được cài đặt thì bài vẫn mở với tốc độ thường và hiện pinyin: Cài đặt "Chậm" nhưng đọc lỗi thì bài mở, công tắc tắt, "Nghe" phát 1x, không báo lỗi', async () => {
+      await seedUnreadableSettings();
+      const { user } = renderRunner();
+
+      expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
+      await expectNormalPlayback(user);
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    it('S8.2-AC2 Không đọc được cài đặt thì bài vẫn mở với tốc độ thường và hiện pinyin: Cài đặt tắt pinyin nhưng đọc lỗi thì câu "nói" 你好 hiện chữ, "nǐ hǎo" và nghĩa, không báo lỗi', async () => {
+      await seedUnreadableSettings();
+      serveSpeakLesson();
+      renderRunner();
+
+      expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
+      expect(await screen.findByText(NIHAO.hanzi)).toBeInTheDocument();
+      expect(screen.getByText(NIHAO.pinyin)).toBeInTheDocument();
+      expect(screen.getByText(NIHAO.vi)).toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+  });
 });
