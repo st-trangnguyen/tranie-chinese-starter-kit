@@ -15,3 +15,9 @@ export function startOfNextLocalDay(ms: number): number {
     date.getDate() + 1,
   ).getTime();
 }
+
+// Skeleton S8.3 (tasks 2.1): hành vi thêm ở 2.2.
+/** Khóa ngày `YYYY-MM-DD` của ngày liền trước (giờ máy). */
+export function previousLocalDateKey(dateKey: string): string {
+  return dateKey;
+}

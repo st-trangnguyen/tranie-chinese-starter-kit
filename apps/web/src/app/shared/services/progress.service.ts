@@ -137,6 +137,16 @@ export class ProgressService {
     return minutes >= goalMinutes;
   }
 
+  // Skeleton S8.3 (tasks 2.1): hành vi thêm ở 2.2.
+  countStudyStreak(
+    stats: readonly DailyStat[],
+    today: string,
+    todayGoalMinutes: DailyGoalMinutes,
+  ): number;
+  countStudyStreak(): number {
+    return 0;
+  }
+
   /**
    * Rule: bài tiếp theo là bài "Đang mở" đầu tiên theo thứ tự lộ trình; đã xong mọi bài thì không
    * còn bài tiếp theo (S8.1 AC1).
