@@ -133,4 +133,10 @@ describe('ProgressService — countStudyStreak', () => {
 
     expect(service.countStudyStreak(stats, dayAfterNext, 15)).toBe(0);
   });
+
+  it('S8.3-AC1 Học qua nửa đêm thì mỗi ngày so với phần thời gian của ngày đó: hôm qua 10 + 10 phút đạt, hôm nay 10 phút chưa đạt thì streak là 1', () => {
+    const stats = [day(-2, 0), day(-1, REACHED), day(0, 600)];
+
+    expect(service.countStudyStreak(stats, TODAY, 15)).toBe(1);
+  });
 });
