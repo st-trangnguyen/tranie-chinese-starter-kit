@@ -41,8 +41,8 @@ Test: `apps/web/src/app/shared/utils/date.utils.test.ts`, `apps/web/src/app/shar
 - [x] 2.10 GREEN: sửa đến khi pass; kiểm: test 2.9 pass
 - [x] 2.11 RED: S8.1-AC1 "Bài kế tiếp ở nhóm hoặc giai đoạn sau" (Phần 2) — xong mọi bài nhóm 1 → bài đầu nhóm 2; xong mọi bài giai đoạn 1 → bài đầu giai đoạn 2; kiểm: như 2.9
 - [x] 2.12 GREEN: sửa đến khi pass; kiểm: test 2.11 pass
-- [ ] 2.13 RED: S8.1-AC1 "Còn bài đang mở ở trước một bài đã xong" (Phần 2) — chỉ xong một bài ở nhóm 3 → bài đầu lộ trình (không phải bài ngay sau bài đã xong, dù bài đó cũng `'open'`); kiểm: chạy, nếu pass ngay thì tạm duyệt ngược từ bài đã xong cuối để thấy fail rồi trả lại
-- [ ] 2.14 GREEN: sửa đến khi pass; kiểm: test 2.13 pass
+- [x] 2.13 RED: S8.1-AC1 "Còn bài đang mở ở trước một bài đã xong" (Phần 2) — chỉ xong một bài ở nhóm 3 → bài đầu lộ trình (không phải bài ngay sau bài đã xong, dù bài đó cũng `'open'`); kiểm: chạy, nếu pass ngay thì tạm duyệt ngược từ bài đã xong cuối để thấy fail rồi trả lại
+- [x] 2.14 GREEN: sửa đến khi pass; kiểm: test 2.13 pass
 - [ ] 2.15 RED: S8.1-AC1 "Đã học xong mọi bài" (Phần 2) — xong mọi bài → `undefined`; kiểm: chạy, nếu pass ngay thì tạm trả bài cuối khi không còn bài mở để thấy fail rồi trả lại
 - [ ] 2.16 GREEN: sửa đến khi pass; kiểm: test 2.15 pass, mọi rule có `Rule:`, `progress.service.ts` < 300 dòng
 

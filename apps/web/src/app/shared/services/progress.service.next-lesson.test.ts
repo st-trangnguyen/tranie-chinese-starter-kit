@@ -42,4 +42,13 @@ describe('ProgressService — findNextLessonId', () => {
   it('S8.1-AC1 Bài kế tiếp ở giai đoạn sau: xong mọi bài giai đoạn 1 thì là bài đầu giai đoạn 2', () => {
     expect(nextLessonOf(['l1', 'l2', 'l3', 'l4'])).toBe('l5');
   });
+
+  it('S8.1-AC1 Còn bài đang mở ở trước một bài đã xong: bài tiếp theo là bài đầu lộ trình', () => {
+    // Chỉ xong l5 (bài đầu nhóm 3 'hsk1-a'): l6 ngay sau cũng đang mở, nhưng l1 mở và đứng trước.
+    const statuses = service.deriveLessonStatuses(STAGES, new Set(['l5']));
+    expect(statuses.get('l1')).toBe('open');
+    expect(statuses.get('l6')).toBe('open');
+
+    expect(service.findNextLessonId(STAGES, statuses)).toBe('l1');
+  });
 });
