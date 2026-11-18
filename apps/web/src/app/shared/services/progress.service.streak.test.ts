@@ -111,4 +111,26 @@ describe('ProgressService — countStudyStreak', () => {
 
     expect(service.countStudyStreak(stats, TODAY, 15)).toBe(1);
   });
+
+  it('S8.3-AC1 Ngày mới bắt đầu sau nửa đêm theo giờ máy: trong ngày hôm nay đã đạt thì streak là 2', () => {
+    const stats = [day(-2, 0), day(-1, REACHED), day(0, REACHED)];
+
+    expect(service.countStudyStreak(stats, TODAY, 15)).toBe(2);
+  });
+
+  it('S8.3-AC1 Ngày mới bắt đầu sau nửa đêm theo giờ máy: vừa qua 0:00, ngày mới chưa học thì streak vẫn là 2', () => {
+    const stats = [day(-2, 0), day(-1, REACHED), day(0, REACHED)];
+    const justAfterMidnight = toLocalDateKey(
+      new Date(2026, 10, 19, 0, 1).getTime(),
+    );
+
+    expect(service.countStudyStreak(stats, justAfterMidnight, 15)).toBe(2);
+  });
+
+  it('S8.3-AC1 Ngày mới bắt đầu sau nửa đêm theo giờ máy: hết ngày mới vẫn chưa học thì ngày kế tiếp streak là 0', () => {
+    const stats = [day(-2, 0), day(-1, REACHED), day(0, REACHED)];
+    const dayAfterNext = toLocalDateKey(new Date(2026, 10, 20, 0, 1).getTime());
+
+    expect(service.countStudyStreak(stats, dayAfterNext, 15)).toBe(0);
+  });
 });
