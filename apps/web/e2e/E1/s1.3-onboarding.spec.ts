@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('S1.3 Chọn mục tiêu mỗi ngày khi mở lần đầu', () => {
-  test('onboarding một lần rồi vào thẳng bài 1', async ({ page }) => {
+  test('onboarding một lần rồi vào thẳng bài 1, mở lại vào Trang chủ', async ({
+    page,
+  }) => {
     await page.goto('/');
 
     await expect(page).toHaveURL(/\/onboarding$/);
@@ -16,8 +18,8 @@ test.describe('S1.3 Chọn mục tiêu mỗi ngày khi mở lần đầu', () =>
     await expect(page).toHaveURL(/\/lessons\/intro-01$/);
 
     await page.goto('/');
-    await expect(page).toHaveURL(/\/lessons\/intro-01$/);
+    await expect(page).toHaveURL(/\/home$/);
     await page.goto('/onboarding');
-    await expect(page).toHaveURL(/\/lessons\/intro-01$/);
+    await expect(page).toHaveURL(/\/home$/);
   });
 });
