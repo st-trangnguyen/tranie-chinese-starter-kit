@@ -38,7 +38,7 @@ export const useSettings = (): SettingsState => {
   }, [service]);
 
   // Đổi một field (design D4): hiển thị ngay, lưu qua service, ghi nhận giá trị đã lưu khi xong.
-  // Lưu lỗi: trả field về giá trị đã lưu và báo lỗi.
+  // Lưu được: thông báo lỗi biến mất. Lưu lỗi: trả field về giá trị đã lưu, báo lỗi.
   const applyChange = useCallback(
     <K extends keyof LearningPreferences>(
       key: K,
@@ -53,6 +53,7 @@ export const useSettings = (): SettingsState => {
           if (persistedRef.current !== null) {
             persistedRef.current = { ...persistedRef.current, [key]: value };
           }
+          setSaveErrorId(null);
         },
         () => {
           const persisted = persistedRef.current;

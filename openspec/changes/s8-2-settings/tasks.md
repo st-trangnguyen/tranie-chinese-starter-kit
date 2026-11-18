@@ -151,8 +151,8 @@ giá trị hỏng: `db.settings.put({ key, value })` thô.
 - [x] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass
 - [x] 8.5 RED: S8.2-AC3 "Không lưu được pinyin thì công tắc về trạng thái cũ" — pinyin bật, ghi lỗi, tắt → thông báo; công tắc checked; kiểm: như 8.3
 - [x] 8.6 GREEN: sửa đến khi pass; kiểm: test 8.5 pass
-- [ ] 8.7 RED: S8.2-AC1 "Lưu được lại thì thông báo lỗi biến mất" — sau 8.1 (thông báo đang hiện), chọn lại "30 phút" lần này lưu được → `queryByRole('alert')` null, "30 phút" checked; thêm nhánh TC-S8.2-AC1-17: lỗi ở mục tiêu, rồi đổi tốc độ lưu được → thông báo biến mất, "15 phút" và "Chậm (0.75x)" checked; kiểm: fail vì lỗi chưa được xoá khi lưu thành công
-- [ ] 8.8 GREEN: thành công thì `saveErrorId = null`; kiểm: test 8.7 pass
+- [x] 8.7 RED: S8.2-AC1 "Lưu được lại thì thông báo lỗi biến mất" — sau 8.1 (thông báo đang hiện), chọn lại "30 phút" lần này lưu được → `queryByRole('alert')` null, "30 phút" checked; thêm nhánh TC-S8.2-AC1-17: lỗi ở mục tiêu, rồi đổi tốc độ lưu được → thông báo biến mất, "15 phút" và "Chậm (0.75x)" checked; kiểm: fail vì lỗi chưa được xoá khi lưu thành công
+- [x] 8.8 GREEN: thành công thì `saveErrorId = null`; kiểm: test 8.7 pass
 - [ ] 8.9 RED: S8.2-AC1 "Lỗi lặp lại chỉ có một thông báo" — ghi lỗi hai lần: chọn "30 phút" rồi "60 phút" → `getAllByRole('alert')` dài 1; node alert sau lần 2 `not.toBe` node sau lần 1 (live region mới, được đọc lại); "15 phút" checked (về giá trị đã lưu, không về "30 phút"); kiểm: fail nếu revert về giá trị hiện trước đó hoặc node không đổi (tạm bỏ `key` nếu pass ngay rồi trả lại)
 - [ ] 8.10 GREEN: sửa đến khi pass (`persistedRef`, `key={saveErrorId}`); kiểm: test 8.9 pass
 - [ ] 8.11 RED: S8.2-AC1 "Đổi mục tiêu thì giữ sau khi mở lại app" (biên TC-S8.2-AC1-11, đổi nhanh) — `saveSettings` lần 1 (60) chờ một promise tự điều khiển rồi reject, lần 2 (30) thành công trước: sau cả hai, "30 phút" checked, có thông báo lỗi; render lại → "30 phút"; kiểm: fail nếu lỗi của lần cũ trả giá trị về (tạm bỏ kiểm `latestRequestRef` nếu pass ngay rồi trả lại)
