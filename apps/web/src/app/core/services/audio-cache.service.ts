@@ -1,5 +1,17 @@
 import { AUDIO_CACHE_NAME } from '@core/constants/audio.constants';
 
+export type AudioDownloadFailure = 'network' | 'storage-full';
+
+export class AudioDownloadError extends Error {
+  constructor(
+    readonly reason: AudioDownloadFailure,
+    options?: ErrorOptions,
+  ) {
+    super(`Không tải được audio (${reason})`, options);
+    this.name = 'AudioDownloadError';
+  }
+}
+
 export interface AudioCache {
   /** Trong `paths`, file nào đang có ở bất kỳ cache nào. */
   listCachedPaths(paths: readonly string[]): Promise<ReadonlySet<string>>;

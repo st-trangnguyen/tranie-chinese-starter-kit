@@ -1,7 +1,11 @@
 import { AUDIO_CACHE_NAME } from '@core/constants/audio.constants';
 import { FakeCacheStorage } from '@test/cache-storage.fake';
 
-import { type AudioCache, BrowserAudioCache } from './audio-cache.service';
+import {
+  type AudioCache,
+  AudioDownloadError,
+  BrowserAudioCache,
+} from './audio-cache.service';
 
 const PATH_A = 'audio/aaaaaaaaaaaaaaaa.mp3';
 const PATH_B = 'audio/bbbbbbbbbbbbbbbb.mp3';
@@ -23,6 +27,26 @@ const requestHeaders = (
   init: RequestInit | undefined,
 ): Headers =>
   input instanceof Request ? input.headers : new Headers(init?.headers);
+
+const brokenBodyResponse = (): Response =>
+  new Response(
+    new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array([0x49]));
+        controller.error(new TypeError('network error while reading body'));
+      },
+    }),
+    { status: 200, headers: { 'Content-Type': 'audio/mpeg' } },
+  );
+
+const captureError = async (action: () => Promise<void>): Promise<unknown> => {
+  try {
+    await action();
+  } catch (error) {
+    return error;
+  }
+  return undefined;
+};
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -93,4 +117,40 @@ describe('BrowserAudioCache', () => {
       PATH_B,
     ]);
   });
+
+  it.each([
+    [
+      'fetch rejects with TypeError',
+      async (): Promise<Response> => {
+        throw new TypeError('Failed to fetch');
+      },
+    ],
+    [
+      'server answers 503',
+      async (): Promise<Response> =>
+        new Response('Service Unavailable', { status: 503 }),
+    ],
+    [
+      'body fails while reading',
+      async (): Promise<Response> => brokenBodyResponse(),
+    ],
+  ])(
+    'S8.4-AC1 Mất mạng khi đang tải: should throw AudioDownloadError with reason network and keep nothing in cache when %s',
+    async (_label, respond) => {
+      const storage = new FakeCacheStorage();
+      vi.spyOn(globalThis, 'fetch').mockImplementation(respond);
+      const cache: AudioCache = new BrowserAudioCache(() => storage);
+
+      const error = await captureError(() => cache.download(PATH_A));
+
+      expect(error).toBeInstanceOf(AudioDownloadError);
+      expect(
+        error instanceof AudioDownloadError ? error.reason : undefined,
+      ).toBe('network');
+      expect(
+        await storage.cacheFor(AUDIO_CACHE_NAME).match(`/${PATH_A}`),
+      ).toBeUndefined();
+      expect([...(await cache.listCachedPaths([PATH_A]))]).toEqual([]);
+    },
+  );
 });
