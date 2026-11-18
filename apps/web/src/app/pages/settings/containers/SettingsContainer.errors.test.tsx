@@ -49,4 +49,36 @@ describe('SettingsContainer — lỗi lưu', () => {
       within(group).getByRole('radio', { name: '30 phút' }),
     ).not.toBeChecked();
   });
+
+  it('S8.2-AC2 Không lưu được tốc độ thì giữ tốc độ cũ: tốc độ 1x, chọn "Chậm (0.75x)" lưu lỗi → thông báo, "Bình thường (1x)" vẫn chọn', async () => {
+    await new ProgressService().completeOnboarding(15);
+
+    const { user } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const group = await screen.findByRole('group', {
+      name: 'Tốc độ audio mặc định',
+    });
+    expect(
+      within(group).getByRole('radio', { name: 'Bình thường (1x)' }),
+    ).toBeChecked();
+
+    vi.spyOn(progressStore, 'saveSettings').mockRejectedValueOnce(
+      new Error('quota'),
+    );
+
+    await user.click(
+      within(group).getByRole('radio', { name: 'Chậm (0.75x)' }),
+    );
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(SAVE_ERROR_MESSAGE);
+    expect(
+      within(group).getByRole('radio', { name: 'Bình thường (1x)' }),
+    ).toBeChecked();
+    expect(
+      within(group).getByRole('radio', { name: 'Chậm (0.75x)' }),
+    ).not.toBeChecked();
+  });
 });
