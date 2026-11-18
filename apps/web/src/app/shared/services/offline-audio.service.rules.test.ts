@@ -1,0 +1,70 @@
+import { describe, expect, it } from 'vitest';
+
+import type { AudioIndex } from '@csk/shared';
+
+import type { OfflineAudioSnapshot } from '@shared/models/offline-audio.model';
+
+import { OfflineAudioService } from './offline-audio.service';
+
+const HSK_STAGE_ID = 'hsk1';
+const HSK_UNIT_ID = 'hsk1-greetings';
+
+const AUDIO_A = 'audio/0000000000000001.mp3';
+const AUDIO_B = 'audio/0000000000000002.mp3';
+const AUDIO_C = 'audio/0000000000000003.mp3';
+const AUDIO_D = 'audio/0000000000000004.mp3';
+const AUDIO_INTRO = 'audio/00000000000000ff.mp3';
+
+// Tổng 4 audio của chủ đề HSK = 2 516 582 byte ("2,4 MB").
+const HSK_INDEX: AudioIndex = {
+  units: {
+    intro1: [AUDIO_INTRO],
+    [HSK_UNIT_ID]: [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D],
+  },
+  bytes: {
+    [AUDIO_A]: 600_000,
+    [AUDIO_B]: 700_000,
+    [AUDIO_C]: 616_582,
+    [AUDIO_D]: 600_000,
+    [AUDIO_INTRO]: 50_000,
+  },
+  precached: [AUDIO_INTRO],
+};
+
+function makeSnapshot(
+  overrides: Partial<OfflineAudioSnapshot> = {},
+): OfflineAudioSnapshot {
+  return {
+    index: HSK_INDEX,
+    cachedPaths: new Set<string>(),
+    downloadingUnitIds: new Set<string>(),
+    messages: new Map(),
+    announcements: [],
+    ...overrides,
+  };
+}
+
+describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
+  const service = new OfflineAudioService();
+
+  it('S8.4-AC1 Chủ đề chưa tải có nút tải kèm dung lượng: chủ đề HSK chưa có audio trên máy → not-downloaded, đủ byte', () => {
+    const topic = service.deriveTopic(
+      HSK_STAGE_ID,
+      HSK_UNIT_ID,
+      makeSnapshot(),
+    );
+
+    expect(topic).toEqual({ status: 'not-downloaded', bytes: 2_516_582 });
+  });
+
+  it('S8.4-AC1 Chủ đề chưa tải có nút tải kèm dung lượng: audio trùng chỉ tính dung lượng một lần', () => {
+    const bytes = HSK_INDEX.bytes;
+
+    expect(
+      service.sumBytes(
+        [AUDIO_A, AUDIO_B, AUDIO_A, AUDIO_C, AUDIO_D, AUDIO_B],
+        bytes,
+      ),
+    ).toBe(2_516_582);
+  });
+});
