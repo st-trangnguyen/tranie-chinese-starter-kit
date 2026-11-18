@@ -1,5 +1,8 @@
 import { createDatabase } from '@core/helpers/db.helper';
-import { DexieProgressStore } from './progress-store.service';
+import {
+  DexieProgressStore,
+  type ProgressStore,
+} from './progress-store.service';
 
 const YESTERDAY = '2026-11-17';
 const TODAY = '2026-11-18';
@@ -8,6 +11,16 @@ const openStore = () => {
   const db = createDatabase(`test-${crypto.randomUUID()}`);
   return { db, store: new DexieProgressStore(db) };
 };
+
+/** Store gọi qua interface `ProgressStore` (chữ ký `saveDailyGoal(date, goalMinutes)`). */
+const openGoalStore = () => {
+  const db = createDatabase(`test-${crypto.randomUUID()}`);
+  const store: ProgressStore = new DexieProgressStore(db);
+  return { db, store };
+};
+
+const SCENARIO_CHANGE_GOAL =
+  'S8.3-AC1 Đổi mục tiêu sau khi đã học, qua 0:00 streak không đổi';
 
 describe('DexieProgressStore — mục tiêu của ngày (S8.3)', () => {
   it('S8.3-AC1 Ngày đã qua không có mục tiêu đọc được: mục tiêu hỏng thành undefined, số giây vẫn đọc được', async () => {
@@ -111,6 +124,102 @@ describe('DexieProgressStore — mục tiêu của ngày (S8.3)', () => {
       date: TODAY,
       studySeconds: 60,
       goalMinutes: 15,
+    });
+  });
+
+  it(`${SCENARIO_CHANGE_GOAL}: đổi mục tiêu đổi cả settings và mục tiêu của hôm nay, ngày đã qua giữ nguyên`, async () => {
+    const { db, store } = openGoalStore();
+    await store.saveSettings({
+      dailyGoalMinutes: 15,
+      hasCompletedOnboarding: true,
+    });
+    await db.dailyStats.put({
+      date: YESTERDAY,
+      studySeconds: 1200,
+      goalMinutes: 15,
+    });
+    await db.dailyStats.put({
+      date: TODAY,
+      studySeconds: 1200,
+      goalMinutes: 15,
+    });
+
+    await store.saveDailyGoal(TODAY, 30);
+
+    await expect(store.getSettings()).resolves.toMatchObject({
+      dailyGoalMinutes: 30,
+    });
+    await expect(db.dailyStats.get(TODAY)).resolves.toEqual({
+      date: TODAY,
+      studySeconds: 1200,
+      goalMinutes: 30,
+    });
+    await expect(db.dailyStats.get(YESTERDAY)).resolves.toEqual({
+      date: YESTERDAY,
+      studySeconds: 1200,
+      goalMinutes: 15,
+    });
+  });
+
+  it(`${SCENARIO_CHANGE_GOAL}: ngày chưa có dòng thì chỉ đổi settings, không tạo dòng`, async () => {
+    const { db, store } = openGoalStore();
+    await store.saveSettings({
+      dailyGoalMinutes: 15,
+      hasCompletedOnboarding: true,
+    });
+
+    await store.saveDailyGoal(TODAY, 30);
+
+    await expect(store.getSettings()).resolves.toMatchObject({
+      dailyGoalMinutes: 30,
+    });
+    await expect(db.dailyStats.get(TODAY)).resolves.toBeUndefined();
+  });
+
+  it(`${SCENARIO_CHANGE_GOAL}: dòng hôm nay hỏng thì giữ nguyên dòng, settings vẫn đổi`, async () => {
+    const { db, store } = openGoalStore();
+    await store.saveSettings({
+      dailyGoalMinutes: 15,
+      hasCompletedOnboarding: true,
+    });
+    await db.dailyStats.put({
+      date: TODAY,
+      studySeconds: 'abc',
+      goalMinutes: 15,
+    });
+
+    await store.saveDailyGoal(TODAY, 30);
+
+    await expect(store.getSettings()).resolves.toMatchObject({
+      dailyGoalMinutes: 30,
+    });
+    await expect(db.dailyStats.get(TODAY)).resolves.toEqual({
+      date: TODAY,
+      studySeconds: 'abc',
+      goalMinutes: 15,
+    });
+  });
+
+  it(`${SCENARIO_CHANGE_GOAL}: đổi mục tiêu ngay sau lần ghi phút chưa xong thì dòng cuối có cả phút và mục tiêu mới`, async () => {
+    const { db, store } = openGoalStore();
+    await store.saveSettings({
+      dailyGoalMinutes: 15,
+      hasCompletedOnboarding: true,
+    });
+    await db.dailyStats.put({
+      date: TODAY,
+      studySeconds: 1200,
+      goalMinutes: 15,
+    });
+
+    const pendingWrite = store.addStudySeconds(TODAY, 60);
+    await store.saveDailyGoal(TODAY, 60);
+    await pendingWrite;
+
+    await expect(db.dailyStats.get(TODAY)).resolves.toEqual({
+      date: TODAY,
+      studySeconds: 1260,
+      goalMinutes: 60,
     });
   });
 });
