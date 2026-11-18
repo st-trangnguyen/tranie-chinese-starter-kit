@@ -52,15 +52,20 @@ export class OfflineAudioService {
   }
 
   /**
-   * Rule: chủ đề thuộc giai đoạn Nhập môn có sẵn offline, không cần tải (S8.4 AC1).
-   * Nhánh "mọi audio là audio Nhập môn": task 5.11/5.12.
+   * Rule: chủ đề có sẵn offline, không cần tải (S8.4 AC1) khi thuộc giai đoạn Nhập môn,
+   * hoặc khi mọi audio của chủ đề là audio Nhập môn (nằm trong `precached`).
    */
-  // Chữ ký D6 giữ tham số `unitAudio`, `precached`; task 5.12 mới dùng tới.
-  readonly isAvailableOffline: (
+  isAvailableOffline(
     stageId: string,
     unitAudio: readonly string[],
     precached: readonly string[],
-  ) => boolean = (stageId) => stageId === INTRO_STAGE_ID;
+  ): boolean {
+    if (stageId === INTRO_STAGE_ID) {
+      return true;
+    }
+    const precachedPaths = new Set(precached);
+    return unitAudio.every((path) => precachedPaths.has(path));
+  }
 
   /** Rule: dung lượng = tổng byte các audio (không trùng) của chủ đề (S8.4 AC1). */
   sumBytes(
