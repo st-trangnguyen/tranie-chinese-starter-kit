@@ -16,8 +16,8 @@ export function startOfNextLocalDay(ms: number): number {
   ).getTime();
 }
 
-// Skeleton S8.3 (tasks 2.1): hành vi thêm ở 2.2.
 /** Khóa ngày `YYYY-MM-DD` của ngày liền trước (giờ máy). */
 export function previousLocalDateKey(dateKey: string): string {
-  return dateKey;
+  const [year = 0, month = 1, day = 1] = dateKey.split('-').map(Number);
+  return toLocalDateKey(new Date(year, month - 1, day - 1).getTime());
 }

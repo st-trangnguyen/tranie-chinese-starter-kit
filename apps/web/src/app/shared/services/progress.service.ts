@@ -19,7 +19,11 @@ import {
   findConfirmedPlacementTestLessonId,
   listLessonIdsInOrder,
 } from '@shared/utils/learning-path.utils';
-import { startOfNextLocalDay, toLocalDateKey } from '@shared/utils/date.utils';
+import {
+  previousLocalDateKey,
+  startOfNextLocalDay,
+  toLocalDateKey,
+} from '@shared/utils/date.utils';
 import type { StudyTimeShare, TodayStudy } from '@shared/models/home.model';
 
 type LessonType = (typeof LESSON_TYPES)[number];
@@ -137,14 +141,39 @@ export class ProgressService {
     return minutes >= goalMinutes;
   }
 
-  // Skeleton S8.3 (tasks 2.1): hành vi thêm ở 2.2.
+  /** Rule: ngày không có dòng là chưa đạt; ngày có dòng đạt khi số phút ≥ mục tiêu (S8.3 AC1). */
+  isStreakDayReached(
+    stat: DailyStat | undefined,
+    todayGoalMinutes: DailyGoalMinutes,
+  ): boolean {
+    if (stat === undefined) {
+      return false;
+    }
+    return this.isDailyGoalReached(
+      this.toStudyMinutes(stat.studySeconds),
+      todayGoalMinutes,
+    );
+  }
+
+  /**
+   * Rule: streak là số ngày đạt mục tiêu liên tiếp, tính từ hôm nay nếu hôm nay đã đạt, ngược lại từ
+   * hôm qua; dừng ở ngày đầu tiên chưa đạt (S8.3 AC1).
+   */
   countStudyStreak(
     stats: readonly DailyStat[],
     today: string,
     todayGoalMinutes: DailyGoalMinutes,
-  ): number;
-  countStudyStreak(): number {
-    return 0;
+  ): number {
+    const statsByDate = new Map(stats.map((stat) => [stat.date, stat]));
+    const isReached = (date: string): boolean =>
+      this.isStreakDayReached(statsByDate.get(date), todayGoalMinutes);
+    let cursor = isReached(today) ? today : previousLocalDateKey(today);
+    let streak = 0;
+    while (isReached(cursor)) {
+      streak += 1;
+      cursor = previousLocalDateKey(cursor);
+    }
+    return streak;
   }
 
   /**
