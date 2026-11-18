@@ -1,8 +1,10 @@
-import { INTRO_STAGE_ID, type AudioIndex } from '@csk/shared';
+import { INTRO_STAGE_ID, type AudioIndex, type Stage } from '@csk/shared';
 
 import type {
+  OfflineAudioMessage,
   OfflineAudioSnapshot,
   OfflineAudioTopic,
+  OfflineAudioTopicView,
 } from '@shared/models/offline-audio.model';
 import { toDownloadPercent } from '@shared/utils/offline-audio.utils';
 
@@ -135,6 +137,31 @@ export class OfflineAudioService {
     return [...new Set(index.units[unitId] ?? [])].filter(
       (path) => !keptPaths.has(path),
     );
+  }
+
+  /**
+   * Rule: thông báo của chủ đề mất khi trạng thái hiện tại của chủ đề khác `shownWith`
+   * (S8.4 AC1). Skeleton (RED 5.35): chưa có hành vi.
+   */
+  pruneStaleMessages(
+    messages: ReadonlyMap<string, OfflineAudioMessage>,
+    topicsNow: ReadonlyMap<string, OfflineAudioTopic>,
+  ): ReadonlyMap<string, OfflineAudioMessage> {
+    void topicsNow;
+    return messages;
+  }
+
+  /**
+   * Gom `deriveTopic` của mọi chủ đề + thông báo còn hiệu lực (S8.4 AC1).
+   * Skeleton (RED 5.35): chưa có hành vi.
+   */
+  deriveTopics(
+    stages: readonly Stage[],
+    snapshot: OfflineAudioSnapshot,
+  ): ReadonlyMap<string, OfflineAudioTopicView> {
+    void stages;
+    void snapshot;
+    return new Map();
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
