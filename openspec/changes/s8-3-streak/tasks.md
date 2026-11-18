@@ -5,6 +5,9 @@ import/gõ sai), commit `test(...)`; mỗi GREEN code tối thiểu đúng layer
 Tên test chứa Scenario ID và tên Scenario (`S8.3-AC1 Bỏ một ngày thì chuỗi đứt: …`); test e2e thêm ID TC. Tên file, hàm,
 field: design D1–D5.
 RED nào pass ngay nhờ GREEN trước thì tạm đảo đúng nhánh code liên quan để thấy fail, rồi trả lại (như S8.1).
+Khi đó GREEN của cặp có thể không đổi code: hành vi đã có từ bước trước, và việc tạm đảo đã chứng minh test bắt được lỗi
+(commit `test(...)` ghi "GREEN … không đổi code"; áp dụng cho 2.4–2.20 cặp chẵn, 2.26, 3.4, 3.6, 3.8, 3.12, 3.14, 4.4–4.12
+cặp chẵn, 5.2, 5.4).
 RED cần type/method chưa có thì tạo skeleton không có hành vi trong cùng commit `test(...)` (typecheck sạch, test fail ở assertion).
 
 Vitest: `pnpm --filter @csk/web test:run <mẫu>` (`pnpm --filter @csk/shared test:run <mẫu>` cho schema). Ngày dựng bằng
@@ -35,7 +38,8 @@ Test: `apps/web/src/app/shared/utils/date.utils.test.ts`, `apps/web/src/app/shar
 Dữ liệu là mảng `DailyStat` dựng bằng helper trong file test `day(offset, seconds, goalMinutes = 15)`; các test 2.1–2.19
 luôn ghi `goalMinutes` của ngày đã qua bằng đúng mục tiêu truyền vào `countStudyStreak` (2.3 dùng 30), để các bước 2.22–2.26
 không làm chúng đổi kết quả. Dòng không có mục tiêu (2.25) dựng bằng object literal, vì tham số mặc định nuốt `undefined`.
-Các RED về mục tiêu (2.21, 2.23, 2.25) fail thật nhờ GREEN trước đó tối thiểu, không dùng mẹo tạm đảo. Scenario "Đổi mục tiêu
+RED 2.21 và 2.23 fail thật nhờ GREEN trước đó tối thiểu. RED 2.25 pass ngay vì 2.22 (theo finding duyệt plan vòng 2
+của dev-lead) đã cho `resolveDayGoal` trả `todayGoalMinutes` khi ngày thiếu mục tiêu, nên 2.25 dùng mẹo tạm đảo. Scenario "Đổi mục tiêu
 sau khi đã học, qua 0:00 streak không đổi" không có cặp ở Phần 2 (mục tiêu của ngày bằng mục tiêu đang chọn nên mọi bước
 cài đặt đều cho 0, RED không thể fail thật); nó được kiểm ở store (1.5/1.6) và use case (3.11/3.12).
 
@@ -49,22 +53,22 @@ cài đặt đều cho 0, RED không thể fail thật); nó được kiểm ở
 - [x] 2.8 GREEN: sửa đến khi pass; kiểm: test 2.7 pass
 - [x] 2.9 RED: S8.3-AC1 "Người học mới chưa có ngày nào" — `countStudyStreak([], D0, 15)` = 0; kiểm: chạy, nếu pass ngay thì tạm coi hôm qua không có dòng là đạt để thấy fail rồi trả lại
 - [x] 2.10 GREEN: sửa đến khi pass; kiểm: test 2.9 pass
-- [x] 2.11 RED: S8.3-AC1 "Chưa đủ trọn phút mục tiêu thì chưa tính là đạt" — D0 899 giây (14 phút 59 giây), mục tiêu 15 → 0; 900 giây → 1; ngày đã qua 899 giây `goalMinutes: 15` không đạt; kiểm: chạy, nếu pass ngay thì tạm so `studySeconds / 60` không làm tròn để thấy fail rồi trả lại
+- [x] 2.11 RED: S8.3-AC1 "Chưa đủ trọn phút mục tiêu thì chưa tính là đạt" — D0 899 giây (14 phút 59 giây), mục tiêu 15 → 0; 900 giây → 1; ngày đã qua 899 giây `goalMinutes: 15` không đạt; kiểm: chạy, nếu pass ngay thì tạm đổi `toStudyMinutes` sang làm tròn `Math.round(studySeconds / 60)` (899 giây thành 15 phút) để thấy fail rồi trả lại
 - [x] 2.12 GREEN: sửa đến khi pass (dùng `toStudyMinutes` + `isDailyGoalReached` sẵn có); kiểm: test 2.11 pass
 - [x] 2.13 RED: S8.3-AC1 "Ngày mới bắt đầu sau nửa đêm theo giờ máy" — dữ liệu D-2 0, D-1 đạt, D0 đạt; `today` = D0 → 2; `today` = D+1 (không có dòng) → 2; `today` = D+2 → 0; kiểm: chạy, nếu pass ngay thì tạm luôn bắt đầu đếm từ `today` để thấy fail rồi trả lại
 - [x] 2.14 GREEN: sửa đến khi pass; kiểm: test 2.13 pass
-- [x] 2.15 RED: S8.3-AC1 "Học qua nửa đêm thì mỗi ngày so với phần thời gian của ngày đó" (Phần 2) — mục tiêu 15, D-1 1200 giây (10 + 10 phút), D0 600 giây → 1; kiểm: chạy, nếu pass ngay thì tạm cộng phút hôm nay vào hôm qua để thấy fail rồi trả lại
+- [x] 2.15 RED: S8.3-AC1 "Học qua nửa đêm thì mỗi ngày so với phần thời gian của ngày đó" (Phần 2) — mục tiêu 15, D-1 1200 giây (10 + 10 phút), D0 600 giây → 1; kiểm: chạy, nếu pass ngay thì tạm gộp phút hôm qua vào hôm nay để thấy fail rồi trả lại
 - [x] 2.16 GREEN: sửa đến khi pass; kiểm: test 2.15 pass
 - [x] 2.17 RED: S8.3-AC1 "Số phút của một ngày đã qua bị hỏng" (Phần 2) — D-2 đạt, D-1 không có trong mảng (store đã bỏ dòng hỏng, 1.8), D0 đạt → 1; kiểm: chạy, nếu pass ngay thì tạm nhảy qua ngày thiếu để thấy fail rồi trả lại
 - [x] 2.18 GREEN: sửa đến khi pass; kiểm: test 2.17 pass
 - [x] 2.19 RED: S8.3-AC1 "Ngày ghi sau hôm nay không được tính" — D-2 0, D-1 đạt, D0 đạt, D+1 đạt → 2; thêm D+1 đạt khi D0 chưa đạt → bằng chuỗi tính tới D-1; kiểm: fail nếu đếm bắt đầu từ ngày mới nhất trong dữ liệu (tạm làm vậy nếu pass ngay rồi trả lại)
-- [x] 2.20 GREEN: bỏ dòng `date > today`; kiểm: test 2.19 pass
+- [x] 2.20 GREEN: không đổi code — không thêm bước lọc `date > today`, vì đếm lùi từ hôm nay đã không đọc ngày tương lai và không test nào đòi; kiểm: test 2.19 pass
 - [x] 2.21 RED: S8.3-AC1 "Tăng mục tiêu không đổi các ngày đã qua" (Phần 2) — mục tiêu đang chọn 30, D-4 0, D-3…D-1 1200 giây `goalMinutes: 15`, D0 1200 giây → 3; kiểm: fail thật (2.2 so mọi ngày với 30 → 0)
-- [x] 2.22 GREEN: Phần 2 `resolveDayGoal` kèm `Rule:` (bước này: trả mục tiêu đã lưu của ngày đã qua, `undefined` khi thiếu); `isStreakDayReached` cho ngày đã qua: có mục tiêu của ngày thì đạt khi đạt mục tiêu đó **hoặc** mục tiêu hôm nay (giữ hành vi 2.2, thêm mục tiêu của ngày — bước tối thiểu cho Scenario này), không có mục tiêu của ngày thì chưa đạt; hôm nay vẫn so với `todayGoalMinutes`; kiểm: test 2.21 pass, 2.1–2.20 vẫn pass
+- [x] 2.22 GREEN: Phần 2 `resolveDayGoal` kèm `Rule:` (`resolveDayGoal(dayGoalMinutes, todayGoalMinutes)` trả mục tiêu đã lưu của ngày, thiếu thì trả `todayGoalMinutes` — giữ hành vi 2.2 cho ngày thiếu mục tiêu, theo finding duyệt plan vòng 2 của dev-lead; kiểu trả `DailyGoalMinutes`, design D3); `isStreakDayReached` thêm tham số `isToday`, ngày đã qua đạt khi đạt mục tiêu của ngày (`resolveDayGoal`) **hoặc** mục tiêu hôm nay (giữ hành vi 2.2 — bước tối thiểu cho Scenario này); hôm nay vẫn so với `todayGoalMinutes`; kiểm: test 2.21 pass, 2.1–2.20 vẫn pass
 - [x] 2.23 RED: S8.3-AC1 "Hạ mục tiêu không biến ngày chưa đạt thành đạt" — mục tiêu đang chọn 15, D-3 0, D-2 và D-1 1200 giây `goalMinutes: 30`, D0 0 → 0; kiểm: fail thật (2.22 vẫn cho ngày đã qua đạt theo mục tiêu hôm nay 15 → 2)
-- [x] 2.24 GREEN: ngày đã qua chỉ so với mục tiêu của ngày đó (`resolveDayGoal`), bỏ nhánh "hoặc mục tiêu hôm nay"; kiểm: test 2.23 pass, 2.21 vẫn pass
-- [x] 2.25 RED: S8.3-AC1 "Ngày đã qua không có mục tiêu đọc được" (Phần 2) — mục tiêu đang chọn 15, D-2 0, D-1 `{ date, studySeconds: 1200 }` (không có `goalMinutes`), D0 1200 giây → 2; mục tiêu đang chọn 30 (truyền vào), cùng dữ liệu nhưng D-1 2100 giây, D0 1800 giây → 2; kiểm: fail thật (2.24 coi ngày không có mục tiêu là chưa đạt → 1)
-- [x] 2.26 GREEN: `resolveDayGoal(dayGoalMinutes, todayGoalMinutes)` trả `todayGoalMinutes` khi mục tiêu của ngày thiếu/hỏng (`undefined` sau schema 1.2), kiểu trả `DailyGoalMinutes` (design D3); bỏ nhánh "không có mục tiêu → chưa đạt"; kiểm: test 2.25 pass, 2.1–2.24 vẫn pass, mọi rule có `Rule:`, `progress.service.ts` < 300 dòng
+- [x] 2.24 GREEN: ngày đã qua chỉ so với mục tiêu của ngày đó (`resolveDayGoal`, ngày thiếu mục tiêu vẫn rơi về `todayGoalMinutes`), bỏ nhánh "hoặc mục tiêu hôm nay"; kiểm: test 2.23 pass, 2.21 vẫn pass
+- [x] 2.25 RED: S8.3-AC1 "Ngày đã qua không có mục tiêu đọc được" (Phần 2) — mục tiêu đang chọn 15, D-2 0, D-1 `{ date, studySeconds: 1200 }` (không có `goalMinutes`), D0 1200 giây → 2; mục tiêu đang chọn 30 (truyền vào), cùng dữ liệu nhưng D-1 2100 giây, D0 1800 giây → 2; kiểm: pass ngay nhờ `resolveDayGoal` của 2.22, nên tạm đảo (coi ngày đã qua thiếu mục tiêu là chưa đạt → 1) để thấy fail rồi trả lại
+- [x] 2.26 GREEN: không đổi code — `resolveDayGoal` đã trả `todayGoalMinutes` khi mục tiêu của ngày thiếu/hỏng (`undefined` sau schema 1.2) từ 2.22; kiểm: test 2.25 pass, 2.1–2.24 vẫn pass, mọi rule có `Rule:`, `progress.service.ts` < 300 dòng
 
 ## 3. Use case — `ProgressService` Phần 1 + 3 (design D4)
 
@@ -76,7 +80,7 @@ Test: `apps/web/src/app/shared/services/progress.service.streak-flow.test.ts` (m
 - [x] 3.2 GREEN: Phần 1 `readAllDailyStats`; Phần 3 `getStudyStreak(now)` (settings + mọi ngày song song, `.catch` như `getTodayStudy`, `countStudyStreak`); kiểm: test 3.1 pass
 - [x] 3.3 RED: S8.3-AC1 "Mục tiêu đang chọn bị hỏng" — settings `dailyGoalMinutes: 'abc'`, D-1 không có dòng, D0 900 giây → 1; kiểm: chạy, nếu pass ngay thì tạm đọc mục tiêu thô (không qua `parseSettings`) để thấy fail rồi trả lại
 - [x] 3.4 GREEN: sửa đến khi pass; kiểm: test 3.3 pass
-- [x] 3.5 RED: S8.3-AC1 "Học qua nửa đêm thì mỗi ngày so với phần thời gian của ngày đó" (Phần 3) — mục tiêu 15, D-1 600 giây; `recordStudyTime(23:50 D-1, 00:10 D0)` → `getStudyStreak(00:15 D0)` = 1 và `getTodayStudy(00:15 D0).minutes` = 10; kiểm: chạy, nếu pass ngay thì tạm dùng ngày của `now - 1 ngày` làm `today` để thấy fail rồi trả lại
+- [x] 3.5 RED: S8.3-AC1 "Học qua nửa đêm thì mỗi ngày so với phần thời gian của ngày đó" (Phần 3) — mục tiêu 15, D-1 600 giây; `recordStudyTime(23:50 D-1, 00:10 D0)` → `getStudyStreak(00:15 D0)` = 1 và `getTodayStudy(00:15 D0).minutes` = 10; kiểm: chạy, nếu pass ngay thì tạm dùng ngày của `now - 1 ngày` làm `today` để thấy fail rồi trả lại (thực tế: đảo trong `getStudyStreak` không làm fail, nên đảo cùng lỗi trong `getTodayStudy` — assertion số phút hôm nay bắt được)
 - [x] 3.6 GREEN: sửa đến khi pass; kiểm: test 3.5 pass
 - [x] 3.7 RED: S8.3-AC1 "Số phút của một ngày đã qua bị hỏng" (Phần 3) — mục tiêu 15, D-2 và D0 1200 giây, D-1 `studySeconds: 'abc'` → 1, `getTodayStudy` vẫn 20 phút; kiểm: chạy, nếu pass ngay thì tạm cho `getAllDailyStats` trả dòng hỏng D-1 như 1200 giây để thấy 3 rồi trả lại
 - [x] 3.8 GREEN: sửa đến khi pass; kiểm: test 3.7 pass
