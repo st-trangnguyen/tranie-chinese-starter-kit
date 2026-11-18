@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, type Locator, test } from '@playwright/test';
 
 import { completeOnboarding, HOME_URL, seedProgress } from './home.helpers';
 import {
@@ -20,6 +20,24 @@ import {
   speedGroup,
   speedRadio,
 } from './settings.helpers';
+
+const isFocused = (locator: Locator): Promise<boolean> =>
+  locator.evaluate((element) => element === document.activeElement);
+
+/** Ô có focus có viền nhìn thấy: chính phần tử hoặc ô nhãn bao quanh nó có `outline-style` khác `none`. */
+const expectVisibleFocusRing = async (locator: Locator): Promise<void> => {
+  expect(await isFocused(locator)).toBe(true);
+  const outlineStyles = await locator.evaluate((element) => {
+    const box = element.closest('label');
+    return {
+      own: getComputedStyle(element).outlineStyle,
+      box: box === null ? 'none' : getComputedStyle(box).outlineStyle,
+    };
+  });
+  expect(outlineStyles.own !== 'none' || outlineStyles.box !== 'none').toBe(
+    true,
+  );
+};
 
 test.describe('S8.2 Cài đặt', () => {
   test.describe('S8.2-AC1 mục tiêu mỗi ngày', () => {
@@ -105,6 +123,46 @@ test.describe('S8.2 Cài đặt', () => {
       await expect(page.getByRole('button', { name: 'Bắt đầu' })).toHaveCount(
         0,
       );
+    });
+    test('TC-S8.2-AC1-6: S8.2-AC1 Đổi lựa chọn bằng bàn phím', async ({
+      page,
+    }) => {
+      await completeOnboarding(page, 15);
+      await openSettingsFromPath(page);
+
+      let isGoalFocused = false;
+      for (let presses = 0; presses < 15 && !isGoalFocused; presses += 1) {
+        await page.keyboard.press('Tab');
+        isGoalFocused = await isFocused(goalRadio(page, 15));
+      }
+      expect(isGoalFocused).toBe(true);
+      await expectVisibleFocusRing(goalRadio(page, 15));
+
+      await page.keyboard.press('ArrowDown');
+      await expect(goalRadio(page, 30)).toBeChecked();
+      await expectVisibleFocusRing(goalRadio(page, 30));
+      await page.keyboard.press('ArrowDown');
+      await expect(goalRadio(page, 60)).toBeChecked();
+      await expectVisibleFocusRing(goalRadio(page, 60));
+
+      await page.keyboard.press('Tab');
+      await expectVisibleFocusRing(speedRadio(page, NORMAL_SPEED_LABEL));
+      await page.keyboard.press('ArrowDown');
+      await expect(speedRadio(page, SLOW_SPEED_LABEL)).toBeChecked();
+      await expectVisibleFocusRing(speedRadio(page, SLOW_SPEED_LABEL));
+
+      await page.keyboard.press('Tab');
+      await expectVisibleFocusRing(pinyinSwitch(page));
+      await page.keyboard.press('Space');
+      await expect(pinyinSwitch(page)).not.toBeChecked();
+      await expectVisibleFocusRing(pinyinSwitch(page));
+
+      await expect(goalRadio(page, 60)).toBeChecked();
+      await expect(speedRadio(page, SLOW_SPEED_LABEL)).toBeChecked();
+      await expect(pinyinSwitch(page)).not.toBeChecked();
+      await expectStoredSetting(page, 'dailyGoalMinutes', 60);
+      await expectStoredSetting(page, 'defaultAudioSpeed', 'slow');
+      await expectStoredSetting(page, 'isPinyinVisible', false);
     });
   });
 
