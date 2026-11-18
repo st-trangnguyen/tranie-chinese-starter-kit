@@ -85,4 +85,14 @@ describe('ProgressService — thời gian học hôm nay', () => {
     const today = await service.getTodayStudy(at(18, 9, 5));
     expect(today.minutes).toBe(1);
   });
+
+  it('S8.1-AC2 Nhiều lần học trong cùng ngày được cộng: 5 phút và 6 phút là 11 phút', async () => {
+    const service = createService();
+
+    await service.recordStudyTime(at(18, 8, 0), at(18, 8, 5));
+    await service.recordStudyTime(at(18, 20, 0), at(18, 20, 6));
+
+    const today = await service.getTodayStudy(at(18, 20, 10));
+    expect(today.minutes).toBe(11);
+  });
 });
