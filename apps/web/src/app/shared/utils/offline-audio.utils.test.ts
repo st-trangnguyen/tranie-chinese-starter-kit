@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatAudioSize } from './offline-audio.utils';
+import { formatAudioSize, toDownloadPercent } from './offline-audio.utils';
 
 describe('formatAudioSize', () => {
   it.each([
@@ -43,6 +43,18 @@ describe('formatAudioSize', () => {
     'S8.4-AC1 Dung lượng MB làm tròn lên khi chữ số tiếp theo là 5: %d byte → "%s"',
     (bytes, expected) => {
       expect(formatAudioSize(bytes)).toBe(expected);
+    },
+  );
+});
+
+describe('toDownloadPercent', () => {
+  it.each([
+    [1, 4, 25],
+    [3, 4, 75],
+  ])(
+    'S8.4-AC1 Hiện tiến độ khi đang tải: %d/%d → %d phần trăm',
+    (done, total, expected) => {
+      expect(toDownloadPercent(done, total)).toBe(expected);
     },
   );
 });
