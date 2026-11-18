@@ -36,4 +36,16 @@ describe('ProgressService — countStudyStreak', () => {
 
     expect(service.countStudyStreak(stats, TODAY, 15)).toBe(3);
   });
+
+  it('S8.3-AC1 Hôm nay chưa đạt thì vẫn giữ chuỗi đến hôm qua: 4 ngày đạt 30 phút, hôm nay 10 phút thì streak là 4', () => {
+    const stats = [
+      day(-4, 2100, 30),
+      day(-3, 2100, 30),
+      day(-2, 2100, 30),
+      day(-1, 2100, 30),
+      day(0, 600, 30),
+    ];
+
+    expect(service.countStudyStreak(stats, TODAY, 30)).toBe(4);
+  });
 });
