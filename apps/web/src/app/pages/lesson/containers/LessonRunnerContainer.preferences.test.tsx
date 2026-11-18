@@ -1,4 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { I18nextProvider } from 'react-i18next';
+import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
+import { render } from '@testing-library/react';
 import { DEFAULT_SETTINGS, type Settings, type Word } from '@csk/shared';
 
 import { PLAYBACK_RATES } from '@core/constants/audio.constants';
@@ -10,7 +13,8 @@ import {
   installRecordingEnvironment,
   restoreRecordingEnvironment,
 } from '@test/record-compare.helpers';
-import { renderWithProviders, screen } from '@test/render';
+import testI18n from '@test/i18n';
+import { renderWithProviders, screen, userEvent, waitFor } from '@test/render';
 import LessonRunnerContainer from './LessonRunnerContainer';
 
 const BA: Word = {
@@ -43,6 +47,38 @@ const seedSettings = async (patch: Partial<Settings>): Promise<void> => {
     ...patch,
   });
   db.close();
+};
+
+/** Ghi vị trí đang học dở cho bài đang mở (route dùng nguyên văn ':lessonId'). */
+const seedCursor = async (cursor: number): Promise<void> => {
+  const db = createDatabase();
+  await db.lessonProgress.put({
+    lessonId: ':lessonId',
+    status: 'in-progress',
+    cursor,
+  });
+  db.close();
+};
+
+/** Tắt công tắc "Nghe chậm" đang bật sẵn theo Cài đặt. */
+const turnOffSlow = async (
+  user: ReturnType<typeof userEvent.setup>,
+): Promise<void> => {
+  const toggle = await screen.findByRole('switch', { name: 'Nghe chậm' });
+  expect(toggle).toHaveAttribute('aria-checked', 'true');
+  await user.click(toggle);
+  expect(toggle).toHaveAttribute('aria-checked', 'false');
+};
+
+/** Công tắc bật và "Nghe" phát 0.75x. */
+const expectSlowPlayback = async (
+  user: ReturnType<typeof userEvent.setup>,
+): Promise<void> => {
+  expect(
+    await screen.findByRole('switch', { name: 'Nghe chậm' }),
+  ).toHaveAttribute('aria-checked', 'true');
+  await user.click(screen.getByRole('button', { name: 'Nghe' }));
+  expect(fakeAudio.playbackRate).toBe(PLAYBACK_RATES.slow);
 };
 
 const renderRunner = () =>
@@ -85,5 +121,63 @@ describe('LessonRunnerContainer — theo Cài đặt của người học', () =
 
     expect(fakeAudio.src).toBe(`/${BA.audio}`);
     expect(fakeAudio.playbackRate).toBe(PLAYBACK_RATES.slow);
+  });
+
+  describe('S8.2-AC2 Mở bài mới thì theo tốc độ mặc định Chậm', () => {
+    it('S8.2-AC2 Mở bài mới thì theo tốc độ mặc định Chậm: tắt "Nghe chậm" rồi mở lại chính bài thì công tắc bật, "Nghe" phát 0.75x', async () => {
+      await seedSettings({ defaultAudioSpeed: 'slow' });
+      const first = renderRunner();
+      await turnOffSlow(first.user);
+      first.unmount();
+
+      const { user } = renderRunner();
+
+      expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
+      await expectSlowPlayback(user);
+    });
+
+    it('S8.2-AC2 Mở bài mới thì theo tốc độ mặc định Chậm: học tiếp bài đang dở ở câu 2 thì công tắc bật, "Nghe" phát 0.75x', async () => {
+      await seedSettings({ defaultAudioSpeed: 'slow' });
+      const first = renderRunner();
+      await turnOffSlow(first.user);
+      first.unmount();
+      await seedCursor(1);
+
+      const { user } = renderRunner();
+
+      expect(await screen.findByText('Câu 2 / 2')).toBeInTheDocument();
+      await expectSlowPlayback(user);
+    });
+
+    it('S8.2-AC2 Mở bài mới thì theo tốc độ mặc định Chậm: sang bài khác trên cùng route thì công tắc bật, "Nghe" phát 0.75x', async () => {
+      await seedSettings({ defaultAudioSpeed: 'slow' });
+      const OpenLessons = () => (
+        <>
+          <Link to="/lessons/l2">Bài khác</Link>
+          <LessonRunnerContainer />
+        </>
+      );
+      const user = userEvent.setup();
+      render(
+        <I18nextProvider i18n={testI18n}>
+          <MemoryRouter initialEntries={['/lessons/l1']}>
+            <Routes>
+              <Route path="/lessons/:lessonId" element={<OpenLessons />} />
+            </Routes>
+          </MemoryRouter>
+        </I18nextProvider>,
+      );
+      await turnOffSlow(user);
+
+      await user.click(screen.getByRole('link', { name: 'Bài khác' }));
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole('switch', { name: 'Nghe chậm' }),
+        ).toHaveAttribute('aria-checked', 'true'),
+      );
+      expect(screen.getByText('Câu 1 / 2')).toBeInTheDocument();
+      await expectSlowPlayback(user);
+    });
   });
 });
