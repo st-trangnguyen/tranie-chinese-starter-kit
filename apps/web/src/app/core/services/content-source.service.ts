@@ -1,4 +1,5 @@
 import {
+  audioIndexSchema,
   contentRootSchema,
   lessonSchema,
   sentenceSchema,
@@ -74,7 +75,7 @@ export class FetchContentSource implements ContentSource {
   }
 
   getAudioIndex(): Promise<AudioIndex> {
-    return Promise.resolve({ units: {}, bytes: {}, precached: [] });
+    return this.load(`${CONTENT_BASE_PATH}/audio-index.json`, audioIndexSchema);
   }
 
   private async load<T>(url: string, schema: Schema<T>): Promise<T> {
