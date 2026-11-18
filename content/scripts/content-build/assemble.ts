@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import type { ContentRoot, Lesson, Sentence, Stage } from '@csk/shared';
 
 import { audioJob, type AudioJob } from './audio';
-import type { AudioBytes } from './audioIndex';
+import { buildAudioIndex, type AudioBytes } from './audioIndex';
 import {
   lessonRefIssues,
   lessonStrokeWriteIssues,
@@ -251,6 +251,19 @@ export function assembleContent(inputs: BuildInputs): BuildResult {
       data,
     ]),
     ['strokes/index.json', json(strokeFiles.map(({ char }) => char))],
+    // S8.4 AC1: danh sách audio theo chủ đề, không góp vào `contentVersion` (design D2).
+    [
+      'audio-index.json',
+      json(
+        buildAudioIndex(
+          stages,
+          lessons,
+          wordById,
+          sentenceById,
+          inputs.audioBytes,
+        ),
+      ),
+    ],
   ]);
 
   const audioJobs = [...wordAudio, ...sentenceAudio];

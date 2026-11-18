@@ -26,8 +26,8 @@ Test: `content/scripts/content-build/audioIndex.test.ts` (hàm thuần), `conten
 - [x] 2.2 GREEN: `audioIndex.ts` (`lessonAudioPaths`, `buildAudioIndex`); kiểm: test 2.1 pass
 - [x] 2.3 RED: S8.4-AC1 "Mới cài app thì audio HSK chưa có trên máy" (pipeline) — `precached` chỉ gồm audio các nhóm thuộc stage `INTRO_STAGE_ID`; audio HSK dùng chung với Nhập môn có một lần; audio chỉ thuộc HSK không có; đã sort; kiểm: chạy, nếu pass ngay thì tạm lấy audio mọi stage để thấy fail rồi trả lại
 - [x] 2.4 GREEN: sửa đến khi pass; kiểm: test 2.3 pass
-- [ ] 2.5 RED: S8.4-AC1 "Chủ đề không có audio" (pipeline) — nhóm chỉ có bài stroke-write → `units[id]` là `[]` (giữ key); `assembleContent` có `files.get('audio-index.json')` parse được bằng `audioIndexSchema`; `contentVersion` không đổi so với trước khi thêm file; `BuildInputs.audioBytes` thêm vào fixture test có sẵn; kiểm: fail vì `files` chưa có `audio-index.json`
-- [ ] 2.6 GREEN: `BuildInputs.audioBytes` (`inputs.ts`, `statSync`), `assembleContent` thêm `audio-index.json`, `content-audio/index.ts` ghi lại `audio-index.json` sau khi tạo mp3; chạy `pnpm --filter @csk/content content:build`, commit `apps/web/src/assets/content/audio-index.json`; kiểm: test 2.5 pass, `pnpm content:check` sạch (output khớp nguồn)
+- [x] 2.5 RED: S8.4-AC1 "Chủ đề không có audio" (pipeline) — nhóm chỉ có bài stroke-write → `units[id]` là `[]` (giữ key); `assembleContent` có `files.get('audio-index.json')` parse được bằng `audioIndexSchema`; `contentVersion` không đổi so với trước khi thêm file; `BuildInputs.audioBytes` thêm vào fixture test có sẵn; kiểm: fail vì `files` chưa có `audio-index.json`
+- [x] 2.6 GREEN: `BuildInputs.audioBytes` (`inputs.ts`, `statSync`), `assembleContent` thêm `audio-index.json`, `content-audio/index.ts` ghi lại `audio-index.json` sau khi tạo mp3; chạy `pnpm --filter @csk/content content:build`, commit `apps/web/src/assets/content/audio-index.json`; kiểm: test 2.5 pass, `pnpm content:check` sạch (output khớp nguồn)
 
 ## 3. Định dạng dung lượng và phần trăm — `shared/utils/offline-audio.utils.ts` (design D7)
 
