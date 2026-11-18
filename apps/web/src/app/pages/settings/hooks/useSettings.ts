@@ -7,6 +7,8 @@ import { ProgressService } from '@shared/services/progress.service';
 export interface SettingsState {
   /** null khi đang đọc. */
   preferences: LearningPreferences | null;
+  /** null = không có lỗi lưu; tăng mỗi lần lưu lỗi (key của thông báo). */
+  saveErrorId: number | null;
   changeDailyGoal: (minutes: DailyGoalMinutes) => void;
   changeDefaultAudioSpeed: (speed: AudioSpeed) => void;
   changePinyinVisibility: (isVisible: boolean) => void;
@@ -17,7 +19,8 @@ export const useSettings = (): SettingsState => {
   const [preferences, setPreferences] = useState<LearningPreferences | null>(
     null,
   );
-  // Giá trị đã lưu chắc chắn; dùng để trả về khi lưu lỗi (design D4, task 8.x).
+  const [saveErrorId, setSaveErrorId] = useState<number | null>(null);
+  // Giá trị đã lưu chắc chắn; dùng để trả về khi lưu lỗi (design D4).
   const persistedRef = useRef<LearningPreferences | null>(null);
 
   // getLearningPreferences không throw: đọc lỗi → mặc định (design D3).
@@ -35,7 +38,7 @@ export const useSettings = (): SettingsState => {
   }, [service]);
 
   // Đổi một field (design D4): hiển thị ngay, lưu qua service, ghi nhận giá trị đã lưu khi xong.
-  // Xử lý lỗi lưu bổ sung ở task 8.x.
+  // Lưu lỗi: trả field về giá trị đã lưu và báo lỗi.
   const applyChange = useCallback(
     <K extends keyof LearningPreferences>(
       key: K,
@@ -45,11 +48,22 @@ export const useSettings = (): SettingsState => {
       setPreferences((prev) =>
         prev === null ? prev : { ...prev, [key]: value },
       );
-      void save().then(() => {
-        if (persistedRef.current !== null) {
-          persistedRef.current = { ...persistedRef.current, [key]: value };
-        }
-      });
+      void save().then(
+        () => {
+          if (persistedRef.current !== null) {
+            persistedRef.current = { ...persistedRef.current, [key]: value };
+          }
+        },
+        () => {
+          const persisted = persistedRef.current;
+          if (persisted !== null) {
+            setPreferences((prev) =>
+              prev === null ? prev : { ...prev, [key]: persisted[key] },
+            );
+          }
+          setSaveErrorId((prev) => (prev ?? 0) + 1);
+        },
+      );
     },
     [],
   );
@@ -80,6 +94,7 @@ export const useSettings = (): SettingsState => {
 
   return {
     preferences,
+    saveErrorId,
     changeDailyGoal,
     changeDefaultAudioSpeed,
     changePinyinVisibility,

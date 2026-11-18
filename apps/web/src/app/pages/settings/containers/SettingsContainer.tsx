@@ -13,6 +13,7 @@ const SettingsContainer = () => {
   const { t } = useTranslation('settings');
   const {
     preferences,
+    saveErrorId,
     changeDailyGoal,
     changeDefaultAudioSpeed,
     changePinyinVisibility,
@@ -27,6 +28,11 @@ const SettingsContainer = () => {
         {t('backLink')}
       </Link>
       <h1 className="settings-title">{t('title')}</h1>
+      {saveErrorId !== null && (
+        <p role="alert" key={saveErrorId} className="settings-error p-md">
+          {t('saveError')}
+        </p>
+      )}
       {preferences === null ? (
         <p role="status">{t('loading')}</p>
       ) : (

@@ -145,8 +145,8 @@ DB mặc định fake-indexeddb.
 Test: `apps/web/src/app/pages/settings/containers/SettingsContainer.errors.test.tsx`. Lỗi ghi: `vi.spyOn(progressStore, 'saveSettings').mockRejectedValueOnce(new Error('quota'))`;
 giá trị hỏng: `db.settings.put({ key, value })` thô.
 
-- [ ] 8.1 RED: S8.2-AC1 "Không lưu được thì báo lỗi và giữ giá trị cũ" — mục tiêu 15, ghi lỗi, chọn "30 phút" → `findByRole('alert')` có "Không lưu được cài đặt. Hãy thử lại."; "15 phút" checked; kiểm: fail vì hook chưa bắt lỗi
-- [ ] 8.2 GREEN: `applyChange` bắt lỗi: trả field về `persistedRef`, `saveErrorId` tăng; container render một `<p role="alert" key={saveErrorId}>`; kiểm: test 8.1 pass
+- [x] 8.1 RED: S8.2-AC1 "Không lưu được thì báo lỗi và giữ giá trị cũ" — mục tiêu 15, ghi lỗi, chọn "30 phút" → `findByRole('alert')` có "Không lưu được cài đặt. Hãy thử lại."; "15 phút" checked; kiểm: fail vì hook chưa bắt lỗi
+- [x] 8.2 GREEN: `applyChange` bắt lỗi: trả field về `persistedRef`, `saveErrorId` tăng; container render một `<p role="alert" key={saveErrorId}>`; kiểm: test 8.1 pass
 - [ ] 8.3 RED: S8.2-AC2 "Không lưu được tốc độ thì giữ tốc độ cũ" — tốc độ 1x, ghi lỗi, chọn "Chậm (0.75x)" → thông báo; "Bình thường (1x)" checked; kiểm: chạy, nếu pass ngay nhờ 8.2 thì tạm chỉ trả về cho field mục tiêu để thấy fail rồi trả lại
 - [ ] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass
 - [ ] 8.5 RED: S8.2-AC3 "Không lưu được pinyin thì công tắc về trạng thái cũ" — pinyin bật, ghi lỗi, tắt → thông báo; công tắc checked; kiểm: như 8.3

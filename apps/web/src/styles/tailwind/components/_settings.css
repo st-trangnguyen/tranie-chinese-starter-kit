@@ -18,6 +18,10 @@
     @apply text-title-lg text-fg;
   }
 
+  .settings-error {
+    @apply rounded-md bg-danger-soft text-body-sm text-danger-text;
+  }
+
   .settings-group {
     @apply rounded-lg border-2 border-line bg-surface;
   }
