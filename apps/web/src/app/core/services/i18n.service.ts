@@ -6,6 +6,7 @@ export const DEFAULT_LANGUAGE = 'vi';
 export const I18N_NAMESPACES = [
   'common',
   'onboarding',
+  'home',
   'learning-path',
   'lesson',
   'stroke-order',

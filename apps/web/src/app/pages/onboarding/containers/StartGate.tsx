@@ -1,9 +1,9 @@
 import { Navigate } from 'react-router-dom';
 
-import { FIRST_LESSON_ID, ROUTE_PATHS } from '@core/constants/app.constants';
+import { ROUTE_PATHS } from '@core/constants/app.constants';
 import { useOnboarding } from '../hooks/useOnboarding';
 
-/** Route `/`: lần đầu vào onboarding, các lần sau vào thẳng bài học. */
+/** Route `/`: lần đầu vào onboarding, các lần sau vào Trang chủ. */
 const StartGate = () => {
   const { needsOnboarding } = useOnboarding();
 
@@ -13,11 +13,7 @@ const StartGate = () => {
   return (
     <Navigate
       replace
-      to={
-        needsOnboarding
-          ? ROUTE_PATHS.onboarding
-          : ROUTE_PATHS.lesson(FIRST_LESSON_ID)
-      }
+      to={needsOnboarding ? ROUTE_PATHS.onboarding : ROUTE_PATHS.home}
     />
   );
 };
