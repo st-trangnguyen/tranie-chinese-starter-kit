@@ -57,4 +57,14 @@ describe('toDownloadPercent', () => {
       expect(toDownloadPercent(done, total)).toBe(expected);
     },
   );
+
+  it.each([
+    [1, 3, 33],
+    [2, 3, 66],
+  ])(
+    'S8.4-AC1 Tiến độ làm tròn xuống: %d/%d → %d phần trăm',
+    (done, total, expected) => {
+      expect(toDownloadPercent(done, total)).toBe(expected);
+    },
+  );
 });

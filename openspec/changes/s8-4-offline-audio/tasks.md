@@ -43,8 +43,8 @@ Test: `apps/web/src/app/shared/utils/offline-audio.utils.test.ts` — hàm thu�
 - [x] 3.8 GREEN: `floor((20 * bytes + 1_048_576) / 2_097_152)` số nguyên; kiểm: test 3.7 pass
 - [x] 3.9 RED: S8.4-AC1 "Hiện tiến độ khi đang tải" (util) — `toDownloadPercent(1, 4)` = 25, `(3, 4)` = 75; kiểm: fail vì skeleton trả 0
 - [x] 3.10 GREEN: `toDownloadPercent`; kiểm: test 3.9 pass
-- [ ] 3.11 RED: S8.4-AC1 "Tiến độ làm tròn xuống" (util) — `(1, 3)` = 33, `(2, 3)` = 66; kiểm: chạy, nếu pass ngay thì tạm dùng `Math.round` để thấy fail rồi trả lại
-- [ ] 3.12 GREEN: sửa đến khi pass; kiểm: test 3.11 pass
+- [x] 3.11 RED: S8.4-AC1 "Tiến độ làm tròn xuống" (util) — `(1, 3)` = 33, `(2, 3)` = 66; kiểm: chạy, nếu pass ngay thì tạm dùng `Math.round` để thấy fail rồi trả lại
+- [x] 3.12 GREEN: sửa đến khi pass; kiểm: test 3.11 pass
 
 ## 4. Hạ tầng cache và nguồn danh sách audio — `core/services` (design D4, D5)
 
