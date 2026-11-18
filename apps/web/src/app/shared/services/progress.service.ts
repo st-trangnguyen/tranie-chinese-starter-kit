@@ -203,8 +203,11 @@ export class ProgressService {
     };
   }
 
+  /** Không throw: đọc settings lỗi → tốc độ thường + hiện pinyin (design D3). */
   async getLessonPreferences(): Promise<LessonPreferences> {
-    const settings = await this.readSettings();
+    const settings = await this.readSettings().catch(
+      (): Settings => DEFAULT_SETTINGS,
+    );
     return this.toLessonPreferences(settings);
   }
 
