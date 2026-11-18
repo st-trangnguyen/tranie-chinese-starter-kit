@@ -91,8 +91,8 @@ Skeleton service + model `shared/models/offline-audio.model.ts` tạo trong comm
 - [x] 5.20 GREEN: đang tải chỉ khi còn file thiếu; kiểm: test 5.19 pass
 - [x] 5.21 RED: S8.4-AC2 "Chủ đề dùng chung audio vòng tròn vẫn xóa được" (Phần 2) — A={x,y}, B={y,z}, C={x,z} đủ file, không ai tải → cả ba `canRemove: true`; `selectRemovableAudio(A)` = {x,y}; kiểm: chạy, nếu pass ngay thì tạm loại audio dùng chung với chủ đề "Đã tải" để thấy fail rồi trả lại
 - [x] 5.22 GREEN: sửa đến khi pass; kiểm: test 5.21 pass
-- [ ] 5.23 RED: S8.4-AC2 "Hai chủ đề cùng bộ audio vẫn xóa được" (Phần 2) — A, B cùng bộ, đủ file → cả hai `canRemove: true`, xóa A chọn mọi file; kiểm: như 5.21
-- [ ] 5.24 GREEN: sửa đến khi pass; kiểm: test 5.23 pass
+- [x] 5.23 RED: S8.4-AC2 "Hai chủ đề cùng bộ audio vẫn xóa được" (Phần 2) — A, B cùng bộ, đủ file → cả hai `canRemove: true`, xóa A chọn mọi file; kiểm: như 5.21
+- [x] 5.24 GREEN: sửa đến khi pass; kiểm: test 5.23 pass
 - [ ] 5.25 RED: S8.4-AC2 "Chủ đề đã tải luôn có nút xóa khi không có chủ đề nào đang tải" (Phần 2) — A ⊆ B, A có audio không phải Nhập môn, không ai tải → A `canRemove: true`; kiểm: như 5.21
 - [ ] 5.26 GREEN: sửa đến khi pass; kiểm: test 5.25 pass
 - [ ] 5.27 RED: S8.4-AC2 "Audio đang được chủ đề khác tải thì tạm chưa có nút xóa" (Phần 2) — A ⊆ `precached` ∪ audio(C), C đang tải → A `canRemove: false`; C hết tải → `true`; kiểm: fail

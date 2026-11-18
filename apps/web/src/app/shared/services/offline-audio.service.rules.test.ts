@@ -305,4 +305,38 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
       new Set(service.selectRemovableAudio(unitA, index, new Set<string>())),
     ).toEqual(new Set([x, y]));
   });
+
+  it('S8.4-AC2 Hai chủ đề cùng bộ audio vẫn xóa được: A, B cùng bộ {x,y}, đủ file, không chủ đề nào đang tải → cả hai có nút xóa, xóa A chọn mọi file của A', () => {
+    const unitA = 'hsk1-same-set-a';
+    const unitB = 'hsk1-same-set-b';
+    const x = AUDIO_A;
+    const y = AUDIO_B;
+    const index: AudioIndex = {
+      ...HSK_INDEX,
+      units: {
+        intro1: [AUDIO_INTRO],
+        [unitA]: [x, y],
+        [unitB]: [x, y],
+      },
+    };
+    const snapshot = makeSnapshot({
+      index,
+      cachedPaths: new Set([x, y]),
+      downloadingUnitIds: new Set<string>(),
+    });
+
+    expect(service.deriveTopic(HSK_STAGE_ID, unitA, snapshot)).toEqual({
+      status: 'downloaded',
+      bytes: 1_300_000,
+      canRemove: true,
+    });
+    expect(service.deriveTopic(HSK_STAGE_ID, unitB, snapshot)).toEqual({
+      status: 'downloaded',
+      bytes: 1_300_000,
+      canRemove: true,
+    });
+    expect(
+      new Set(service.selectRemovableAudio(unitA, index, new Set<string>())),
+    ).toEqual(new Set([x, y]));
+  });
 });
