@@ -2,5 +2,7 @@
   "title": "Trang chủ",
   "nextLesson": "Bài tiếp theo",
   "startLesson": "Vào học",
-  "loading": "Đang tải…"
+  "loading": "Đang tải…",
+  "allCompleted": "Bạn đã học xong lộ trình hiện có.",
+  "learningPathLink": "Xem lộ trình"
 }

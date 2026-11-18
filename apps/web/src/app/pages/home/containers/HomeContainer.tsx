@@ -1,4 +1,7 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
+import { ROUTE_PATHS } from '@core/constants/app.constants';
 
 import { NextLessonCard } from '../components/NextLessonCard';
 import { useHome } from '../hooks/useHome';
@@ -16,6 +19,10 @@ const HomeContainer = () => {
       ) : (
         <NextLessonCard nextLesson={nextLesson} />
       )}
+      {/* Luôn hiện, kể cả khi nạp lộ trình lỗi (design D6); đứng sau "Vào học" theo thứ tự focus. */}
+      <Link className="btn btn-ghost self-start" to={ROUTE_PATHS.learningPaths}>
+        {t('learningPathLink')}
+      </Link>
     </main>
   );
 };

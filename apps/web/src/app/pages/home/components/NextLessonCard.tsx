@@ -8,12 +8,17 @@ interface NextLessonCardProps {
   nextLesson: NextLesson;
 }
 
-/** Thẻ "Bài tiếp theo" trên Trang chủ: tiêu đề bài và liên kết vào học. */
+/** Thẻ "Bài tiếp theo" trên Trang chủ: tiêu đề bài và liên kết vào học, hoặc báo đã học xong. */
 export function NextLessonCard({ nextLesson }: NextLessonCardProps) {
   const { t } = useTranslation('home');
 
-  if (nextLesson.status !== 'available') {
-    return null;
+  if (nextLesson.status === 'all-completed') {
+    return (
+      <section className="home-next-lesson flex flex-col gap-md p-lg">
+        <h2>{t('nextLesson')}</h2>
+        <p>{t('allCompleted')}</p>
+      </section>
+    );
   }
 
   return (
