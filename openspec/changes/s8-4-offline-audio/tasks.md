@@ -105,8 +105,8 @@ Skeleton service + model `shared/models/offline-audio.model.ts` tạo trong comm
 - [x] 5.34 GREEN: sửa đến khi pass; kiểm: test 5.33 pass
 - [x] 5.35 RED: S8.4-AC1 "Thông báo mất khi trạng thái đổi mà không bấm gì" (Phần 2) — `pruneStaleMessages`: thông báo `shownWith: 'not-downloaded'` của A, A giờ `downloaded` → bỏ; A vẫn `not-downloaded` → giữ; thông báo của B không đổi; kiểm: fail vì skeleton giữ nguyên
 - [x] 5.36 GREEN: `pruneStaleMessages`, `deriveTopics` gắn `message`; kiểm: test 5.35 pass
-- [ ] 5.37 RED: S8.4-AC1 "Hai chủ đề báo cùng lúc thì đọc đủ cả hai" (Phần 2) — `appendAnnouncement` giữ câu trước, câu sau `id` lớn hơn, câu trùng chữ vẫn thêm phần tử mới, quá `MAX_ANNOUNCEMENTS` (5) bỏ câu cũ nhất; kiểm: fail vì skeleton thay cả danh sách
-- [ ] 5.38 GREEN: `appendAnnouncement`; kiểm: test 5.37 pass, mọi rule có comment `Rule:`
+- [x] 5.37 RED: S8.4-AC1 "Hai chủ đề báo cùng lúc thì đọc đủ cả hai" (Phần 2) — `appendAnnouncement` giữ câu trước, câu sau `id` lớn hơn, câu trùng chữ vẫn thêm phần tử mới, quá `MAX_ANNOUNCEMENTS` (5) bỏ câu cũ nhất; kiểm: fail vì skeleton thay cả danh sách
+- [x] 5.38 GREEN: `appendAnnouncement`; kiểm: test 5.37 pass, mọi rule có comment `Rule:`
 
 ## 6. Use case — `OfflineAudioService` Phần 1 + 3 (design D6)
 

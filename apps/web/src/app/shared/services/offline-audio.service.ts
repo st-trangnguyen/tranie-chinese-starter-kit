@@ -160,13 +160,16 @@ export class OfflineAudioService {
   }
 
   /**
-   * Rule: câu thông báo mới nối sau câu cũ (S8.4 AC1). Skeleton RED 5.37: thay cả danh sách.
+   * Rule: câu thông báo mới nối sau câu cũ, không thay câu cũ, để mỗi câu được đọc đủ (S8.4 AC1).
+   * Câu mới có `id` lớn hơn mọi câu đã có (kể cả khi trùng chữ); chỉ giữ `MAX_ANNOUNCEMENTS`
+   * câu gần nhất (D10).
    */
   appendAnnouncement(
     list: readonly OfflineAudioAnnouncement[],
     item: Omit<OfflineAudioAnnouncement, 'id'>,
   ): readonly OfflineAudioAnnouncement[] {
-    return [{ ...item, id: 1 }];
+    const nextId = list.reduce((maxId, { id }) => Math.max(maxId, id), 0) + 1;
+    return [...list, { ...item, id: nextId }].slice(-MAX_ANNOUNCEMENTS);
   }
 
   /**
