@@ -122,6 +122,11 @@ export class ProgressService {
     return Math.floor(seconds / 60);
   }
 
+  /** Rule: đạt mục tiêu ngày khi số phút đã học ≥ mục tiêu; vừa đúng mục tiêu là đạt (S8.1 AC2). */
+  isDailyGoalReached(minutes: number, goalMinutes: number): boolean {
+    return minutes >= goalMinutes;
+  }
+
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
   async needsOnboarding(): Promise<boolean> {

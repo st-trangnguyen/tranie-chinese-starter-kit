@@ -34,7 +34,7 @@ Test: `apps/web/src/app/shared/utils/date.utils.test.ts`, `apps/web/src/app/shar
 - [x] 2.3 RED: S8.1-AC2 "Làm tròn xuống phút" (Phần 2) — `toStudyMinutes(470)` = 7, `toStudyMinutes(479.9)` = 7, `toStudyMinutes(480)` = 8, `toStudyMinutes(0)` = 0; kiểm: fail
 - [x] 2.4 GREEN: `toStudyMinutes` (`Math.floor`, `Rule:`); kiểm: test 2.3 pass
 - [x] 2.5 RED: S8.1-AC2 "Vừa đúng mục tiêu" (Phần 2) — `isDailyGoalReached(15, 15)` true, `(14, 15)` false, `(45, 30)` true, `(0, 30)` false; kiểm: fail
-- [ ] 2.6 GREEN: `isDailyGoalReached` (`>=`, `Rule:`); kiểm: test 2.5 pass
+- [x] 2.6 GREEN: `isDailyGoalReached` (`>=`, `Rule:`); kiểm: test 2.5 pass
 - [ ] 2.7 RED: S8.1-AC1 "Chưa học bài nào" (Phần 2) — lộ trình 2 giai đoạn × 2 nhóm × 2 bài, chưa xong bài nào: `findNextLessonId(stages, deriveLessonStatuses(stages, ∅))` = bài đầu; kiểm: fail vì skeleton trả `undefined`
 - [ ] 2.8 GREEN: `findNextLessonId` (bài `'open'` đầu tiên theo `listLessonIdsInOrder`, `Rule:`); kiểm: test 2.7 pass
 - [ ] 2.9 RED: S8.1-AC1 "Đã xong vài bài thì hiện bài kế tiếp" (Phần 2) — xong bài 1, 2 → bài 3; kiểm: chạy, nếu pass ngay thì tạm trả bài đầu tiên chưa `completed` bỏ qua trạng thái để thấy fail ở 2.13 hoặc đảo điều kiện `'open'` để thấy fail rồi trả lại
