@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import type { NextLesson } from '@shared/models/home.model';
+import type { NextLesson, TodayStudy } from '@shared/models/home.model';
 import { ContentService } from '@shared/services/content.service';
 import { ProgressService } from '@shared/services/progress.service';
 
 export interface HomeState {
   /** null khi đang nạp. */
   nextLesson: NextLesson | null;
+  /** null khi đang nạp. */
+  todayStudy: TodayStudy | null;
   /** true khi nạp lộ trình lỗi (design D6). */
   hasNextLessonError: boolean;
 }
@@ -15,6 +17,7 @@ export const useHome = (): HomeState => {
   const contentService = useMemo(() => new ContentService(), []);
   const progressService = useMemo(() => new ProgressService(), []);
   const [nextLesson, setNextLesson] = useState<NextLesson | null>(null);
+  const [todayStudy, setTodayStudy] = useState<TodayStudy | null>(null);
   const [hasNextLessonError, setHasNextLessonError] = useState(false);
 
   useEffect(() => {
@@ -58,5 +61,18 @@ export const useHome = (): HomeState => {
     };
   }, [contentService, progressService]);
 
-  return { nextLesson, hasNextLessonError };
+  // Phút hôm nay tính khi mount; getTodayStudy không throw (design D4, D6).
+  useEffect(() => {
+    let isActive = true;
+    void progressService.getTodayStudy(Date.now()).then((study) => {
+      if (isActive) {
+        setTodayStudy(study);
+      }
+    });
+    return () => {
+      isActive = false;
+    };
+  }, [progressService]);
+
+  return { nextLesson, todayStudy, hasNextLessonError };
 };

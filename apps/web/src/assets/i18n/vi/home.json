@@ -5,5 +5,6 @@
   "loading": "Đang tải…",
   "loadError": "Chưa tải được bài tiếp theo.",
   "allCompleted": "Bạn đã học xong lộ trình hiện có.",
+  "todayStudy": "Hôm nay: {{minutes}} / {{goalMinutes}} phút",
   "learningPathLink": "Xem lộ trình"
 }
