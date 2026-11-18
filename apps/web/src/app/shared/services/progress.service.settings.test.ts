@@ -51,3 +51,47 @@ describe('ProgressService — đổi mục tiêu mỗi ngày', () => {
     expect(saveSpy.mock.calls).toStrictEqual([[{ dailyGoalMinutes: 30 }]]);
   });
 });
+
+describe('ProgressService — tốc độ audio mặc định', () => {
+  it.each([
+    ['normal', true],
+    ['slow', true],
+    ['fast', false],
+    ['', false],
+    ['0.75', false],
+  ])(
+    'S8.2-AC2 Tốc độ mặc định giữ sau khi mở lại app: isValidAudioSpeed(%j) là %s',
+    (value, isValid) => {
+      const service = new ProgressService(createStore());
+
+      expect(service.isValidAudioSpeed(value)).toBe(isValid);
+    },
+  );
+
+  it('S8.2-AC2 Tốc độ mặc định giữ sau khi mở lại app: chọn Chậm, mở lại vẫn là Chậm', async () => {
+    const dbName = `test-${crypto.randomUUID()}`;
+    await new ProgressService(
+      new DexieProgressStore(createDatabase(dbName)),
+    ).changeDefaultAudioSpeed('slow');
+
+    const reopened = new ProgressService(
+      new DexieProgressStore(createDatabase(dbName)),
+    );
+    expect((await reopened.getLearningPreferences()).defaultAudioSpeed).toBe(
+      'slow',
+    );
+  });
+
+  it('S8.2-AC2 Tốc độ mặc định giữ sau khi mở lại app: tốc độ sai thì từ chối và không ghi', async () => {
+    const store = await createOnboardedStore();
+    const service = new ProgressService(store);
+    const saveSpy = vi.spyOn(store, 'saveSettings');
+
+    await expect(service.changeDefaultAudioSpeed('fast')).rejects.toThrow(
+      'Tốc độ audio mặc định phải là bình thường hoặc chậm.',
+    );
+
+    expect(saveSpy).not.toHaveBeenCalled();
+    expect((await store.getSettings()).defaultAudioSpeed).toBe('normal');
+  });
+});
