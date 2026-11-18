@@ -23,4 +23,16 @@ describe('formatAudioSize', () => {
       expect(formatAudioSize(bytes)).toBe(expected);
     },
   );
+
+  it.each([
+    [1_047_553, '1,0 MB'],
+    [1_048_064, '1,0 MB'],
+    [1_048_575, '1,0 MB'],
+    [1_048_576, '1,0 MB'],
+  ])(
+    'S8.4-AC1 Dung lượng sát 1 MB hiện 1,0 MB: %d byte → "%s"',
+    (bytes, expected) => {
+      expect(formatAudioSize(bytes)).toBe(expected);
+    },
+  );
 });
