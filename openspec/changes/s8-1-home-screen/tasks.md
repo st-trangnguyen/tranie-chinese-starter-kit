@@ -88,8 +88,8 @@ Test: `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.studyTime.
 - [x] 5.2 GREEN: `useStudyTimeRecorder` (gọi `recordStudyTime`, `.catch` có comment), gọi trong `LessonRunnerContainer`; kiểm: test 5.1 pass, test container cũ vẫn pass
 - [x] 5.3 RED: S8.1-AC2 "Thoát giữa bài vẫn được tính" — trả lời câu 1, tiến 2 phút 10 giây, unmount khi chưa xong bài → tăng 2; kiểm: chạy, nếu pass ngay thì tạm chỉ ghi khi `summary` có để thấy fail rồi trả lại
 - [x] 5.4 GREEN: sửa đến khi pass; kiểm: test 5.3 pass
-- [ ] 5.5 RED: S8.1-AC2 "Học lại bài đã xong vẫn được tính" — `lessonProgress` bài `completed`, mở lại, 4 phút 10 giây, unmount → tăng 4; kiểm: như 5.3 (tạm bỏ ghi khi bài đã `completed`)
-- [ ] 5.6 GREEN: sửa đến khi pass; kiểm: test 5.5 pass
+- [x] 5.5 RED: S8.1-AC2 "Học lại bài đã xong vẫn được tính" — `lessonProgress` bài `completed`, mở lại, 4 phút 10 giây, unmount → tăng 4; kiểm: như 5.3 (tạm bỏ ghi khi bài đã `completed`)
+- [x] 5.6 GREEN: sửa đến khi pass; kiểm: test 5.5 pass
 - [ ] 5.7 RED: S8.1-AC2 "Bài kiểm tra cuối chủ đề được tính" — bài `type: 'test'`, làm 3 phút 10 giây tới màn tổng kết, thêm 1 phút trên tổng kết, unmount → tăng 4; kiểm: như 5.3 (tạm dừng ghi khi `phase === 'finished'`)
 - [ ] 5.8 GREEN: sửa đến khi pass; kiểm: test 5.7 pass
 - [ ] 5.9 RED: S8.1-AC2 "Bài kiểm tra vượt cấp được tính" — `PlacementTestContainer` route `units/:unitId/placement-test`, 3 phút 10 giây tới tổng kết + 1 phút, unmount → tăng 4; kiểm: chạy, nếu pass ngay thì tạm bỏ ghi khi có `placementUnitId` để thấy fail rồi trả lại

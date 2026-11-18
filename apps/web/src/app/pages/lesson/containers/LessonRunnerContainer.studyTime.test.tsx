@@ -49,6 +49,13 @@ const resetSavedProgress = async (): Promise<void> => {
   db.close();
 };
 
+/** Ghi sẵn bài `lessonId` là đã học xong, như người học đã hoàn thành bài này từ trước. */
+const markLessonCompleted = async (lessonId: string): Promise<void> => {
+  const db = createDatabase();
+  await db.lessonProgress.put({ lessonId, status: 'completed' });
+  db.close();
+};
+
 const readTodayMinutes = async (): Promise<number> =>
   (await new ProgressService().getTodayStudy(Date.now())).minutes;
 
@@ -95,6 +102,22 @@ describe('LessonRunnerContainer — thời gian học hôm nay (S8.1)', () => {
 
     await waitFor(async () => {
       expect(await readTodayMinutes()).toBe(2);
+    });
+  });
+
+  it('S8.1-AC2 Học lại bài đã xong vẫn được tính: should add 4 minutes to today after reopening a completed lesson for 4 min 10 s', async () => {
+    await markLessonCompleted(LESSON.id);
+
+    const { unmount } = renderWithProviders(
+      <LessonRunnerContainer registry={registry} lessonId={LESSON.id} />,
+    );
+    expect(await screen.findByText('Câu về 八')).toBeInTheDocument();
+
+    vi.setSystemTime(START_TIME + 4 * MINUTE + 10 * SECOND);
+    unmount();
+
+    await waitFor(async () => {
+      expect(await readTodayMinutes()).toBe(4);
     });
   });
 });
