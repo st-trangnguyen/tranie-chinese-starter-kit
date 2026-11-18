@@ -162,7 +162,7 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.test.tsx` — `openR
 Test: `apps/web/src/app/pages/home/containers/HomeContainer.todayStudy.test.tsx` — `openRoute('/home')`, settings và
 `dailyStats` ghi thẳng IndexedDB, đồng hồ giả.
 
-- [ ] 9.1 RED: S8.1-AC2 "Chưa học hôm nay" — mục tiêu 30, không có dòng hôm nay → "Hôm nay: 0 / 30 phút", không có "Đã đạt mục tiêu hôm nay"; kiểm: fail
+- [x] 9.1 RED: S8.1-AC2 "Chưa học hôm nay" — mục tiêu 30, không có dòng hôm nay → "Hôm nay: 0 / 30 phút", không có "Đã đạt mục tiêu hôm nay"; kiểm: fail
 - [ ] 9.2 GREEN: effect phút hôm nay trong `useHome` (`getTodayStudy`), `TodayStudyStatus`, key `todayStudy`; kiểm: test 9.1 pass
 - [ ] 9.3 RED: S8.1-AC2 "Đã học một phần mục tiêu" — mục tiêu 15, 430 giây → "Hôm nay: 7 / 15 phút"; kiểm: chạy, nếu pass ngay thì tạm hiện số giây thay vì phút để thấy fail rồi trả lại
 - [ ] 9.4 GREEN: sửa đến khi pass; kiểm: test 9.3 pass

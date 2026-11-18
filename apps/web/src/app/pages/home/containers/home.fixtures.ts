@@ -75,6 +75,7 @@ export const seedProgress = async (
   const db = createDatabase();
   await db.settings.clear();
   await db.lessonProgress.clear();
+  await db.dailyStats.clear();
   await new DexieProgressStore(db).saveSettings({
     ...DEFAULT_SETTINGS,
     hasCompletedOnboarding: true,
@@ -92,5 +93,28 @@ export const seedInProgress = async (
 ): Promise<void> => {
   const db = createDatabase();
   await db.lessonProgress.put({ lessonId, status: 'in-progress', cursor });
+  db.close();
+};
+
+/** Khóa ngày `YYYY-MM-DD` theo giờ máy của thời điểm `time`, như khi người học xem "hôm nay". */
+export const toLocalDateKey = (time: Date): string => {
+  const pad = (value: number): string => String(value).padStart(2, '0');
+  return `${time.getFullYear()}-${pad(time.getMonth() + 1)}-${pad(time.getDate())}`;
+};
+
+/** Mục tiêu mỗi ngày đã lưu; `unknown` để ghi được cả giá trị hỏng (ví dụ `'abc'`). */
+export const seedGoal = async (dailyGoalMinutes: unknown): Promise<void> => {
+  const db = createDatabase();
+  await db.settings.put({ key: 'dailyGoalMinutes', value: dailyGoalMinutes });
+  db.close();
+};
+
+/** Số giây đã học của ngày `date` (`YYYY-MM-DD`); `unknown` để ghi được cả dòng hỏng. */
+export const seedDailyStat = async (
+  date: string,
+  studySeconds: unknown,
+): Promise<void> => {
+  const db = createDatabase();
+  await db.dailyStats.put({ date, studySeconds });
   db.close();
 };
