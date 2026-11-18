@@ -205,6 +205,11 @@ export class ProgressService {
     await this.writeSettings({ defaultAudioSpeed: speed });
   }
 
+  /** Chỉ ghi khóa pinyin; lỗi ghi đi thẳng lên hook (design D2, D3). */
+  async changePinyinVisibility(isVisible: boolean): Promise<void> {
+    await this.writeSettings({ isPinyinVisible: isVisible });
+  }
+
   async getCompletedLessonIds(): Promise<Set<string>> {
     const progress = await this.readAllLessonProgress();
     return new Set(
