@@ -1,10 +1,11 @@
-import type {
-  AudioIndex,
-  Exercise,
-  Lesson,
-  Sentence,
-  Stage,
-  Word,
+import {
+  INTRO_STAGE_ID,
+  type AudioIndex,
+  type Exercise,
+  type Lesson,
+  type Sentence,
+  type Stage,
+  type Word,
 } from '@csk/shared';
 
 /** Dung lượng (byte) của một file audio trong `assets/`, `undefined` nếu file chưa có. */
@@ -58,6 +59,7 @@ export function lessonAudioPaths(
  * Danh sách audio theo chủ đề (design D1, D2) cho `audio-index.json`.
  * Rule (S8.4 AC1): audio của nhóm = audio các bài của nhóm, không trùng, theo thứ tự bài; dung
  * lượng lấy từ file, file chưa có ghi 0.
+ * Rule (S8.4 AC1): `precached` = hợp audio các nhóm thuộc stage Nhập môn, không trùng, đã sort.
  */
 export function buildAudioIndex(
   stages: readonly Stage[],
@@ -67,20 +69,31 @@ export function buildAudioIndex(
   audioBytes: AudioBytes,
 ): AudioIndex {
   const lessonById = new Map(lessons.map((lesson) => [lesson.id, lesson]));
+  const unitPaths = (lessonIds: readonly string[]): string[] => {
+    const paths = lessonIds.flatMap((lessonId) => {
+      const lesson = lessonById.get(lessonId);
+      return lesson === undefined
+        ? []
+        : lessonAudioPaths(lesson, wordById, sentenceById);
+    });
+    return [...new Set(paths)];
+  };
   const unitEntries = stages
     .flatMap((stage) => stage.units)
-    .map((unit): [string, string[]] => {
-      const paths = unit.lessonIds.flatMap((lessonId) => {
-        const lesson = lessonById.get(lessonId);
-        return lesson === undefined
-          ? []
-          : lessonAudioPaths(lesson, wordById, sentenceById);
-      });
-      return [unit.id, [...new Set(paths)]];
-    });
+    .map((unit): [string, string[]] => [unit.id, unitPaths(unit.lessonIds)]);
   const allPaths = new Set(unitEntries.flatMap(([, paths]) => paths));
   const bytes = Object.fromEntries(
     [...allPaths].map((path) => [path, audioBytes(path) ?? 0]),
   );
-  return { units: Object.fromEntries(unitEntries), bytes, precached: [] };
+  const precached = new Set(
+    stages
+      .filter((stage) => stage.id === INTRO_STAGE_ID)
+      .flatMap((stage) => stage.units)
+      .flatMap((unit) => unitPaths(unit.lessonIds)),
+  );
+  return {
+    units: Object.fromEntries(unitEntries),
+    bytes,
+    precached: [...precached].sort(),
+  };
 }
