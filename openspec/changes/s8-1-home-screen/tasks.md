@@ -118,7 +118,7 @@ IndexedDB thật (fake-indexeddb), `mockContentFetch`.
 
 - [x] 7.1 RED: S8.1-AC1 "Mở lại app sau onboarding thì vào Trang chủ" — đã xong onboarding, mở `/` → vị trí `/home`, có heading "Trang chủ", không có màn bài 1; kiểm: fail (vào `/lessons/intro-01`)
 - [x] 7.2 GREEN: `pages/home/home.routes.ts` (lazy, gom vào `page.routes.ts`), `HomeContainer` tối thiểu (`<main>`, `<h1>`), `assets/i18n/vi/home.json` (`title`), `'home'` vào `I18N_NAMESPACES` và `src/test/i18n.ts`; `StartGate` → `ROUTE_PATHS.home`; kiểm: test 7.1 pass
-- [ ] 7.3 RED: S8.1-AC1 "Mở màn onboarding khi đã xong" — mở `/onboarding` → `/home`, không có bước nào của onboarding; kiểm: fail (vào bài 1)
+- [x] 7.3 RED: S8.1-AC1 "Mở màn onboarding khi đã xong" — mở `/onboarding` → `/home`, không có bước nào của onboarding; kiểm: fail (vào bài 1)
 - [ ] 7.4 GREEN: `OnboardingContainer` nhánh đã xong → `ROUTE_PATHS.home`; sửa kỳ vọng `OnboardingContainer.test.tsx` "never shows onboarding again once completed" sang `/home`; kiểm: test 7.3 pass
 - [ ] 7.5 RED: S8.1-AC1 "Tải lại ở màn khác thì vẫn ở màn đó" — đã xong onboarding, mở thẳng `/learning-paths` và `/lessons/intro-01` → ở nguyên; kiểm: chạy, nếu pass ngay thì tạm cho `HomeContainer`/gate bắt mọi route để thấy fail rồi trả lại
 - [ ] 7.6 GREEN: sửa đến khi pass; kiểm: test 7.5 pass

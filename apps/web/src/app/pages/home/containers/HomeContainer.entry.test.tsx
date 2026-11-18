@@ -4,7 +4,7 @@ import { createDatabase } from '@core/helpers/db.helper';
 import { DexieProgressStore } from '@core/services/progress-store.service';
 import { mockContentFetch } from '@test/mocks/content-fetch';
 import { screen, waitFor } from '@test/render';
-import { openRoute } from '@test/stroke-order-route';
+import { openRoute, stubReducedMotion } from '@test/stroke-order-route';
 
 const FIRST_LESSON_TITLE = 'Bài mở đầu';
 
@@ -38,6 +38,7 @@ const seedSettings = async (hasCompletedOnboarding: boolean): Promise<void> => {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe('Mở app — Trang chủ', () => {
@@ -53,5 +54,34 @@ describe('Mở app — Trang chủ', () => {
       await screen.findByRole('heading', { level: 1, name: 'Trang chủ' }),
     ).toBeInTheDocument();
     expect(screen.queryByText(FIRST_LESSON_TITLE)).not.toBeInTheDocument();
+  });
+
+  it('S8.1-AC1 Mở màn onboarding khi đã xong: should redirect /onboarding to /home without any onboarding step', async () => {
+    await seedSettings(true);
+    serveContent();
+    // Màn onboarding đọc chế độ standalone qua matchMedia (jsdom không có): giả ranh giới trình duyệt.
+    stubReducedMotion(false);
+
+    const { router } = openRoute('/onboarding');
+
+    await waitFor(() =>
+      expect(router.state.location.pathname).not.toBe('/onboarding'),
+    );
+    expect(router.state.location.pathname).toBe('/home');
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Trang chủ' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: /Chào mừng đến/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Mỗi ngày bạn muốn học bao lâu?' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Cài app lên màn hình chính' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Bắt đầu' }),
+    ).not.toBeInTheDocument();
   });
 });
