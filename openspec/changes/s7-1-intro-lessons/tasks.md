@@ -147,15 +147,15 @@ Các task dưới đây phủ case có cột Tự động `e2e` trong `test-case
 
 ## 8. Giao diện, tài liệu và kiểm tra
 
-- [ ] 8.1 `apps/web/src/styles/tailwind/components/_lesson.css`: `.lesson-stroke-write-link`, `.lesson-stroke-write-message` (design D8), JSX chỉ layout/spacing (§6) — ngoại lệ test-first: CSS thuần; kiểm: preview `web-dev` 375×812 và 1280×800, sáng và tối: câu viết (mới, sai nét, Đúng), đang tải, lỗi, không có dữ liệu nét; vùng chạm link ≥ 44×44 px
+- [x] 8.1 `apps/web/src/styles/tailwind/components/_lesson.css`: `.lesson-stroke-write-link`, `.lesson-stroke-write-message` (design D8), JSX chỉ layout/spacing (§6) — ngoại lệ test-first: CSS thuần; kiểm: preview `web-dev` 375×812 và 1280×800, sáng và tối: câu viết (mới, sai nét, Đúng), đang tải, lỗi, không có dữ liệu nét; vùng chạm link ≥ 44×44 px
 - [x] 8.2 Cập nhật `docs/03-architecture.md`: §6.3 sửa câu "Lesson runner … chỉ làm việc qua `exercise.registry.ts`" thành có ngoại lệ `stroke-write` (nhánh riêng trong `LessonRunner`, dữ liệu nét/lượt viết từ `useLessonStrokeWrite`, lý do: hợp đồng `ExerciseProps` không mang được trạng thái tải, design D4); `useLessonStrokeWrite`, `LessonStrokeWrite`, luật `lessonStrokeWriteIssues`, giai đoạn Nhập môn 12 bài — ngoại lệ test-first: docs thuần; kiểm: đọc lại diff
 - [x] 8.3 Refactor + self-review theo CLAUDE.md §0, §2, §7 (không `any`, không `eslint-disable`, dependency một chiều, file < 300 dòng, component < 5 props, effect có cleanup, không mutate); kiểm: `pnpm lint` sạch
-- [ ] 8.4 Chạy `pnpm typecheck && pnpm lint && pnpm test:run`; kiểm: pass, ghi output thật
-- [ ] 8.5 Chạy `pnpm content:check`; kiểm: 0 lỗi
-- [ ] 8.6 Chạy `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts`; kiểm: pass
-- [ ] 8.7 Chạy `pnpm e2e`; kiểm: toàn bộ pass (gồm E1, E3, E6, E7: `s7.1-intro-lessons`, `-writing`, `-offline`, `-audio`, `-writing-content`, `s7.1-lesson-runner`)
-- [ ] 8.8 Screenshot cho PR: màn Lộ trình 12 bài, màn bài câu viết 人 (mới, sai nét, Đúng), đang tải, lỗi tải — mobile 375×812 và desktop 1280×800, sáng và tối; commit vào `pr-assets/pr-<n>/`; kiểm: ảnh nhúng trong bảng mục Screenshots
-- [ ] 8.9 Ghi vào mô tả PR code cho QA: cách nạp tiến độ e2e (`seedCompletedLessons`), cách chặn file nét khi chạy tay (DevTools block `/content/strokes/人.json` + Bypass for network), danh sách câu viết của bài 10–11, nhóm Nhập môn mới `intro-basics` "Pinyin và chữ Hán cơ bản"; TC-S7.1-AC1-29/-30, TC-S3.2-X1 phủ ở Vitest (`LessonRunnerContainer.strokeWriteLoad.test.tsx`); TC-S7.1-AC1-8 phủ ở component (`LessonRunnerContainer.audio.test.tsx`, task 5.9) và e2e (`s7.1-intro-audio.spec.ts`, task 7.16), TC-S7.1-AC1-7 vẫn chạy tay; chỗ lệch tài liệu: câu viết đi nhánh riêng trong `LessonRunner` thay vì đăng ký registry (proposal bảng Layer đích, `docs/03-architecture.md` §6.3 đã sửa ở 8.2); kiểm: mô tả PR có đủ mục
+- [x] 8.4 Chạy `pnpm typecheck && pnpm lint && pnpm test:run`; kiểm: pass, ghi output thật
+- [x] 8.5 Chạy `pnpm content:check`; kiểm: 0 lỗi
+- [x] 8.6 Chạy `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts`; kiểm: pass
+- [x] 8.7 Chạy `pnpm e2e`; kiểm: toàn bộ pass (gồm E1, E3, E6, E7: `s7.1-intro-lessons`, `-writing`, `-offline`, `-audio`, `-writing-content`, `s7.1-lesson-runner`)
+- [x] 8.8 Screenshot cho PR: màn Lộ trình 12 bài, màn bài câu viết 人 (mới, sai nét, Đúng), đang tải, lỗi tải — mobile 375×812 và desktop 1280×800, sáng và tối; commit vào `pr-assets/pr-<n>/`; kiểm: ảnh nhúng trong bảng mục Screenshots
+- [x] 8.9 Ghi vào mô tả PR code cho QA: cách nạp tiến độ e2e (`seedCompletedLessons`), cách chặn file nét khi chạy tay (DevTools block `/content/strokes/人.json` + Bypass for network), danh sách câu viết của bài 10–11, nhóm Nhập môn mới `intro-basics` "Pinyin và chữ Hán cơ bản"; TC-S7.1-AC1-29/-30, TC-S3.2-X1 phủ ở Vitest (`LessonRunnerContainer.strokeWriteLoad.test.tsx`); TC-S7.1-AC1-8 phủ ở component (`LessonRunnerContainer.audio.test.tsx`, task 5.9) và e2e (`s7.1-intro-audio.spec.ts`, task 7.16), TC-S7.1-AC1-7 vẫn chạy tay; chỗ lệch tài liệu: câu viết đi nhánh riêng trong `LessonRunner` thay vì đăng ký registry (proposal bảng Layer đích, `docs/03-architecture.md` §6.3 đã sửa ở 8.2); kiểm: mô tả PR có đủ mục
 
 ## Workflow follow-up
 
