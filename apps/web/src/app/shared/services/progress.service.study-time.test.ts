@@ -1,9 +1,29 @@
 import { describe, expect, it } from 'vitest';
 
 import { createDatabase } from '@core/helpers/db.helper';
-import { DexieProgressStore } from '@core/services/progress-store.service';
+import {
+  DexieProgressStore,
+  type ProgressStore,
+} from '@core/services/progress-store.service';
 
 import { ProgressService } from './progress.service';
+
+const unavailable = (): Promise<never> =>
+  Promise.reject(
+    new DOMException('IndexedDB không mở được', 'InvalidStateError'),
+  );
+
+/** Store khi IndexedDB không mở được (chế độ riêng tư): mọi thao tác đều reject. */
+const unavailableStore: ProgressStore = {
+  getSettings: unavailable,
+  saveSettings: unavailable,
+  getAllLessonProgress: unavailable,
+  getLessonProgress: unavailable,
+  saveLessonProgress: unavailable,
+  saveLessonProgressBatch: unavailable,
+  getDailyStat: unavailable,
+  addStudySeconds: unavailable,
+};
 
 const at = (day: number, hours: number, minutes: number, seconds = 0) =>
   new Date(2026, 10, day, hours, minutes, seconds).getTime();
@@ -116,5 +136,24 @@ describe('ProgressService — thời gian học hôm nay', () => {
 
     expect((await service.getTodayStudy(at(17, 23, 59))).minutes).toBe(10);
     expect((await service.getTodayStudy(at(18, 0, 15))).minutes).toBe(10);
+  });
+
+  it('S8.1-AC2 Mục tiêu lưu bị hỏng: dailyGoalMinutes "abc" thì mục tiêu là 15', async () => {
+    const db = createDatabase(`test-${crypto.randomUUID()}`);
+    await db.settings.put({ key: 'dailyGoalMinutes', value: 'abc' });
+    const service = new ProgressService(new DexieProgressStore(db));
+
+    const today = await service.getTodayStudy(at(18, 9, 0));
+    expect(today.goalMinutes).toBe(15);
+  });
+
+  it('S8.1-AC2 Mục tiêu lưu bị hỏng: IndexedDB không mở được thì 0 / 15 phút, không throw', async () => {
+    const service = new ProgressService(unavailableStore);
+
+    await expect(service.getTodayStudy(at(18, 9, 0))).resolves.toEqual({
+      minutes: 0,
+      goalMinutes: 15,
+      isGoalReached: false,
+    });
   });
 });

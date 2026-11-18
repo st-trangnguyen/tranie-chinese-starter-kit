@@ -58,7 +58,7 @@ Test: `apps/web/src/app/shared/services/progress.service.study-time.test.ts` —
 - [x] 3.6 GREEN: sửa đến khi pass; kiểm: test 3.5 pass
 - [x] 3.7 RED: S8.1-AC2 "Học qua nửa đêm chia cho hai ngày" (Phần 3) — `recordStudyTime(23:50 ngày 17, 00:10 ngày 18)`: `getTodayStudy(ngày 17 23:59)` = 10, `getTodayStudy(ngày 18 00:15)` = 10; kiểm: chạy, nếu pass ngay thì tạm ghi cả đoạn vào ngày bắt đầu để thấy fail rồi trả lại
 - [x] 3.8 GREEN: sửa đến khi pass; kiểm: test 3.7 pass
-- [ ] 3.9 RED: S8.1-AC2 "Mục tiêu lưu bị hỏng" (Phần 3) — settings `dailyGoalMinutes: 'abc'` → `goalMinutes` 15; IndexedDB không mở được (store stub reject) → `{ minutes: 0, goalMinutes: 15, isGoalReached: false }`, không throw; kiểm: fail ở nhánh store reject
+- [x] 3.9 RED: S8.1-AC2 "Mục tiêu lưu bị hỏng" (Phần 3) — settings `dailyGoalMinutes: 'abc'` → `goalMinutes` 15; IndexedDB không mở được (store stub reject) → `{ minutes: 0, goalMinutes: 15, isGoalReached: false }`, không throw; kiểm: fail ở nhánh store reject
 - [ ] 3.10 GREEN: `.catch` trong `getTodayStudy` (settings → `DEFAULT_SETTINGS`, phút → 0); kiểm: test 3.9 pass
 - [ ] 3.11 RED: S8.1-AC2 "Thời gian học đã lưu bị hỏng" (Phần 3) — dòng hôm nay hỏng → `minutes` 0; `recordStudyTime` 2 phút 10 giây sau đó → 2; kiểm: chạy, nếu pass ngay thì tạm bỏ nhánh hỏng-coi-là-0 ở 1.4 để thấy fail rồi trả lại
 - [ ] 3.12 GREEN: sửa đến khi pass; kiểm: test 3.11 pass, file test < 300 dòng
