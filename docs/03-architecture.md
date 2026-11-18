@@ -123,7 +123,7 @@ chinese-starter-kit/
     ├── config/environment.ts
     ├── test/
     │   ├── setup.ts                        # jest-dom, cleanup, fake-indexeddb, xóa DB sau mỗi test
-    │   ├── render.tsx                      # renderWithProviders: i18n → SettingsProvider → MemoryRouter
+    │   ├── render.tsx                      # renderWithProviders: i18n → MemoryRouter (không có SettingsProvider, xem 6.2)
     │   ├── factories.ts                    # makeWord, makeSentence, makeLesson, makeExercise(kind), makeCard, makeLessonProgress…
     │   └── i18n.ts                         # instance i18n cho test, nạp vi/*.json thật
     └── app/
@@ -144,7 +144,8 @@ chinese-starter-kit/
         │   └── services/
         │       ├── i18n.service.ts
         │       ├── progress-store.service.ts   # interface ProgressStore + DexieProgressStore
-        │       ├── audio.service.ts            # phát audio, ghi âm
+        │       ├── audio.service.ts            # phát audio, ghi âm; play(src, rate) gán src trước rồi mới đặt
+        │       │                               # defaultPlaybackRate + playbackRate (gán src sau sẽ reset về 1x)
         │       ├── speech.service.ts           # adapter Web Speech
         │       ├── content-source.service.ts   # fetch + validate JSON nội dung (cả strokes/index.json, strokes/<chữ>.json)
         │       └── stroke-writer.service.ts    # adapter hanzi-writer, file duy nhất import `hanzi-writer`:
@@ -160,6 +161,15 @@ chinese-starter-kit/
         │   │   ├── components/NextLessonCard.tsx · TodayStudyStatus.tsx
         │   │   └── hooks/useHome.ts            # nạp bài tiếp theo; đọc phút hôm nay khi mount và khi trang hiện lại
         │   ├── lesson/hooks/useStudyTimeRecorder.ts   # LessonRunnerContainer gọi: ghi thời gian học khi màn bài hiện
+        │   ├── lesson/hooks/useLessonPreferences.ts   # đọc Cài đặt mỗi lần vào bài (đổi lessonId thì đọc lại),
+        │   │                                          # null khi đang đọc; LessonRunnerContainer bọc runner bằng
+        │   │                                          # AudioSpeedProvider(initialIsSlow) + PinyinVisibilityProvider
+        │   ├── settings/
+        │   │   ├── settings.routes.ts          # /settings (vào từ liên kết "Cài đặt" trên màn Lộ trình)
+        │   │   ├── containers/SettingsContainer.tsx   # "Về lộ trình", 3 nhóm, một thông báo lỗi lưu role="alert"
+        │   │   ├── components/DailyGoalSetting · AudioSpeedSetting · PinyinVisibilitySetting   # value + onChange
+        │   │   └── hooks/useSettings.ts        # đọc tùy chọn (lỗi → mặc định), đổi lạc quan từng khóa, lưu lỗi
+        │   │                                   # thì trả về giá trị đã lưu chắc chắn; saveErrorId
         │   ├── stroke-order/
         │   │   ├── stroke-order.routes.ts      # /characters/:character?/stroke-order
         │   │   ├── containers/StrokeOrderContainer.tsx   # + link "Tập viết" sang writing-practice
@@ -175,8 +185,11 @@ chinese-starter-kit/
             │   ├── exercises/              # mỗi dạng bài tập 1 component + exercise.registry.ts;
             │   │                           # StrokeWritingPad (khung viết theo nét, S6.2)
             │   └── StrokeGlyph · StrokeOrderAnimation · StrokeOrderStatic   # thứ tự nét (S6.1), nhận props
-            ├── contexts/settings.context.tsx   # bật/tắt pinyin, tốc độ audio…
-            ├── models/                     # type riêng của UI (home.model: NextLesson, TodayStudy, StudyTimeShare);
+            ├── contexts/                   # AudioSpeedContext (+ useAudioSpeed; prop initialIsSlow, chỉ dùng lúc mount),
+            │                               # PinyinVisibilityContext (+ usePinyinVisibility, mặc định true ngoài provider),
+            │                               # RecordingModeContext; không có SettingsProvider toàn app (xem 6.2)
+            ├── models/                     # type riêng của UI (home.model: NextLesson, TodayStudy, StudyTimeShare;
+            │                               # settings.model: LearningPreferences, LessonPreferences);
             │                               # schema nội dung và tiến độ lấy từ @csk/shared
             ├── services/                   # content · srs · progress · backup · stroke-order · writing-practice (.service.ts)
             └── utils/                      # date.utils.ts (toLocalDateKey `YYYY-MM-DD` giờ máy, startOfNextLocalDay)…
@@ -204,7 +217,7 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
 | `core/services/stroke-writer` + `core/hooks/useStrokeAnimation`, `core/hooks/useInitialReducedMotion` | Adapter hanzi-writer (file duy nhất import `hanzi-writer`): vẽ từng nét vào `<g>` SVG; hook phát tuần tự, tự phát khi mở, "Phát lại", huỷ khi unmount; chốt `prefers-reduced-motion` lúc mở màn | E6 |
 | `core/services/stroke-writer` (`createStrokeQuiz`) + `core/hooks/useStrokeQuiz` | Chấm nét người viết vẽ: mỗi lần chấm tạo `<svg>` riêng trong `<g>` host, có `rect` trong suốt làm vùng chạm để nhấn vào chỗ trống vẫn nhận; báo `correct` / `mistake` / `ignored` (chạm một điểm, nét quá ngắn); sau `destroy()` không báo nữa, an toàn khi StrictMode mount hai lần; hook tạo quiz khi mount, huỷ khi unmount hoặc đổi chữ | E6 |
 | `shared/services/content.service` | Nạp JSON nội dung, tra từ và câu theo ID, tìm kiếm từ điển | E3, E10 |
-| `shared/services/progress.service` | Quy tắc mở khóa, chấm điểm bài, cursor học dở, bài tiếp theo (`findNextLessonId`), thời gian học mỗi ngày (`splitStudyTimeByDay` cắt tại 0 giờ giờ máy, `toStudyMinutes` làm tròn xuống, `isDailyGoalReached`; use case `recordStudyTime`, `getTodayStudy`), streak | E3, E8 |
+| `shared/services/progress.service` | Quy tắc mở khóa, chấm điểm bài, cursor học dở, bài tiếp theo (`findNextLessonId`), thời gian học mỗi ngày (`splitStudyTimeByDay` cắt tại 0 giờ giờ máy, `toStudyMinutes` làm tròn xuống, `isDailyGoalReached`; use case `recordStudyTime`, `getTodayStudy`), Cài đặt (S8.2: rule `isValidAudioSpeed`, `toLessonPreferences`; use case `getLearningPreferences`, `getLessonPreferences` đọc lỗi thì trả mặc định, `changeDailyGoal`, `changeDefaultAudioSpeed`, `changePinyinVisibility` ghi đúng một khóa), streak | E3, E8 |
 | `core/hooks/useVisibleTimeSegments` + `pages/lesson/hooks/useStudyTimeRecorder` | Đo thời gian học ở màn bài: chỉ khi trang hiện, ghi mỗi `STUDY_TIME_FLUSH_INTERVAL_MS` (15 giây), khi trang ẩn và khi rời màn; đóng app đột ngột chỉ mất phần sau lần ghi cuối. Chỉ `LessonRunnerContainer` gọi (bài thường, bài kiểm tra, kiểm tra vượt cấp, màn tổng kết) | E8 |
 | `shared/services/srs.service` | Bọc ts-fsrs: tạo thẻ, chấm, lấy thẻ đến hạn trong giới hạn mỗi ngày, thống kê | E9 |
 | `shared/services/backup.service` | Export/import, kiểm tra file trước khi ghi đè | E8 |
@@ -225,7 +238,7 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
 - **Component bài tập** chỉ nhận dữ liệu qua props (`exercise`, `onResult`, `isLocked`). Audio và ghi âm lấy qua hook trong `core/hooks`, không import service trực tiếp.
 - **Route:** mỗi feature export `PageRoute[]` (container lazy-load) từ `<feature>.routes.ts`, gom về `pages/page.routes.ts` rồi về `app.routes.ts`.
   - Mở app: route `/` (`StartGate`, `start_url` của manifest) chuyển `replace` tới `/onboarding` (chưa xong onboarding) hoặc `/home` (Trang chủ). Vừa xong bước cuối onboarding vẫn vào bài 1; mở `/onboarding` khi đã xong thì về `/home`. Tải lại ở màn khác không đi qua `/`.
-  - URL theo RESTful: danh từ tài nguyên, kebab-case, collection số nhiều, tên cụ thể (`/home`, `/learning-paths`, `/lessons/:lessonId`, `/units/:unitId/placement-test`, `/characters/:character?/stroke-order`, `/characters/:character/writing-practice`). `ROUTE_PATHS` trong `core/constants/app.constants.ts` là nguồn duy nhất của URL.
+  - URL theo RESTful: danh từ tài nguyên, kebab-case, collection số nhiều, tên cụ thể (`/home`, `/learning-paths`, `/lessons/:lessonId`, `/units/:unitId/placement-test`, `/settings`, `/characters/:character?/stroke-order`, `/characters/:character/writing-practice`). `ROUTE_PATHS` trong `core/constants/app.constants.ts` là nguồn duy nhất của URL.
 - **i18n:** chuỗi giao diện đặt trong `apps/web/src/assets/i18n/vi/<namespace>.json`, dùng `useTranslation(namespace)`. Nội dung bài học không nằm trong i18n mà nằm trong JSON của pipeline.
 - **Alias:** trong `apps/web`, `aliases.ts` là nguồn duy nhất, giữ đồng bộ với `apps/web/tsconfig.json`. Sang package khác thì import bằng tên package (xem 3.1).
 
@@ -275,13 +288,26 @@ Luật câu viết của `content:check` (`lessonStrokeWriteIssues` trong `conte
 
 | Bảng | Khóa | Nội dung |
 |---|---|---|
-| `settings` | key | Mục tiêu phút, tốc độ audio, hiện pinyin, giới hạn SRS, đã xong onboarding… |
+| `settings` | key | Khóa–giá trị (`{ key, value }`), mỗi tùy chọn một dòng. Khóa hiện có: `dailyGoalMinutes` (15 · 30 · 60), `hasCompletedOnboarding`, `defaultAudioSpeed` (`'normal' \| 'slow'`, S8.2), `isPinyinVisible` (S8.2). Đọc qua `parseSettings` (Zod): thiếu khóa hoặc giá trị hỏng thì **riêng khóa đó** về mặc định (15 phút, chưa xong onboarding, `'normal'`, `true`). Hai khóa S8.2 không cần Dexie version mới. Sau này thêm giới hạn SRS… S8.5 phải sao lưu đủ mọi khóa, kể cả `defaultAudioSpeed` và `isPinyinVisible` |
 | `lessonProgress` | `lessonId` | `status`, `bestScore`, `cursor` (vị trí câu đang dở) |
 | `cards` | `"wordId:facet"` | Trạng thái FSRS, `due` (có index) |
 | `reviewLogs` | auto | `cardId`, `rating`, `reviewedAt`… |
 | `dailyStats` | `date` (`YYYY-MM-DD` theo giờ máy) | `studySeconds` (giây, số thực, giữ phần lẻ giữa các lần ghi; Trang chủ hiện phút làm tròn xuống). Giữ mọi ngày, không xoá. Dexie version 3. S8.3 dùng cho streak (sẽ thêm mục tiêu của ngày, `reviews`, `newCards`…); S8.5 phải sao lưu bảng này |
 
 **Bản ghi âm không được lưu.**
+
+**Cài đặt không có `SettingsProvider` toàn app.** Mỗi nơi cần cài đặt đọc qua hook của feature, gọi `ProgressService`:
+màn Cài đặt (`pages/settings/hooks/useSettings`), Trang chủ (`getTodayStudy`), màn học (`pages/lesson/hooks/useLessonPreferences`,
+đọc lại **mỗi lần vào bài**). Lý do (design S8.2 D5): provider nạp một lần lúc mở app thì màn học dùng giá trị cache, nên
+khi đọc lỗi trong lúc đang dùng app bài vẫn mở theo tùy chọn cũ thay vì mặc định (1x, hiện pinyin) như spec; còn phải đồng bộ
+cache sau mỗi lần màn Cài đặt lưu. Tùy chọn đi vào màn học qua hai context hẹp trong `shared/contexts/`:
+`AudioSpeedProvider initialIsSlow` (`key={lessonId}`, mount lại mỗi lần vào bài và sau "Làm lại"; bật/tắt "Nghe chậm" trong bài
+chỉ đổi state, không ghi Cài đặt) và `PinyinVisibilityProvider` (`SpeakExercise` đọc qua `usePinyinVisibility`, không đổi
+hợp đồng `ExerciseProps`).
+
+Đổi một tùy chọn ghi đúng một khóa (`saveSettings({ [khóa]: giá trị })`), không đọc–gộp–ghi: khi không đọc được cài đặt
+(màn hiện mặc định) mà ghi thành công thì không đè `hasCompletedOnboarding` hay tùy chọn khác; hai lần đổi nhanh không ghi đè
+nhau bằng ảnh chụp cũ. `completeOnboarding` (S1.3) vẫn đọc → gộp → ghi cả object.
 
 ### 6.3 Interface
 
@@ -295,8 +321,9 @@ interface ProgressStore {
   logReview(log): Promise<void>;
   getDailyStat(date): Promise<DailyStat | undefined>;  // không có dòng hoặc dòng hỏng (Zod) → undefined; chờ các lần ghi đang chờ trong tab
   addStudySeconds(date, seconds): Promise<void>;        // một transaction rw: đọc + cộng + ghi; dòng hỏng coi là 0 và bị thay
-  getSettings(): Promise<Settings>;
-  saveSettings(settings): Promise<void>;
+  getSettings(): Promise<Settings>;                     // gom mọi dòng rồi parseSettings: khóa hỏng → mặc định riêng khóa đó
+  saveSettings(patch: Partial<Settings>): Promise<void>; // chỉ ghi các khóa có trong patch với giá trị khác undefined;
+                                                         // khóa khác giữ nguyên; patch rỗng thì không ghi
   exportAll(): Promise<Snapshot>;      // có schemaVersion
   importAll(snapshot): Promise<void>;  // ghi đè toàn bộ
 }
