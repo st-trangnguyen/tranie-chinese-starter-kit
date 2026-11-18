@@ -51,7 +51,7 @@ Test: `apps/web/src/app/shared/utils/date.utils.test.ts`, `apps/web/src/app/shar
 Test: `apps/web/src/app/shared/services/progress.service.study-time.test.ts` — `ProgressService(new DexieProgressStore(createDatabase('test-…')))`, fake-indexeddb.
 
 - [x] 3.1 RED: S8.1-AC2 "Giây lẻ được cộng dồn" — `recordStudyTime` hai đoạn 40 giây cùng ngày → `getTodayStudy(now).minutes` = 1; kiểm: fail vì skeleton `recordStudyTime` no-op, `getTodayStudy` trả 0
-- [ ] 3.2 GREEN: Phần 1 `readDailyStat`, `addStudySeconds`; Phần 3 `recordStudyTime` (gọi ghi đồng bộ cho mọi phần rồi `Promise.all`), `getTodayStudy` (settings + dòng hôm nay song song, `toStudyMinutes`, `isDailyGoalReached`); model `shared/models/home.model.ts`; kiểm: test 3.1 pass
+- [x] 3.2 GREEN: Phần 1 `readDailyStat`, `addStudySeconds`; Phần 3 `recordStudyTime` (gọi ghi đồng bộ cho mọi phần rồi `Promise.all`), `getTodayStudy` (settings + dòng hôm nay song song, `toStudyMinutes`, `isDailyGoalReached`); model `shared/models/home.model.ts`; kiểm: test 3.1 pass
 - [ ] 3.3 RED: S8.1-AC2 "Nhiều lần học trong cùng ngày được cộng" — 08:00–08:05 và 20:00–20:06 cùng ngày → 11; kiểm: chạy, nếu pass ngay thì tạm cho `addStudySeconds` ghi đè thay vì cộng để thấy fail rồi trả lại
 - [ ] 3.4 GREEN: sửa đến khi pass; kiểm: test 3.3 pass
 - [ ] 3.5 RED: S8.1-AC2 "Sang ngày mới đếm lại" — hôm qua ghi 20 phút, `getTodayStudy(hôm nay 09:00).minutes` = 0; dòng hôm qua vẫn 1200 giây (giữ mọi ngày); kiểm: chạy, nếu pass ngay thì tạm đọc khóa ngày cố định để thấy fail rồi trả lại

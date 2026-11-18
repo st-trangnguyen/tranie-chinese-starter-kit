@@ -2,6 +2,7 @@ import {
   DAILY_GOAL_OPTIONS,
   type LESSON_TYPES,
   type DailyGoalMinutes,
+  type DailyStat,
   type LessonProgress,
   type LessonStatus,
   type Settings,
@@ -18,7 +19,7 @@ import {
   listLessonIdsInOrder,
 } from '@shared/utils/learning-path.utils';
 import { startOfNextLocalDay, toLocalDateKey } from '@shared/utils/date.utils';
-import type { StudyTimeShare } from '@shared/models/home.model';
+import type { StudyTimeShare, TodayStudy } from '@shared/models/home.model';
 
 type LessonType = (typeof LESSON_TYPES)[number];
 
@@ -37,6 +38,14 @@ export class ProgressService {
 
   private readAllLessonProgress(): Promise<LessonProgress[]> {
     return this.store.getAllLessonProgress();
+  }
+
+  private readDailyStat(date: string): Promise<DailyStat | undefined> {
+    return this.store.getDailyStat(date);
+  }
+
+  private addStudySeconds(date: string, seconds: number): Promise<void> {
+    return this.store.addStudySeconds(date, seconds);
   }
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
@@ -166,5 +175,27 @@ export class ProgressService {
         .filter((lesson) => lesson.status === 'completed')
         .map((lesson) => lesson.lessonId),
     );
+  }
+
+  /** Ghi một đoạn thời gian học, chia theo ngày; xếp hàng mọi lần ghi đồng bộ (design D2, D4). */
+  async recordStudyTime(startMs: number, endMs: number): Promise<void> {
+    const writes = this.splitStudyTimeByDay(startMs, endMs).map((share) =>
+      this.addStudySeconds(share.date, share.seconds),
+    );
+    await Promise.all(writes);
+  }
+
+  async getTodayStudy(now: number = Date.now()): Promise<TodayStudy> {
+    const [settings, dailyStat] = await Promise.all([
+      this.readSettings(),
+      this.readDailyStat(toLocalDateKey(now)),
+    ]);
+    const minutes = this.toStudyMinutes(dailyStat?.studySeconds ?? 0);
+    const goalMinutes = settings.dailyGoalMinutes;
+    return {
+      minutes,
+      goalMinutes,
+      isGoalReached: this.isDailyGoalReached(minutes, goalMinutes),
+    };
   }
 }
