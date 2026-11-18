@@ -49,8 +49,8 @@ cài đặt đều cho 0, RED không thể fail thật); nó được kiểm ở
 - [x] 2.8 GREEN: sửa đến khi pass; kiểm: test 2.7 pass
 - [x] 2.9 RED: S8.3-AC1 "Người học mới chưa có ngày nào" — `countStudyStreak([], D0, 15)` = 0; kiểm: chạy, nếu pass ngay thì tạm coi hôm qua không có dòng là đạt để thấy fail rồi trả lại
 - [x] 2.10 GREEN: sửa đến khi pass; kiểm: test 2.9 pass
-- [ ] 2.11 RED: S8.3-AC1 "Chưa đủ trọn phút mục tiêu thì chưa tính là đạt" — D0 899 giây (14 phút 59 giây), mục tiêu 15 → 0; 900 giây → 1; ngày đã qua 899 giây `goalMinutes: 15` không đạt; kiểm: chạy, nếu pass ngay thì tạm so `studySeconds / 60` không làm tròn để thấy fail rồi trả lại
-- [ ] 2.12 GREEN: sửa đến khi pass (dùng `toStudyMinutes` + `isDailyGoalReached` sẵn có); kiểm: test 2.11 pass
+- [x] 2.11 RED: S8.3-AC1 "Chưa đủ trọn phút mục tiêu thì chưa tính là đạt" — D0 899 giây (14 phút 59 giây), mục tiêu 15 → 0; 900 giây → 1; ngày đã qua 899 giây `goalMinutes: 15` không đạt; kiểm: chạy, nếu pass ngay thì tạm so `studySeconds / 60` không làm tròn để thấy fail rồi trả lại
+- [x] 2.12 GREEN: sửa đến khi pass (dùng `toStudyMinutes` + `isDailyGoalReached` sẵn có); kiểm: test 2.11 pass
 - [ ] 2.13 RED: S8.3-AC1 "Ngày mới bắt đầu sau nửa đêm theo giờ máy" — dữ liệu D-2 0, D-1 đạt, D0 đạt; `today` = D0 → 2; `today` = D+1 (không có dòng) → 2; `today` = D+2 → 0; kiểm: chạy, nếu pass ngay thì tạm luôn bắt đầu đếm từ `today` để thấy fail rồi trả lại
 - [ ] 2.14 GREEN: sửa đến khi pass; kiểm: test 2.13 pass
 - [ ] 2.15 RED: S8.3-AC1 "Học qua nửa đêm thì mỗi ngày so với phần thời gian của ngày đó" (Phần 2) — mục tiêu 15, D-1 1200 giây (10 + 10 phút), D0 600 giây → 1; kiểm: chạy, nếu pass ngay thì tạm cộng phút hôm nay vào hôm qua để thấy fail rồi trả lại
