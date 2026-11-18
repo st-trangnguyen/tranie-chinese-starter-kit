@@ -258,4 +258,10 @@ export class ProgressService {
       isGoalReached: this.isDailyGoalReached(minutes, goalMinutes),
     };
   }
+
+  // Skeleton S8.3 (tasks 3.1): hành vi thêm ở 3.2.
+  getStudyStreak(now?: number): Promise<number>;
+  getStudyStreak(): Promise<number> {
+    return Promise.reject(new Error('Chưa cài'));
+  }
 }
