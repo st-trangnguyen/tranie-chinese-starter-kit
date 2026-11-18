@@ -130,6 +130,24 @@ describe('ProgressService — tùy chọn khi mở bài', () => {
       isPinyinVisible: true,
     });
   });
+  it('S8.2-AC2 Không đọc được cài đặt thì bài vẫn mở với tốc độ thường và hiện pinyin: đã chọn Chậm và tắt pinyin, đọc lỗi thì về mặc định, không lỗi', async () => {
+    const store = await createOnboardedStore();
+    const setup = new ProgressService(store);
+    await setup.changeDefaultAudioSpeed('slow');
+    await setup.changePinyinVisibility(false);
+    vi.spyOn(store, 'getSettings').mockRejectedValue(new Error('read failed'));
+    const service = new ProgressService(store);
+
+    await expect(service.getLessonPreferences()).resolves.toStrictEqual({
+      isSlowAudio: false,
+      isPinyinVisible: true,
+    });
+    await expect(service.getLearningPreferences()).resolves.toStrictEqual({
+      dailyGoalMinutes: 15,
+      defaultAudioSpeed: 'normal',
+      isPinyinVisible: true,
+    });
+  });
 });
 
 describe('ProgressService — hiện pinyin', () => {
