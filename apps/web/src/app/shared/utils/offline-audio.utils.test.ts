@@ -12,4 +12,15 @@ describe('formatAudioSize', () => {
       expect(formatAudioSize(bytes)).toBe(expected);
     },
   );
+
+  it.each([
+    [300, '1 KB'],
+    [1, '1 KB'],
+    [0, '1 KB'],
+  ])(
+    'S8.4-AC1 Dung lượng rất nhỏ hiện tối thiểu 1 KB: %d byte → "%s"',
+    (bytes, expected) => {
+      expect(formatAudioSize(bytes)).toBe(expected);
+    },
+  );
 });
