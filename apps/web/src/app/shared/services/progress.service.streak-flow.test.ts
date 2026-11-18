@@ -75,4 +75,31 @@ describe('ProgressService — getStudyStreak', () => {
     const today = await service.getTodayStudy(at(18, 0, 15));
     expect(today.minutes).toBe(10);
   });
+
+  it('S8.3-AC1 Số phút của một ngày đã qua bị hỏng: hôm kia, hôm nay 20 phút, số phút hôm qua không đọc được thì streak 1, Trang chủ vẫn 20 phút', async () => {
+    const db = createDatabase(`test-${crypto.randomUUID()}`);
+    const service = new ProgressService(new DexieProgressStore(db));
+    await service.completeOnboarding(15);
+    await db.dailyStats.bulkPut([
+      {
+        date: toLocalDateKey(at(16, 9, 0)),
+        studySeconds: 1200,
+        goalMinutes: 15,
+      },
+      {
+        date: toLocalDateKey(at(17, 9, 0)),
+        studySeconds: 'abc',
+        goalMinutes: 15,
+      },
+      {
+        date: toLocalDateKey(at(18, 8, 0)),
+        studySeconds: 1200,
+        goalMinutes: 15,
+      },
+    ]);
+
+    await expect(service.getStudyStreak(at(18, 9, 0))).resolves.toBe(1);
+    const today = await service.getTodayStudy(at(18, 9, 0));
+    expect(today.minutes).toBe(20);
+  });
 });
