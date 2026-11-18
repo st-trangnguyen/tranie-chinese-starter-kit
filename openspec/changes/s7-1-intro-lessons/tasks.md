@@ -148,8 +148,8 @@ Các task dưới đây phủ case có cột Tự động `e2e` trong `test-case
 ## 8. Giao diện, tài liệu và kiểm tra
 
 - [ ] 8.1 `apps/web/src/styles/tailwind/components/_lesson.css`: `.lesson-stroke-write-link`, `.lesson-stroke-write-message` (design D8), JSX chỉ layout/spacing (§6) — ngoại lệ test-first: CSS thuần; kiểm: preview `web-dev` 375×812 và 1280×800, sáng và tối: câu viết (mới, sai nét, Đúng), đang tải, lỗi, không có dữ liệu nét; vùng chạm link ≥ 44×44 px
-- [ ] 8.2 Cập nhật `docs/03-architecture.md`: §6.3 sửa câu "Lesson runner … chỉ làm việc qua `exercise.registry.ts`" thành có ngoại lệ `stroke-write` (nhánh riêng trong `LessonRunner`, dữ liệu nét/lượt viết từ `useLessonStrokeWrite`, lý do: hợp đồng `ExerciseProps` không mang được trạng thái tải, design D4); `useLessonStrokeWrite`, `LessonStrokeWrite`, luật `lessonStrokeWriteIssues`, giai đoạn Nhập môn 12 bài — ngoại lệ test-first: docs thuần; kiểm: đọc lại diff
-- [ ] 8.3 Refactor + self-review theo CLAUDE.md §0, §2, §7 (không `any`, không `eslint-disable`, dependency một chiều, file < 300 dòng, component < 5 props, effect có cleanup, không mutate); kiểm: `pnpm lint` sạch
+- [x] 8.2 Cập nhật `docs/03-architecture.md`: §6.3 sửa câu "Lesson runner … chỉ làm việc qua `exercise.registry.ts`" thành có ngoại lệ `stroke-write` (nhánh riêng trong `LessonRunner`, dữ liệu nét/lượt viết từ `useLessonStrokeWrite`, lý do: hợp đồng `ExerciseProps` không mang được trạng thái tải, design D4); `useLessonStrokeWrite`, `LessonStrokeWrite`, luật `lessonStrokeWriteIssues`, giai đoạn Nhập môn 12 bài — ngoại lệ test-first: docs thuần; kiểm: đọc lại diff
+- [x] 8.3 Refactor + self-review theo CLAUDE.md §0, §2, §7 (không `any`, không `eslint-disable`, dependency một chiều, file < 300 dòng, component < 5 props, effect có cleanup, không mutate); kiểm: `pnpm lint` sạch
 - [ ] 8.4 Chạy `pnpm typecheck && pnpm lint && pnpm test:run`; kiểm: pass, ghi output thật
 - [ ] 8.5 Chạy `pnpm content:check`; kiểm: 0 lỗi
 - [ ] 8.6 Chạy `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts`; kiểm: pass

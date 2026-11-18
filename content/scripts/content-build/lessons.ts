@@ -213,52 +213,41 @@ export function lessonStrokeWriteIssues(
     }
     const exerciseId =
       typeof exercise.id === 'string' ? exercise.id : `#${index + 1}`;
+    const prefix = `Bài "${lessonId}", câu "${exerciseId}"`;
+    const errorAt = (
+      path: (string | number)[],
+      detail: string,
+    ): ContentIssue[] => [
+      {
+        level: 'error',
+        file: parsed.source.file,
+        line: parsed.source.lineOf(path),
+        message: `${prefix}: ${detail}`,
+      },
+    ];
+    const wordIdPath = ['exercises', index, 'wordId'];
     if (typeof exercise.wordId !== 'string' || exercise.wordId.trim() === '') {
       const path =
-        typeof exercise.wordId === 'string'
-          ? ['exercises', index, 'wordId']
-          : ['exercises', index];
-      return [
-        {
-          level: 'error',
-          file: parsed.source.file,
-          line: parsed.source.lineOf(path),
-          message: `Bài "${lessonId}", câu "${exerciseId}": câu viết rỗng, cần đúng một chữ Hán`,
-        },
-      ];
+        typeof exercise.wordId === 'string' ? wordIdPath : ['exercises', index];
+      return errorAt(path, 'câu viết rỗng, cần đúng một chữ Hán');
     }
     const char = wordsById.get(exercise.wordId)?.hanzi ?? exercise.wordId;
     const chars = [...char];
     if (chars.length > 1 && chars.every(isHan)) {
-      return [
-        {
-          level: 'error',
-          file: parsed.source.file,
-          line: parsed.source.lineOf(['exercises', index, 'wordId']),
-          message: `Bài "${lessonId}", câu "${exerciseId}": câu viết "${char}" có nhiều hơn một chữ, câu viết chỉ nhận một chữ Hán`,
-        },
-      ];
+      return errorAt(
+        wordIdPath,
+        `câu viết "${char}" có nhiều hơn một chữ, câu viết chỉ nhận một chữ Hán`,
+      );
     }
     if (!isHan(char)) {
-      return [
-        {
-          level: 'error',
-          file: parsed.source.file,
-          line: parsed.source.lineOf(['exercises', index, 'wordId']),
-          message: `Bài "${lessonId}", câu "${exerciseId}": câu viết "${char}" không phải chữ Hán`,
-        },
-      ];
+      return errorAt(wordIdPath, `câu viết "${char}" không phải chữ Hán`);
     }
     if (hasStrokeData(char)) {
       return [];
     }
-    return [
-      {
-        level: 'error',
-        file: parsed.source.file,
-        line: parsed.source.lineOf(['exercises', index, 'wordId']),
-        message: `Bài "${lessonId}", câu "${exerciseId}": chữ "${char}" thiếu dữ liệu nét, câu viết cần chữ có dữ liệu nét`,
-      },
-    ];
+    return errorAt(
+      wordIdPath,
+      `chữ "${char}" thiếu dữ liệu nét, câu viết cần chữ có dữ liệu nét`,
+    );
   });
 }
