@@ -180,4 +180,15 @@ describe('ProgressService — countStudyStreak', () => {
 
     expect(service.countStudyStreak(stats, TODAY, 30)).toBe(3);
   });
+
+  it('S8.3-AC1 Hạ mục tiêu không biến ngày chưa đạt thành đạt: 2 ngày học 20 phút với mục tiêu 30, hôm nay đổi sang 15 và chưa học thì streak là 0', () => {
+    const stats = [
+      day(-3, 0, 30),
+      day(-2, REACHED, 30),
+      day(-1, REACHED, 30),
+      day(0, 0, 15),
+    ];
+
+    expect(service.countStudyStreak(stats, TODAY, 15)).toBe(0);
+  });
 });
