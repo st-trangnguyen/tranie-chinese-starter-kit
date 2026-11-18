@@ -55,8 +55,8 @@ cài đặt đều cho 0, RED không thể fail thật); nó được kiểm ở
 - [x] 2.14 GREEN: sửa đến khi pass; kiểm: test 2.13 pass
 - [x] 2.15 RED: S8.3-AC1 "Học qua nửa đêm thì mỗi ngày so với phần thời gian của ngày đó" (Phần 2) — mục tiêu 15, D-1 1200 giây (10 + 10 phút), D0 600 giây → 1; kiểm: chạy, nếu pass ngay thì tạm cộng phút hôm nay vào hôm qua để thấy fail rồi trả lại
 - [x] 2.16 GREEN: sửa đến khi pass; kiểm: test 2.15 pass
-- [ ] 2.17 RED: S8.3-AC1 "Số phút của một ngày đã qua bị hỏng" (Phần 2) — D-2 đạt, D-1 không có trong mảng (store đã bỏ dòng hỏng, 1.8), D0 đạt → 1; kiểm: chạy, nếu pass ngay thì tạm nhảy qua ngày thiếu để thấy fail rồi trả lại
-- [ ] 2.18 GREEN: sửa đến khi pass; kiểm: test 2.17 pass
+- [x] 2.17 RED: S8.3-AC1 "Số phút của một ngày đã qua bị hỏng" (Phần 2) — D-2 đạt, D-1 không có trong mảng (store đã bỏ dòng hỏng, 1.8), D0 đạt → 1; kiểm: chạy, nếu pass ngay thì tạm nhảy qua ngày thiếu để thấy fail rồi trả lại
+- [x] 2.18 GREEN: sửa đến khi pass; kiểm: test 2.17 pass
 - [ ] 2.19 RED: S8.3-AC1 "Ngày ghi sau hôm nay không được tính" — D-2 0, D-1 đạt, D0 đạt, D+1 đạt → 2; thêm D+1 đạt khi D0 chưa đạt → bằng chuỗi tính tới D-1; kiểm: fail nếu đếm bắt đầu từ ngày mới nhất trong dữ liệu (tạm làm vậy nếu pass ngay rồi trả lại)
 - [ ] 2.20 GREEN: bỏ dòng `date > today`; kiểm: test 2.19 pass
 - [ ] 2.21 RED: S8.3-AC1 "Tăng mục tiêu không đổi các ngày đã qua" (Phần 2) — mục tiêu đang chọn 30, D-4 0, D-3…D-1 1200 giây `goalMinutes: 15`, D0 1200 giây → 3; kiểm: fail thật (2.2 so mọi ngày với 30 → 0)

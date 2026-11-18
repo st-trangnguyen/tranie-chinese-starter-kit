@@ -139,4 +139,10 @@ describe('ProgressService — countStudyStreak', () => {
 
     expect(service.countStudyStreak(stats, TODAY, 15)).toBe(1);
   });
+
+  it('S8.3-AC1 Số phút của một ngày đã qua bị hỏng: hôm kia và hôm nay đạt, dòng hỏng của hôm qua đã bị bỏ thì streak là 1', () => {
+    const stats = [day(-2, REACHED), day(0, REACHED)];
+
+    expect(service.countStudyStreak(stats, TODAY, 15)).toBe(1);
+  });
 });
