@@ -89,4 +89,8 @@ describe('ProgressService — countStudyStreak', () => {
 
     expect(service.countStudyStreak(stats, TODAY, 15)).toBe(2);
   });
+
+  it('S8.3-AC1 Người học mới chưa có ngày nào: chưa có dòng nào thì streak là 0', () => {
+    expect(service.countStudyStreak([], TODAY, 15)).toBe(0);
+  });
 });
