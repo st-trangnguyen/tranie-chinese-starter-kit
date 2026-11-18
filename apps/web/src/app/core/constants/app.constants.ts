@@ -4,6 +4,7 @@ export const APP_NAME = 'Tranie Chinese';
 export const FIRST_LESSON_ID = 'intro-01';
 
 export const ROUTE_PATHS = {
+  home: '/home',
   onboarding: '/onboarding',
   learningPaths: '/learning-paths',
   lesson: (lessonId: string): string => `/lessons/${lessonId}`,

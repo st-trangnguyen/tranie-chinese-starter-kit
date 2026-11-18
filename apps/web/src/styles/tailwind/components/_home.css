@@ -1,0 +1,45 @@
+/* Màn Trang chủ — S8.1 (design D8). Chỉ token semantic để tự đổi theo theme tối. */
+
+@layer components {
+  .home-title {
+    @apply text-title-lg text-fg;
+  }
+
+  .home-next-lesson {
+    @apply rounded-lg border-2 border-line bg-surface text-fg;
+  }
+
+  /* Tiêu đề bài dài xuống dòng, không tràn thẻ ở 375 px. */
+  .home-next-lesson-title {
+    @apply min-w-0 text-title-sm break-words text-fg;
+  }
+
+  .home-today-study {
+    @apply text-body text-fg;
+  }
+
+  /* Trạng thái bằng chữ, nền màu chỉ là phụ (cặp success-text / success-soft ≥ 4.5:1 cả hai theme). */
+  .home-goal-reached {
+    @apply self-start rounded-md bg-success-soft px-md py-xs text-body-sm text-success-text;
+  }
+
+  /* Liên kết điều hướng: chữ fg trên nền trang, gạch chân là tín hiệu ngoài màu; vùng chạm ≥ 44×44 px. */
+  .home-link {
+    @apply inline-flex min-h-11 min-w-11 items-center rounded-md px-sm text-body font-semibold text-fg underline underline-offset-4;
+    @apply transition-colors;
+  }
+
+  .home-link:hover {
+    @apply bg-sunken;
+  }
+
+  .home-link:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-link {
+      @apply transition-none;
+    }
+  }
+}

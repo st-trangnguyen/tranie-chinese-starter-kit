@@ -1,7 +1,9 @@
 import {
   DAILY_GOAL_OPTIONS,
+  DEFAULT_SETTINGS,
   type LESSON_TYPES,
   type DailyGoalMinutes,
+  type DailyStat,
   type LessonProgress,
   type LessonStatus,
   type Settings,
@@ -17,6 +19,8 @@ import {
   findConfirmedPlacementTestLessonId,
   listLessonIdsInOrder,
 } from '@shared/utils/learning-path.utils';
+import { startOfNextLocalDay, toLocalDateKey } from '@shared/utils/date.utils';
+import type { StudyTimeShare, TodayStudy } from '@shared/models/home.model';
 
 type LessonType = (typeof LESSON_TYPES)[number];
 
@@ -35,6 +39,14 @@ export class ProgressService {
 
   private readAllLessonProgress(): Promise<LessonProgress[]> {
     return this.store.getAllLessonProgress();
+  }
+
+  private readDailyStat(date: string): Promise<DailyStat | undefined> {
+    return this.store.getDailyStat(date);
+  }
+
+  private addStudySeconds(date: string, seconds: number): Promise<void> {
+    return this.store.addStudySeconds(date, seconds);
   }
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
@@ -97,6 +109,47 @@ export class ProgressService {
     return findConfirmedPlacementTestLessonId(unit.lessonIds, lessonTypes);
   }
 
+  /**
+   * Rule: mỗi phần thời gian học tính vào ngày (giờ máy) nó diễn ra; qua 0 giờ thì cắt tại 0 giờ.
+   * Đồng hồ lùi hoặc đoạn rỗng thì không tính (S8.1 AC2).
+   */
+  splitStudyTimeByDay(startMs: number, endMs: number): StudyTimeShare[] {
+    const shares: StudyTimeShare[] = [];
+    let cursor = startMs;
+    while (cursor < endMs) {
+      const segmentEnd = Math.min(startOfNextLocalDay(cursor), endMs);
+      shares.push({
+        date: toLocalDateKey(cursor),
+        seconds: (segmentEnd - cursor) / 1000,
+      });
+      cursor = segmentEnd;
+    }
+    return shares;
+  }
+
+  /** Rule: thời gian học hiển thị theo phút, làm tròn xuống (S8.1 AC2). */
+  toStudyMinutes(seconds: number): number {
+    return Math.floor(seconds / 60);
+  }
+
+  /** Rule: đạt mục tiêu ngày khi số phút đã học ≥ mục tiêu; vừa đúng mục tiêu là đạt (S8.1 AC2). */
+  isDailyGoalReached(minutes: number, goalMinutes: number): boolean {
+    return minutes >= goalMinutes;
+  }
+
+  /**
+   * Rule: bài tiếp theo là bài "Đang mở" đầu tiên theo thứ tự lộ trình; đã xong mọi bài thì không
+   * còn bài tiếp theo (S8.1 AC1).
+   */
+  findNextLessonId(
+    stages: readonly Stage[],
+    statuses: ReadonlyMap<string, LessonStatus>,
+  ): string | undefined {
+    return listLessonIdsInOrder(stages).find(
+      (lessonId) => statuses.get(lessonId) === 'open',
+    );
+  }
+
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
   async needsOnboarding(): Promise<boolean> {
@@ -123,5 +176,28 @@ export class ProgressService {
         .filter((lesson) => lesson.status === 'completed')
         .map((lesson) => lesson.lessonId),
     );
+  }
+
+  /** Ghi một đoạn thời gian học, chia theo ngày; xếp hàng mọi lần ghi đồng bộ (design D2, D4). */
+  async recordStudyTime(startMs: number, endMs: number): Promise<void> {
+    const writes = this.splitStudyTimeByDay(startMs, endMs).map((share) =>
+      this.addStudySeconds(share.date, share.seconds),
+    );
+    await Promise.all(writes);
+  }
+
+  /** Không throw: đọc settings lỗi → mục tiêu mặc định; đọc dòng ngày lỗi → 0 giây (D4). */
+  async getTodayStudy(now: number = Date.now()): Promise<TodayStudy> {
+    const [settings, dailyStat] = await Promise.all([
+      this.readSettings().catch((): Settings => DEFAULT_SETTINGS),
+      this.readDailyStat(toLocalDateKey(now)).catch(() => undefined),
+    ]);
+    const minutes = this.toStudyMinutes(dailyStat?.studySeconds ?? 0);
+    const goalMinutes = settings.dailyGoalMinutes;
+    return {
+      minutes,
+      goalMinutes,
+      isGoalReached: this.isDailyGoalReached(minutes, goalMinutes),
+    };
   }
 }

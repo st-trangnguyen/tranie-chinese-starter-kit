@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DAILY_GOAL_OPTIONS,
   DEFAULT_SETTINGS,
+  dailyStatSchema,
   lessonProgressSchema,
   parseSettings,
 } from './progress.schema';
@@ -113,5 +114,33 @@ describe('lessonProgressSchema', () => {
     expect(result.success).toBe(true);
     expect(result.data?.status).toBe('completed');
     expect(result.data?.cursor).toBeUndefined();
+  });
+});
+
+describe('dailyStatSchema', () => {
+  it('S8.1-AC2 Thời gian học đã lưu bị hỏng: nhận dòng hợp lệ, giữ phần lẻ của giây', () => {
+    expect(
+      dailyStatSchema.safeParse({ date: '2026-11-18', studySeconds: 130.5 })
+        .success,
+    ).toBe(true);
+    expect(
+      dailyStatSchema.safeParse({ date: '2026-11-18', studySeconds: 0 })
+        .success,
+    ).toBe(true);
+  });
+
+  it.each<[string, unknown]>([
+    ['studySeconds âm', { date: '2026-11-18', studySeconds: -1 }],
+    ['studySeconds là chuỗi', { date: '2026-11-18', studySeconds: 'abc' }],
+    ['studySeconds là NaN', { date: '2026-11-18', studySeconds: Number.NaN }],
+    [
+      'studySeconds vô hạn',
+      { date: '2026-11-18', studySeconds: Number.POSITIVE_INFINITY },
+    ],
+    ['thiếu studySeconds', { date: '2026-11-18' }],
+    ['ngày sai dạng', { date: '18/11/2026', studySeconds: 60 }],
+    ['ngày thiếu số 0', { date: '2026-1-8', studySeconds: 60 }],
+  ])('S8.1-AC2 Thời gian học đã lưu bị hỏng: từ chối %s', (_label, row) => {
+    expect(dailyStatSchema.safeParse(row).success).toBe(false);
   });
 });

@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 import type { LessonSummary as LessonSummaryData } from '@shared/models/lesson-session.model';
+import { ROUTE_PATHS } from '@core/constants/app.constants';
 import { TEST_PASS_PERCENT } from '@core/constants/lesson.constants';
 import { formatDuration } from '@shared/utils/duration.utils';
 
@@ -77,6 +79,9 @@ export const LessonSummary = ({
           {t('summary.notSaved')}
         </p>
       )}
+      <Link to={ROUTE_PATHS.home} className="btn btn-ghost">
+        {t('summary.home')}
+      </Link>
     </section>
   );
 };

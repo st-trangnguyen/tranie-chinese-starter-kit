@@ -1,4 +1,7 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
+import { ROUTE_PATHS } from '@core/constants/app.constants';
 
 import { LearningPathLessonItem } from '../components/LearningPathLessonItem';
 import { LearningPathStage } from '../components/LearningPathStage';
@@ -21,6 +24,12 @@ const LearningPathContainer = () => {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-xl p-xl">
+      <Link
+        to={ROUTE_PATHS.home}
+        className="learning-path-home-link self-start"
+      >
+        {t('homeLink')}
+      </Link>
       <h1 className="learning-path-title">{t('title')}</h1>
       {hasError && (
         <p role="alert" className="learning-path-error p-md">

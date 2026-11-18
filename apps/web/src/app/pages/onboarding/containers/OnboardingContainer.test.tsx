@@ -84,9 +84,7 @@ describe('OnboardingContainer', () => {
     renderOnboarding();
 
     await waitFor(() =>
-      expect(screen.getByTestId('location')).toHaveTextContent(
-        '/lessons/intro-01',
-      ),
+      expect(screen.getByTestId('location')).toHaveTextContent('/home'),
     );
     expect(
       screen.queryByRole('button', { name: 'Bắt đầu' }),

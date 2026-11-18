@@ -5,12 +5,15 @@ export {
   DEFAULT_SETTINGS,
   LESSON_PROGRESS_STATUSES,
   dailyGoalMinutesSchema,
+  dailyStatSchema,
   lessonProgressSchema,
+  localDateKeySchema,
   parseSettings,
   settingsSchema,
 } from './progress.schema';
 export type {
   DailyGoalMinutes,
+  DailyStat,
   LessonProgress,
   LessonStatus,
   Settings,

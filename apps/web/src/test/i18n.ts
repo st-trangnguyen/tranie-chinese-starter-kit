@@ -2,6 +2,7 @@ import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import common from '@assets/i18n/vi/common.json';
+import home from '@assets/i18n/vi/home.json';
 import learningPath from '@assets/i18n/vi/learning-path.json';
 import lesson from '@assets/i18n/vi/lesson.json';
 import onboarding from '@assets/i18n/vi/onboarding.json';
@@ -24,6 +25,7 @@ testI18n.use(initReactI18next).init({
     'lesson',
     'stroke-order',
     'writing-practice',
+    'home',
   ],
   defaultNS: 'common',
   resources: {
@@ -34,6 +36,7 @@ testI18n.use(initReactI18next).init({
       lesson,
       'stroke-order': strokeOrder,
       'writing-practice': writingPractice,
+      home,
     },
   },
   interpolation: { escapeValue: false },
