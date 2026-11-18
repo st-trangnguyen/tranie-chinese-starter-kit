@@ -177,7 +177,7 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.todayStudy.test.tsx`
 - [x] 9.13 RED: S8.1-AC2 "Để Trang chủ mở qua nửa đêm" — mục tiêu 15, hôm nay 1200 giây, mở `/home` lúc 23:59 → "20 / 15"; tiến tới 00:01 (không đổi visibility) → vẫn "20 / 15"; `router.navigate('/learning-paths')` rồi về `/home` → "0 / 15"; kiểm: fail ở bước quay về nếu `useHome` cache kết quả, hoặc tạm thêm interval làm mới để thấy bước "vẫn 20" fail rồi trả lại
 - [x] 9.14 GREEN: tính lại khi mount, không timer; kiểm: test 9.13 pass
 - [x] 9.15 RED: S8.1-AC2 "Trang chủ hiện lại sau khi app bị ẩn qua nửa đêm" — như 9.13 nhưng ẩn lúc 23:59, hiện lúc 00:01, không điều hướng → "Hôm nay: 0 / 15 phút", không có "Đã đạt mục tiêu hôm nay"; kiểm: fail (vẫn 20)
-- [ ] 9.16 GREEN: deps `isPageVisible` từ `usePageVisibility` trong effect phút hôm nay; kiểm: test 9.15 pass
+- [x] 9.16 GREEN: deps `isPageVisible` từ `usePageVisibility` trong effect phút hôm nay; kiểm: test 9.15 pass
 - [ ] 9.17 RED: S8.1-AC2 "Học xong quay lại Trang chủ thấy số phút tăng" — `/home` "0 / 15", bấm "Vào học", trả lời hết câu trong 2 phút 10 giây, bấm "Trang chủ" trên tổng kết → "Hôm nay: 2 / 15 phút" không tải lại; kiểm: chạy, nếu pass ngay thì tạm bỏ chờ chuỗi ghi ở `getDailyStat` (1.8) để thấy fail rồi trả lại
 - [ ] 9.18 GREEN: sửa đến khi pass; kiểm: test 9.17 pass
 - [ ] 9.19 RED: S8.1-AC2 "Màn khác không tính" — mở `/home` 2 phút, `/learning-paths` 3 phút, `/onboarding`, `/characters/人/stroke-order`, `/characters/人/writing-practice` (mỗi màn 1 phút, mock nét theo `setupStrokeOrderRoute`), về `/home` → không đổi (0); kiểm: chạy, nếu pass ngay thì tạm gọi `useStudyTimeRecorder` trong `HomeContainer` để thấy fail rồi trả lại

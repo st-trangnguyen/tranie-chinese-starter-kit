@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { usePageVisibility } from '@core/hooks/usePageVisibility';
 import type { NextLesson, TodayStudy } from '@shared/models/home.model';
 import { ContentService } from '@shared/services/content.service';
 import { ProgressService } from '@shared/services/progress.service';
@@ -19,6 +20,7 @@ export const useHome = (): HomeState => {
   const [nextLesson, setNextLesson] = useState<NextLesson | null>(null);
   const [todayStudy, setTodayStudy] = useState<TodayStudy | null>(null);
   const [hasNextLessonError, setHasNextLessonError] = useState(false);
+  const isPageVisible = usePageVisibility();
 
   useEffect(() => {
     let isActive = true;
@@ -61,8 +63,12 @@ export const useHome = (): HomeState => {
     };
   }, [contentService, progressService]);
 
-  // Phút hôm nay tính khi mount; getTodayStudy không throw (design D4, D6).
+  // Phút hôm nay tính khi mount và mỗi lần trang hiện lại (qua nửa đêm thì sang ngày mới);
+  // getTodayStudy không throw (design D4, D6).
   useEffect(() => {
+    if (!isPageVisible) {
+      return undefined;
+    }
     let isActive = true;
     void progressService.getTodayStudy(Date.now()).then((study) => {
       if (isActive) {
@@ -72,7 +78,7 @@ export const useHome = (): HomeState => {
     return () => {
       isActive = false;
     };
-  }, [progressService]);
+  }, [progressService, isPageVisible]);
 
   return { nextLesson, todayStudy, hasNextLessonError };
 };
