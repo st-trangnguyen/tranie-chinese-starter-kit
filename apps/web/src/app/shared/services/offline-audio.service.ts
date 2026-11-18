@@ -1,3 +1,5 @@
+import type { AudioIndex } from '@csk/shared';
+
 import type {
   OfflineAudioSnapshot,
   OfflineAudioTopic,
@@ -40,6 +42,17 @@ export class OfflineAudioService {
   ): string[] {
     return unitAudio.filter((path) => !cachedPaths.has(path));
   }
+
+  // Skeleton (RED 5.5): giữ chữ ký D6, chưa có hành vi; GREEN thay bằng method thật.
+  /**
+   * Rule (bảng xóa): audio của chủ đề trừ `precached`, trừ audio của mọi chủ đề đang tải;
+   * audio dùng chung với chủ đề "Đã tải" khác vẫn bị xóa (S8.4 AC2).
+   */
+  readonly selectRemovableAudio: (
+    unitId: string,
+    index: AudioIndex,
+    downloadingUnitIds: ReadonlySet<string>,
+  ) => string[] = () => [];
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 }

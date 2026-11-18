@@ -97,4 +97,32 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
       ),
     ).toEqual([]);
   });
+
+  it('S8.4-AC1 Đã tải thì hiện dung lượng và nút xóa: đủ 4/4 audio trên máy, không chủ đề nào đang tải → downloaded, đủ byte, có nút xóa', () => {
+    const topic = service.deriveTopic(
+      HSK_STAGE_ID,
+      HSK_UNIT_ID,
+      makeSnapshot({
+        cachedPaths: new Set([AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D]),
+      }),
+    );
+
+    expect(topic).toEqual({
+      status: 'downloaded',
+      bytes: 2_516_582,
+      canRemove: true,
+    });
+  });
+
+  it('S8.4-AC1 Đã tải thì hiện dung lượng và nút xóa: mọi audio không phải Nhập môn của chủ đề là xóa được', () => {
+    const removable = service.selectRemovableAudio(
+      HSK_UNIT_ID,
+      HSK_INDEX,
+      new Set<string>(),
+    );
+
+    expect(new Set(removable)).toEqual(
+      new Set([AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D]),
+    );
+  });
 });
