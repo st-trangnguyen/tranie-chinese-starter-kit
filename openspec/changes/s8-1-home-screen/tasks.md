@@ -172,8 +172,8 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.todayStudy.test.tsx`
 - [x] 9.8 GREEN: `TodayStudyStatus` dòng `goalReached` khi `isGoalReached`; kiểm: test 9.7 pass
 - [x] 9.9 RED: S8.1-AC2 "Vừa đúng mục tiêu" (mức màn) — 900 giây → "Hôm nay: 15 / 15 phút" + "Đã đạt mục tiêu hôm nay"; 890 giây → "14 / 15", không có dòng đạt; kiểm: chạy, nếu pass ngay thì tạm dùng `>` trong `isDailyGoalReached` để thấy fail rồi trả lại
 - [x] 9.10 GREEN: sửa đến khi pass; kiểm: test 9.9 pass
-- [ ] 9.11 RED: S8.1-AC2 "Thời gian học đã lưu bị hỏng" (mức màn) — dòng hôm nay hỏng → Trang chủ hiện bình thường, "Hôm nay: 0 / 15 phút", không `role="alert"`; kiểm: chạy, nếu pass ngay thì tạm cho store throw khi dòng hỏng để thấy fail rồi trả lại
-- [ ] 9.12 GREEN: sửa đến khi pass; kiểm: test 9.11 pass
+- [x] 9.11 RED: S8.1-AC2 "Thời gian học đã lưu bị hỏng" (mức màn) — dòng hôm nay hỏng → Trang chủ hiện bình thường, "Hôm nay: 0 / 15 phút", không `role="alert"`; kiểm: chạy, nếu pass ngay thì tạm cho store throw khi dòng hỏng để thấy fail rồi trả lại
+- [x] 9.12 GREEN: sửa đến khi pass; kiểm: test 9.11 pass
 - [ ] 9.13 RED: S8.1-AC2 "Để Trang chủ mở qua nửa đêm" — mục tiêu 15, hôm nay 1200 giây, mở `/home` lúc 23:59 → "20 / 15"; tiến tới 00:01 (không đổi visibility) → vẫn "20 / 15"; `router.navigate('/learning-paths')` rồi về `/home` → "0 / 15"; kiểm: fail ở bước quay về nếu `useHome` cache kết quả, hoặc tạm thêm interval làm mới để thấy bước "vẫn 20" fail rồi trả lại
 - [ ] 9.14 GREEN: tính lại khi mount, không timer; kiểm: test 9.13 pass
 - [ ] 9.15 RED: S8.1-AC2 "Trang chủ hiện lại sau khi app bị ẩn qua nửa đêm" — như 9.13 nhưng ẩn lúc 23:59, hiện lúc 00:01, không điều hướng → "Hôm nay: 0 / 15 phút", không có "Đã đạt mục tiêu hôm nay"; kiểm: fail (vẫn 20)
@@ -182,8 +182,8 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.todayStudy.test.tsx`
 - [ ] 9.18 GREEN: sửa đến khi pass; kiểm: test 9.17 pass
 - [ ] 9.19 RED: S8.1-AC2 "Màn khác không tính" — mở `/home` 2 phút, `/learning-paths` 3 phút, `/onboarding`, `/characters/人/stroke-order`, `/characters/人/writing-practice` (mỗi màn 1 phút, mock nét theo `setupStrokeOrderRoute`), về `/home` → không đổi (0); kiểm: chạy, nếu pass ngay thì tạm gọi `useStudyTimeRecorder` trong `HomeContainer` để thấy fail rồi trả lại
 - [ ] 9.20 GREEN: sửa đến khi pass; kiểm: test 9.19 pass, mọi file < 300 dòng
-- [ ] 9.21 RED: S8.1-AC2 "Sang ngày mới đếm lại" (mức màn) — dòng hôm qua 1200 giây, không có dòng hôm nay → "Hôm nay: 0 / 15 phút"; kiểm: chạy, nếu pass ngay thì tạm đọc dòng mới nhất thay vì dòng hôm nay để thấy fail rồi trả lại
-- [ ] 9.22 GREEN: sửa đến khi pass; kiểm: test 9.21 pass
+- [x] 9.21 RED: S8.1-AC2 "Sang ngày mới đếm lại" (mức màn) — dòng hôm qua 1200 giây, không có dòng hôm nay → "Hôm nay: 0 / 15 phút"; kiểm: chạy, nếu pass ngay thì tạm đọc dòng mới nhất thay vì dòng hôm nay để thấy fail rồi trả lại
+- [x] 9.22 GREEN: sửa đến khi pass; kiểm: test 9.21 pass
 
 ## 10. Giao diện — `styles/tailwind/` (design D8)
 

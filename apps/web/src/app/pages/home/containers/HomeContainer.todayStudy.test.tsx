@@ -11,6 +11,7 @@ import {
 
 const NOW = new Date(2026, 10, 18, 9, 0, 0);
 const TODAY = toLocalDateKey(NOW);
+const YESTERDAY = toLocalDateKey(new Date(2026, 10, 17, 9, 0, 0));
 const GOAL_REACHED = 'Đã đạt mục tiêu hôm nay';
 
 beforeEach(() => {
@@ -94,6 +95,28 @@ describe('HomeContainer — phút hôm nay', () => {
     expect(
       await screen.findByText('Hôm nay: 14 / 15 phút'),
     ).toBeInTheDocument();
+    expect(screen.queryByText(GOAL_REACHED)).not.toBeInTheDocument();
+  });
+
+  it('S8.1-AC2 Thời gian học đã lưu bị hỏng: should show "Hôm nay: 0 / 15 phút" without an alert when today\'s saved study time is "abc"', async () => {
+    await seedProgress();
+    await seedGoal(15);
+    await seedDailyStat(TODAY, 'abc');
+
+    openRoute('/home');
+
+    expect(await screen.findByText('Hôm nay: 0 / 15 phút')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('S8.1-AC2 Sang ngày mới đếm lại: should show "Hôm nay: 0 / 15 phút" when only yesterday has 1200 seconds', async () => {
+    await seedProgress();
+    await seedGoal(15);
+    await seedDailyStat(YESTERDAY, 1200);
+
+    openRoute('/home');
+
+    expect(await screen.findByText('Hôm nay: 0 / 15 phút')).toBeInTheDocument();
     expect(screen.queryByText(GOAL_REACHED)).not.toBeInTheDocument();
   });
 });
