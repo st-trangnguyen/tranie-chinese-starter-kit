@@ -113,4 +113,34 @@ describe('SettingsContainer — lưu khi đổi', () => {
       within(reopenedGroup).getByRole('radio', { name: '30 phút' }),
     ).not.toBeChecked();
   });
+
+  it('S8.2-AC2 Tốc độ mặc định giữ sau khi mở lại app: chọn "Chậm (0.75x)" → checked, mở lại vẫn "Chậm (0.75x)"', async () => {
+    const { user, unmount } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const group = await screen.findByRole('group', {
+      name: 'Tốc độ audio mặc định',
+    });
+    await user.click(
+      within(group).getByRole('radio', { name: 'Chậm (0.75x)' }),
+    );
+
+    expect(
+      within(group).getByRole('radio', { name: 'Chậm (0.75x)' }),
+    ).toBeChecked();
+
+    unmount();
+    renderWithProviders(<SettingsContainer />, { route: '/settings' });
+
+    const reopenedGroup = await screen.findByRole('group', {
+      name: 'Tốc độ audio mặc định',
+    });
+    expect(
+      within(reopenedGroup).getByRole('radio', { name: 'Chậm (0.75x)' }),
+    ).toBeChecked();
+    expect(
+      within(reopenedGroup).getByRole('radio', { name: 'Bình thường (1x)' }),
+    ).not.toBeChecked();
+  });
 });
