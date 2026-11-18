@@ -1,7 +1,9 @@
 import {
+  AUDIO_SPEED_OPTIONS,
   DAILY_GOAL_OPTIONS,
   DEFAULT_SETTINGS,
   type LESSON_TYPES,
+  type AudioSpeed,
   type DailyGoalMinutes,
   type DailyStat,
   type LessonProgress,
@@ -55,6 +57,11 @@ export class ProgressService {
   /** Rule: mục tiêu mỗi ngày chỉ được là 15, 30 hoặc 60 phút (S1.3 AC1). */
   isValidDailyGoal(minutes: number): minutes is DailyGoalMinutes {
     return DAILY_GOAL_OPTIONS.some((option) => option === minutes);
+  }
+
+  /** Rule: tốc độ audio mặc định chỉ là "Bình thường (1x)" hoặc "Chậm (0.75x)" (S8.2 AC2). */
+  isValidAudioSpeed(value: string): value is AudioSpeed {
+    return AUDIO_SPEED_OPTIONS.some((option) => option === value);
   }
 
   /** Rule: onboarding chỉ hiện cho tới khi người học hoàn thành (S1.3 AC3). */
@@ -188,6 +195,14 @@ export class ProgressService {
       throw new Error('Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.');
     }
     await this.writeSettings({ dailyGoalMinutes: minutes });
+  }
+
+  /** Chỉ ghi khóa tốc độ; lỗi ghi đi thẳng lên hook (design D2, D3). */
+  async changeDefaultAudioSpeed(speed: string): Promise<void> {
+    if (!this.isValidAudioSpeed(speed)) {
+      throw new Error('Tốc độ audio mặc định phải là bình thường hoặc chậm.');
+    }
+    await this.writeSettings({ defaultAudioSpeed: speed });
   }
 
   async getCompletedLessonIds(): Promise<Set<string>> {
