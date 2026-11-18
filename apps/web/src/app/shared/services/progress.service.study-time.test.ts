@@ -16,9 +16,9 @@ describe('ProgressService — splitStudyTimeByDay', () => {
   });
 
   it('S8.1-AC2 Học qua nửa đêm chia cho hai ngày: cùng ngày thì một phần', () => {
-    expect(service.splitStudyTimeByDay(at(18, 8, 0), at(18, 8, 5, 30))).toEqual([
-      { date: '2026-11-18', seconds: 330 },
-    ]);
+    expect(service.splitStudyTimeByDay(at(18, 8, 0), at(18, 8, 5, 30))).toEqual(
+      [{ date: '2026-11-18', seconds: 330 }],
+    );
   });
 
   it('S8.1-AC2 Học qua nửa đêm chia cho hai ngày: đồng hồ lùi hoặc đoạn rỗng thì không tính', () => {
