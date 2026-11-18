@@ -46,3 +46,23 @@ describe('ProgressService — toStudyMinutes', () => {
     expect(service.toStudyMinutes(0)).toBe(0);
   });
 });
+
+describe('ProgressService — isDailyGoalReached', () => {
+  const service = new ProgressService();
+
+  it('S8.1-AC2 Vừa đúng mục tiêu: 15 / 15 phút là đạt', () => {
+    expect(service.isDailyGoalReached(15, 15)).toBe(true);
+  });
+
+  it('S8.1-AC2 Vừa đúng mục tiêu: 14 / 15 phút là chưa đạt', () => {
+    expect(service.isDailyGoalReached(14, 15)).toBe(false);
+  });
+
+  it('S8.1-AC2 Vừa đúng mục tiêu: vượt mục tiêu 45 / 30 phút vẫn là đạt', () => {
+    expect(service.isDailyGoalReached(45, 30)).toBe(true);
+  });
+
+  it('S8.1-AC2 Vừa đúng mục tiêu: 0 / 30 phút là chưa đạt', () => {
+    expect(service.isDailyGoalReached(0, 30)).toBe(false);
+  });
+});
