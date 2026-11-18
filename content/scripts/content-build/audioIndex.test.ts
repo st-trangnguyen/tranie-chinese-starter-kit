@@ -1,4 +1,10 @@
-import type { Lesson, Sentence, Stage, Word } from '@csk/shared';
+import {
+  INTRO_STAGE_ID,
+  type Lesson,
+  type Sentence,
+  type Stage,
+  type Word,
+} from '@csk/shared';
 
 import { buildAudioIndex, lessonAudioPaths } from './audioIndex';
 
@@ -170,5 +176,61 @@ describe('buildAudioIndex', () => {
       [AUDIO_BA]: 0,
       [AUDIO_NI]: 9_000,
     });
+  });
+});
+
+describe('buildAudioIndex precached', () => {
+  const LESSONS: Lesson[] = [
+    lesson('intro-01', [
+      { id: 'e1', kind: 'tone-choice', wordId: '骂' },
+      { id: 'e2', kind: 'tone-choice', wordId: '八' },
+    ]),
+    lesson('intro-02', [
+      { id: 'e1', kind: 'pinyin-type', wordId: '妈' },
+      { id: 'e2', kind: 'pinyin-type', wordId: '八' },
+    ]),
+    lesson('hsk-01', [
+      { id: 'e1', kind: 'tone-choice', wordId: '妈' },
+      { id: 'e2', kind: 'pinyin-type', wordId: '你' },
+      { id: 'e3', kind: 'speak', sentenceId: 's1' },
+    ]),
+  ];
+
+  const STAGES: Stage[] = [
+    {
+      id: 'hsk1',
+      title: 'HSK 1',
+      units: [{ id: 'u-greet', title: 'Chào hỏi', lessonIds: ['hsk-01'] }],
+    },
+    {
+      id: INTRO_STAGE_ID,
+      title: 'Nhập môn',
+      units: [
+        { id: 'u-tones', title: 'Thanh điệu', lessonIds: ['intro-01'] },
+        { id: 'u-pinyin', title: 'Pinyin', lessonIds: ['intro-02'] },
+      ],
+    },
+  ];
+
+  const build = (): ReturnType<typeof buildAudioIndex> =>
+    buildAudioIndex(STAGES, LESSONS, wordById, sentenceById, () => 10_000);
+
+  it('S8.4-AC1 Mới cài app thì audio HSK chưa có trên máy: precached chỉ gồm audio các nhóm Nhập môn, không trùng, đã sort', () => {
+    const index = build();
+
+    expect(index.precached).toEqual([AUDIO_BA, AUDIO_MA, AUDIO_MA4]);
+  });
+
+  it('S8.4-AC1 Mới cài app thì audio HSK chưa có trên máy: audio chỉ thuộc HSK không được lưu sẵn', () => {
+    const index = build();
+
+    expect(index.units['u-greet']).toEqual([
+      AUDIO_MA,
+      AUDIO_NI,
+      AUDIO_SENTENCE,
+    ]);
+    expect(index.precached).toContain(AUDIO_MA);
+    expect(index.precached).not.toContain(AUDIO_NI);
+    expect(index.precached).not.toContain(AUDIO_SENTENCE);
   });
 });
