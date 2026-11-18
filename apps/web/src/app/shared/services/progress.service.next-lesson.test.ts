@@ -30,4 +30,8 @@ describe('ProgressService — findNextLessonId', () => {
   it('S8.1-AC1 Chưa học bài nào: bài tiếp theo là bài đầu tiên của lộ trình', () => {
     expect(nextLessonOf([])).toBe('l1');
   });
+
+  it('S8.1-AC1 Đã xong vài bài: bài tiếp theo là bài kế tiếp theo thứ tự lộ trình', () => {
+    expect(nextLessonOf(['l1', 'l2'])).toBe('l3');
+  });
 });

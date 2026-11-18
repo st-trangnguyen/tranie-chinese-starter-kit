@@ -37,8 +37,8 @@ Test: `apps/web/src/app/shared/utils/date.utils.test.ts`, `apps/web/src/app/shar
 - [x] 2.6 GREEN: `isDailyGoalReached` (`>=`, `Rule:`); kiểm: test 2.5 pass
 - [x] 2.7 RED: S8.1-AC1 "Chưa học bài nào" (Phần 2) — lộ trình 2 giai đoạn × 2 nhóm × 2 bài, chưa xong bài nào: `findNextLessonId(stages, deriveLessonStatuses(stages, ∅))` = bài đầu; kiểm: fail vì skeleton trả `undefined`
 - [x] 2.8 GREEN: `findNextLessonId` (bài `'open'` đầu tiên theo `listLessonIdsInOrder`, `Rule:`); kiểm: test 2.7 pass
-- [ ] 2.9 RED: S8.1-AC1 "Đã xong vài bài thì hiện bài kế tiếp" (Phần 2) — xong bài 1, 2 → bài 3; kiểm: chạy, nếu pass ngay thì tạm trả bài đầu tiên chưa `completed` bỏ qua trạng thái để thấy fail ở 2.13 hoặc đảo điều kiện `'open'` để thấy fail rồi trả lại
-- [ ] 2.10 GREEN: sửa đến khi pass; kiểm: test 2.9 pass
+- [x] 2.9 RED: S8.1-AC1 "Đã xong vài bài thì hiện bài kế tiếp" (Phần 2) — xong bài 1, 2 → bài 3; kiểm: chạy, nếu pass ngay thì tạm trả bài đầu tiên chưa `completed` bỏ qua trạng thái để thấy fail ở 2.13 hoặc đảo điều kiện `'open'` để thấy fail rồi trả lại
+- [x] 2.10 GREEN: sửa đến khi pass; kiểm: test 2.9 pass
 - [ ] 2.11 RED: S8.1-AC1 "Bài kế tiếp ở nhóm hoặc giai đoạn sau" (Phần 2) — xong mọi bài nhóm 1 → bài đầu nhóm 2; xong mọi bài giai đoạn 1 → bài đầu giai đoạn 2; kiểm: như 2.9
 - [ ] 2.12 GREEN: sửa đến khi pass; kiểm: test 2.11 pass
 - [ ] 2.13 RED: S8.1-AC1 "Còn bài đang mở ở trước một bài đã xong" (Phần 2) — chỉ xong một bài ở nhóm 3 → bài đầu lộ trình (không phải bài ngay sau bài đã xong, dù bài đó cũng `'open'`); kiểm: chạy, nếu pass ngay thì tạm duyệt ngược từ bài đã xong cuối để thấy fail rồi trả lại
