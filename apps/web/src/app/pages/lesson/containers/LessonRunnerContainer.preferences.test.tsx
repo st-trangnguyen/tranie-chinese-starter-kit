@@ -1,192 +1,26 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { I18nextProvider } from 'react-i18next';
-import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
-import { render } from '@testing-library/react';
-import { DEFAULT_SETTINGS, type Settings, type Word } from '@csk/shared';
+import { describe, expect, it, vi } from 'vitest';
 
 import { PLAYBACK_RATES } from '@core/constants/audio.constants';
-import { createDatabase } from '@core/helpers/db.helper';
+import { progressStore } from '@core/services/progress-store.service';
 import {
-  DexieProgressStore,
-  progressStore,
-} from '@core/services/progress-store.service';
-import { ProgressService } from '@shared/services/progress.service';
-import { mockContentFetch, sentenceOf } from '@test/mocks/content-fetch';
-import {
-  fakeAudio,
-  installRecordingEnvironment,
-  restoreRecordingEnvironment,
-} from '@test/record-compare.helpers';
-import testI18n from '@test/i18n';
-import { renderWithProviders, screen, userEvent, waitFor } from '@test/render';
-import LessonRunnerContainer from './LessonRunnerContainer';
+  BA,
+  NIHAO,
+  clearDatabase,
+  expectNormalPlayback,
+  expectSlowPlayback,
+  renderRunner,
+  renderTwoLessons,
+  seedCursor,
+  seedSettings,
+  serveSpeakLesson,
+  setupLessonPreferences,
+  turnOffSlow,
+  turnOnSlow,
+} from '@test/lesson-preferences.helpers';
+import { fakeAudio } from '@test/record-compare.helpers';
+import { screen, waitFor } from '@test/render';
 
-const BA: Word = {
-  id: 'w-ba',
-  hanzi: '八',
-  pinyin: 'bā',
-  vi: ['tám'],
-  viReviewed: true,
-  hsk: 1,
-  audio: 'audio/aaaaaaaaaaaaaaa1.mp3',
-};
-
-const LESSON = {
-  id: 'intro-preferences',
-  type: 'lesson',
-  title: 'Nghe theo Cài đặt',
-  exercises: [
-    { id: 'e1', kind: 'tone-choice', wordId: BA.id },
-    { id: 'e2', kind: 'tone-choice', wordId: BA.id },
-  ],
-};
-
-const NIHAO = sentenceOf('s-nihao');
-
-/** Bài có câu "nói" 你好 ở câu 1. */
-const SPEAK_LESSON = {
-  id: 'intro-pinyin',
-  type: 'lesson',
-  title: 'Nói theo Cài đặt',
-  exercises: [
-    { id: 'e1', kind: 'speak', sentenceId: NIHAO.id },
-    { id: 'e2', kind: 'tone-choice', wordId: BA.id },
-  ],
-};
-
-/** Phục vụ SPEAK_LESSON cho mọi bài (thay cho LESSON mặc định). */
-const serveSpeakLesson = (): void => {
-  vi.spyOn(globalThis, 'fetch').mockImplementation(
-    mockContentFetch(
-      async (input) =>
-        /\/content\/lessons\/.+\.json$/.test(String(input))
-          ? Response.json(SPEAK_LESSON)
-          : new Response('', { status: 404 }),
-      { words: [BA] },
-    ),
-  );
-};
-
-/** Ghi settings vào IndexedDB thật (fake-indexeddb) của app; xoá dữ liệu cũ trước. */
-const seedSettings = async (patch: Partial<Settings>): Promise<void> => {
-  const db = createDatabase();
-  await db.settings.clear();
-  await db.lessonProgress.clear();
-  await new DexieProgressStore(db).saveSettings({
-    ...DEFAULT_SETTINGS,
-    ...patch,
-  });
-  db.close();
-};
-
-/** Ghi vị trí đang học dở cho bài đang mở (route dùng nguyên văn ':lessonId'). */
-const seedCursor = async (cursor: number): Promise<void> => {
-  const db = createDatabase();
-  await db.lessonProgress.put({
-    lessonId: ':lessonId',
-    status: 'in-progress',
-    cursor,
-  });
-  db.close();
-};
-
-/** Tắt công tắc "Nghe chậm" đang bật sẵn theo Cài đặt. */
-const turnOffSlow = async (
-  user: ReturnType<typeof userEvent.setup>,
-): Promise<void> => {
-  const toggle = await screen.findByRole('switch', { name: 'Nghe chậm' });
-  expect(toggle).toHaveAttribute('aria-checked', 'true');
-  await user.click(toggle);
-  expect(toggle).toHaveAttribute('aria-checked', 'false');
-};
-
-/** Bật công tắc "Nghe chậm" đang tắt theo Cài đặt. */
-const turnOnSlow = async (
-  user: ReturnType<typeof userEvent.setup>,
-): Promise<void> => {
-  const toggle = await screen.findByRole('switch', { name: 'Nghe chậm' });
-  expect(toggle).toHaveAttribute('aria-checked', 'false');
-  await user.click(toggle);
-  expect(toggle).toHaveAttribute('aria-checked', 'true');
-};
-
-/** Công tắc bật và "Nghe" phát 0.75x. */
-const expectSlowPlayback = async (
-  user: ReturnType<typeof userEvent.setup>,
-): Promise<void> => {
-  expect(
-    await screen.findByRole('switch', { name: 'Nghe chậm' }),
-  ).toHaveAttribute('aria-checked', 'true');
-  await user.click(screen.getByRole('button', { name: 'Nghe' }));
-  expect(fakeAudio.playbackRate).toBe(PLAYBACK_RATES.slow);
-};
-
-/** Xoá settings và tiến độ: IndexedDB trống như lần đầu mở app. */
-const clearDatabase = async (): Promise<void> => {
-  const db = createDatabase();
-  await db.settings.clear();
-  await db.lessonProgress.clear();
-  db.close();
-};
-
-/** Công tắc tắt và "Nghe" phát 1x (đặt sẵn tốc độ khác để không pass nhờ giá trị cũ). */
-const expectNormalPlayback = async (
-  user: ReturnType<typeof userEvent.setup>,
-): Promise<void> => {
-  expect(
-    await screen.findByRole('switch', { name: 'Nghe chậm' }),
-  ).toHaveAttribute('aria-checked', 'false');
-  fakeAudio.playbackRate = PLAYBACK_RATES.slow;
-  await user.click(screen.getByRole('button', { name: 'Nghe' }));
-  expect(fakeAudio.src).toBe(`/${BA.audio}`);
-  expect(fakeAudio.playbackRate).toBe(PLAYBACK_RATES.normal);
-};
-
-const renderRunner = () =>
-  renderWithProviders(<LessonRunnerContainer />, {
-    route: '/lessons/:lessonId',
-  });
-
-/** Hai bài trên cùng route `/lessons/:lessonId`, có liên kết "Bài khác" sang bài l2. */
-const renderTwoLessons = (): ReturnType<typeof userEvent.setup> => {
-  const OpenLessons = () => (
-    <>
-      <Link to="/lessons/l2">Bài khác</Link>
-      <LessonRunnerContainer />
-    </>
-  );
-  const user = userEvent.setup();
-  render(
-    <I18nextProvider i18n={testI18n}>
-      <MemoryRouter initialEntries={['/lessons/l1']}>
-        <Routes>
-          <Route path="/lessons/:lessonId" element={<OpenLessons />} />
-        </Routes>
-      </MemoryRouter>
-    </I18nextProvider>,
-  );
-  return user;
-};
-
-beforeEach(() => {
-  installRecordingEnvironment();
-  fakeAudio.src = '';
-  fakeAudio.playbackRate = 1;
-  vi.spyOn(globalThis, 'fetch').mockImplementation(
-    mockContentFetch(
-      async (input) =>
-        /\/content\/lessons\/.+\.json$/.test(String(input))
-          ? Response.json(LESSON)
-          : new Response('', { status: 404 }),
-      { words: [BA] },
-    ),
-  );
-});
-
-afterEach(() => {
-  restoreRecordingEnvironment();
-  vi.restoreAllMocks();
-});
+setupLessonPreferences();
 
 describe('LessonRunnerContainer — theo Cài đặt của người học', () => {
   it('S8.2-AC2 Chọn Chậm thì mở bài là phát chậm: công tắc "Nghe chậm" bật ở câu 1 và "Nghe" phát 0.75x', async () => {
@@ -322,52 +156,6 @@ describe('LessonRunnerContainer — theo Cài đặt của người học', () =
 
       expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
       await expectNormalPlayback(user);
-    });
-  });
-
-  describe('S8.2-AC3 Tắt pinyin thì câu nói không hiện pinyin', () => {
-    it('S8.2-AC3 Tắt pinyin thì câu nói không hiện pinyin: Cài đặt tắt pinyin thì câu "nói" 你好 hiện chữ và nghĩa, không "nǐ hǎo"', async () => {
-      await seedSettings({ isPinyinVisible: false });
-      serveSpeakLesson();
-      renderRunner();
-
-      expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
-      expect(await screen.findByText(NIHAO.hanzi)).toBeInTheDocument();
-      expect(screen.getByText(NIHAO.vi)).toBeInTheDocument();
-      expect(screen.queryByText(NIHAO.pinyin)).not.toBeInTheDocument();
-    });
-  });
-
-  describe('S8.2-AC3 Bật lại pinyin thì câu nói hiện pinyin', () => {
-    it('S8.2-AC3 Bật lại pinyin thì câu nói hiện pinyin: Cài đặt tắt rồi bật lại pinyin thì câu "nói" 你好 hiện chữ, "nǐ hǎo" và nghĩa', async () => {
-      await seedSettings({ isPinyinVisible: false });
-      await new ProgressService().changePinyinVisibility(true);
-      serveSpeakLesson();
-      renderRunner();
-
-      expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
-      expect(await screen.findByText(NIHAO.hanzi)).toBeInTheDocument();
-      expect(screen.getByText(NIHAO.pinyin)).toBeInTheDocument();
-      expect(screen.getByText(NIHAO.vi)).toBeInTheDocument();
-    });
-  });
-
-  describe('S8.2-AC3 Tắt pinyin vẫn hiện pinyin trong giải thích khi sai', () => {
-    it('S8.2-AC3 Tắt pinyin vẫn hiện pinyin trong giải thích khi sai: Cài đặt tắt pinyin, câu "nói" 你好 bấm "Chưa đúng" thì giải thích hiện chữ, "nǐ hǎo" và nghĩa', async () => {
-      await seedSettings({ isPinyinVisible: false });
-      serveSpeakLesson();
-      const { user } = renderRunner();
-
-      expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
-      expect(screen.queryByText(NIHAO.pinyin)).not.toBeInTheDocument();
-      await user.click(
-        await screen.findByRole('button', { name: 'Chưa đúng' }),
-      );
-
-      const explanation = await screen.findByRole('status');
-      expect(explanation).toHaveTextContent(NIHAO.hanzi);
-      expect(explanation).toHaveTextContent(NIHAO.pinyin);
-      expect(explanation).toHaveTextContent(NIHAO.vi);
     });
   });
   describe('S8.2-AC2 Không đọc được cài đặt thì bài vẫn mở với tốc độ thường và hiện pinyin', () => {
