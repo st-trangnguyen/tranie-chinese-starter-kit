@@ -131,9 +131,11 @@ declare global {
 }
 
 /**
- * Bọc `IDBDatabase.prototype.transaction`: phạm vi có bảng `settings` thì throw `UnknownError`
- * khi cờ trong `sessionStorage` bật (`readwrite` cho ghi, `readonly` cho đọc). Đọc cờ ở mỗi lần
- * gọi nên bật/tắt cờ có hiệu lực ngay. Chạy cả trong trang hiện tại lẫn mỗi lần tải lại.
+ * Bọc các method đọc/ghi của `IDBObjectStore.prototype`: thao tác trên bảng `settings` thì throw
+ * `UnknownError` khi cờ trong `sessionStorage` bật (put/add/delete/clear cho ghi; get/getAll/
+ * openCursor/count… cho đọc). Bọc ở mức object store vì Dexie có thể ghi trong transaction đã mở
+ * sẵn, không qua `IDBDatabase.transaction` (bọc ở đó thì lần ghi vẫn lọt). Đọc cờ ở mỗi lần gọi nên
+ * bật/tắt cờ có hiệu lực ngay. Chạy cả trong trang hiện tại lẫn mỗi lần tải lại.
  */
 const installSettingsGuard = ({
   writesFlag,
@@ -146,27 +148,52 @@ const installSettingsGuard = ({
     return;
   }
   window.cskSettingsGuardInstalled = true;
-  const originalTransaction = IDBDatabase.prototype.transaction;
-  IDBDatabase.prototype.transaction = function transaction(
-    this: IDBDatabase,
-    storeNames: string | string[],
-    mode?: IDBTransactionMode,
-    options?: IDBTransactionOptions,
-  ): IDBTransaction {
-    const names =
-      typeof storeNames === 'string' ? [storeNames] : Array.from(storeNames);
-    if (names.includes('settings')) {
-      const isWrite = mode === 'readwrite';
-      const flag = isWrite ? writesFlag : readsFlag;
-      if (sessionStorage.getItem(flag) === 'on') {
-        throw new DOMException(
-          isWrite ? 'E2E: ghi settings lỗi' : 'E2E: đọc settings lỗi',
-          'UnknownError',
-        );
+  const guardMethods = (
+    methodNames: readonly string[],
+    flag: string,
+    message: string,
+  ): void => {
+    methodNames.forEach((methodName) => {
+      const original: unknown = Reflect.get(
+        IDBObjectStore.prototype,
+        methodName,
+      );
+      if (typeof original !== 'function') {
+        return;
       }
-    }
-    return originalTransaction.call(this, storeNames, mode, options);
+      Reflect.set(
+        IDBObjectStore.prototype,
+        methodName,
+        function guarded(this: IDBObjectStore, ...args: unknown[]): unknown {
+          if (
+            this.name === 'settings' &&
+            sessionStorage.getItem(flag) === 'on'
+          ) {
+            throw new DOMException(message, 'UnknownError');
+          }
+          return Reflect.apply(original, this, args);
+        },
+      );
+    });
   };
+  guardMethods(
+    ['put', 'add', 'delete', 'clear'],
+    writesFlag,
+    'E2E: ghi settings lỗi',
+  );
+  guardMethods(
+    [
+      'get',
+      'getAll',
+      'getAllKeys',
+      'getKey',
+      'openCursor',
+      'openKeyCursor',
+      'count',
+    ],
+    readsFlag,
+    'E2E: đọc settings lỗi',
+  );
 };
 
 const setGuardFlag = async (
