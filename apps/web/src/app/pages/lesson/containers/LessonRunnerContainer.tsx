@@ -10,6 +10,7 @@ import { AudioSpeedProvider } from '@shared/contexts/AudioSpeedContext';
 import { RecordingModeProvider } from '@shared/contexts/RecordingModeContext';
 import { LessonRunner } from '../components/LessonRunner';
 import { LessonSummary } from '../components/LessonSummary';
+import { useLessonPreferences } from '../hooks/useLessonPreferences';
 import { useLessonRunner } from '../hooks/useLessonRunner';
 import { useLessonStrokeWrite } from '../hooks/useLessonStrokeWrite';
 import { useStudyTimeRecorder } from '../hooks/useStudyTimeRecorder';
@@ -46,6 +47,7 @@ const LessonRunnerContainer = ({
     skipExercise,
     restart,
   } = useLessonRunner(lessonId, { placementUnitId });
+  const preferences = useLessonPreferences(lessonId);
   const [restartedLessonId, setRestartedLessonId] = useState<string | null>(
     null,
   );
@@ -54,6 +56,7 @@ const LessonRunnerContainer = ({
     setRestartedLessonId(lessonId);
     restart();
   };
+  const isRunning = session !== null && session.phase !== 'finished';
   const exercise = lesson?.exercises[session?.currentIndex ?? 0];
   const content = exercise ? contents.get(exercise.id) : undefined;
   const strokeWriteWord =
@@ -72,7 +75,9 @@ const LessonRunnerContainer = ({
           {t('loadError')}
         </p>
       )}
-      {!lesson && !hasError && <p role="status">{t('loading')}</p>}
+      {!hasError && (!lesson || (isRunning && preferences === null)) && (
+        <p role="status">{t('loading')}</p>
+      )}
       {summary && (
         <LessonSummary
           summary={summary}
@@ -80,8 +85,11 @@ const LessonRunnerContainer = ({
           onRestart={handleRestart}
         />
       )}
-      {session && session.phase !== 'finished' && exercise && content && (
-        <AudioSpeedProvider key={lessonId}>
+      {isRunning && exercise && content && preferences && (
+        <AudioSpeedProvider
+          key={lessonId}
+          initialIsSlow={preferences.isSlowAudio}
+        >
           <RecordingModeProvider key={lessonId}>
             <LessonRunner
               view={{
