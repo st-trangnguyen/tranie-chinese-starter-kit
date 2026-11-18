@@ -35,4 +35,20 @@ describe('SettingsContainer — giá trị hiện tại', () => {
       within(group).getByRole('radio', { name: '60 phút' }),
     ).not.toBeChecked();
   });
+
+  it('S8.2-AC2 Mặc định ban đầu là tốc độ thường: hai lựa chọn, "Bình thường (1x)" đang chọn', async () => {
+    renderWithProviders(<SettingsContainer />, { route: '/settings' });
+
+    const group = await screen.findByRole('group', {
+      name: 'Tốc độ audio mặc định',
+    });
+    const radios = within(group).getAllByRole('radio');
+    expect(radios).toHaveLength(2);
+    expect(
+      within(group).getByRole('radio', { name: 'Bình thường (1x)' }),
+    ).toBeChecked();
+    expect(
+      within(group).getByRole('radio', { name: 'Chậm (0.75x)' }),
+    ).not.toBeChecked();
+  });
 });

@@ -125,8 +125,8 @@ DB mặc định fake-indexeddb.
 
 - [x] 7.1 RED: S8.2-AC1 "Hiện mục tiêu đã chọn ở onboarding" — DB mục tiêu 30 (ghi qua `completeOnboarding(30)`): nhóm "Mục tiêu mỗi ngày" có đúng ba radio "15 phút", "30 phút", "60 phút", "30 phút" checked; kiểm: chạy, nếu pass ngay nhờ 6.2 thì tạm cho hook bỏ qua giá trị đọc được (luôn mặc định) để thấy fail rồi trả lại
 - [x] 7.2 GREEN: sửa đến khi pass; kiểm: test 7.1 pass
-- [ ] 7.3 RED: S8.2-AC2 "Mặc định ban đầu là tốc độ thường" — DB trống: nhóm "Tốc độ audio mặc định" có hai radio "Bình thường (1x)", "Chậm (0.75x)", "Bình thường (1x)" checked; kiểm: như 7.1
-- [ ] 7.4 GREEN: sửa đến khi pass; kiểm: test 7.3 pass
+- [x] 7.3 RED: S8.2-AC2 "Mặc định ban đầu là tốc độ thường" — DB trống: nhóm "Tốc độ audio mặc định" có hai radio "Bình thường (1x)", "Chậm (0.75x)", "Bình thường (1x)" checked; kiểm: như 7.1
+- [x] 7.4 GREEN: sửa đến khi pass; kiểm: test 7.3 pass
 - [ ] 7.5 RED: S8.2-AC3 "Mặc định hiện pinyin" — DB trống: `getByRole('switch', { name: 'Hiện pinyin' })` checked và chữ "Bật" nhìn thấy trong nhóm; tắt → chữ "Tắt"; kiểm: fail nếu chưa có chữ trạng thái
 - [ ] 7.6 GREEN: `PinyinVisibilitySetting` chữ "Bật"/"Tắt" theo giá trị; kiểm: test 7.5 pass
 - [ ] 7.7 RED: S8.2-AC1 "Đổi mục tiêu thì giữ sau khi mở lại app" — chọn "60 phút" → checked ngay; không có nút "Lưu"; `unmount()` rồi render lại → "60 phút" checked; kiểm: fail vì `changeDailyGoal` của hook chưa làm (skeleton no-op)
