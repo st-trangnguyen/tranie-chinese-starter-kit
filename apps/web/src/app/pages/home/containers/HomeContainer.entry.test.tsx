@@ -3,8 +3,12 @@ import { DEFAULT_SETTINGS } from '@csk/shared';
 import { createDatabase } from '@core/helpers/db.helper';
 import { DexieProgressStore } from '@core/services/progress-store.service';
 import { mockContentFetch } from '@test/mocks/content-fetch';
-import { screen, waitFor } from '@test/render';
-import { openRoute, stubReducedMotion } from '@test/stroke-order-route';
+import { screen, userEvent, waitFor } from '@test/render';
+import {
+  openRoute,
+  stubReducedMotion,
+  type TestRouter,
+} from '@test/stroke-order-route';
 
 const FIRST_LESSON_TITLE = 'Bài mở đầu';
 
@@ -34,6 +38,32 @@ const seedSettings = async (hasCompletedOnboarding: boolean): Promise<void> => {
     hasCompletedOnboarding,
   });
   db.close();
+};
+
+/** Giả trình duyệt đang chạy app như PWA đã cài: chỉ query display-mode standalone khớp. */
+const stubStandalone = (): void => {
+  vi.stubGlobal(
+    'matchMedia',
+    vi.fn((query: string) => ({
+      matches: query === '(display-mode: standalone)',
+      media: query,
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => true,
+    })),
+  );
+};
+
+/** Ghi lại mọi pathname router đi qua (kể cả điểm xuất phát). */
+const trackPathnames = (router: TestRouter): string[] => {
+  const pathnames = [router.state.location.pathname];
+  router.subscribe((state) => {
+    pathnames.push(state.location.pathname);
+  });
+  return pathnames;
 };
 
 afterEach(() => {
@@ -111,4 +141,51 @@ describe('Mở app — Trang chủ', () => {
       screen.queryByRole('heading', { level: 1, name: 'Trang chủ' }),
     ).not.toBeInTheDocument();
   });
+
+  it.each([
+    {
+      branch: 'chưa cài: bấm "Vào học" ở bước cài app',
+      isStandalone: false,
+      finishLabel: 'Vào học',
+    },
+    {
+      branch: 'đã cài: bấm "Tiếp tục" ở bước mục tiêu',
+      isStandalone: true,
+      finishLabel: 'Tiếp tục',
+    },
+  ])(
+    'S8.1-AC1 Vừa xong onboarding vẫn vào bài 1 ($branch): should go to /lessons/intro-01 without passing /home',
+    async ({ isStandalone, finishLabel }) => {
+      await seedSettings(false);
+      serveContent();
+      if (isStandalone) {
+        stubStandalone();
+      } else {
+        stubReducedMotion(false);
+      }
+      const user = userEvent.setup();
+
+      const { router } = openRoute('/');
+      const pathnames = trackPathnames(router);
+
+      await user.click(await screen.findByRole('button', { name: 'Bắt đầu' }));
+      // Bước mục tiêu: đã cài thì "Tiếp tục" là nút cuối; chưa cài thì còn bước cài app.
+      await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+      if (!isStandalone) {
+        await screen.findByRole('heading', {
+          name: 'Cài app lên màn hình chính',
+        });
+        await user.click(screen.getByRole('button', { name: finishLabel }));
+      }
+
+      await waitFor(() =>
+        expect(router.state.location.pathname).toBe('/lessons/intro-01'),
+      );
+      expect(await screen.findByText(FIRST_LESSON_TITLE)).toBeInTheDocument();
+      expect(pathnames).not.toContain('/home');
+      expect(
+        screen.queryByRole('heading', { level: 1, name: 'Trang chủ' }),
+      ).not.toBeInTheDocument();
+    },
+  );
 });

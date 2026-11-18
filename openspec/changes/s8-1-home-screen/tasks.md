@@ -122,8 +122,8 @@ IndexedDB thật (fake-indexeddb), `mockContentFetch`.
 - [x] 7.4 GREEN: `OnboardingContainer` nhánh đã xong → `ROUTE_PATHS.home`; sửa kỳ vọng `OnboardingContainer.test.tsx` "never shows onboarding again once completed" sang `/home`; kiểm: test 7.3 pass
 - [x] 7.5 RED: S8.1-AC1 "Tải lại ở màn khác thì vẫn ở màn đó" — đã xong onboarding, mở thẳng `/learning-paths` và `/lessons/intro-01` → ở nguyên; kiểm: chạy, nếu pass ngay thì tạm cho `HomeContainer`/gate bắt mọi route để thấy fail rồi trả lại
 - [x] 7.6 GREEN: sửa đến khi pass; kiểm: test 7.5 pass
-- [ ] 7.7 RED: S8.1-AC1 "Vừa xong onboarding vẫn vào bài 1" — chưa onboarding, mở `/`, làm hết bước, bấm nút bước cuối (cả nhánh đã cài, `useInstallPrompt` giả `isStandalone`) → `/lessons/intro-01`, không qua `/home`; kiểm: chạy, nếu pass ngay thì tạm đổi `goToFirstLesson` sang `/home` để thấy fail rồi trả lại
-- [ ] 7.8 GREEN: giữ `goToFirstLesson`; kiểm: test 7.7 pass
+- [x] 7.7 RED: S8.1-AC1 "Vừa xong onboarding vẫn vào bài 1" — chưa onboarding, mở `/`, làm hết bước, bấm nút bước cuối (cả nhánh đã cài, `useInstallPrompt` giả `isStandalone`) → `/lessons/intro-01`, không qua `/home`; kiểm: chạy, nếu pass ngay thì tạm đổi `goToFirstLesson` sang `/home` để thấy fail rồi trả lại
+- [x] 7.8 GREEN: giữ `goToFirstLesson`; kiểm: test 7.7 pass
 - [ ] 7.9 RED: S8.1-AC1 "Chưa xong onboarding thì vẫn vào onboarding" — DB trống, mở `/` → `/onboarding`, không có heading "Trang chủ"; kiểm: chạy, nếu pass ngay thì tạm cho `StartGate` luôn về `/home` để thấy fail rồi trả lại
 - [ ] 7.10 GREEN: sửa đến khi pass; kiểm: test 7.9 pass
 
