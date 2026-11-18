@@ -104,7 +104,7 @@ Test: `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.studyTime.
 Test: `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.homeLink.test.tsx`,
 `apps/web/src/app/pages/learning-path/containers/LearningPathContainer.homeLink.test.tsx` — `renderWithProviders` + `LocationProbe`.
 
-- [ ] 6.1 RED: S8.1-AC1 "Từ màn tổng kết về Trang chủ" — làm xong bài thường và bài `test`: màn tổng kết có link "Trang chủ"; bấm → vị trí `/home`; kiểm: fail vì chưa có link
+- [x] 6.1 RED: S8.1-AC1 "Từ màn tổng kết về Trang chủ" — làm xong bài thường và bài `test`: màn tổng kết có link "Trang chủ"; bấm → vị trí `/home`; kiểm: fail vì chưa có link
 - [ ] 6.2 GREEN: `ROUTE_PATHS.home = '/home'`; `<Link>` trong `LessonSummary` (key `lesson:summary.home`); kiểm: test 6.1 pass
 - [ ] 6.3 RED: S8.1-AC1 "Màn bài khi đang làm câu không có liên kết Trang chủ" — ở câu 1 và khi đang xem kết quả câu: không có link "Trang chủ"; kiểm: chạy, nếu pass ngay thì tạm đặt link ở `LessonRunnerContainer` ngoài nhánh tổng kết để thấy fail rồi trả lại
 - [ ] 6.4 GREEN: link chỉ ở `LessonSummary`; kiểm: test 6.3 pass
