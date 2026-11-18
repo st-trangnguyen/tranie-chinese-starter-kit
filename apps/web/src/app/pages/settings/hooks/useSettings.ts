@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { LearningPreferences } from '@shared/models/settings.model';
 import { ProgressService } from '@shared/services/progress.service';
@@ -6,6 +6,7 @@ import { ProgressService } from '@shared/services/progress.service';
 export interface SettingsState {
   /** null khi đang đọc. */
   preferences: LearningPreferences | null;
+  changePinyinVisibility: (isVisible: boolean) => void;
 }
 
 export const useSettings = (): SettingsState => {
@@ -27,5 +28,24 @@ export const useSettings = (): SettingsState => {
     };
   }, [service]);
 
-  return { preferences };
+  // Đổi một field (design D4): cập nhật giá trị hiển thị ngay (lạc quan).
+  // Lưu qua service và xử lý lỗi bổ sung ở task 7.8–7.12, 8.x.
+  const applyChange = useCallback(
+    <K extends keyof LearningPreferences>(
+      key: K,
+      value: LearningPreferences[K],
+    ) => {
+      setPreferences((prev) =>
+        prev === null ? prev : { ...prev, [key]: value },
+      );
+    },
+    [],
+  );
+
+  const changePinyinVisibility = useCallback(
+    (isVisible: boolean) => applyChange('isPinyinVisible', isVisible),
+    [applyChange],
+  );
+
+  return { preferences, changePinyinVisibility };
 };

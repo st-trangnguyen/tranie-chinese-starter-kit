@@ -54,6 +54,10 @@
     @apply outline-2 outline-offset-2 outline-accent;
   }
 
+  .settings-switch-state {
+    @apply text-body font-semibold text-fg;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .settings-back-link,
     .settings-option {
