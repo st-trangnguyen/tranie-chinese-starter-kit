@@ -142,6 +142,27 @@ describe('Mở app — Trang chủ', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('S8.1-AC1 Chưa xong onboarding thì vẫn vào onboarding: should go from / to /onboarding without the "Trang chủ" heading', async () => {
+    // DB trống: chưa có bản ghi settings nào.
+    const db = createDatabase();
+    await db.settings.clear();
+    await db.lessonProgress.clear();
+    db.close();
+    serveContent();
+    stubReducedMotion(false);
+
+    const { router } = openRoute('/');
+
+    await waitFor(() => expect(router.state.location.pathname).not.toBe('/'));
+    expect(router.state.location.pathname).toBe('/onboarding');
+    expect(
+      await screen.findByRole('button', { name: 'Bắt đầu' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { level: 1, name: 'Trang chủ' }),
+    ).not.toBeInTheDocument();
+  });
+
   it.each([
     {
       branch: 'chưa cài: bấm "Vào học" ở bước cài app',

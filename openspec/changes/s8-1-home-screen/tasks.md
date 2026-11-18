@@ -124,8 +124,8 @@ IndexedDB thật (fake-indexeddb), `mockContentFetch`.
 - [x] 7.6 GREEN: sửa đến khi pass; kiểm: test 7.5 pass
 - [x] 7.7 RED: S8.1-AC1 "Vừa xong onboarding vẫn vào bài 1" — chưa onboarding, mở `/`, làm hết bước, bấm nút bước cuối (cả nhánh đã cài, `useInstallPrompt` giả `isStandalone`) → `/lessons/intro-01`, không qua `/home`; kiểm: chạy, nếu pass ngay thì tạm đổi `goToFirstLesson` sang `/home` để thấy fail rồi trả lại
 - [x] 7.8 GREEN: giữ `goToFirstLesson`; kiểm: test 7.7 pass
-- [ ] 7.9 RED: S8.1-AC1 "Chưa xong onboarding thì vẫn vào onboarding" — DB trống, mở `/` → `/onboarding`, không có heading "Trang chủ"; kiểm: chạy, nếu pass ngay thì tạm cho `StartGate` luôn về `/home` để thấy fail rồi trả lại
-- [ ] 7.10 GREEN: sửa đến khi pass; kiểm: test 7.9 pass
+- [x] 7.9 RED: S8.1-AC1 "Chưa xong onboarding thì vẫn vào onboarding" — DB trống, mở `/` → `/onboarding`, không có heading "Trang chủ"; kiểm: chạy, nếu pass ngay thì tạm cho `StartGate` luôn về `/home` để thấy fail rồi trả lại
+- [x] 7.10 GREEN: sửa đến khi pass; kiểm: test 7.9 pass
 
 ## 8. Trang chủ: bài tiếp theo — `useHome`, `NextLessonCard`, `HomeContainer` (design D6)
 
