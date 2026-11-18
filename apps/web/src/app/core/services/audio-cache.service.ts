@@ -1,4 +1,4 @@
-// Skeleton (S8.4 task 4.1): chưa có hành vi, cài đặt ở task 4.2 (design D4).
+import { AUDIO_CACHE_NAME } from '@core/constants/audio.constants';
 
 export interface AudioCache {
   /** Trong `paths`, file nào đang có ở bất kỳ cache nào. */
@@ -7,12 +7,41 @@ export interface AudioCache {
   download(path: string): Promise<void>;
 }
 
+const toPath = (request: Request): string =>
+  new URL(request.url).pathname.replace(/^\//, '');
+
 export class BrowserAudioCache implements AudioCache {
   constructor(private readonly storage: () => CacheStorage | undefined) {}
 
-  async listCachedPaths(): Promise<ReadonlySet<string>> {
-    return new Set<string>();
+  async listCachedPaths(
+    paths: readonly string[],
+  ): Promise<ReadonlySet<string>> {
+    const storage = this.storage();
+    if (storage === undefined) {
+      return new Set<string>();
+    }
+    const cacheNames = await storage.keys();
+    const requestLists = await Promise.all(
+      cacheNames.map(async (cacheName) =>
+        (await storage.open(cacheName)).keys(),
+      ),
+    );
+    const cachedPaths = new Set(requestLists.flat().map(toPath));
+    return new Set(paths.filter((path) => cachedPaths.has(path)));
   }
 
-  async download(): Promise<void> {}
+  async download(path: string): Promise<void> {
+    const storage = this.storage();
+    if (storage === undefined) {
+      throw new Error('Trình duyệt không có bộ nhớ đệm để tải audio');
+    }
+    const url = `/${path}`;
+    const response = await fetch(url);
+    const cache = await storage.open(AUDIO_CACHE_NAME);
+    await cache.put(url, response);
+  }
 }
+
+export const audioCache: AudioCache = new BrowserAudioCache(
+  () => globalThis.caches,
+);
