@@ -1,5 +1,6 @@
 import {
   countPinyinSyllables,
+  hanCharacterSchema,
   lessonSchema,
   type Lesson,
   type Word,
@@ -20,6 +21,9 @@ export interface ParsedLesson {
   sentences: AuthoredSentence[];
   issues: ContentIssue[];
 }
+
+const isHan = (char: string): boolean =>
+  hanCharacterSchema.safeParse(char).success;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -187,5 +191,63 @@ export function lessonToneChoiceIssues(
         message: `Bài "${lessonId}", câu "${exerciseId}": từ "${word.id}" (${word.pinyin}) có nhiều âm tiết, câu tone-choice chỉ nhận từ một âm tiết`,
       },
     ];
+  });
+}
+
+/**
+ * S7.1 AC3: câu `stroke-write` phải dùng chữ có dữ liệu nét. Thiếu dữ liệu nét → lỗi file:dòng
+ * nêu id bài, id câu và chữ. Từ không có trong từ điển do `lessonRefIssues` báo riêng.
+ */
+export function lessonStrokeWriteIssues(
+  parsed: ParsedLesson,
+  wordsById: ReadonlyMap<string, Word>,
+  hasStrokeData: (char: string) => boolean,
+): ContentIssue[] {
+  const value = parsed.source.value;
+  const exercises =
+    isRecord(value) && Array.isArray(value.exercises) ? value.exercises : [];
+  const lessonId = rawLessonId(parsed) ?? parsed.source.file;
+  return exercises.flatMap((exercise: unknown, index): ContentIssue[] => {
+    if (!isRecord(exercise) || exercise.kind !== 'stroke-write') {
+      return [];
+    }
+    const exerciseId =
+      typeof exercise.id === 'string' ? exercise.id : `#${index + 1}`;
+    const prefix = `Bài "${lessonId}", câu "${exerciseId}"`;
+    const errorAt = (
+      path: (string | number)[],
+      detail: string,
+    ): ContentIssue[] => [
+      {
+        level: 'error',
+        file: parsed.source.file,
+        line: parsed.source.lineOf(path),
+        message: `${prefix}: ${detail}`,
+      },
+    ];
+    const wordIdPath = ['exercises', index, 'wordId'];
+    if (typeof exercise.wordId !== 'string' || exercise.wordId.trim() === '') {
+      const path =
+        typeof exercise.wordId === 'string' ? wordIdPath : ['exercises', index];
+      return errorAt(path, 'câu viết rỗng, cần đúng một chữ Hán');
+    }
+    const char = wordsById.get(exercise.wordId)?.hanzi ?? exercise.wordId;
+    const chars = [...char];
+    if (chars.length > 1 && chars.every(isHan)) {
+      return errorAt(
+        wordIdPath,
+        `câu viết "${char}" có nhiều hơn một chữ, câu viết chỉ nhận một chữ Hán`,
+      );
+    }
+    if (!isHan(char)) {
+      return errorAt(wordIdPath, `câu viết "${char}" không phải chữ Hán`);
+    }
+    if (hasStrokeData(char)) {
+      return [];
+    }
+    return errorAt(
+      wordIdPath,
+      `chữ "${char}" thiếu dữ liệu nét, câu viết cần chữ có dữ liệu nét`,
+    );
   });
 }

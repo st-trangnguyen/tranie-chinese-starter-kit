@@ -196,7 +196,7 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
 | `shared/services/srs.service` | Bọc ts-fsrs: tạo thẻ, chấm, lấy thẻ đến hạn trong giới hạn mỗi ngày, thống kê | E9 |
 | `shared/services/backup.service` | Export/import, kiểm tra file trước khi ghi đè | E8 |
 | `shared/services/stroke-order.service` | Rule chữ hợp lệ (đúng một chữ Hán), chữ có trong `strokes/index.json` mới có dữ liệu nét; nạp dữ liệu nét qua `ContentSource` | E6 |
-| `shared/services/writing-practice.service` | Phần 2: rule bắt đầu lượt viết, đếm sai liên tiếp ở nét hiện tại, hiện gợi ý sau 3 lần sai, đúng hết các nét là xong chữ, bỏ qua sự kiện sau khi xong; Phần 3: `loadCharacter` ủy quyền `StrokeOrderService` (rule chữ hợp lệ và có dữ liệu nét giữ một chỗ) | E6 |
+| `shared/services/writing-practice.service` | Phần 2: rule bắt đầu lượt viết, đếm sai liên tiếp ở nét hiện tại, hiện gợi ý sau 3 lần sai, đúng hết các nét là xong chữ, bỏ qua sự kiện sau khi xong, kết quả câu viết trong màn bài (`lessonResultOf`, S7.1); Phần 3: `loadCharacter` ủy quyền `StrokeOrderService` (rule chữ hợp lệ và có dữ liệu nét giữ một chỗ) | E6 |
 | `shared/components/StrokeGlyph`, `StrokeOrderAnimation`, `StrokeOrderStatic` | Vẽ chữ từ dữ liệu nét: animation có chữ mờ nền + nút "Phát lại"; bản tĩnh đánh số nét khi giảm chuyển động | E6 |
 | `shared/components/exercises` | Các dạng bài tập + registry theo `kind`; `StrokeWritingPad` (khung viết có nét mờ cả chữ, nét gợi ý; chấm nét qua `core/hooks/useStrokeQuiz`, chỉ nhận props) | E4, E5, E6, E10 |
 | `pages/*` | Màn hình: onboarding, home, learning-path, lesson, review, practice, dictionary, settings, stroke-order (có link "Tập viết" sang writing-practice), writing-practice | E1, E3, E6, E8, E9, E10 |
@@ -248,9 +248,14 @@ Audio: `apps/web/src/assets/audio/<hash>.mp3`, hash của giọng + chữ đư�
 | `content:build` | Ghép nguồn + YAML soạn tay thành JSON, chép nét chữ và ghi `strokes/index.json`; có lỗi thì không ghi | Không |
 | `content:audio` | Tạo mp3 còn thiếu bằng edge-tts (`msedge-tts`), xoá mp3 không còn dùng | Có |
 | `font:subset` | Cắt font chữ Hán theo nội dung | Có (lần đầu) |
-| `content:check` | Kiểm tra (S2.1–S2.5) + output khớp nguồn; chạy trong CI | Không |
+| `content:check` | Kiểm tra (S2.1–S2.5, câu viết S7.1) + output khớp nguồn; chạy trong CI | Không |
 
-Cấu trúc `Stage → Unit → Lesson` dùng chung cho Nhập môn và mọi cấp HSK.
+Cấu trúc `Stage → Unit → Lesson` dùng chung cho Nhập môn và mọi cấp HSK. Giai đoạn Nhập môn (stage `intro`) có một
+unit `intro-basics` gồm 12 bài (`intro-01` … `intro-12`), có câu viết `stroke-write` cho chữ Hán cơ bản.
+
+Luật câu viết của `content:check` (`lessonStrokeWriteIssues` trong `content/scripts/content-build/lessons.ts`): mỗi câu
+`stroke-write` phải là đúng một chữ Hán có dữ liệu nét. Câu viết rỗng, nhiều chữ, không phải chữ Hán hoặc thiếu dữ liệu nét
+đều là lỗi (file:dòng), làm `content:check` fail.
 
 ### 6.2 Dữ liệu người dùng (các bảng Dexie)
 
@@ -288,7 +293,11 @@ type ExerciseProps<K extends ExerciseKind> = {
 };
 ```
 
-Lesson runner, màn ôn tập và màn luyện tự do chỉ làm việc qua `exercise.registry.ts` (map từ `kind` sang component), không cần biết bên trong từng dạng bài.
+Lesson runner, màn ôn tập và màn luyện tự do chỉ làm việc qua `exercise.registry.ts` (map từ `kind` sang component), không cần biết bên trong từng dạng bài. **Ngoại lệ: `stroke-write`** (S7.1).
+
+- Câu viết (`stroke-write`) trong màn bài đi nhánh riêng: `LessonRunner` rẽ nhánh `exercise.kind === 'stroke-write'` **trước** khi tra registry và render `pages/lesson/components/LessonStrokeWrite` (bên trong dùng nguyên `StrokeWritingPad`). Dữ liệu nét và lượt viết lấy từ hook `pages/lesson/hooks/useLessonStrokeWrite` (container gọi, truyền qua trường optional `LessonRunnerView.strokeWrite`); kết quả câu theo rule `WritingPracticeService.lessonResultOf` (chỉ có "Đúng", đúng một lần lúc vừa xong chữ; viết sai nét không cho kết quả).
+- Lý do: hợp đồng `ExerciseProps` (4 props) không mang được trạng thái tải dữ liệu nét và lượt viết, còn `shared/components/exercises` không được gọi service (quy tắc lượt viết nằm ở `WritingPracticeService`). Thêm prop riêng cho một dạng bài sẽ vượt ngưỡng props và làm phức tạp type registry. `exerciseRegistry` không đăng ký `stroke-write`.
+- Câu viết chưa có `view.strokeWrite` hiện như đang tải, không rơi vào "Dạng bài này chưa có". Không tải được dữ liệu nét thì có nút thử lại và nút bỏ qua câu.
 
 - `ExerciseResult = { isCorrect: boolean; explanation?: string }`. Component dạng bài tự soạn `explanation` từ từ/câu của nó; runner chỉ hiện khi trả lời sai (`LessonService.shouldShowExplanation`).
 - `exerciseRegistry` là `Partial<Record<kind, component>>`, rỗng cho tới khi E4–E6 đăng ký. `kind` chưa đăng ký thì runner hiện "Dạng bài này chưa có" kèm nút bỏ qua.

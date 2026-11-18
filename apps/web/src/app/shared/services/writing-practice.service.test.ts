@@ -217,3 +217,68 @@ describe('WritingPracticeService — quy tắc nghiệp vụ', () => {
     expect(next.isComplete).toBe(false);
   });
 });
+
+describe('WritingPracticeService — kết quả câu viết trong bài (S7.1)', () => {
+  it('S7.1-AC1 Viết xong chữ thì câu được tính đúng: viết sai nét chưa cho kết quả', () => {
+    const service = new WritingPracticeService();
+    const initial = service.startPractice(2);
+
+    const afterMistake = service.recordStrokeAttempt(initial, 'mistake');
+
+    expect(service.lessonResultOf(initial, afterMistake)).toBeNull();
+  });
+
+  it('S7.1-AC1 Viết xong chữ thì câu được tính đúng: viết đúng nét cuối thì câu Đúng, không có giải thích', () => {
+    const service = new WritingPracticeService();
+    const initial = service.startPractice(2);
+
+    const afterFirst = service.recordStrokeAttempt(initial, 'correct');
+    const afterSecond = service.recordStrokeAttempt(afterFirst, 'correct');
+
+    expect(service.lessonResultOf(initial, afterFirst)).toBeNull();
+    const result = service.lessonResultOf(afterFirst, afterSecond);
+    expect(result).toEqual({ isCorrect: true });
+    expect(result).not.toHaveProperty('explanation');
+  });
+
+  it.each(['correct', 'mistake', 'ignored'] as const)(
+    'S7.1-AC1 Viết xong chữ thì câu được tính đúng: sự kiện %s sau khi đã xong chữ không cho kết quả lần nữa',
+    (attempt) => {
+      const service = new WritingPracticeService();
+      const complete = service.recordStrokeAttempt(
+        service.recordStrokeAttempt(service.startPractice(2), 'correct'),
+        'correct',
+      );
+
+      const next = service.recordStrokeAttempt(complete, attempt);
+
+      expect(service.lessonResultOf(complete, next)).toBeNull();
+    },
+  );
+
+  it('S7.1-AC1 Câu viết chỉ có kết quả Đúng: viết sai nét nhiều lần không bao giờ cho kết quả Sai', () => {
+    const service = new WritingPracticeService();
+    const attempts = [
+      'mistake',
+      'mistake',
+      'mistake',
+      'mistake',
+      'correct',
+      'correct',
+    ] as const;
+
+    let state = service.startPractice(2);
+    const results = attempts.map((attempt) => {
+      const next = service.recordStrokeAttempt(state, attempt);
+      const result = service.lessonResultOf(state, next);
+      state = next;
+      return result;
+    });
+
+    expect(results.slice(0, -1)).toEqual([null, null, null, null, null]);
+    expect(results).not.toContainEqual(
+      expect.objectContaining({ isCorrect: false }),
+    );
+    expect(results.at(-1)).toEqual({ isCorrect: true });
+  });
+});

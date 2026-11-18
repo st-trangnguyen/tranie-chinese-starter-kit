@@ -3,6 +3,18 @@ stages:
   - id: intro
     title: Nhập môn
     units:
-      - id: intro-pronunciation
-        title: Phát âm
-        lessons: [intro-01]
+      - id: intro-basics
+        title: Pinyin và chữ Hán cơ bản
+        lessons:
+          - intro-01
+          - intro-02
+          - intro-03
+          - intro-04
+          - intro-05
+          - intro-06
+          - intro-07
+          - intro-08
+          - intro-09
+          - intro-10
+          - intro-11
+          - intro-12

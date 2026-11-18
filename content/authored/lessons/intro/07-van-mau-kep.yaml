@@ -1,0 +1,17 @@
+# Bài 7 giai đoạn Nhập môn (S7.1): vận mẫu kép ai ei ao ou ia ie ua uo üe iao iu uai ui.
+id: intro-07
+type: lesson
+title: Vận mẫu kép
+exercises:
+  - { id: e1, kind: tone-choice, wordId: 买 }
+  - { id: e2, kind: tone-choice, wordId: 给 }
+  - { id: e3, kind: tone-choice, wordId: 走 }
+  - { id: e4, kind: tone-choice, wordId: 家 }
+  - { id: e5, kind: tone-choice, wordId: 学 }
+  - { id: e6, kind: tone-choice, wordId: 快 }
+  - { id: e7, kind: sound-pair, wordIds: [白, 北], answerWordId: 北 }
+  - { id: e8, kind: sound-pair, wordIds: [好, 后], answerWordId: 后 }
+  - { id: e9, kind: sound-pair, wordIds: [写, 学], answerWordId: 写 }
+  - { id: e10, kind: pinyin-type, wordId: 学校 }
+  - { id: e11, kind: pinyin-type, wordId: 好吃 }
+  - { id: e12, kind: speak, wordId: 小 }

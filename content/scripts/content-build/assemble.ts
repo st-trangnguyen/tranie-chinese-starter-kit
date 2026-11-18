@@ -5,6 +5,7 @@ import type { ContentRoot, Lesson, Sentence, Stage } from '@csk/shared';
 import { audioJob, type AudioJob } from './audio';
 import {
   lessonRefIssues,
+  lessonStrokeWriteIssues,
   lessonToneChoiceIssues,
   parseLesson,
   rawLessonId,
@@ -169,6 +170,13 @@ export function assembleContent(inputs: BuildInputs): BuildResult {
     ),
     ...parsedLessons.flatMap((parsed) =>
       lessonToneChoiceIssues(parsed, wordById),
+    ),
+    ...parsedLessons.flatMap((parsed) =>
+      lessonStrokeWriteIssues(
+        parsed,
+        wordById,
+        (char) => inputs.strokeData(char) !== undefined,
+      ),
     ),
     ...duplicateIssues(
       sentenceEntries.map(({ sentence, file, line }) => ({

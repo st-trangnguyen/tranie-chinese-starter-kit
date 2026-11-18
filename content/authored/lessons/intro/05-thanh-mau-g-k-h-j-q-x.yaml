@@ -1,0 +1,17 @@
+# Bài 5 giai đoạn Nhập môn (S7.1): thanh mẫu g k h j q x.
+id: intro-05
+type: lesson
+title: Thanh mẫu g k h j q x
+exercises:
+  - { id: e1, kind: tone-choice, wordId: 高 }
+  - { id: e2, kind: tone-choice, wordId: 看 }
+  - { id: e3, kind: tone-choice, wordId: 喝 }
+  - { id: e4, kind: tone-choice, wordId: 几 }
+  - { id: e5, kind: tone-choice, wordId: 去 }
+  - { id: e6, kind: tone-choice, wordId: 西 }
+  - { id: e7, kind: sound-pair, wordIds: [高, 考], answerWordId: 考 }
+  - { id: e8, kind: sound-pair, wordIds: [七, 西], answerWordId: 西 }
+  - { id: e9, kind: sound-pair, wordIds: [九, 球], answerWordId: 球 }
+  - { id: e10, kind: pinyin-type, wordId: 哥哥 }
+  - { id: e11, kind: pinyin-type, wordId: 喜欢 }
+  - { id: e12, kind: speak, wordId: 谢谢 }

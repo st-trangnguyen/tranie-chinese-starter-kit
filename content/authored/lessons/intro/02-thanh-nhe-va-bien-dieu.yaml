@@ -1,0 +1,25 @@
+# Bài 2 giai đoạn Nhập môn (S7.1): thanh nhẹ, và biến điệu 3-3, 不, 一.
+# Câu chọn thanh và gõ pinyin không dùng từ có biến điệu (pinyin từ điển ghi thanh gốc);
+# biến điệu chỉ luyện bằng nói theo mẫu (spec "Bài 2 chỉ luyện biến điệu bằng nói theo mẫu").
+id: intro-02
+type: lesson
+title: Thanh nhẹ và biến điệu (3-3, 不, 一)
+sentences:
+  - id: intro-02-nihao
+    hanzi: 你好！
+    pinyin: nǐ hǎo!
+    vi: Xin chào!
+exercises:
+  - { id: e1, kind: tone-choice, wordId: 吗 }
+  - { id: e2, kind: tone-choice, wordId: 呢 }
+  - { id: e3, kind: pinyin-type, wordId: 妈妈 }
+  - { id: e4, kind: pinyin-type, wordId: 爸爸 }
+  - { id: e5, kind: pinyin-type, wordId: 谢谢 }
+  - { id: e6, kind: tone-choice, wordId: 你 }
+  - { id: e7, kind: tone-choice, wordId: 好 }
+  - { id: e8, kind: speak, sentenceId: intro-02-nihao }
+  - { id: e9, kind: speak, wordId: 水果 }
+  - { id: e10, kind: speak, wordId: 不对 }
+  - { id: e11, kind: speak, wordId: 不客气 }
+  - { id: e12, kind: speak, wordId: 一起 }
+  - { id: e13, kind: speak, wordId: 一样 }

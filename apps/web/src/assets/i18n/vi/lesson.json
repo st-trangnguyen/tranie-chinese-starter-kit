@@ -7,9 +7,9 @@
     "incorrect": "Sai",
     "continue": "Tiếp tục"
   },
+  "skip": "Bỏ qua câu này",
   "unsupported": {
-    "message": "Dạng bài này chưa có.",
-    "skip": "Bỏ qua câu này"
+    "message": "Dạng bài này chưa có."
   },
   "listen": {
     "play": "Nghe",
@@ -17,7 +17,7 @@
     "error": "Không phát được audio."
   },
   "finished": "Bạn đã làm xong các câu của bài này.",
-  "finishedWithSkipped": "Bạn đã bỏ qua {{count}} câu vì dạng bài chưa có, bài chưa hoàn thành.",
+  "finishedWithSkipped": "Bạn đã bỏ qua {{count}} câu, bài chưa hoàn thành.",
   "summary": {
     "score": "Điểm",
     "correct": "Đúng {{correct}} / {{answered}} câu",
