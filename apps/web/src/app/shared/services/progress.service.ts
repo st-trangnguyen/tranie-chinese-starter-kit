@@ -1,5 +1,6 @@
 import {
   DAILY_GOAL_OPTIONS,
+  DEFAULT_SETTINGS,
   type LESSON_TYPES,
   type DailyGoalMinutes,
   type DailyStat,
@@ -185,10 +186,11 @@ export class ProgressService {
     await Promise.all(writes);
   }
 
+  /** Không throw: đọc settings lỗi → mục tiêu mặc định; đọc dòng ngày lỗi → 0 giây (D4). */
   async getTodayStudy(now: number = Date.now()): Promise<TodayStudy> {
     const [settings, dailyStat] = await Promise.all([
-      this.readSettings(),
-      this.readDailyStat(toLocalDateKey(now)),
+      this.readSettings().catch((): Settings => DEFAULT_SETTINGS),
+      this.readDailyStat(toLocalDateKey(now)).catch(() => undefined),
     ]);
     const minutes = this.toStudyMinutes(dailyStat?.studySeconds ?? 0);
     const goalMinutes = settings.dailyGoalMinutes;
