@@ -108,4 +108,13 @@ describe('ProgressService — thời gian học hôm nay', () => {
     expect(today.minutes).toBe(0);
     expect((await store.getDailyStat('2026-11-17'))?.studySeconds).toBe(1200);
   });
+
+  it('S8.1-AC2 Học qua nửa đêm chia cho hai ngày: 23:50 → 00:10 là 10 phút mỗi ngày', async () => {
+    const service = createService();
+
+    await service.recordStudyTime(at(17, 23, 50), at(18, 0, 10));
+
+    expect((await service.getTodayStudy(at(17, 23, 59))).minutes).toBe(10);
+    expect((await service.getTodayStudy(at(18, 0, 15))).minutes).toBe(10);
+  });
 });
