@@ -14,9 +14,16 @@ export interface LessonProgressRow {
   [field: string]: unknown;
 }
 
+/** Một dòng của bảng `dailyStats`: chưa tin cậy, validate khi đọc. */
+export interface DailyStatRow {
+  date: string;
+  [field: string]: unknown;
+}
+
 export type AppDatabase = Dexie & {
   settings: EntityTable<SettingRow, 'key'>;
   lessonProgress: EntityTable<LessonProgressRow, 'lessonId'>;
+  dailyStats: EntityTable<DailyStatRow, 'date'>;
 };
 
 /**
@@ -32,6 +39,11 @@ export const createDatabase = (name: string = DB_NAME): AppDatabase => {
   db.version(2).stores({
     settings: 'key',
     lessonProgress: 'lessonId',
+  });
+  db.version(3).stores({
+    settings: 'key',
+    lessonProgress: 'lessonId',
+    dailyStats: 'date',
   });
 
   return db;

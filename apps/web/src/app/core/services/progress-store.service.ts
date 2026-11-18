@@ -1,6 +1,8 @@
 import {
+  dailyStatSchema,
   lessonProgressSchema,
   parseSettings,
+  type DailyStat,
   type LessonProgress,
   type Settings,
 } from '@csk/shared';
@@ -22,9 +24,20 @@ export interface ProgressStore {
   saveLessonProgress(progress: LessonProgress): Promise<void>;
   /** Ghi mọi dòng trong một transaction: một dòng lỗi thì không dòng nào được ghi (S3.6). */
   saveLessonProgressBatch(rows: LessonProgress[]): Promise<void>;
+  /** Thống kê học của một ngày (`YYYY-MM-DD`); chưa có thì `undefined` (S8.1). */
+  getDailyStat(date: string): Promise<DailyStat | undefined>;
+  /** Cộng dồn số giây đã học vào ngày `date` (S8.1). */
+  addStudySeconds(date: string, seconds: number): Promise<void>;
 }
 
 export class DexieProgressStore implements ProgressStore {
+  /**
+   * Chuỗi các lần ghi thời gian học trong tab này (design D2): `getDailyStat` chờ nó để đọc
+   * thấy cả lần ghi chưa xong (màn bài unmount ghi phần cuối, Trang chủ mount đọc ngay).
+   * Luôn resolve: lỗi một lần ghi không gãy chuỗi.
+   */
+  private studyTimeWrites: Promise<void> = Promise.resolve();
+
   constructor(private readonly db: AppDatabase) {}
 
   async getSettings(): Promise<Settings> {
@@ -64,6 +77,36 @@ export class DexieProgressStore implements ProgressStore {
   async saveLessonProgressBatch(rows: LessonProgress[]): Promise<void> {
     await this.db.transaction('rw', this.db.lessonProgress, async () => {
       await this.db.lessonProgress.bulkPut(rows);
+    });
+  }
+
+  async getDailyStat(date: string): Promise<DailyStat | undefined> {
+    await this.studyTimeWrites;
+    const row = await this.db.dailyStats.get(date);
+    const result = dailyStatSchema.safeParse(row);
+    return result.success ? result.data : undefined;
+  }
+
+  addStudySeconds(date: string, seconds: number): Promise<void> {
+    // Nối vào chuỗi đồng bộ (trước mọi `await`) để lần đọc gọi ngay sau đó chờ được lần ghi này.
+    const write = this.studyTimeWrites.then(() =>
+      this.writeStudySeconds(date, seconds),
+    );
+    // Lỗi vẫn reject cho người gọi qua `write`; bản trong chuỗi chỉ bỏ lỗi để lần sau chạy tiếp.
+    this.studyTimeWrites = write.catch(() => undefined);
+    return write;
+  }
+
+  private async writeStudySeconds(
+    date: string,
+    seconds: number,
+  ): Promise<void> {
+    // Đọc + cộng + ghi trong một transaction `rw`: IndexedDB tuần tự hoá cả giữa hai tab.
+    await this.db.transaction('rw', this.db.dailyStats, async () => {
+      const row = await this.db.dailyStats.get(date);
+      const result = dailyStatSchema.safeParse(row);
+      const current = result.success ? result.data.studySeconds : 0;
+      await this.db.dailyStats.put({ date, studySeconds: current + seconds });
     });
   }
 }

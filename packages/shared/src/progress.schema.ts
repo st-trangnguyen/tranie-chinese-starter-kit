@@ -48,6 +48,19 @@ export const lessonProgressSchema = z.object({
 });
 export type LessonProgress = z.infer<typeof lessonProgressSchema>;
 
+/** Khóa ngày theo giờ máy, dạng `YYYY-MM-DD` (S8.1). */
+export const localDateKeySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
+/**
+ * Số giây đã học trong một ngày (S8.1), lưu trong bảng `dailyStats`.
+ * `studySeconds` là số thực để giữ phần lẻ dưới 1 giây giữa các lần ghi.
+ */
+export const dailyStatSchema = z.object({
+  date: localDateKeySchema,
+  studySeconds: z.number().finite().nonnegative(),
+});
+export type DailyStat = z.infer<typeof dailyStatSchema>;
+
 /** Trạng thái một bài trên bản đồ lộ trình (S3.1 AC2). Suy ra từ tiến độ, không lưu. */
 export type LessonStatus = 'locked' | 'open' | 'completed';
 
