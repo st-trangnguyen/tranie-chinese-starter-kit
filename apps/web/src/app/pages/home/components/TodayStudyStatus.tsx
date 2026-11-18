@@ -18,6 +18,9 @@ export function TodayStudyStatus({ todayStudy }: TodayStudyStatusProps) {
           goalMinutes: todayStudy.goalMinutes,
         })}
       </p>
+      {todayStudy.isGoalReached && (
+        <p className="home-today-study-goal">{t('goalReached')}</p>
+      )}
     </div>
   );
 }

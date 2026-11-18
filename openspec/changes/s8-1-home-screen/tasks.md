@@ -169,9 +169,9 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.todayStudy.test.tsx`
 - [x] 9.5 RED: S8.1-AC2 "Mục tiêu lưu bị hỏng" (mức màn) — settings `dailyGoalMinutes: 'abc'` → "Hôm nay: 0 / 15 phút"; kiểm: chạy, nếu pass ngay thì tạm đọc mục tiêu thô để thấy fail rồi trả lại
 - [x] 9.6 GREEN: sửa đến khi pass; kiểm: test 9.5 pass
 - [x] 9.7 RED: S8.1-AC2 "Vượt mục tiêu" — mục tiêu 30, 2700 giây → "Hôm nay: 45 / 30 phút" và "Đã đạt mục tiêu hôm nay"; kiểm: fail vì chưa có dòng đạt mục tiêu
-- [ ] 9.8 GREEN: `TodayStudyStatus` dòng `goalReached` khi `isGoalReached`; kiểm: test 9.7 pass
+- [x] 9.8 GREEN: `TodayStudyStatus` dòng `goalReached` khi `isGoalReached`; kiểm: test 9.7 pass
 - [x] 9.9 RED: S8.1-AC2 "Vừa đúng mục tiêu" (mức màn) — 900 giây → "Hôm nay: 15 / 15 phút" + "Đã đạt mục tiêu hôm nay"; 890 giây → "14 / 15", không có dòng đạt; kiểm: chạy, nếu pass ngay thì tạm dùng `>` trong `isDailyGoalReached` để thấy fail rồi trả lại
-- [ ] 9.10 GREEN: sửa đến khi pass; kiểm: test 9.9 pass
+- [x] 9.10 GREEN: sửa đến khi pass; kiểm: test 9.9 pass
 - [ ] 9.11 RED: S8.1-AC2 "Thời gian học đã lưu bị hỏng" (mức màn) — dòng hôm nay hỏng → Trang chủ hiện bình thường, "Hôm nay: 0 / 15 phút", không `role="alert"`; kiểm: chạy, nếu pass ngay thì tạm cho store throw khi dòng hỏng để thấy fail rồi trả lại
 - [ ] 9.12 GREEN: sửa đến khi pass; kiểm: test 9.11 pass
 - [ ] 9.13 RED: S8.1-AC2 "Để Trang chủ mở qua nửa đêm" — mục tiêu 15, hôm nay 1200 giây, mở `/home` lúc 23:59 → "20 / 15"; tiến tới 00:01 (không đổi visibility) → vẫn "20 / 15"; `router.navigate('/learning-paths')` rồi về `/home` → "0 / 15"; kiểm: fail ở bước quay về nếu `useHome` cache kết quả, hoặc tạm thêm interval làm mới để thấy bước "vẫn 20" fail rồi trả lại
