@@ -26,3 +26,23 @@ describe('ProgressService — splitStudyTimeByDay', () => {
     expect(service.splitStudyTimeByDay(at(18, 8, 5), at(18, 8, 0))).toEqual([]);
   });
 });
+
+describe('ProgressService — toStudyMinutes', () => {
+  const service = new ProgressService();
+
+  it('S8.1-AC2 Làm tròn xuống phút: 470 giây là 7 phút', () => {
+    expect(service.toStudyMinutes(470)).toBe(7);
+  });
+
+  it('S8.1-AC2 Làm tròn xuống phút: 479.9 giây vẫn là 7 phút', () => {
+    expect(service.toStudyMinutes(479.9)).toBe(7);
+  });
+
+  it('S8.1-AC2 Làm tròn xuống phút: đủ 480 giây là 8 phút', () => {
+    expect(service.toStudyMinutes(480)).toBe(8);
+  });
+
+  it('S8.1-AC2 Làm tròn xuống phút: 0 giây là 0 phút', () => {
+    expect(service.toStudyMinutes(0)).toBe(0);
+  });
+});
