@@ -155,7 +155,7 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.test.tsx` — `openR
 - [x] 8.21 RED: S8.1-AC1 "Mở bản đồ lộ trình từ Trang chủ" — bấm "Xem lộ trình" → `/learning-paths`, heading "Lộ trình học"; kiểm: chạy, nếu pass ngay thì tạm trỏ link sai để thấy fail rồi trả lại
 - [x] 8.22 GREEN: sửa đến khi pass; kiểm: test 8.21 pass
 - [x] 8.23 RED: nhánh lỗi nạp lộ trình (design D6, không có Scenario riêng; tên test `S8.1-AC1 (D6) nạp lộ trình lỗi thì báo lỗi, vẫn có "Xem lộ trình"`) — `mockContentFetch` trả 500 cho file lộ trình → Trang chủ có `role="alert"` "Chưa tải được bài tiếp theo.", không còn `role="status"` "Đang tải…", không có "Vào học", link "Xem lộ trình" vẫn có và trỏ `/learning-paths`; kiểm: fail (kẹt ở "Đang tải…" vì skeleton chưa có nhánh lỗi)
-- [ ] 8.24 GREEN: `.catch` của effect bài tiếp theo trong `useHome` đặt `hasNextLessonError` (cờ `isActive`, mẫu `useLearningPath`); `HomeContainer` hiện `<p role="alert">` key `home:loadError` thay `NextLessonCard`; kiểm: test 8.23 pass, mọi file < 300 dòng, component < 5 props
+- [x] 8.24 GREEN: `.catch` của effect bài tiếp theo trong `useHome` đặt `hasNextLessonError` (cờ `isActive`, mẫu `useLearningPath`); `HomeContainer` hiện `<p role="alert">` key `home:loadError` thay `NextLessonCard`; kiểm: test 8.23 pass, mọi file < 300 dòng, component < 5 props
 
 ## 9. Trang chủ: phút hôm nay — `useHome`, `TodayStudyStatus` (design D6)
 

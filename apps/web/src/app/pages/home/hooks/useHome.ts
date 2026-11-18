@@ -7,12 +7,15 @@ import { ProgressService } from '@shared/services/progress.service';
 export interface HomeState {
   /** null khi đang nạp. */
   nextLesson: NextLesson | null;
+  /** true khi nạp lộ trình lỗi (design D6). */
+  hasNextLessonError: boolean;
 }
 
 export const useHome = (): HomeState => {
   const contentService = useMemo(() => new ContentService(), []);
   const progressService = useMemo(() => new ProgressService(), []);
   const [nextLesson, setNextLesson] = useState<NextLesson | null>(null);
+  const [hasNextLessonError, setHasNextLessonError] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -46,12 +49,14 @@ export const useHome = (): HomeState => {
         );
       })
       .catch(() => {
-        // Nạp lộ trình lỗi: tạm giữ trạng thái đang nạp; nhánh báo lỗi là task 8.24 (design D6).
+        if (isActive) {
+          setHasNextLessonError(true);
+        }
       });
     return () => {
       isActive = false;
     };
   }, [contentService, progressService]);
 
-  return { nextLesson };
+  return { nextLesson, hasNextLessonError };
 };
