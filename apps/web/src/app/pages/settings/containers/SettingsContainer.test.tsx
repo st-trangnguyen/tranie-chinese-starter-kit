@@ -143,4 +143,30 @@ describe('SettingsContainer — lưu khi đổi', () => {
       within(reopenedGroup).getByRole('radio', { name: 'Bình thường (1x)' }),
     ).not.toBeChecked();
   });
+
+  it('S8.2-AC3 Tùy chọn pinyin giữ sau khi mở lại app: tắt "Hiện pinyin" → không checked, mở lại vẫn tắt', async () => {
+    const { user, unmount } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const group = await screen.findByRole('group', { name: 'Hiện pinyin' });
+    await user.click(
+      within(group).getByRole('switch', { name: 'Hiện pinyin' }),
+    );
+
+    expect(
+      within(group).getByRole('switch', { name: 'Hiện pinyin' }),
+    ).not.toBeChecked();
+
+    unmount();
+    renderWithProviders(<SettingsContainer />, { route: '/settings' });
+
+    const reopenedGroup = await screen.findByRole('group', {
+      name: 'Hiện pinyin',
+    });
+    expect(
+      within(reopenedGroup).getByRole('switch', { name: 'Hiện pinyin' }),
+    ).not.toBeChecked();
+    expect(within(reopenedGroup).getByText('Tắt')).toBeVisible();
+  });
 });
