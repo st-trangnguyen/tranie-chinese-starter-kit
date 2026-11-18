@@ -35,8 +35,8 @@ Test: `apps/web/src/app/shared/utils/offline-audio.utils.test.ts` — hàm thu�
 
 - [x] 3.1 RED: S8.4-AC1 "Dung lượng dưới 1 MB hiện theo KB" — `formatAudioSize(870_400)` = "850 KB", `(1_047_552)` = "1023 KB"; kiểm: fail vì skeleton trả ""
 - [x] 3.2 GREEN: nhánh KB (`ceil(bytes / 1024)`); kiểm: test 3.1 pass
-- [ ] 3.3 RED: S8.4-AC1 "Dung lượng rất nhỏ hiện tối thiểu 1 KB" — `300` → "1 KB", `1` → "1 KB", `0` → "1 KB"; kiểm: fail ở `0` (hoặc tạm bỏ `max(1, …)` nếu pass ngay)
-- [ ] 3.4 GREEN: tối thiểu 1 KB; kiểm: test 3.3 pass
+- [x] 3.3 RED: S8.4-AC1 "Dung lượng rất nhỏ hiện tối thiểu 1 KB" — `300` → "1 KB", `1` → "1 KB", `0` → "1 KB"; kiểm: fail ở `0` (hoặc tạm bỏ `max(1, …)` nếu pass ngay)
+- [x] 3.4 GREEN: tối thiểu 1 KB; kiểm: test 3.3 pass
 - [ ] 3.5 RED: S8.4-AC1 "Dung lượng sát 1 MB hiện 1,0 MB" — `1_047_553`, `1_048_064`, `1_048_575`, `1_048_576` → "1,0 MB" (không "1024 KB"); kiểm: fail
 - [ ] 3.6 GREEN: nhánh MB khi KB làm tròn lên đạt 1024; kiểm: test 3.5 pass
 - [ ] 3.7 RED: S8.4-AC1 "Dung lượng MB làm tròn lên khi chữ số tiếp theo là 5" — `1_310_720` → "1,3 MB", `2_516_582` → "2,4 MB", dấu phẩy thập phân; kiểm: fail nếu làm tròn xuống/`toFixed` (tạm dùng `floor` nếu pass ngay rồi trả lại)
