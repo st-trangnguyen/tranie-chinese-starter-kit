@@ -246,3 +246,55 @@ describe('SpeakExercise — Hiện pinyin ở chế độ đọc to', () => {
     });
   });
 });
+
+describe('SpeakExercise — giải thích khi sai lúc tắt pinyin', () => {
+  beforeEach(installRecordingEnvironment);
+  afterEach(restoreRecordingEnvironment);
+
+  it.each([
+    {
+      label: 'từ',
+      exercise: { id: 'ex-word', wordId: 'w-nihao' },
+      content: { words: [nihao], sentences: [] },
+      expected: { hanzi: '你好', pinyin: 'nǐ hǎo', vi: 'xin chào' },
+    },
+    {
+      label: 'câu',
+      exercise: { id: 'ex-sentence', sentenceId: 's-xiexie' },
+      content: { words: [], sentences: [sentence] },
+      expected: { hanzi: '谢谢你', pinyin: 'xièxie nǐ', vi: 'Cảm ơn bạn' },
+    },
+  ])(
+    'S8.2-AC3: tắt pinyin, bấm "Chưa đúng" ($label) thì giải thích vẫn có chữ Hán, pinyin và nghĩa',
+    async ({ exercise, content, expected }) => {
+      const SpeakExercise = exerciseRegistry.speak;
+      const handleResult = vi.fn();
+      const { user } = renderWithProviders(
+        <PinyinVisibilityProvider isVisible={false}>
+          <AudioSpeedProvider>
+            {SpeakExercise ? (
+              <SpeakExercise
+                exercise={{ kind: 'speak', ...exercise }}
+                content={content}
+                onResult={handleResult}
+                isLocked={false}
+              />
+            ) : null}
+          </AudioSpeedProvider>
+        </PinyinVisibilityProvider>,
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Chưa đúng' }));
+
+      expect(handleResult).toHaveBeenCalledTimes(1);
+      for (const part of [expected.hanzi, expected.pinyin, expected.vi]) {
+        expect(handleResult).toHaveBeenCalledWith(
+          expect.objectContaining({
+            isCorrect: false,
+            explanation: expect.stringContaining(part),
+          }),
+        );
+      }
+    },
+  );
+});
