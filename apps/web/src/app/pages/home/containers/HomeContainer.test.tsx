@@ -145,4 +145,16 @@ describe('HomeContainer — bài tiếp theo', () => {
     expect(await screen.findByText(LESSON_TITLES.l1)).toBeInTheDocument();
     expect(screen.queryByText(LESSON_TITLES.l5)).not.toBeInTheDocument();
   });
+
+  it('S8.1-AC1 Đã học xong mọi bài: should show the path-completed message without a "Vào học" link when every lesson is completed', async () => {
+    await seedProgress(Object.keys(LESSON_TITLES));
+
+    openRoute('/home');
+
+    expect(
+      await screen.findByText('Bạn đã học xong lộ trình hiện có.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Vào học' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Xem lộ trình' })).toBeInTheDocument();
+  });
 });
