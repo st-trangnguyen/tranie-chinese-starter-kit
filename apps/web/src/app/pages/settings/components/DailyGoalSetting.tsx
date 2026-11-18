@@ -3,9 +3,10 @@ import { DAILY_GOAL_OPTIONS, type DailyGoalMinutes } from '@csk/shared';
 
 interface DailyGoalSettingProps {
   value: DailyGoalMinutes;
+  onChange: (minutes: DailyGoalMinutes) => void;
 }
 
-export function DailyGoalSetting({ value }: DailyGoalSettingProps) {
+export function DailyGoalSetting({ value, onChange }: DailyGoalSettingProps) {
   const { t } = useTranslation('settings');
 
   return (
@@ -23,7 +24,7 @@ export function DailyGoalSetting({ value }: DailyGoalSettingProps) {
             name="daily-goal"
             value={minutes}
             checked={minutes === value}
-            readOnly
+            onChange={() => onChange(minutes)}
             className="settings-option-input"
           />
           {t('dailyGoal.option', { count: minutes })}

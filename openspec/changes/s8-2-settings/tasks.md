@@ -129,8 +129,8 @@ DB mặc định fake-indexeddb.
 - [x] 7.4 GREEN: sửa đến khi pass; kiểm: test 7.3 pass
 - [x] 7.5 RED: S8.2-AC3 "Mặc định hiện pinyin" — DB trống: `getByRole('switch', { name: 'Hiện pinyin' })` checked và chữ "Bật" nhìn thấy trong nhóm; tắt → chữ "Tắt"; kiểm: fail nếu chưa có chữ trạng thái
 - [x] 7.6 GREEN: `PinyinVisibilitySetting` chữ "Bật"/"Tắt" theo giá trị; kiểm: test 7.5 pass
-- [ ] 7.7 RED: S8.2-AC1 "Đổi mục tiêu thì giữ sau khi mở lại app" — chọn "60 phút" → checked ngay; không có nút "Lưu"; `unmount()` rồi render lại → "60 phút" checked; kiểm: fail vì `changeDailyGoal` của hook chưa làm (skeleton no-op)
-- [ ] 7.8 GREEN: `useSettings.applyChange` (lạc quan, gọi `changeDailyGoal`, cập nhật `persistedRef` khi xong); kiểm: test 7.7 pass
+- [x] 7.7 RED: S8.2-AC1 "Đổi mục tiêu thì giữ sau khi mở lại app" — chọn "60 phút" → checked ngay; không có nút "Lưu"; `unmount()` rồi render lại → "60 phút" checked; kiểm: fail vì `changeDailyGoal` của hook chưa làm (skeleton no-op)
+- [x] 7.8 GREEN: `useSettings.applyChange` (lạc quan, gọi `changeDailyGoal`, cập nhật `persistedRef` khi xong); kiểm: test 7.7 pass
 - [ ] 7.9 RED: S8.2-AC2 "Tốc độ mặc định giữ sau khi mở lại app" — chọn "Chậm (0.75x)", render lại → checked; kiểm: fail vì skeleton
 - [ ] 7.10 GREEN: `changeDefaultAudioSpeed` qua `applyChange`; kiểm: test 7.9 pass
 - [ ] 7.11 RED: S8.2-AC3 "Tùy chọn pinyin giữ sau khi mở lại app" — tắt "Hiện pinyin", render lại → không checked; kiểm: fail vì skeleton
