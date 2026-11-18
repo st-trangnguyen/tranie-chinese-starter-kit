@@ -1,6 +1,19 @@
 /* Màn Cài đặt — S8.2 D6. Lựa chọn đang chọn luôn có radio/công tắc gốc, màu chỉ là phụ. */
 
 @layer components {
+  .settings-back-link {
+    @apply inline-flex min-h-11 min-w-11 items-center rounded-md px-sm text-body font-semibold text-fg underline underline-offset-4;
+    @apply transition-colors;
+  }
+
+  .settings-back-link:hover {
+    @apply bg-sunken;
+  }
+
+  .settings-back-link:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
   .settings-title {
     @apply text-title-lg text-fg;
   }
@@ -42,6 +55,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .settings-back-link,
     .settings-option {
       @apply transition-none;
     }

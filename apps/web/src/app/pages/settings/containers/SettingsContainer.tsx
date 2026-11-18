@@ -1,4 +1,7 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
+import { ROUTE_PATHS } from '@core/constants/app.constants';
 
 import { AudioSpeedSetting } from '../components/AudioSpeedSetting';
 import { DailyGoalSetting } from '../components/DailyGoalSetting';
@@ -12,6 +15,12 @@ const SettingsContainer = () => {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-xl p-xl">
+      <Link
+        to={ROUTE_PATHS.learningPaths}
+        className="settings-back-link self-start"
+      >
+        {t('backLink')}
+      </Link>
       <h1 className="settings-title">{t('title')}</h1>
       {preferences === null ? (
         <p role="status">{t('loading')}</p>
