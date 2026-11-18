@@ -87,4 +87,28 @@ describe('LessonRunnerContainer — liên kết Trang chủ ở màn tổng kế
       );
     },
   );
+
+  it('S8.1-AC1 Màn bài khi đang làm câu không có liên kết Trang chủ: should not show a "Trang chủ" link at question 1 nor while viewing the answer result', async () => {
+    serveLesson('lesson');
+    const { user } = renderWithProviders(
+      <LessonRunnerContainer registry={registry} />,
+      { route: '/lessons/:lessonId' },
+    );
+
+    const answerButton = await screen.findByRole('button', {
+      name: 'Chọn đúng',
+    });
+    expect(screen.getByText('Câu về 八')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Trang chủ' }),
+    ).not.toBeInTheDocument();
+
+    await user.click(answerButton);
+    expect(
+      await screen.findByRole('button', { name: 'Tiếp tục' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Trang chủ' }),
+    ).not.toBeInTheDocument();
+  });
 });
