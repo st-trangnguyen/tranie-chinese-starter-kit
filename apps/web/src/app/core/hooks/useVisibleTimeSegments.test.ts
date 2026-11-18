@@ -67,4 +67,22 @@ describe('useVisibleTimeSegments', () => {
       expect(overlapsHidden).toBe(false);
     }
   });
+
+  it('S8.1-AC2: đóng app giữa bài chỉ mất tối đa 30 giây cuối', () => {
+    const onSegment = vi.fn();
+    renderHook(() =>
+      useVisibleTimeSegments(onSegment, STUDY_TIME_FLUSH_INTERVAL_MS),
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(3 * MINUTE + 40_000);
+    });
+
+    const segments = toSegments(onSegment);
+    expect(totalSeconds(segments)).toBeGreaterThanOrEqual(190);
+    const lastEmittedEnd = Math.max(...segments.map(([, end]) => end));
+    expect(Date.now() - lastEmittedEnd).toBeLessThanOrEqual(
+      STUDY_TIME_FLUSH_INTERVAL_MS,
+    );
+  });
 });
