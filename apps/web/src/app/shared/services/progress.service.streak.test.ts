@@ -48,4 +48,30 @@ describe('ProgressService — countStudyStreak', () => {
 
     expect(service.countStudyStreak(stats, TODAY, 30)).toBe(4);
   });
+  it('S8.3-AC1 Bỏ một ngày thì chuỗi đứt: hôm qua chỉ 5 phút, hôm nay chưa học thì streak là 0', () => {
+    const stats = [
+      day(-6, REACHED),
+      day(-5, REACHED),
+      day(-4, REACHED),
+      day(-3, REACHED),
+      day(-2, REACHED),
+      day(-1, 300),
+      day(0, 0),
+    ];
+
+    expect(service.countStudyStreak(stats, TODAY, 15)).toBe(0);
+  });
+
+  it('S8.3-AC1 Bỏ một ngày thì chuỗi đứt: hôm qua không mở app, hôm nay chưa học thì streak là 0', () => {
+    const stats = [
+      day(-6, REACHED),
+      day(-5, REACHED),
+      day(-4, REACHED),
+      day(-3, REACHED),
+      day(-2, REACHED),
+      day(0, 0),
+    ];
+
+    expect(service.countStudyStreak(stats, TODAY, 15)).toBe(0);
+  });
 });

@@ -43,8 +43,8 @@ cài đặt đều cho 0, RED không thể fail thật); nó được kiểm ở
 - [x] 2.2 GREEN: `previousLocalDateKey` (`date.utils.ts`); Phần 2 `isStreakDayReached` (tối thiểu: không có dòng → chưa đạt; **mọi ngày** so với `todayGoalMinutes`, chưa đọc `goalMinutes` của dòng) và `countStudyStreak` kèm `Rule:` (design D3); chưa có `resolveDayGoal`; kiểm: test 2.1 pass
 - [x] 2.3 RED: S8.3-AC1 "Hôm nay chưa đạt thì vẫn giữ chuỗi đến hôm qua" — mục tiêu 30, D-5 không có dòng, D-4…D-1 mỗi ngày 2100 giây `goalMinutes: 30`, D0 600 giây → 4; kiểm: chạy, nếu pass ngay thì tạm trả 0 khi hôm nay chưa đạt để thấy fail rồi trả lại
 - [x] 2.4 GREEN: sửa đến khi pass; kiểm: test 2.3 pass
-- [ ] 2.5 RED: S8.3-AC1 "Bỏ một ngày thì chuỗi đứt" — D-6…D-2 đạt, D-1 300 giây, D0 0 → 0; biến thể D-1 không có dòng → 0; kiểm: chạy, nếu pass ngay thì tạm bỏ qua ngày không có dòng khi đếm lùi để thấy fail rồi trả lại
-- [ ] 2.6 GREEN: sửa đến khi pass; kiểm: test 2.5 pass
+- [x] 2.5 RED: S8.3-AC1 "Bỏ một ngày thì chuỗi đứt" — D-6…D-2 đạt, D-1 300 giây, D0 0 → 0; biến thể D-1 không có dòng → 0; kiểm: chạy, nếu pass ngay thì tạm bỏ qua ngày không có dòng khi đếm lùi để thấy fail rồi trả lại
+- [x] 2.6 GREEN: sửa đến khi pass; kiểm: test 2.5 pass
 - [ ] 2.7 RED: S8.3-AC1 "Đếm lại sau khi chuỗi đứt" — D-7…D-3 đạt, D-2 300 giây, D-1 đạt, D0 đạt → 2; kiểm: chạy, nếu pass ngay thì tạm đếm mọi ngày đạt thay vì dừng ở ngày đứt để thấy fail rồi trả lại
 - [ ] 2.8 GREEN: sửa đến khi pass; kiểm: test 2.7 pass
 - [ ] 2.9 RED: S8.3-AC1 "Người học mới chưa có ngày nào" — `countStudyStreak([], D0, 15)` = 0; kiểm: chạy, nếu pass ngay thì tạm coi hôm qua không có dòng là đạt để thấy fail rồi trả lại
