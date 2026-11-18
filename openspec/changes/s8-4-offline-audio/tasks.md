@@ -33,8 +33,8 @@ Test: `content/scripts/content-build/audioIndex.test.ts` (hàm thuần), `conten
 
 Test: `apps/web/src/app/shared/utils/offline-audio.utils.test.ts` — hàm thuần, bảng.
 
-- [ ] 3.1 RED: S8.4-AC1 "Dung lượng dưới 1 MB hiện theo KB" — `formatAudioSize(870_400)` = "850 KB", `(1_047_552)` = "1023 KB"; kiểm: fail vì skeleton trả ""
-- [ ] 3.2 GREEN: nhánh KB (`ceil(bytes / 1024)`); kiểm: test 3.1 pass
+- [x] 3.1 RED: S8.4-AC1 "Dung lượng dưới 1 MB hiện theo KB" — `formatAudioSize(870_400)` = "850 KB", `(1_047_552)` = "1023 KB"; kiểm: fail vì skeleton trả ""
+- [x] 3.2 GREEN: nhánh KB (`ceil(bytes / 1024)`); kiểm: test 3.1 pass
 - [ ] 3.3 RED: S8.4-AC1 "Dung lượng rất nhỏ hiện tối thiểu 1 KB" — `300` → "1 KB", `1` → "1 KB", `0` → "1 KB"; kiểm: fail ở `0` (hoặc tạm bỏ `max(1, …)` nếu pass ngay)
 - [ ] 3.4 GREEN: tối thiểu 1 KB; kiểm: test 3.3 pass
 - [ ] 3.5 RED: S8.4-AC1 "Dung lượng sát 1 MB hiện 1,0 MB" — `1_047_553`, `1_048_064`, `1_048_575`, `1_048_576` → "1,0 MB" (không "1024 KB"); kiểm: fail
