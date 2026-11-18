@@ -85,7 +85,7 @@ Test: `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.studyTime.
 `new ProgressService().getTodayStudy(Date.now())`.
 
 - [x] 5.1 RED: S8.1-AC2 "Ở màn bài được tính" — mở bài, tiến 3 phút 10 giây, unmount (rời màn bài) → `minutes` 3; kiểm: fail (0) vì container chưa ghi
-- [ ] 5.2 GREEN: `useStudyTimeRecorder` (gọi `recordStudyTime`, `.catch` có comment), gọi trong `LessonRunnerContainer`; kiểm: test 5.1 pass, test container cũ vẫn pass
+- [x] 5.2 GREEN: `useStudyTimeRecorder` (gọi `recordStudyTime`, `.catch` có comment), gọi trong `LessonRunnerContainer`; kiểm: test 5.1 pass, test container cũ vẫn pass
 - [ ] 5.3 RED: S8.1-AC2 "Thoát giữa bài vẫn được tính" — trả lời câu 1, tiến 2 phút 10 giây, unmount khi chưa xong bài → tăng 2; kiểm: chạy, nếu pass ngay thì tạm chỉ ghi khi `summary` có để thấy fail rồi trả lại
 - [ ] 5.4 GREEN: sửa đến khi pass; kiểm: test 5.3 pass
 - [ ] 5.5 RED: S8.1-AC2 "Học lại bài đã xong vẫn được tính" — `lessonProgress` bài `completed`, mở lại, 4 phút 10 giây, unmount → tăng 4; kiểm: như 5.3 (tạm bỏ ghi khi bài đã `completed`)

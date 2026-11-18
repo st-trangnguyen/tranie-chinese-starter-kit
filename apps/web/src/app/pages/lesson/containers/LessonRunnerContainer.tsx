@@ -12,6 +12,7 @@ import { LessonRunner } from '../components/LessonRunner';
 import { LessonSummary } from '../components/LessonSummary';
 import { useLessonRunner } from '../hooks/useLessonRunner';
 import { useLessonStrokeWrite } from '../hooks/useLessonStrokeWrite';
+import { useStudyTimeRecorder } from '../hooks/useStudyTimeRecorder';
 
 interface LessonRunnerContainerProps {
   /** Mặc định là registry thật; test truyền registry giả. */
@@ -28,6 +29,7 @@ const LessonRunnerContainer = ({
   lessonId: lessonIdProp,
   placementUnitId,
 }: LessonRunnerContainerProps) => {
+  useStudyTimeRecorder();
   const { t } = useTranslation('lesson');
   const { lessonId: lessonIdParam = '' } = useParams();
   const lessonId = lessonIdProp ?? lessonIdParam;
