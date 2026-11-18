@@ -72,8 +72,8 @@ Test: `apps/web/src/app/core/hooks/useVisibleTimeSegments.test.ts`, `apps/web/sr
 - [x] 4.2 GREEN: `useVisibleTimeSegments` (design D5: listener `visibilitychange` phát đoạn ngay trong listener, interval chỉ chạy khi hiện, cleanup phát đoạn mở và gỡ listener/interval); kiểm: test 4.1 pass
 - [x] 4.3 RED: S8.1-AC2 "Đóng app giữa bài chỉ mất tối đa 30 giây cuối" (tầng hook) — hiện 3 phút 40 giây, **không** unmount, không đổi visibility → tổng các đoạn đã phát ≥ 190 giây (mất < 30 giây) và lần phát cuối cách hiện tại ≤ 15 giây; kiểm: fail nếu chỉ phát lúc unmount (tạm bỏ interval nếu pass ngay rồi trả lại)
 - [x] 4.4 GREEN: interval `flushIntervalMs`; kiểm: test 4.3 pass
-- [ ] 4.5 RED: S8.1-AC2 "Để app mở ở màn bài không thao tác vẫn tính" (tầng hook) — hiện 2 giờ không sự kiện nào rồi unmount → tổng 7200 giây; kiểm: chạy, nếu pass ngay thì tạm dừng interval sau N lần để thấy fail rồi trả lại
-- [ ] 4.6 GREEN: sửa đến khi pass; kiểm: test 4.5 pass, effect có cleanup, deps đủ (lint sạch)
+- [x] 4.5 RED: S8.1-AC2 "Để app mở ở màn bài không thao tác vẫn tính" (tầng hook) — hiện 2 giờ không sự kiện nào rồi unmount → tổng 7200 giây; kiểm: chạy, nếu pass ngay thì tạm dừng interval sau N lần để thấy fail rồi trả lại
+- [x] 4.6 GREEN: sửa đến khi pass; kiểm: test 4.5 pass, effect có cleanup, deps đủ (lint sạch)
 - [ ] 4.7 RED: S8.1-AC2 "Trang chủ hiện lại sau khi app bị ẩn qua nửa đêm" (tầng hook) — `usePageVisibility()` trả `true` lúc đầu, `false` sau `setPageVisibility(true)`, `true` sau `setPageVisibility(false)`; unmount gỡ listener; kiểm: fail vì skeleton luôn `true`
 - [ ] 4.8 GREEN: `usePageVisibility` bằng `useSyncExternalStore` (mẫu `useOnlineStatus`); kiểm: test 4.7 pass
 

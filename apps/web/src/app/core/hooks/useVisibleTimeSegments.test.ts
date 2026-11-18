@@ -85,4 +85,18 @@ describe('useVisibleTimeSegments', () => {
       STUDY_TIME_FLUSH_INTERVAL_MS,
     );
   });
+
+  it('S8.1-AC2: để app mở ở màn bài không thao tác vẫn tính', () => {
+    const onSegment = vi.fn();
+    const { unmount } = renderHook(() =>
+      useVisibleTimeSegments(onSegment, STUDY_TIME_FLUSH_INTERVAL_MS),
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(120 * MINUTE);
+    });
+    unmount();
+
+    expect(totalSeconds(toSegments(onSegment))).toBe(7200);
+  });
 });
