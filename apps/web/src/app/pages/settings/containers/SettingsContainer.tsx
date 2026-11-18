@@ -11,8 +11,12 @@ import { useSettings } from '../hooks/useSettings';
 /** Màn Cài đặt (S8.2): mục tiêu mỗi ngày, tốc độ audio mặc định, hiện pinyin. */
 const SettingsContainer = () => {
   const { t } = useTranslation('settings');
-  const { preferences, changeDailyGoal, changePinyinVisibility } =
-    useSettings();
+  const {
+    preferences,
+    changeDailyGoal,
+    changeDefaultAudioSpeed,
+    changePinyinVisibility,
+  } = useSettings();
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-xl p-xl">
@@ -31,7 +35,10 @@ const SettingsContainer = () => {
             value={preferences.dailyGoalMinutes}
             onChange={changeDailyGoal}
           />
-          <AudioSpeedSetting value={preferences.defaultAudioSpeed} />
+          <AudioSpeedSetting
+            value={preferences.defaultAudioSpeed}
+            onChange={changeDefaultAudioSpeed}
+          />
           <PinyinVisibilitySetting
             value={preferences.isPinyinVisible}
             onChange={changePinyinVisibility}

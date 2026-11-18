@@ -3,9 +3,10 @@ import { AUDIO_SPEED_OPTIONS, type AudioSpeed } from '@csk/shared';
 
 interface AudioSpeedSettingProps {
   value: AudioSpeed;
+  onChange: (speed: AudioSpeed) => void;
 }
 
-export function AudioSpeedSetting({ value }: AudioSpeedSettingProps) {
+export function AudioSpeedSetting({ value, onChange }: AudioSpeedSettingProps) {
   const { t } = useTranslation('settings');
 
   return (
@@ -23,7 +24,7 @@ export function AudioSpeedSetting({ value }: AudioSpeedSettingProps) {
             name="default-audio-speed"
             value={speed}
             checked={speed === value}
-            readOnly
+            onChange={() => onChange(speed)}
             className="settings-option-input"
           />
           {t(`audioSpeed.options.${speed}`)}

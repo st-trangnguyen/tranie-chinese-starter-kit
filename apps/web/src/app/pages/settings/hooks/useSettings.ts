@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { DailyGoalMinutes } from '@csk/shared';
+import type { AudioSpeed, DailyGoalMinutes } from '@csk/shared';
 
 import type { LearningPreferences } from '@shared/models/settings.model';
 import { ProgressService } from '@shared/services/progress.service';
@@ -8,6 +8,7 @@ export interface SettingsState {
   /** null khi đang đọc. */
   preferences: LearningPreferences | null;
   changeDailyGoal: (minutes: DailyGoalMinutes) => void;
+  changeDefaultAudioSpeed: (speed: AudioSpeed) => void;
   changePinyinVisibility: (isVisible: boolean) => void;
 }
 
@@ -72,11 +73,24 @@ export const useSettings = (): SettingsState => {
     [applyChange, service],
   );
 
+  const changeDefaultAudioSpeed = useCallback(
+    (speed: AudioSpeed) =>
+      applyChange('defaultAudioSpeed', speed, () =>
+        service.changeDefaultAudioSpeed(speed),
+      ),
+    [applyChange, service],
+  );
+
   // Lưu qua applyChange ở task 7.12.
   const changePinyinVisibility = useCallback(
     (isVisible: boolean) => showChange('isPinyinVisible', isVisible),
     [showChange],
   );
 
-  return { preferences, changeDailyGoal, changePinyinVisibility };
+  return {
+    preferences,
+    changeDailyGoal,
+    changeDefaultAudioSpeed,
+    changePinyinVisibility,
+  };
 };

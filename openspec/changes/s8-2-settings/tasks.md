@@ -131,8 +131,8 @@ DB mặc định fake-indexeddb.
 - [x] 7.6 GREEN: `PinyinVisibilitySetting` chữ "Bật"/"Tắt" theo giá trị; kiểm: test 7.5 pass
 - [x] 7.7 RED: S8.2-AC1 "Đổi mục tiêu thì giữ sau khi mở lại app" — chọn "60 phút" → checked ngay; không có nút "Lưu"; `unmount()` rồi render lại → "60 phút" checked; kiểm: fail vì `changeDailyGoal` của hook chưa làm (skeleton no-op)
 - [x] 7.8 GREEN: `useSettings.applyChange` (lạc quan, gọi `changeDailyGoal`, cập nhật `persistedRef` khi xong); kiểm: test 7.7 pass
-- [ ] 7.9 RED: S8.2-AC2 "Tốc độ mặc định giữ sau khi mở lại app" — chọn "Chậm (0.75x)", render lại → checked; kiểm: fail vì skeleton
-- [ ] 7.10 GREEN: `changeDefaultAudioSpeed` qua `applyChange`; kiểm: test 7.9 pass
+- [x] 7.9 RED: S8.2-AC2 "Tốc độ mặc định giữ sau khi mở lại app" — chọn "Chậm (0.75x)", render lại → checked; kiểm: fail vì skeleton
+- [x] 7.10 GREEN: `changeDefaultAudioSpeed` qua `applyChange`; kiểm: test 7.9 pass
 - [ ] 7.11 RED: S8.2-AC3 "Tùy chọn pinyin giữ sau khi mở lại app" — tắt "Hiện pinyin", render lại → không checked; kiểm: fail vì skeleton
 - [ ] 7.12 GREEN: `changePinyinVisibility` qua `applyChange`; kiểm: test 7.11 pass
 - [ ] 7.13 RED: S8.2-AC1 "Đổi mục tiêu không hiện lại onboarding" (route thật như nhóm 6) — đã xong onboarding, ở `/settings` chọn "60 phút", mở `/` → URL `/home`, không có heading/nút "Bắt đầu" của onboarding; kiểm: chạy, nếu pass ngay nhờ 1.8/2.2 thì tạm cho `changeDailyGoal` ghi `{ ...DEFAULT_SETTINGS, dailyGoalMinutes }` để thấy fail rồi trả lại
