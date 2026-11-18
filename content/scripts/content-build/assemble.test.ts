@@ -1,4 +1,10 @@
-import { strokeIndexSchema } from '@csk/shared';
+import { createHash } from 'node:crypto';
+
+import {
+  audioIndexSchema,
+  contentRootSchema,
+  strokeIndexSchema,
+} from '@csk/shared';
 
 import { assembleContent, type BuildInputs } from './assemble';
 import { parseYamlFile } from '../lib/yamlFile';
@@ -38,6 +44,7 @@ const inputs = (strokeData: BuildInputs['strokeData']): BuildInputs => ({
   path: parseYamlFile('content/authored/path.yaml', PATH.join('\n')),
   lessons: [parseYamlFile(LESSON_FILE, LESSON.join('\n'))],
   strokeData,
+  audioBytes: () => 4_096,
 });
 
 describe('assembleContent — strokes/index.json', () => {
@@ -63,5 +70,34 @@ describe('assembleContent — strokes/index.json', () => {
     const indexFile = result.files.get('strokes/index.json');
     expect(indexFile).toBeDefined();
     expect(strokeIndexSchema.parse(JSON.parse(indexFile ?? ''))).toEqual([]);
+  });
+});
+
+describe('assembleContent — audio-index.json', () => {
+  it('S8.4-AC1 Chủ đề không có audio: sinh audio-index.json hợp lệ, không làm đổi contentVersion', () => {
+    const result = assembleContent(inputs(() => undefined));
+
+    const indexFile = result.files.get('audio-index.json');
+    expect(indexFile).toBeDefined();
+    const index = audioIndexSchema.parse(JSON.parse(indexFile ?? ''));
+    expect(Object.keys(index.units)).toEqual(['u1']);
+
+    // contentVersion chỉ tính từ các file nội dung có từ trước (words, sentences, lessons).
+    const previousFiles = [...result.files.entries()]
+      .filter(
+        ([name]) =>
+          name === 'words.json' ||
+          name === 'sentences.json' ||
+          name.startsWith('lessons/'),
+      )
+      .map(([, content]) => content);
+    const expectedVersion = createHash('sha1')
+      .update(previousFiles.join(''))
+      .digest('hex')
+      .slice(0, 12);
+    const root = contentRootSchema.parse(
+      JSON.parse(result.files.get('content.json') ?? ''),
+    );
+    expect(root.contentVersion).toBe(expectedVersion);
   });
 });

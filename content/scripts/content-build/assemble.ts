@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import type { ContentRoot, Lesson, Sentence, Stage } from '@csk/shared';
 
 import { audioJob, type AudioJob } from './audio';
+import type { AudioBytes } from './audioIndex';
 import {
   lessonRefIssues,
   lessonStrokeWriteIssues,
@@ -29,6 +30,8 @@ export interface BuildInputs {
   lessons: readonly YamlFile[];
   /** Dữ liệu nét chữ (JSON hanzi-writer) của một chữ, `undefined` nếu không có. */
   strokeData: (char: string) => string | undefined;
+  /** Dung lượng (byte) của một file audio trong `assets/`, `undefined` nếu file chưa có (S8.4). */
+  audioBytes: AudioBytes;
 }
 
 export interface BuildResult {

@@ -234,3 +234,39 @@ describe('buildAudioIndex precached', () => {
     expect(index.precached).not.toContain(AUDIO_SENTENCE);
   });
 });
+
+describe('buildAudioIndex nhóm không có audio', () => {
+  const LESSONS: Lesson[] = [
+    lesson('hsk-write', [
+      { id: 'e1', kind: 'stroke-write', wordId: '水' },
+      { id: 'e2', kind: 'stroke-write', wordId: '八' },
+    ]),
+    lesson('hsk-01', [{ id: 'e1', kind: 'tone-choice', wordId: '妈' }]),
+  ];
+
+  const STAGES: Stage[] = [
+    {
+      id: 'hsk1',
+      title: 'HSK 1',
+      units: [
+        { id: 'u-write', title: 'Tập viết', lessonIds: ['hsk-write'] },
+        { id: 'u-greet', title: 'Chào hỏi', lessonIds: ['hsk-01'] },
+      ],
+    },
+  ];
+
+  it('S8.4-AC1 Chủ đề không có audio: nhóm chỉ có bài stroke-write vẫn giữ key với danh sách rỗng', () => {
+    const index = buildAudioIndex(
+      STAGES,
+      LESSONS,
+      wordById,
+      sentenceById,
+      () => 10_000,
+    );
+
+    expect(index.units).toHaveProperty('u-write');
+    expect(index.units['u-write']).toEqual([]);
+    expect(index.units['u-greet']).toEqual([AUDIO_MA]);
+    expect(index.bytes).not.toHaveProperty(AUDIO_SHUI);
+  });
+});

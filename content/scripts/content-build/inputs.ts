@@ -62,5 +62,7 @@ export function readBuildInputs(): BuildInputs {
     path: readYaml(PATHS.path),
     lessons: listYamlFiles(PATHS.lessons).map(readYaml),
     strokeData,
+    // Skeleton (S8.4 RED 2.5): chưa đọc dung lượng file, GREEN 2.6 thay bằng `statSync`.
+    audioBytes: () => undefined,
   };
 }
