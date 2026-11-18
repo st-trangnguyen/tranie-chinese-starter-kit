@@ -24,6 +24,8 @@ const makeStore = (
     ),
     saveLessonProgress: vi.fn(async () => undefined),
     saveLessonProgressBatch: vi.fn(async () => undefined),
+    getDailyStat: vi.fn(async () => undefined),
+    addStudySeconds: vi.fn(async () => undefined),
   };
   return store;
 };
