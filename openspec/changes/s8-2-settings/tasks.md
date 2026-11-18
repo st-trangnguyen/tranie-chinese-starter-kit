@@ -163,8 +163,8 @@ giá trị hỏng: `db.settings.put({ key, value })` thô.
 - [x] 8.16 GREEN: sửa đến khi pass; kiểm: test 8.15 pass
 - [x] 8.17 RED: S8.2-AC3 "Tùy chọn pinyin đã lưu bị hỏng thì về bật" (container) — thô: mục tiêu 30, pinyin `'yes'` → công tắc bật, "30 phút" checked, không alert; kiểm: như 8.13
 - [x] 8.18 GREEN: sửa đến khi pass; kiểm: test 8.17 pass
-- [ ] 8.19 RED: S8.2-AC1 "Không đọc được cài đặt thì màn Cài đặt hiện mặc định" (container) — DB có 60/`'slow'`/tắt nhưng `getSettings` reject: "15 phút", "Bình thường (1x)" checked, công tắc bật, không alert; rồi `saveSettings` reject, chọn "30 phút" → thông báo lỗi, "15 phút" checked; kiểm: chạy, nếu pass ngay nhờ 2.2 thì tạm cho hook giữ `null` khi đọc lỗi để thấy fail (kẹt "Đang tải cài đặt…") rồi trả lại
-- [ ] 8.20 GREEN: sửa đến khi pass; kiểm: test 8.19 pass, `useSettings.ts` và `SettingsContainer.tsx` < 300 dòng, mỗi component < 5 props
+- [x] 8.19 RED: S8.2-AC1 "Không đọc được cài đặt thì màn Cài đặt hiện mặc định" (container) — DB có 60/`'slow'`/tắt nhưng `getSettings` reject: "15 phút", "Bình thường (1x)" checked, công tắc bật, không alert; rồi `saveSettings` reject, chọn "30 phút" → thông báo lỗi, "15 phút" checked; kiểm: chạy, nếu pass ngay nhờ 2.2 thì tạm cho hook giữ `null` khi đọc lỗi để thấy fail (kẹt "Đang tải cài đặt…") rồi trả lại
+- [x] 8.20 GREEN: sửa đến khi pass; kiểm: test 8.19 pass, `useSettings.ts` và `SettingsContainer.tsx` < 300 dòng, mỗi component < 5 props
 
 ## 9. E2E — `apps/web/e2e/E8/` (design mục Test)
 

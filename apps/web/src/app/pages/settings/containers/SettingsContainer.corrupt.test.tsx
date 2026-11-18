@@ -1,4 +1,5 @@
 import { createDatabase } from '@core/helpers/db.helper';
+import { progressStore } from '@core/services/progress-store.service';
 import { renderWithProviders, screen, within } from '@test/render';
 
 import SettingsContainer from './SettingsContainer';
@@ -111,5 +112,73 @@ describe('SettingsContainer — dữ liệu lưu bị hỏng', () => {
     ).not.toBeChecked();
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+});
+
+describe('SettingsContainer — không đọc được cài đặt', () => {
+  beforeEach(async () => {
+    await clearDatabase();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('S8.2-AC1 Không đọc được cài đặt thì màn Cài đặt hiện mặc định: DB có 60/"slow"/tắt nhưng đọc lỗi → "15 phút", "Bình thường (1x)", pinyin bật; lưu lỗi khi chọn "30 phút" → thông báo, "15 phút" vẫn chọn', async () => {
+    await writeRawSettings([
+      { key: 'dailyGoalMinutes', value: 60 },
+      { key: 'defaultAudioSpeed', value: 'slow' },
+      { key: 'isPinyinVisible', value: false },
+    ]);
+    vi.spyOn(progressStore, 'getSettings').mockRejectedValue(
+      new Error('read failed'),
+    );
+
+    const { user } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const goalGroup = await screen.findByRole('group', {
+      name: 'Mục tiêu mỗi ngày',
+    });
+    expect(
+      within(goalGroup).getByRole('radio', { name: '15 phút' }),
+    ).toBeChecked();
+    expect(
+      within(goalGroup).getByRole('radio', { name: '60 phút' }),
+    ).not.toBeChecked();
+
+    const speedGroup = screen.getByRole('group', {
+      name: 'Tốc độ audio mặc định',
+    });
+    expect(
+      within(speedGroup).getByRole('radio', { name: 'Bình thường (1x)' }),
+    ).toBeChecked();
+    expect(
+      within(speedGroup).getByRole('radio', { name: 'Chậm (0.75x)' }),
+    ).not.toBeChecked();
+
+    const pinyinGroup = screen.getByRole('group', { name: 'Hiện pinyin' });
+    expect(
+      within(pinyinGroup).getByRole('switch', { name: 'Hiện pinyin' }),
+    ).toBeChecked();
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    vi.spyOn(progressStore, 'saveSettings').mockRejectedValue(
+      new Error('write failed'),
+    );
+
+    await user.click(within(goalGroup).getByRole('radio', { name: '30 phút' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Không lưu được cài đặt. Hãy thử lại.',
+    );
+    expect(
+      within(goalGroup).getByRole('radio', { name: '15 phút' }),
+    ).toBeChecked();
+    expect(
+      within(goalGroup).getByRole('radio', { name: '30 phút' }),
+    ).not.toBeChecked();
   });
 });
