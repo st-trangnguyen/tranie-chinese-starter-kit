@@ -141,27 +141,44 @@ export class OfflineAudioService {
 
   /**
    * Rule: thông báo của chủ đề mất khi trạng thái hiện tại của chủ đề khác `shownWith`
-   * (S8.4 AC1). Skeleton (RED 5.35): chưa có hành vi.
+   * (S8.4 AC1), kể cả khi chủ đề không còn khối; trạng thái không đổi thì giữ.
    */
   pruneStaleMessages(
     messages: ReadonlyMap<string, OfflineAudioMessage>,
     topicsNow: ReadonlyMap<string, OfflineAudioTopic>,
   ): ReadonlyMap<string, OfflineAudioMessage> {
-    void topicsNow;
-    return messages;
+    return new Map(
+      [...messages].filter(
+        ([unitId, message]) =>
+          topicsNow.get(unitId)?.status === message.shownWith,
+      ),
+    );
   }
 
   /**
-   * Gom `deriveTopic` của mọi chủ đề + thông báo còn hiệu lực (S8.4 AC1).
-   * Skeleton (RED 5.35): chưa có hành vi.
+   * Rule: khối audio của mọi chủ đề có audio, kèm thông báo còn hiệu lực (S8.4 AC1).
+   * Chủ đề không có audio không có khối.
    */
   deriveTopics(
     stages: readonly Stage[],
     snapshot: OfflineAudioSnapshot,
   ): ReadonlyMap<string, OfflineAudioTopicView> {
-    void stages;
-    void snapshot;
-    return new Map();
+    const topics = new Map<string, OfflineAudioTopic>();
+    stages.forEach((stage) => {
+      stage.units.forEach((unit) => {
+        const topic = this.deriveTopic(stage.id, unit.id, snapshot);
+        if (topic) {
+          topics.set(unit.id, topic);
+        }
+      });
+    });
+    const messages = this.pruneStaleMessages(snapshot.messages, topics);
+    return new Map(
+      [...topics].map(([unitId, topic]) => [
+        unitId,
+        { ...topic, message: messages.get(unitId)?.kind ?? null },
+      ]),
+    );
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
