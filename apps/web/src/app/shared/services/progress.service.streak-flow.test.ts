@@ -63,4 +63,16 @@ describe('ProgressService — getStudyStreak', () => {
 
     await expect(service.getStudyStreak(at(18, 9, 0))).resolves.toBe(1);
   });
+
+  it('S8.3-AC1 Học qua nửa đêm thì mỗi ngày so với phần thời gian của ngày đó: hôm qua 10 phút, học 23:50 → 0:10 thì hôm qua đạt, hôm nay 10 phút, streak 1', async () => {
+    const service = createService();
+    await service.completeOnboarding(15);
+    await service.recordStudyTime(at(17, 10, 0), at(17, 10, 10));
+
+    await service.recordStudyTime(at(17, 23, 50), at(18, 0, 10));
+
+    await expect(service.getStudyStreak(at(18, 0, 15))).resolves.toBe(1);
+    const today = await service.getTodayStudy(at(18, 0, 15));
+    expect(today.minutes).toBe(10);
+  });
 });
