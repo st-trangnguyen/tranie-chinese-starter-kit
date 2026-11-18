@@ -177,4 +177,40 @@ describe('SettingsContainer — lỗi lưu', () => {
       within(speedGroup).getByRole('radio', { name: 'Chậm (0.75x)' }),
     ).toBeChecked();
   });
+
+  it('S8.2-AC1 Lỗi lặp lại chỉ có một thông báo: chọn "30 phút" lỗi rồi "60 phút" lỗi → một thông báo mới, "15 phút" vẫn chọn', async () => {
+    await new ProgressService().completeOnboarding(15);
+
+    const { user } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const group = await screen.findByRole('group', {
+      name: 'Mục tiêu mỗi ngày',
+    });
+
+    vi.spyOn(progressStore, 'saveSettings')
+      .mockRejectedValueOnce(new Error('quota'))
+      .mockRejectedValueOnce(new Error('quota'));
+
+    await user.click(within(group).getByRole('radio', { name: '30 phút' }));
+    const firstAlert = await screen.findByRole('alert');
+    expect(firstAlert).toHaveTextContent(SAVE_ERROR_MESSAGE);
+
+    await user.click(within(group).getByRole('radio', { name: '60 phút' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).not.toBe(firstAlert);
+    });
+    const alerts = screen.getAllByRole('alert');
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0]).toHaveTextContent(SAVE_ERROR_MESSAGE);
+    expect(within(group).getByRole('radio', { name: '15 phút' })).toBeChecked();
+    expect(
+      within(group).getByRole('radio', { name: '30 phút' }),
+    ).not.toBeChecked();
+    expect(
+      within(group).getByRole('radio', { name: '60 phút' }),
+    ).not.toBeChecked();
+  });
 });
