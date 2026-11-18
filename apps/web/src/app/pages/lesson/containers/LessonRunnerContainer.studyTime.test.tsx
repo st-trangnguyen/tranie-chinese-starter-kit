@@ -173,4 +173,21 @@ describe('LessonRunnerContainer — thời gian học hôm nay (S8.1)', () => {
       expect(await readTodayMinutes()).toBe(2);
     });
   });
+
+  it('S8.1-AC2 Hai tab cùng mở màn bài: should add 6 minutes to today when two lesson screens stay open together 3 min 10 s and both are left', async () => {
+    // Hai cây React riêng trong cùng trang, mỗi cây là một màn bài tính thời gian riêng.
+    const first = renderRunner();
+    const second = renderRunner();
+    await waitFor(() => {
+      expect(screen.getAllByText('Câu về 八')).toHaveLength(2);
+    });
+
+    vi.setSystemTime(START_TIME + 3 * MINUTE + 10 * SECOND);
+    first.unmount();
+    second.unmount();
+
+    await waitFor(async () => {
+      expect(await readTodayMinutes()).toBe(6);
+    });
+  });
 });
