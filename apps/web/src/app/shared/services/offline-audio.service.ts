@@ -37,6 +37,36 @@ export class OfflineAudioService {
 
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
 
+  private snapshot: OfflineAudioSnapshot = INITIAL_SNAPSHOT;
+  private readonly listeners = new Set<() => void>();
+  private audioIndex: Promise<AudioIndex> | null = null;
+
+  /** Nạp audio index một lần, giữ promise. */
+  private readAudioIndex(): Promise<AudioIndex> {
+    this.audioIndex ??= this.source.getAudioIndex();
+    return this.audioIndex;
+  }
+
+  private readCachedPaths(
+    paths: readonly string[],
+  ): Promise<ReadonlySet<string>> {
+    return this.cache.listCachedPaths(paths);
+  }
+
+  private downloadFile(path: string): Promise<void> {
+    return this.cache.download(path);
+  }
+
+  private readSnapshot(): OfflineAudioSnapshot {
+    return this.snapshot;
+  }
+
+  /** Đặt snapshot mới (object mới, bất biến) rồi báo mọi listener. */
+  private writeSnapshot(next: OfflineAudioSnapshot): void {
+    this.snapshot = next;
+    this.listeners.forEach((listener) => listener());
+  }
+
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
   /**
@@ -222,25 +252,79 @@ export class OfflineAudioService {
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
-  // Skeleton RED 6.1: chưa có hành vi (GREEN 6.2).
   subscribe = (listener: () => void): (() => void) => {
-    void listener;
-    return () => undefined;
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
   };
 
-  getSnapshot = (): OfflineAudioSnapshot => INITIAL_SNAPSHOT;
+  getSnapshot = (): OfflineAudioSnapshot => this.readSnapshot();
 
+  /** Nạp audio index và tập file đang có trên máy cho mọi audio trong index. */
   async refresh(): Promise<void> {
-    void this.cache;
-    void this.source;
+    const index = await this.readAudioIndex();
+    const cachedPaths = await this.readCachedPaths([
+      ...new Set(Object.values(index.units).flat()),
+    ]);
+    this.writeSnapshot({ ...this.readSnapshot(), index, cachedPaths });
   }
 
+  /**
+   * Tải tuần tự (theo thứ tự trong index) các audio còn thiếu của chủ đề. File cuối và việc
+   * bỏ "đang tải" + câu `download-finished` nằm trong cùng một lần ghi snapshot.
+   */
   async startDownload(
     unit: OfflineAudioUnit,
     isOnline: boolean,
   ): Promise<void> {
-    void unit;
     void isOnline;
+    const started = this.readSnapshot();
+    const messages = new Map(started.messages);
+    messages.delete(unit.id);
+    this.writeSnapshot({
+      ...started,
+      messages,
+      downloadingUnitIds: new Set(started.downloadingUnitIds).add(unit.id),
+      announcements: this.appendAnnouncement(started.announcements, {
+        kind: 'download-started',
+        unitTitle: unit.title,
+      }),
+    });
+    const missingAudio = this.listMissingAudio(
+      started.index?.units[unit.id] ?? [],
+      started.cachedPaths,
+    );
+    for (const [position, path] of missingAudio.entries()) {
+      await this.downloadFile(path);
+      const current = this.readSnapshot();
+      const next = {
+        ...current,
+        cachedPaths: new Set(current.cachedPaths).add(path),
+      };
+      const isLast = position === missingAudio.length - 1;
+      this.writeSnapshot(isLast ? this.finishDownload(next, unit) : next);
+    }
+    if (missingAudio.length === 0) {
+      this.writeSnapshot(this.finishDownload(this.readSnapshot(), unit));
+    }
+  }
+
+  /** Bỏ chủ đề khỏi "đang tải" kèm câu `download-finished` (bước 6). */
+  private finishDownload(
+    snapshot: OfflineAudioSnapshot,
+    unit: OfflineAudioUnit,
+  ): OfflineAudioSnapshot {
+    const downloadingUnitIds = new Set(snapshot.downloadingUnitIds);
+    downloadingUnitIds.delete(unit.id);
+    return {
+      ...snapshot,
+      downloadingUnitIds,
+      announcements: this.appendAnnouncement(snapshot.announcements, {
+        kind: 'download-finished',
+        unitTitle: unit.title,
+      }),
+    };
   }
 }
 
