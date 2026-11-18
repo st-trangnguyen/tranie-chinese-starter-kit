@@ -58,7 +58,11 @@ export class BrowserAudioCache implements AudioCache {
       const cache = await storage.open(AUDIO_CACHE_NAME);
       await cache.put(url, response);
     } catch (cause) {
-      throw new AudioDownloadError('network', { cause });
+      const reason: AudioDownloadFailure =
+        cause instanceof DOMException && cause.name === 'QuotaExceededError'
+          ? 'storage-full'
+          : 'network';
+      throw new AudioDownloadError(reason, { cause });
     }
   }
 
