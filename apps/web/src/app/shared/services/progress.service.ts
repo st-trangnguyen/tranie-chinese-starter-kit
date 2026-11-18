@@ -150,8 +150,8 @@ export class ProgressService {
   }
 
   /**
-   * Rule: ngày không có dòng là chưa đạt; hôm nay so với mục tiêu đang chọn; ngày đã qua đạt khi số
-   * phút ≥ mục tiêu của ngày đó hoặc ≥ mục tiêu hôm nay (S8.3 AC1).
+   * Rule: ngày không có dòng là chưa đạt; hôm nay so với mục tiêu đang chọn; ngày đã qua chỉ so với
+   * mục tiêu của ngày đó, đổi mục tiêu sau không đổi kết quả ngày đã qua (S8.3 AC1).
    */
   isStreakDayReached(
     stat: DailyStat | undefined,
@@ -161,16 +161,12 @@ export class ProgressService {
     if (stat === undefined) {
       return false;
     }
-    const minutes = this.toStudyMinutes(stat.studySeconds);
-    if (this.isDailyGoalReached(minutes, todayGoalMinutes)) {
-      return true;
-    }
-    return (
-      !isToday &&
-      this.isDailyGoalReached(
-        minutes,
-        this.resolveDayGoal(stat.goalMinutes, todayGoalMinutes),
-      )
+    const goalMinutes = isToday
+      ? todayGoalMinutes
+      : this.resolveDayGoal(stat.goalMinutes, todayGoalMinutes);
+    return this.isDailyGoalReached(
+      this.toStudyMinutes(stat.studySeconds),
+      goalMinutes,
     );
   }
 
