@@ -145,4 +145,27 @@ describe('ProgressService — countStudyStreak', () => {
 
     expect(service.countStudyStreak(stats, TODAY, 15)).toBe(1);
   });
+
+  it('S8.3-AC1 Ngày ghi sau hôm nay không được tính: ngày mai đã ghi 20 phút, hôm qua và hôm nay đạt thì streak là 2', () => {
+    const stats = [
+      day(-2, 0),
+      day(-1, REACHED),
+      day(0, REACHED),
+      day(1, REACHED),
+    ];
+
+    expect(service.countStudyStreak(stats, TODAY, 15)).toBe(2);
+  });
+
+  it('S8.3-AC1 Ngày ghi sau hôm nay không được tính: ngày mai đã ghi 20 phút, hôm nay chưa đạt thì giữ chuỗi đến hôm qua', () => {
+    const stats = [
+      day(-3, 0),
+      day(-2, REACHED),
+      day(-1, REACHED),
+      day(0, 600),
+      day(1, REACHED),
+    ];
+
+    expect(service.countStudyStreak(stats, TODAY, 15)).toBe(2);
+  });
 });
