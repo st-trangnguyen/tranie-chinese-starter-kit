@@ -4,6 +4,7 @@ import {
   type ProgressStore,
 } from './progress-store.service';
 
+const DAY_BEFORE_YESTERDAY = '2026-11-16';
 const YESTERDAY = '2026-11-17';
 const TODAY = '2026-11-18';
 
@@ -221,5 +222,39 @@ describe('DexieProgressStore — mục tiêu của ngày (S8.3)', () => {
       studySeconds: 1260,
       goalMinutes: 60,
     });
+  });
+
+  it('S8.3-AC1 Số phút của một ngày đã qua bị hỏng: đọc mọi ngày bỏ dòng hỏng, giữ các dòng hợp lệ', async () => {
+    const { db, store } = openStore();
+    await db.dailyStats.put({
+      date: DAY_BEFORE_YESTERDAY,
+      studySeconds: 1200,
+      goalMinutes: 15,
+    });
+    await db.dailyStats.put({
+      date: YESTERDAY,
+      studySeconds: 'abc',
+      goalMinutes: 15,
+    });
+    await db.dailyStats.put({
+      date: TODAY,
+      studySeconds: 1200,
+      goalMinutes: 15,
+    });
+    await db.dailyStats.put({
+      date: 'xyz',
+      studySeconds: 1200,
+      goalMinutes: 15,
+    });
+
+    const stats = await store.getAllDailyStats();
+
+    expect(stats).toHaveLength(2);
+    expect(stats).toEqual(
+      expect.arrayContaining([
+        { date: DAY_BEFORE_YESTERDAY, studySeconds: 1200, goalMinutes: 15 },
+        { date: TODAY, studySeconds: 1200, goalMinutes: 15 },
+      ]),
+    );
   });
 });
