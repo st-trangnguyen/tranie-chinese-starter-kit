@@ -38,8 +38,7 @@ export class OfflineAudioService {
     unitAudio: readonly string[],
     cachedPaths: ReadonlySet<string>,
   ): string[] {
-    // Skeleton (RED 5.3): chỉ xử lý "chưa có file nào"; GREEN 5.4 thay bằng lọc từng file.
-    return cachedPaths.size === 0 ? [...unitAudio] : [];
+    return unitAudio.filter((path) => !cachedPaths.has(path));
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────

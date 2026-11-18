@@ -71,8 +71,8 @@ Skeleton service + model `shared/models/offline-audio.model.ts` tạo trong comm
 
 - [x] 5.1 RED: S8.4-AC1 "Chủ đề chưa tải có nút tải kèm dung lượng" (Phần 2) — nhóm HSK 4 audio, không có trên máy → `{ status: 'not-downloaded', bytes: 2_516_582 }`; audio trùng tính một lần; kiểm: fail vì skeleton trả `null`
 - [x] 5.2 GREEN: `deriveTopic` (nhánh chưa tải), `sumBytes`; kiểm: test 5.1 pass
-- [ ] 5.3 RED: S8.4-AC1 "Thiếu một phần audio thì là chưa tải" — 3/4 có trên máy → `not-downloaded`; kiểm: chạy, nếu pass ngay thì tạm coi "có ≥ 1 file" là đã tải để thấy fail rồi trả lại
-- [ ] 5.4 GREEN: `listMissingAudio`; kiểm: test 5.3 pass
+- [x] 5.3 RED: S8.4-AC1 "Thiếu một phần audio thì là chưa tải" — 3/4 có trên máy → `not-downloaded`; kiểm: chạy, nếu pass ngay thì tạm coi "có ≥ 1 file" là đã tải để thấy fail rồi trả lại
+- [x] 5.4 GREEN: `listMissingAudio`; kiểm: test 5.3 pass
 - [ ] 5.5 RED: S8.4-AC1 "Đã tải thì hiện dung lượng và nút xóa" — đủ 4/4, có audio không phải Nhập môn, không chủ đề nào tải → `{ status: 'downloaded', bytes, canRemove: true }`; kiểm: fail
 - [ ] 5.6 GREEN: nhánh đã tải, `selectRemovableAudio`, `canRemove`; kiểm: test 5.5 pass
 - [ ] 5.7 RED: S8.4-AC1 "Đã nghe hết audio thì là đã tải" (Phần 2) — đủ file trong đó một file là audio Nhập môn (precache), chưa từng tải → `downloaded`, `canRemove: true`; kiểm: chạy, nếu pass ngay thì tạm bỏ file precache khỏi tập "có trên máy" để thấy fail rồi trả lại
