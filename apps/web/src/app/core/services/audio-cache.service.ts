@@ -50,9 +50,16 @@ export class BrowserAudioCache implements AudioCache {
       throw new Error('Trình duyệt không có bộ nhớ đệm để tải audio');
     }
     const url = `/${path}`;
-    const response = await fetch(url);
-    const cache = await storage.open(AUDIO_CACHE_NAME);
-    await cache.put(url, response);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} khi tải ${url}`);
+      }
+      const cache = await storage.open(AUDIO_CACHE_NAME);
+      await cache.put(url, response);
+    } catch (cause) {
+      throw new AudioDownloadError('network', { cause });
+    }
   }
 
   async remove(paths: readonly string[]): Promise<void> {
