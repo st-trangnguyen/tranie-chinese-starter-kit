@@ -41,7 +41,8 @@ describe('parseSettings', () => {
 });
 
 describe('parseSettings — tốc độ audio và hiện pinyin', () => {
-  const AC2 = 'S8.2-AC2 Một tùy chọn đã lưu bị hỏng thì chỉ tùy chọn đó về mặc định';
+  const AC2 =
+    'S8.2-AC2 Một tùy chọn đã lưu bị hỏng thì chỉ tùy chọn đó về mặc định';
 
   it(`${AC2}: bản ghi rỗng có tốc độ bình thường và hiện pinyin`, () => {
     expect(parseSettings({})).toEqual({
@@ -83,6 +84,26 @@ describe('parseSettings — tốc độ audio và hiện pinyin', () => {
       hasCompletedOnboarding: true,
     });
   });
+});
+
+describe('parseSettings — mục tiêu đã lưu bị hỏng', () => {
+  const AC1 = 'S8.2-AC1 Mục tiêu đã lưu bị hỏng thì về 15 phút';
+
+  it.each<[string, unknown]>([
+    ['chuỗi không đọc được', 'abc'],
+    ['số ngoài ba mức', 45],
+  ])(
+    `${AC1}: mục tiêu là %s thì về 15, tốc độ chậm giữ nguyên`,
+    (_label, dailyGoalMinutes) => {
+      const settings = parseSettings({
+        dailyGoalMinutes,
+        defaultAudioSpeed: 'slow',
+      });
+
+      expect(settings.dailyGoalMinutes).toBe(15);
+      expect(settings.defaultAudioSpeed).toBe('slow');
+    },
+  );
 });
 
 describe('lessonProgressSchema', () => {
