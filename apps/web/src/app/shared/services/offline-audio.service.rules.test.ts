@@ -193,4 +193,19 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
     expect(withEmptyCache).toEqual({ status: 'available-offline' });
     expect(withPrecachedFiles).toEqual({ status: 'available-offline' });
   });
+
+  it('S8.4-AC1 Chủ đề không có audio: nhóm HSK có danh sách audio rỗng, hoặc không có trong audio index → không có khối (null)', () => {
+    const emptyUnitId = 'hsk1-no-audio';
+    const missingUnitId = 'hsk1-not-in-index';
+    const index: AudioIndex = {
+      ...HSK_INDEX,
+      units: { ...HSK_INDEX.units, [emptyUnitId]: [] },
+    };
+    const snapshot = makeSnapshot({ index });
+
+    expect(service.deriveTopic(HSK_STAGE_ID, emptyUnitId, snapshot)).toBeNull();
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, missingUnitId, snapshot),
+    ).toBeNull();
+  });
 });
