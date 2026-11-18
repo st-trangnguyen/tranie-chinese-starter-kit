@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useOnlineStatus } from '@core/hooks/useOnlineStatus';
 import { useSpeechRecognition } from '@core/hooks/useSpeechRecognition';
+import { usePinyinVisibility } from '@shared/contexts/usePinyinVisibility';
 
 import type { ExerciseContent, ExerciseProps } from './exercise.types';
 import {
@@ -54,6 +55,7 @@ export function SpeakExercise({
   const isOnline = useOnlineStatus();
   const speech = useSpeechRecognition();
   const { isReadAloud } = useRecordingMode();
+  const isPinyinVisible = usePinyinVisibility();
   const canAutoCheck = isOnline && speech.isSupported && !isReadAloud;
   const isRatingLocked = selectedRating !== null || isLocked;
   const target = resolveTarget(exercise, content);
@@ -97,7 +99,7 @@ export function SpeakExercise({
     <div className="flex flex-col gap-md">
       <div className="flex flex-col gap-xs">
         <p>{target.hanzi}</p>
-        <p>{target.pinyin}</p>
+        {isPinyinVisible && <p lang="zh-Latn-pinyin">{target.pinyin}</p>}
         <p>{target.vi}</p>
       </div>
       <RecordCompare

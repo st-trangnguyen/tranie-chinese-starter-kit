@@ -67,8 +67,8 @@ Test: `apps/web/src/app/shared/contexts/AudioSpeedContext.test.tsx` (thêm case)
 Test: `apps/web/src/app/shared/components/exercises/SpeakExercise.pinyin.test.tsx` (mẫu render của `SpeakExercise.test.tsx`,
 helper mic bị chặn của `SpeakExercise.no-mic.test.tsx`), `apps/web/src/app/shared/components/exercises/PinyinHidden.otherKinds.test.tsx`.
 
-- [ ] 4.1 RED: S8.2-AC3 "Câu nói khi tắt pinyin" (speak-rating) — `PinyinVisibilityProvider isVisible={false}`, câu "nói" theo `wordId` và theo `sentenceId`: hiện chữ Hán và nghĩa, `queryByText(pinyin)` null, có ba nút "Chưa đúng", "Gần đúng", "Đúng"; kiểm: fail vì pinyin vẫn hiện
-- [ ] 4.2 GREEN: `SpeakExercise` đọc `usePinyinVisibility()`, chỉ render dòng pinyin khi `true` (thêm `lang="zh-Latn-pinyin"`); kiểm: test 4.1 pass
+- [x] 4.1 RED: S8.2-AC3 "Câu nói khi tắt pinyin" (speak-rating) — `PinyinVisibilityProvider isVisible={false}`, câu "nói" theo `wordId` và theo `sentenceId`: hiện chữ Hán và nghĩa, `queryByText(pinyin)` null, có ba nút "Chưa đúng", "Gần đúng", "Đúng"; kiểm: fail vì pinyin vẫn hiện
+- [x] 4.2 GREEN: `SpeakExercise` đọc `usePinyinVisibility()`, chỉ render dòng pinyin khi `true` (thêm `lang="zh-Latn-pinyin"`); kiểm: test 4.1 pass
 - [ ] 4.3 RED: S5.2-AC1 "Câu nói hiện nội dung để đọc và 3 mức" (speak-rating, Scenario sửa: "Hiện pinyin" đang bật) — trong provider `isVisible` true: hiện chữ Hán, pinyin, nghĩa và ba nút; kiểm: chạy, nếu pass ngay thì tạm luôn ẩn pinyin để thấy fail rồi trả lại
 - [ ] 4.4 GREEN: sửa đến khi pass; kiểm: test 4.3 pass, `SpeakExercise.test.tsx` cũ (không provider → mặc định hiện) pass
 - [ ] 4.5 RED: S8.2-AC3 "Đọc to rồi tự chấm khi tắt pinyin" (speak-no-mic) — mic bị chặn, bấm "Ghi âm" → chế độ đọc to; provider `false`: hiện chữ Hán và nghĩa, không pinyin; "Nghe mẫu" bấm được; kiểm: chạy, nếu pass ngay nhờ 4.2 thì tạm chỉ ẩn pinyin khi `!isReadAloud` để thấy fail rồi trả lại
