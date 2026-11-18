@@ -125,4 +125,31 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
       new Set([AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D]),
     );
   });
+
+  it('S8.4-AC1 Đã nghe hết audio thì là đã tải: đủ file (một file là audio Nhập môn có qua precache, còn lại có vì đã nghe), chưa từng bấm tải → downloaded, có nút xóa', () => {
+    const listenedUnitId = 'hsk1-listened';
+    const index: AudioIndex = {
+      ...HSK_INDEX,
+      units: {
+        ...HSK_INDEX.units,
+        [listenedUnitId]: [AUDIO_INTRO, AUDIO_A, AUDIO_B],
+      },
+    };
+
+    const topic = service.deriveTopic(
+      HSK_STAGE_ID,
+      listenedUnitId,
+      makeSnapshot({
+        index,
+        // AUDIO_INTRO có trên máy qua precache; AUDIO_A, AUDIO_B có vì đã nghe khi online.
+        cachedPaths: new Set([AUDIO_INTRO, AUDIO_A, AUDIO_B]),
+      }),
+    );
+
+    expect(topic).toEqual({
+      status: 'downloaded',
+      bytes: 1_350_000,
+      canRemove: true,
+    });
+  });
 });
