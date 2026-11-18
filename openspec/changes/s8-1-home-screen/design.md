@@ -130,7 +130,10 @@ export type NextLesson =
 
 - **Hook hạ tầng `core/hooks/useVisibleTimeSegments.ts`** (timer + sự kiện trình duyệt, không nghiệp vụ):
   `useVisibleTimeSegments(onSegment: (startMs: number, endMs: number) => void, flushIntervalMs: number): void`.
-  - Một effect (deps `[onSegment, flushIntervalMs]`) giữ `segmentStart: number | null` trong closure:
+  - `onSegment` gọi qua ref: `onSegmentRef` cập nhật trong một effect riêng (mỗi lần `onSegment` đổi), nên đổi callback
+    không dựng lại timer/listener.
+  - Effect chính (deps `[flushIntervalMs]`) giữ `segmentStart: number | null` trong closure, phát đoạn qua
+    `onSegmentRef.current`:
     - mount: trang đang hiện (`document.visibilityState === 'visible'`) → `segmentStart = Date.now()`, bật interval.
     - mỗi `flushIntervalMs`: phát `[segmentStart, now]`, `segmentStart = now`.
     - `visibilitychange` → `hidden`: phát `[segmentStart, now]` **ngay trong listener** (thời điểm lấy lúc sự kiện, không chờ
@@ -169,13 +172,13 @@ export type NextLesson =
     sau khi bị ẩn; không có timer nên không tự đổi khi đang hiện qua nửa đêm (đúng Scenario "Để Trang chủ mở qua nửa đêm").
 - `pages/home/containers/HomeContainer.tsx` (default export, lazy): `<main className="mx-auto flex min-h-screen max-w-md
   flex-col gap-xl p-xl">`, `<h1>` `home:title` "Trang chủ", `<NextLessonCard>`, `<TodayStudyStatus>`, `<Link
-  to={ROUTE_PATHS.learningPaths}>` `home:learningPathLink` "Xem lộ trình" (mọi trạng thái). Đang nạp → `<p role="status">`.
+  to={ROUTE_PATHS.learningPaths} className="home-link">` `home:learningPathLink` "Xem lộ trình" (mọi trạng thái). Đang nạp → `<p role="status">`.
 - `pages/home/components/NextLessonCard.tsx` — props `{ nextLesson: NextLesson }`: `available` → `<section>` có `<h2>`
   `home:nextLesson` "Bài tiếp theo", tiêu đề bài, `<Link className="btn btn-primary" to={ROUTE_PATHS.lesson(id)}>` "Vào học"
   (liên kết điều hướng trông như nút, vùng chạm ≥ 44×44 px, mẫu nút "Tập viết" S6.2 D8; test truy vấn `getByRole('link',
   { name: 'Vào học' })`); `all-completed` → `<p>` "Bạn đã học xong lộ trình hiện có.", không có "Vào học".
 - `pages/home/components/TodayStudyStatus.tsx` — props `{ todayStudy: TodayStudy }`: `<p>` `home:todayStudy` "Hôm nay:
-  {{minutes}} / {{goalMinutes}} phút"; `isGoalReached` → thêm `<p>` `home:goalReached` "Đã đạt mục tiêu hôm nay" (chữ, không
+  {{minutes}} / {{goalMinutes}} phút"; `isGoalReached` → thêm `<p className="home-goal-reached">` `home:goalReached` "Đã đạt mục tiêu hôm nay" (chữ, không
   chỉ màu).
 - Focus nhìn thấy dùng `:focus-visible` chung (`base/_base.css`).
 
