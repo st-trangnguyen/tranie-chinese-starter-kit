@@ -157,4 +157,20 @@ describe('LessonRunnerContainer — thời gian học hôm nay (S8.1)', () => {
       expect(await readTodayMinutes()).toBe(4);
     });
   });
+
+  it('S8.1-AC2 Thời gian app chạy nền không tính: should add only 2 minutes to today when the app stays in the background 10 min between 1 min 10 s and 1 min on the lesson screen', async () => {
+    const { unmount } = renderRunner();
+    expect(await screen.findByText('Câu về 八')).toBeInTheDocument();
+
+    vi.setSystemTime(START_TIME + 1 * MINUTE + 10 * SECOND);
+    setPageVisibility(true);
+    vi.setSystemTime(START_TIME + 11 * MINUTE + 10 * SECOND);
+    setPageVisibility(false);
+    vi.setSystemTime(START_TIME + 12 * MINUTE + 10 * SECOND);
+    unmount();
+
+    await waitFor(async () => {
+      expect(await readTodayMinutes()).toBe(2);
+    });
+  });
 });
