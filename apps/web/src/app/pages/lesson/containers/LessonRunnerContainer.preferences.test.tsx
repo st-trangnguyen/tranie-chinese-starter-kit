@@ -6,7 +6,10 @@ import { DEFAULT_SETTINGS, type Settings, type Word } from '@csk/shared';
 
 import { PLAYBACK_RATES } from '@core/constants/audio.constants';
 import { createDatabase } from '@core/helpers/db.helper';
-import { DexieProgressStore } from '@core/services/progress-store.service';
+import {
+  DexieProgressStore,
+  progressStore,
+} from '@core/services/progress-store.service';
 import { mockContentFetch } from '@test/mocks/content-fetch';
 import {
   fakeAudio,
@@ -216,6 +219,18 @@ describe('LessonRunnerContainer — theo Cài đặt của người học', () =
       expect(screen.getByText('Câu 1 / 2')).toBeInTheDocument();
       await expectSlowPlayback(user);
     });
+  });
+
+  it('S8.2-AC2 Tắt Nghe chậm trong bài không đổi Cài đặt: tắt công tắc thì Cài đặt vẫn "Chậm", không ghi cài đặt', async () => {
+    await seedSettings({ defaultAudioSpeed: 'slow' });
+    const saveSettings = vi.spyOn(progressStore, 'saveSettings');
+    const { user } = renderRunner();
+    expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
+
+    await turnOffSlow(user);
+
+    expect(saveSettings).not.toHaveBeenCalled();
+    expect((await progressStore.getSettings()).defaultAudioSpeed).toBe('slow');
   });
 
   describe('S4.4-AC2 Mở bài mới thì về tốc độ thường', () => {
