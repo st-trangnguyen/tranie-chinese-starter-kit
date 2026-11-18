@@ -186,4 +186,36 @@ describe('BrowserAudioCache', () => {
       expect([...(await cache.listCachedPaths([PATH_A]))]).toEqual([]);
     },
   );
+
+  it('S8.4-AC1 Mở lại app vẫn thấy đã tải: should let a new adapter on the same Cache Storage see files downloaded before', async () => {
+    const storage = new FakeCacheStorage();
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => mp3Response());
+    const before: AudioCache = new BrowserAudioCache(() => storage);
+    await before.download(PATH_A);
+
+    const reopened: AudioCache = new BrowserAudioCache(() => storage);
+    const cached = await reopened.listCachedPaths([PATH_A, PATH_C]);
+
+    expect([...cached]).toEqual([PATH_A]);
+  });
+
+  it('S8.4-AC1 Mở lại app vẫn thấy đã tải: should list nothing when the browser has no Cache Storage', async () => {
+    const cache: AudioCache = new BrowserAudioCache(() => undefined);
+
+    const cached = await cache.listCachedPaths([PATH_A, PATH_B]);
+
+    expect([...cached]).toEqual([]);
+  });
+
+  it('S8.4-AC1 Mở lại app vẫn thấy đã tải: should throw AudioDownloadError with reason network when the browser has no Cache Storage', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => mp3Response());
+    const cache: AudioCache = new BrowserAudioCache(() => undefined);
+
+    const error = await captureError(() => cache.download(PATH_A));
+
+    expect(error).toBeInstanceOf(AudioDownloadError);
+    expect(error instanceof AudioDownloadError ? error.reason : undefined).toBe(
+      'network',
+    );
+  });
 });
