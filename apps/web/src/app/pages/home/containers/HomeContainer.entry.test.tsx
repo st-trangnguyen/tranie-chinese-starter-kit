@@ -84,4 +84,31 @@ describe('Mở app — Trang chủ', () => {
       screen.queryByRole('button', { name: 'Bắt đầu' }),
     ).not.toBeInTheDocument();
   });
+  it('S8.1-AC1 Tải lại ở màn khác thì vẫn ở màn đó: should stay on /learning-paths when opened directly', async () => {
+    await seedSettings(true);
+    serveContent();
+
+    const { router } = openRoute('/learning-paths');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Lộ trình học' }),
+    ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/learning-paths');
+    expect(
+      screen.queryByRole('heading', { level: 1, name: 'Trang chủ' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('S8.1-AC1 Tải lại ở màn khác thì vẫn ở màn đó: should stay on /lessons/intro-01 when opened directly', async () => {
+    await seedSettings(true);
+    serveContent();
+
+    const { router } = openRoute('/lessons/intro-01');
+
+    expect(await screen.findByText(FIRST_LESSON_TITLE)).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/lessons/intro-01');
+    expect(
+      screen.queryByRole('heading', { level: 1, name: 'Trang chủ' }),
+    ).not.toBeInTheDocument();
+  });
 });
