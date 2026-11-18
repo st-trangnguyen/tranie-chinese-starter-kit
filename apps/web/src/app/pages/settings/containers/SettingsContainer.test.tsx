@@ -74,3 +74,43 @@ describe('SettingsContainer — giá trị hiện tại', () => {
     expect(within(group).queryByText('Bật')).not.toBeInTheDocument();
   });
 });
+
+describe('SettingsContainer — lưu khi đổi', () => {
+  beforeEach(async () => {
+    await clearDatabase();
+  });
+
+  it('S8.2-AC1 Đổi mục tiêu thì giữ sau khi mở lại app: chọn "60 phút" → checked ngay, không có nút "Lưu", mở lại vẫn "60 phút"', async () => {
+    await new ProgressService().completeOnboarding(30);
+
+    const { user, unmount } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const group = await screen.findByRole('group', {
+      name: 'Mục tiêu mỗi ngày',
+    });
+    await user.click(within(group).getByRole('radio', { name: '60 phút' }));
+
+    expect(within(group).getByRole('radio', { name: '60 phút' })).toBeChecked();
+    expect(
+      within(group).getByRole('radio', { name: '30 phút' }),
+    ).not.toBeChecked();
+    expect(
+      screen.queryByRole('button', { name: /lưu/i }),
+    ).not.toBeInTheDocument();
+
+    unmount();
+    renderWithProviders(<SettingsContainer />, { route: '/settings' });
+
+    const reopenedGroup = await screen.findByRole('group', {
+      name: 'Mục tiêu mỗi ngày',
+    });
+    expect(
+      within(reopenedGroup).getByRole('radio', { name: '60 phút' }),
+    ).toBeChecked();
+    expect(
+      within(reopenedGroup).getByRole('radio', { name: '30 phút' }),
+    ).not.toBeChecked();
+  });
+});
