@@ -84,4 +84,30 @@ describe('SpeakExercise — Hiện pinyin', () => {
     expect(screen.queryByText('xièxie nǐ')).not.toBeInTheDocument();
     expectThreeRatingButtons();
   });
+
+  it('S5.2-AC1: câu nói theo wordId khi bật pinyin hiện chữ Hán, pinyin, nghĩa và ba nút', () => {
+    renderSpeakWithPinyin(
+      true,
+      { id: 'ex-word', wordId: 'w-nihao' },
+      { words: [nihao], sentences: [] },
+    );
+
+    expect(screen.getByText('你好')).toBeInTheDocument();
+    expect(screen.getByText('nǐ hǎo')).toBeInTheDocument();
+    expect(screen.getByText('xin chào')).toBeInTheDocument();
+    expectThreeRatingButtons();
+  });
+
+  it('S5.2-AC1: câu nói theo sentenceId khi bật pinyin hiện chữ Hán, pinyin, nghĩa và ba nút', () => {
+    renderSpeakWithPinyin(
+      true,
+      { id: 'ex-sentence', sentenceId: 's-xiexie' },
+      { words: [], sentences: [sentence] },
+    );
+
+    expect(screen.getByText('谢谢你')).toBeInTheDocument();
+    expect(screen.getByText('xièxie nǐ')).toBeInTheDocument();
+    expect(screen.getByText('Cảm ơn bạn')).toBeInTheDocument();
+    expectThreeRatingButtons();
+  });
 });
