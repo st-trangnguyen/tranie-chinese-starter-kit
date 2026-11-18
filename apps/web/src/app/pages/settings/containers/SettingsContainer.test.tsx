@@ -1,6 +1,14 @@
 import { createDatabase } from '@core/helpers/db.helper';
 import { ProgressService } from '@shared/services/progress.service';
-import { renderWithProviders, screen, within } from '@test/render';
+import { mockContentFetch } from '@test/mocks/content-fetch';
+import {
+  renderWithProviders,
+  screen,
+  userEvent,
+  waitFor,
+  within,
+} from '@test/render';
+import { openRoute } from '@test/stroke-order-route';
 
 import SettingsContainer from './SettingsContainer';
 
@@ -168,5 +176,55 @@ describe('SettingsContainer — lưu khi đổi', () => {
       within(reopenedGroup).getByRole('switch', { name: 'Hiện pinyin' }),
     ).not.toBeChecked();
     expect(within(reopenedGroup).getByText('Tắt')).toBeVisible();
+  });
+});
+
+describe('SettingsContainer — đổi mục tiêu không ảnh hưởng onboarding (route thật)', () => {
+  beforeEach(async () => {
+    await clearDatabase();
+    // Trang chủ nạp nội dung: phục vụ bài học tối thiểu, còn lại 404.
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      mockContentFetch(async (input) =>
+        /\/content\/lessons\/.+\.json$/.test(String(input))
+          ? Response.json({
+              id: 'intro-01',
+              type: 'lesson',
+              title: 'Bài mở đầu',
+              exercises: [{ id: 'e1', kind: 'tone-choice', wordId: '八' }],
+            })
+          : new Response('', { status: 404 }),
+      ),
+    );
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('S8.2-AC1 Đổi mục tiêu không hiện lại onboarding: chọn "60 phút" ở /settings, mở lại / thì vào /home, không có màn chào mừng', async () => {
+    await new ProgressService().completeOnboarding(30);
+    const user = userEvent.setup();
+
+    const { unmount } = openRoute('/settings');
+    const group = await screen.findByRole('group', {
+      name: 'Mục tiêu mỗi ngày',
+    });
+    await user.click(within(group).getByRole('radio', { name: '60 phút' }));
+    expect(within(group).getByRole('radio', { name: '60 phút' })).toBeChecked();
+
+    unmount();
+    const { router } = openRoute('/');
+
+    await waitFor(() => expect(router.state.location.pathname).not.toBe('/'));
+    expect(router.state.location.pathname).toBe('/home');
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Trang chủ' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: /Chào mừng đến/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Bắt đầu' }),
+    ).not.toBeInTheDocument();
   });
 });

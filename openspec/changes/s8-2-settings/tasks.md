@@ -135,8 +135,8 @@ DB mặc định fake-indexeddb.
 - [x] 7.10 GREEN: `changeDefaultAudioSpeed` qua `applyChange`; kiểm: test 7.9 pass
 - [x] 7.11 RED: S8.2-AC3 "Tùy chọn pinyin giữ sau khi mở lại app" — tắt "Hiện pinyin", render lại → không checked; kiểm: fail vì skeleton
 - [x] 7.12 GREEN: `changePinyinVisibility` qua `applyChange`; kiểm: test 7.11 pass
-- [ ] 7.13 RED: S8.2-AC1 "Đổi mục tiêu không hiện lại onboarding" (route thật như nhóm 6) — đã xong onboarding, ở `/settings` chọn "60 phút", mở `/` → URL `/home`, không có heading/nút "Bắt đầu" của onboarding; kiểm: chạy, nếu pass ngay nhờ 1.8/2.2 thì tạm cho `changeDailyGoal` ghi `{ ...DEFAULT_SETTINGS, dailyGoalMinutes }` để thấy fail rồi trả lại
-- [ ] 7.14 GREEN: sửa đến khi pass; kiểm: test 7.13 pass
+- [x] 7.13 RED: S8.2-AC1 "Đổi mục tiêu không hiện lại onboarding" (route thật như nhóm 6) — đã xong onboarding, ở `/settings` chọn "60 phút", mở `/` → URL `/home`, không có heading/nút "Bắt đầu" của onboarding; kiểm: chạy, nếu pass ngay nhờ 1.8/2.2 thì tạm cho `changeDailyGoal` ghi `{ ...DEFAULT_SETTINGS, dailyGoalMinutes }` để thấy fail rồi trả lại
+- [x] 7.14 GREEN: sửa đến khi pass; kiểm: test 7.13 pass
 - [ ] 7.15 RED: S8.2-AC1 "Đổi lựa chọn bằng bàn phím" — chỉ `user.tab()`, `user.keyboard('{ArrowDown}')`, `user.keyboard(' ')`: Tab tới nhóm mục tiêu, mũi tên chọn "60 phút"; Tab tới nhóm tốc độ, mũi tên chọn "Chậm (0.75x)"; Tab tới công tắc, Space tắt; `document.activeElement` đúng ô ở mỗi bước; kết quả lưu như 7.7–7.11 (viền focus nhìn thấy kiểm ở e2e 9.3); kiểm: chạy, nếu pass ngay (radio/checkbox gốc) thì tạm thêm `tabIndex={-1}` cho công tắc để thấy fail rồi trả lại
 - [ ] 7.16 GREEN: sửa đến khi pass; style `_settings.css` (`.settings-option:focus-within`, `.settings-switch:focus-visible` outline như `.goal-option`), import trong `main.css`; kiểm: test 7.15 pass, `pnpm lint` sạch (không utility visual trong JSX)
 
