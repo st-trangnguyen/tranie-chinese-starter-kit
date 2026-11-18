@@ -126,4 +126,15 @@ describe('ProgressService — getStudyStreak', () => {
       'Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.',
     );
   });
+
+  it('S8.3-AC1 Đổi mục tiêu sau khi đã học, qua 0:00 streak không đổi: hôm nay học 20 phút rồi đổi 15 → 30 phút thì streak 0, qua 0:00 vẫn 0', async () => {
+    const service = createService();
+    await service.completeOnboarding(15);
+    await service.recordStudyTime(at(18, 9, 0), at(18, 9, 20));
+
+    await service.changeDailyGoal(30, at(18, 10, 0));
+
+    await expect(service.getStudyStreak(at(18, 23, 59))).resolves.toBe(0);
+    await expect(service.getStudyStreak(at(19, 0, 1))).resolves.toBe(0);
+  });
 });

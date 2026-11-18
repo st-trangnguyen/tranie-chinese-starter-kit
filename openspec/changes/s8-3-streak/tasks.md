@@ -82,8 +82,8 @@ Test: `apps/web/src/app/shared/services/progress.service.streak-flow.test.ts` (m
 - [x] 3.8 GREEN: sửa đến khi pass; kiểm: test 3.7 pass
 - [x] 3.9 RED: S8.3-AC1 "Tăng mục tiêu không đổi các ngày đã qua" (Phần 3, dữ liệu app tự ghi) — `completeOnboarding(15)`; mỗi ngày D-3, D-2, D-1 `recordStudyTime` 20 phút; ở D0 `changeDailyGoal(30, now)`, `recordStudyTime` 20 phút → `getStudyStreak` = 3, `getTodayStudy().goalMinutes` = 30; `changeDailyGoal(45)` → throw `'Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.'`; kiểm: fail vì skeleton `changeDailyGoal` no-op (mục tiêu vẫn 15) — nếu pass ở phần streak thì tạm cho 1.4 chụp mục tiêu khi đọc thay vì khi ghi để thấy fail rồi trả lại
 - [x] 3.10 GREEN: Phần 1 `writeDailyGoal`; Phần 3 `changeDailyGoal(minutes, now)` (`isValidDailyGoal` → throw, `writeDailyGoal(toLocalDateKey(now), minutes)`); kiểm: test 3.9 pass
-- [ ] 3.11 RED: S8.3-AC1 "Đổi mục tiêu sau khi đã học, qua 0:00 streak không đổi" (Phần 3) — `completeOnboarding(15)`, D-1 không học, D0 `recordStudyTime` 20 phút, `changeDailyGoal(30, D0)` → `getStudyStreak(D0 23:59)` = 0, `getStudyStreak(D+1 00:01)` = 0; kiểm: chạy, nếu pass ngay thì tạm bỏ cập nhật dòng hôm nay trong `saveDailyGoal` (chỉ ghi settings) để thấy 1 rồi trả lại
-- [ ] 3.12 GREEN: sửa đến khi pass; kiểm: test 3.11 pass
+- [x] 3.11 RED: S8.3-AC1 "Đổi mục tiêu sau khi đã học, qua 0:00 streak không đổi" (Phần 3) — `completeOnboarding(15)`, D-1 không học, D0 `recordStudyTime` 20 phút, `changeDailyGoal(30, D0)` → `getStudyStreak(D0 23:59)` = 0, `getStudyStreak(D+1 00:01)` = 0; kiểm: chạy, nếu pass ngay thì tạm bỏ cập nhật dòng hôm nay trong `saveDailyGoal` (chỉ ghi settings) để thấy 1 rồi trả lại
+- [x] 3.12 GREEN: sửa đến khi pass; kiểm: test 3.11 pass
 - [ ] 3.13 RED: S8.3-AC1 "Hạ mục tiêu không biến ngày chưa đạt thành đạt" (Phần 3) — `completeOnboarding(30)`, D-2 và D-1 `recordStudyTime` 20 phút, D0 `changeDailyGoal(15)` chưa học → 0; kiểm: chạy, nếu pass ngay thì tạm cho `saveDailyGoal` cập nhật mọi dòng để thấy fail rồi trả lại
 - [ ] 3.14 GREEN: sửa đến khi pass; kiểm: test 3.13 pass, file test < 300 dòng (tách `progress.service.streak-goal.test.ts` nếu vượt)
 
