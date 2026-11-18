@@ -168,4 +168,16 @@ describe('ProgressService — countStudyStreak', () => {
 
     expect(service.countStudyStreak(stats, TODAY, 15)).toBe(2);
   });
+
+  it('S8.3-AC1 Tăng mục tiêu không đổi các ngày đã qua: 3 ngày đạt mục tiêu 15, hôm nay đổi sang 30 và học 20 phút thì streak là 3', () => {
+    const stats = [
+      day(-4, 0),
+      day(-3, REACHED, 15),
+      day(-2, REACHED, 15),
+      day(-1, REACHED, 15),
+      day(0, REACHED, 30),
+    ];
+
+    expect(service.countStudyStreak(stats, TODAY, 30)).toBe(3);
+  });
 });
