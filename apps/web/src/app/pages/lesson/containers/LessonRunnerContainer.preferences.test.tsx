@@ -70,6 +70,16 @@ const turnOffSlow = async (
   expect(toggle).toHaveAttribute('aria-checked', 'false');
 };
 
+/** Bật công tắc "Nghe chậm" đang tắt theo Cài đặt. */
+const turnOnSlow = async (
+  user: ReturnType<typeof userEvent.setup>,
+): Promise<void> => {
+  const toggle = await screen.findByRole('switch', { name: 'Nghe chậm' });
+  expect(toggle).toHaveAttribute('aria-checked', 'false');
+  await user.click(toggle);
+  expect(toggle).toHaveAttribute('aria-checked', 'true');
+};
+
 /** Công tắc bật và "Nghe" phát 0.75x. */
 const expectSlowPlayback = async (
   user: ReturnType<typeof userEvent.setup>,
@@ -85,6 +95,27 @@ const renderRunner = () =>
   renderWithProviders(<LessonRunnerContainer />, {
     route: '/lessons/:lessonId',
   });
+
+/** Hai bài trên cùng route `/lessons/:lessonId`, có liên kết "Bài khác" sang bài l2. */
+const renderTwoLessons = (): ReturnType<typeof userEvent.setup> => {
+  const OpenLessons = () => (
+    <>
+      <Link to="/lessons/l2">Bài khác</Link>
+      <LessonRunnerContainer />
+    </>
+  );
+  const user = userEvent.setup();
+  render(
+    <I18nextProvider i18n={testI18n}>
+      <MemoryRouter initialEntries={['/lessons/l1']}>
+        <Routes>
+          <Route path="/lessons/:lessonId" element={<OpenLessons />} />
+        </Routes>
+      </MemoryRouter>
+    </I18nextProvider>,
+  );
+  return user;
+};
 
 beforeEach(() => {
   installRecordingEnvironment();
@@ -151,22 +182,7 @@ describe('LessonRunnerContainer — theo Cài đặt của người học', () =
 
     it('S8.2-AC2 Mở bài mới thì theo tốc độ mặc định Chậm: sang bài khác trên cùng route thì công tắc bật, "Nghe" phát 0.75x', async () => {
       await seedSettings({ defaultAudioSpeed: 'slow' });
-      const OpenLessons = () => (
-        <>
-          <Link to="/lessons/l2">Bài khác</Link>
-          <LessonRunnerContainer />
-        </>
-      );
-      const user = userEvent.setup();
-      render(
-        <I18nextProvider i18n={testI18n}>
-          <MemoryRouter initialEntries={['/lessons/l1']}>
-            <Routes>
-              <Route path="/lessons/:lessonId" element={<OpenLessons />} />
-            </Routes>
-          </MemoryRouter>
-        </I18nextProvider>,
-      );
+      const user = renderTwoLessons();
       await turnOffSlow(user);
 
       await user.click(screen.getByRole('link', { name: 'Bài khác' }));
@@ -178,6 +194,54 @@ describe('LessonRunnerContainer — theo Cài đặt của người học', () =
       );
       expect(screen.getByText('Câu 1 / 2')).toBeInTheDocument();
       await expectSlowPlayback(user);
+    });
+  });
+
+  describe('S4.4-AC2 Mở bài mới thì về tốc độ thường', () => {
+    it('S4.4-AC2 Mở bài mới thì về tốc độ thường: bật "Nghe chậm" rồi mở lại chính bài thì công tắc tắt', async () => {
+      await seedSettings({ defaultAudioSpeed: 'normal' });
+      const first = renderRunner();
+      await turnOnSlow(first.user);
+      first.unmount();
+
+      renderRunner();
+
+      expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
+      expect(screen.getByRole('switch', { name: 'Nghe chậm' })).toHaveAttribute(
+        'aria-checked',
+        'false',
+      );
+    });
+
+    it('S4.4-AC2 Mở bài mới thì về tốc độ thường: bật "Nghe chậm" rồi học tiếp bài đang dở ở câu 2 thì công tắc tắt', async () => {
+      await seedSettings({ defaultAudioSpeed: 'normal' });
+      const first = renderRunner();
+      await turnOnSlow(first.user);
+      first.unmount();
+      await seedCursor(1);
+
+      renderRunner();
+
+      expect(await screen.findByText('Câu 2 / 2')).toBeInTheDocument();
+      expect(screen.getByRole('switch', { name: 'Nghe chậm' })).toHaveAttribute(
+        'aria-checked',
+        'false',
+      );
+    });
+
+    it('S4.4-AC2 Mở bài mới thì về tốc độ thường: bật "Nghe chậm" rồi sang bài khác trên cùng route thì công tắc tắt', async () => {
+      await seedSettings({ defaultAudioSpeed: 'normal' });
+      const user = renderTwoLessons();
+      await turnOnSlow(user);
+
+      await user.click(screen.getByRole('link', { name: 'Bài khác' }));
+
+      await waitFor(() =>
+        expect(
+          screen.getByRole('switch', { name: 'Nghe chậm' }),
+        ).toHaveAttribute('aria-checked', 'false'),
+      );
+      expect(screen.getByText('Câu 1 / 2')).toBeInTheDocument();
     });
   });
 });
