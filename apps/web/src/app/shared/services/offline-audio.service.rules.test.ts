@@ -237,4 +237,31 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
 
     expect(topic).toEqual({ status: 'downloading', percent: 25 });
   });
+
+  it('S8.4-AC1 Tiến độ tính cả file đã có từ trước: chủ đề HSK 4 audio đang tải, 3/4 file có trên máy (gồm file có từ trước) → downloading 75%', () => {
+    const topic = service.deriveTopic(
+      HSK_STAGE_ID,
+      HSK_UNIT_ID,
+      makeSnapshot({
+        cachedPaths: new Set([AUDIO_A, AUDIO_B, AUDIO_C]),
+        downloadingUnitIds: new Set([HSK_UNIT_ID]),
+      }),
+    );
+
+    expect(topic).toEqual({ status: 'downloading', percent: 75 });
+  });
+
+  it('S8.4-AC1 Tiến độ tính cả file đã có từ trước: đang tải mà đủ 4/4 file trên máy → downloaded, không dừng ở downloading 100%', () => {
+    const topic = service.deriveTopic(
+      HSK_STAGE_ID,
+      HSK_UNIT_ID,
+      makeSnapshot({
+        cachedPaths: new Set([AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D]),
+        downloadingUnitIds: new Set([HSK_UNIT_ID]),
+      }),
+    );
+
+    expect(topic).toMatchObject({ status: 'downloaded', bytes: 2_516_582 });
+    expect(topic).not.toHaveProperty('percent');
+  });
 });
