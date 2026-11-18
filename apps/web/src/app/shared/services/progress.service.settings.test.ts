@@ -95,3 +95,36 @@ describe('ProgressService — tốc độ audio mặc định', () => {
     expect((await store.getSettings()).defaultAudioSpeed).toBe('normal');
   });
 });
+
+describe('ProgressService — hiện pinyin', () => {
+  const openService = (dbName: string) =>
+    new ProgressService(new DexieProgressStore(createDatabase(dbName)));
+
+  it('S8.2-AC3 Tùy chọn pinyin giữ sau khi mở lại app: tắt pinyin, mở lại vẫn tắt; bật lại, mở lại thì bật', async () => {
+    const dbName = `test-${crypto.randomUUID()}`;
+
+    await openService(dbName).changePinyinVisibility(false);
+    expect(
+      (await openService(dbName).getLearningPreferences()).isPinyinVisible,
+    ).toBe(false);
+
+    await openService(dbName).changePinyinVisibility(true);
+    expect(
+      (await openService(dbName).getLearningPreferences()).isPinyinVisible,
+    ).toBe(true);
+  });
+
+  it('S8.2-AC3 Tùy chọn pinyin giữ sau khi mở lại app: chỉ ghi khóa pinyin, giữ mục tiêu đã lưu', async () => {
+    const store = await createOnboardedStore();
+    const saveSpy = vi.spyOn(store, 'saveSettings');
+
+    await new ProgressService(store).changePinyinVisibility(false);
+
+    expect(saveSpy.mock.calls).toStrictEqual([[{ isPinyinVisible: false }]]);
+    const preferences = await new ProgressService(
+      store,
+    ).getLearningPreferences();
+    expect(preferences.dailyGoalMinutes).toBe(30);
+    expect(preferences.isPinyinVisible).toBe(false);
+  });
+});
