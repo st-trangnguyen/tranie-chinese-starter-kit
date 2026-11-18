@@ -51,4 +51,26 @@ describe('SettingsContainer — giá trị hiện tại', () => {
       within(group).getByRole('radio', { name: 'Chậm (0.75x)' }),
     ).not.toBeChecked();
   });
+
+  it('S8.2-AC3 Mặc định hiện pinyin: công tắc "Hiện pinyin" bật, có chữ "Bật"; tắt thì chữ "Tắt"', async () => {
+    const { user } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const group = await screen.findByRole('group', { name: 'Hiện pinyin' });
+    const pinyinSwitch = within(group).getByRole('switch', {
+      name: 'Hiện pinyin',
+    });
+    expect(pinyinSwitch).toBeChecked();
+    expect(within(group).getByText('Bật')).toBeVisible();
+    expect(within(group).queryByText('Tắt')).not.toBeInTheDocument();
+
+    await user.click(pinyinSwitch);
+
+    expect(
+      within(group).getByRole('switch', { name: 'Hiện pinyin' }),
+    ).not.toBeChecked();
+    expect(within(group).getByText('Tắt')).toBeVisible();
+    expect(within(group).queryByText('Bật')).not.toBeInTheDocument();
+  });
 });
