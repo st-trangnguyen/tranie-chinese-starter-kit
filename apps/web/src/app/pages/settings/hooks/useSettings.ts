@@ -22,6 +22,10 @@ export const useSettings = (): SettingsState => {
   const [saveErrorId, setSaveErrorId] = useState<number | null>(null);
   // Giá trị đã lưu chắc chắn; dùng để trả về khi lưu lỗi (design D4).
   const persistedRef = useRef<LearningPreferences | null>(null);
+  // Id lần đổi mới nhất của từng field; chỉ lần mới nhất được trả giá trị về khi lỗi (design D4).
+  const latestRequestRef = useRef<
+    Partial<Record<keyof LearningPreferences, number>>
+  >({});
 
   // getLearningPreferences không throw: đọc lỗi → mặc định (design D3).
   useEffect(() => {
@@ -38,13 +42,19 @@ export const useSettings = (): SettingsState => {
   }, [service]);
 
   // Đổi một field (design D4): hiển thị ngay, lưu qua service, ghi nhận giá trị đã lưu khi xong.
-  // Lưu được: thông báo lỗi biến mất. Lưu lỗi: trả field về giá trị đã lưu, báo lỗi.
+  // Lưu được: thông báo lỗi biến mất. Lưu lỗi: trả field về giá trị đã lưu (chỉ khi đây vẫn là
+  // lần đổi mới nhất của field), báo lỗi.
   const applyChange = useCallback(
     <K extends keyof LearningPreferences>(
       key: K,
       value: LearningPreferences[K],
       save: () => Promise<void>,
     ) => {
+      const requestId = (latestRequestRef.current[key] ?? 0) + 1;
+      latestRequestRef.current = {
+        ...latestRequestRef.current,
+        [key]: requestId,
+      };
       setPreferences((prev) =>
         prev === null ? prev : { ...prev, [key]: value },
       );
@@ -57,7 +67,8 @@ export const useSettings = (): SettingsState => {
         },
         () => {
           const persisted = persistedRef.current;
-          if (persisted !== null) {
+          const isLatest = latestRequestRef.current[key] === requestId;
+          if (isLatest && persisted !== null) {
             setPreferences((prev) =>
               prev === null ? prev : { ...prev, [key]: persisted[key] },
             );
