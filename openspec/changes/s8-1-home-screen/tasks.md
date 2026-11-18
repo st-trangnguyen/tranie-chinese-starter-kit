@@ -68,7 +68,7 @@ Test: `apps/web/src/app/shared/services/progress.service.study-time.test.ts` —
 Test: `apps/web/src/app/core/hooks/useVisibleTimeSegments.test.ts`, `apps/web/src/app/core/hooks/usePageVisibility.test.ts` —
 `renderHook`, đồng hồ giả, `onSegment = vi.fn()`; tổng giây = tổng `(end - start) / 1000` các lần gọi.
 
-- [ ] 4.1 RED: S8.1-AC2 "Thời gian app chạy nền không tính" (tầng hook) — hiện 1 phút, `setPageVisibility(true)`, tiến 10 phút, `setPageVisibility(false)`, tiến 1 phút, unmount → tổng 120 giây; không đoạn nào chứa khoảng ẩn; tạo `src/test/visibility.helpers.ts` và hằng `STUDY_TIME_FLUSH_INTERVAL_MS = 15_000` (`core/constants/study-time.constants.ts`) trong commit test, hook skeleton không phát gì; kiểm: fail (tổng 0)
+- [x] 4.1 RED: S8.1-AC2 "Thời gian app chạy nền không tính" (tầng hook) — hiện 1 phút, `setPageVisibility(true)`, tiến 10 phút, `setPageVisibility(false)`, tiến 1 phút, unmount → tổng 120 giây; không đoạn nào chứa khoảng ẩn; tạo `src/test/visibility.helpers.ts` và hằng `STUDY_TIME_FLUSH_INTERVAL_MS = 15_000` (`core/constants/study-time.constants.ts`) trong commit test, hook skeleton không phát gì; kiểm: fail (tổng 0)
 - [ ] 4.2 GREEN: `useVisibleTimeSegments` (design D5: listener `visibilitychange` phát đoạn ngay trong listener, interval chỉ chạy khi hiện, cleanup phát đoạn mở và gỡ listener/interval); kiểm: test 4.1 pass
 - [ ] 4.3 RED: S8.1-AC2 "Đóng app giữa bài chỉ mất tối đa 30 giây cuối" (tầng hook) — hiện 3 phút 40 giây, **không** unmount, không đổi visibility → tổng các đoạn đã phát ≥ 190 giây (mất < 30 giây) và lần phát cuối cách hiện tại ≤ 15 giây; kiểm: fail nếu chỉ phát lúc unmount (tạm bỏ interval nếu pass ngay rồi trả lại)
 - [ ] 4.4 GREEN: interval `flushIntervalMs`; kiểm: test 4.3 pass

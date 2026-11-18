@@ -1,0 +1,1 @@
+export const STUDY_TIME_FLUSH_INTERVAL_MS = 15_000;
