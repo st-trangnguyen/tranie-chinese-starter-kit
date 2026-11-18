@@ -35,12 +35,16 @@ describe('usePageVisibility', () => {
     const removeSpy = vi.spyOn(document, 'removeEventListener');
     const { unmount } = renderHook(() => usePageVisibility());
 
-    const added = addSpy.mock.calls.filter(([type]) => type === 'visibilitychange');
+    const added = addSpy.mock.calls.filter(
+      ([type]) => type === 'visibilitychange',
+    );
     expect(added).toHaveLength(1);
 
     unmount();
 
-    const removed = removeSpy.mock.calls.filter(([type]) => type === 'visibilitychange');
+    const removed = removeSpy.mock.calls.filter(
+      ([type]) => type === 'visibilitychange',
+    );
     expect(removed).toHaveLength(1);
     expect(removed[0]?.[1]).toBe(added[0]?.[1]);
   });
