@@ -69,8 +69,8 @@ Test: `apps/web/src/app/core/services/audio-cache.service.test.ts` (`FakeCacheSt
 Test: `apps/web/src/app/shared/services/offline-audio.service.rules.test.ts` — hàm thuần trên snapshot dựng tay, không adapter.
 Skeleton service + model `shared/models/offline-audio.model.ts` tạo trong commit 5.1.
 
-- [ ] 5.1 RED: S8.4-AC1 "Chủ đề chưa tải có nút tải kèm dung lượng" (Phần 2) — nhóm HSK 4 audio, không có trên máy → `{ status: 'not-downloaded', bytes: 2_516_582 }`; audio trùng tính một lần; kiểm: fail vì skeleton trả `null`
-- [ ] 5.2 GREEN: `deriveTopic` (nhánh chưa tải), `sumBytes`; kiểm: test 5.1 pass
+- [x] 5.1 RED: S8.4-AC1 "Chủ đề chưa tải có nút tải kèm dung lượng" (Phần 2) — nhóm HSK 4 audio, không có trên máy → `{ status: 'not-downloaded', bytes: 2_516_582 }`; audio trùng tính một lần; kiểm: fail vì skeleton trả `null`
+- [x] 5.2 GREEN: `deriveTopic` (nhánh chưa tải), `sumBytes`; kiểm: test 5.1 pass
 - [ ] 5.3 RED: S8.4-AC1 "Thiếu một phần audio thì là chưa tải" — 3/4 có trên máy → `not-downloaded`; kiểm: chạy, nếu pass ngay thì tạm coi "có ≥ 1 file" là đã tải để thấy fail rồi trả lại
 - [ ] 5.4 GREEN: `listMissingAudio`; kiểm: test 5.3 pass
 - [ ] 5.5 RED: S8.4-AC1 "Đã tải thì hiện dung lượng và nút xóa" — đủ 4/4, có audio không phải Nhập môn, không chủ đề nào tải → `{ status: 'downloaded', bytes, canRemove: true }`; kiểm: fail
