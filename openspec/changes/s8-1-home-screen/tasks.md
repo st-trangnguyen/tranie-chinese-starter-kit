@@ -108,7 +108,7 @@ Test: `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.homeLink.t
 - [x] 6.2 GREEN: `ROUTE_PATHS.home = '/home'`; `<Link>` trong `LessonSummary` (key `lesson:summary.home`); kiểm: test 6.1 pass
 - [x] 6.3 RED: S8.1-AC1 "Màn bài khi đang làm câu không có liên kết Trang chủ" — ở câu 1 và khi đang xem kết quả câu: không có link "Trang chủ"; kiểm: chạy, nếu pass ngay thì tạm đặt link ở `LessonRunnerContainer` ngoài nhánh tổng kết để thấy fail rồi trả lại
 - [x] 6.4 GREEN: link chỉ ở `LessonSummary`; kiểm: test 6.3 pass
-- [ ] 6.5 RED: S8.1-AC1 "Từ bản đồ lộ trình về Trang chủ" — bản đồ có link "Trang chủ" (Tab tới được), bấm → `/home`; kiểm: fail
+- [x] 6.5 RED: S8.1-AC1 "Từ bản đồ lộ trình về Trang chủ" — bản đồ có link "Trang chủ" (Tab tới được), bấm → `/home`; kiểm: fail
 - [ ] 6.6 GREEN: `<Link>` trong `LearningPathContainer` (key `learning-path:homeLink`); kiểm: test 6.5 pass, `LearningPathContainer.test.tsx` cũ vẫn pass
 
 ## 7. Mở app — `StartGate`, `OnboardingContainer`, route `home` (design D1)
