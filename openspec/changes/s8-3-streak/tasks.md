@@ -94,8 +94,8 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.streak.test.tsx` và
 (`vi.useFakeTimers({ toFake: ['Date'] })`), `mockContentFetch(respondToContent)`, dữ liệu qua `home.fixtures.ts`
 (`seedDailyStat(date, studySeconds, goalMinutes?)` — tham số thứ ba thêm trong commit RED 4.1, lời gọi cũ không đổi).
 
-- [ ] 4.1 RED: S8.3-AC2 "Trang chủ hiện streak" — D-3 0, D-2, D-1, D0 đạt → `findByText('Chuỗi ngày học: 3 ngày')`, phần tử là `<p>` (không `aria-hidden`); kiểm: fail vì Trang chủ chưa có dòng streak
-- [ ] 4.2 GREEN: `useHome` thêm `streakDays` (cùng effect với phút hôm nay, cùng `now`, design D5); `StudyStreakStatus`; `HomeContainer` render sau `TodayStudyStatus`; `home.json` key `streak` "Chuỗi ngày học: {{days}} ngày"; `.home-streak` trong `_home.css` (`@apply text-body text-fg`); kiểm: test 4.1 pass, `HomeContainer*.test.tsx` cũ vẫn pass
+- [x] 4.1 RED: S8.3-AC2 "Trang chủ hiện streak" — D-3 0, D-2, D-1, D0 đạt → `findByText('Chuỗi ngày học: 3 ngày')`, phần tử là `<p>` (không `aria-hidden`); kiểm: fail vì Trang chủ chưa có dòng streak
+- [x] 4.2 GREEN: `useHome` thêm `streakDays` (cùng effect với phút hôm nay, cùng `now`, design D5); `StudyStreakStatus`; `HomeContainer` render sau `TodayStudyStatus`; `home.json` key `streak` "Chuỗi ngày học: {{days}} ngày"; `.home-streak` trong `_home.css` (`@apply text-body text-fg`); kiểm: test 4.1 pass, `HomeContainer*.test.tsx` cũ vẫn pass
 - [ ] 4.3 RED: S8.3-AC2 "Streak bằng 0 vẫn hiện" — D-2 0, D-1 300 giây, D0 180 giây → "Chuỗi ngày học: 0 ngày"; DB trống (chỉ xong onboarding) → "Chuỗi ngày học: 0 ngày"; kiểm: chạy, nếu pass ngay thì tạm ẩn dòng khi `streakDays === 0` để thấy fail rồi trả lại
 - [ ] 4.4 GREEN: sửa đến khi pass; kiểm: test 4.3 pass
 - [ ] 4.5 RED: S8.3-AC1 "Số phút của một ngày đã qua bị hỏng" (mức màn) — D-2, D0 1200 giây, D-1 `'abc'` → "Chuỗi ngày học: 1 ngày", "Hôm nay: 20 / 15 phút", không `role="alert"`; kiểm: chạy, nếu pass ngay thì tạm cho `getStudyStreak` throw khi gặp dòng hỏng (bỏ `.catch`) để thấy Trang chủ kẹt/không có dòng streak rồi trả lại

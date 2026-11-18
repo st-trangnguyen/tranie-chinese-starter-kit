@@ -7,5 +7,6 @@
   "allCompleted": "Bạn đã học xong lộ trình hiện có.",
   "todayStudy": "Hôm nay: {{minutes}} / {{goalMinutes}} phút",
   "goalReached": "Đã đạt mục tiêu hôm nay",
+  "streak": "Chuỗi ngày học: {{days}} ngày",
   "learningPathLink": "Xem lộ trình"
 }
