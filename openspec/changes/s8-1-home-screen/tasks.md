@@ -150,11 +150,11 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.test.tsx` — `openR
 - [x] 8.16 GREEN: sửa đến khi pass (dựa vào `LessonService.openLesson` có sẵn); kiểm: test 8.15 pass
 - [x] 8.17 RED: S8.1-AC1 "Bài tiếp theo là bài kiểm tra cuối chủ đề đang làm dở" — bài tiếp theo `type: 'test'` có `cursor: 2` → "Câu 1 / N"; kiểm: như 8.15
 - [x] 8.18 GREEN: sửa đến khi pass; kiểm: test 8.17 pass
-- [ ] 8.19 RED: S8.1-AC1 "Dùng được bằng bàn phím" — chỉ `userEvent.tab()` tới link "Vào học" (thứ tự focus: "Vào học" trước "Xem lộ trình"), `{Enter}` → màn bài; kiểm: chạy, nếu pass ngay thì tạm render "Vào học" bằng phần tử không focus được để thấy fail rồi trả lại
-- [ ] 8.20 GREEN: sửa đến khi pass; kiểm: test 8.19 pass (viền focus nhìn thấy kiểm ở e2e 10.1)
-- [ ] 8.21 RED: S8.1-AC1 "Mở bản đồ lộ trình từ Trang chủ" — bấm "Xem lộ trình" → `/learning-paths`, heading "Lộ trình học"; kiểm: chạy, nếu pass ngay thì tạm trỏ link sai để thấy fail rồi trả lại
-- [ ] 8.22 GREEN: sửa đến khi pass; kiểm: test 8.21 pass
-- [ ] 8.23 RED: nhánh lỗi nạp lộ trình (design D6, không có Scenario riêng; tên test `S8.1-AC1 (D6) nạp lộ trình lỗi thì báo lỗi, vẫn có "Xem lộ trình"`) — `mockContentFetch` trả 500 cho file lộ trình → Trang chủ có `role="alert"` "Chưa tải được bài tiếp theo.", không còn `role="status"` "Đang tải…", không có "Vào học", link "Xem lộ trình" vẫn có và trỏ `/learning-paths`; kiểm: fail (kẹt ở "Đang tải…" vì skeleton chưa có nhánh lỗi)
+- [x] 8.19 RED: S8.1-AC1 "Dùng được bằng bàn phím" — chỉ `userEvent.tab()` tới link "Vào học" (thứ tự focus: "Vào học" trước "Xem lộ trình"), `{Enter}` → màn bài; kiểm: chạy, nếu pass ngay thì tạm render "Vào học" bằng phần tử không focus được để thấy fail rồi trả lại
+- [x] 8.20 GREEN: sửa đến khi pass; kiểm: test 8.19 pass (viền focus nhìn thấy kiểm ở e2e 10.1)
+- [x] 8.21 RED: S8.1-AC1 "Mở bản đồ lộ trình từ Trang chủ" — bấm "Xem lộ trình" → `/learning-paths`, heading "Lộ trình học"; kiểm: chạy, nếu pass ngay thì tạm trỏ link sai để thấy fail rồi trả lại
+- [x] 8.22 GREEN: sửa đến khi pass; kiểm: test 8.21 pass
+- [x] 8.23 RED: nhánh lỗi nạp lộ trình (design D6, không có Scenario riêng; tên test `S8.1-AC1 (D6) nạp lộ trình lỗi thì báo lỗi, vẫn có "Xem lộ trình"`) — `mockContentFetch` trả 500 cho file lộ trình → Trang chủ có `role="alert"` "Chưa tải được bài tiếp theo.", không còn `role="status"` "Đang tải…", không có "Vào học", link "Xem lộ trình" vẫn có và trỏ `/learning-paths`; kiểm: fail (kẹt ở "Đang tải…" vì skeleton chưa có nhánh lỗi)
 - [ ] 8.24 GREEN: `.catch` của effect bài tiếp theo trong `useHome` đặt `hasNextLessonError` (cờ `isActive`, mẫu `useLearningPath`); `HomeContainer` hiện `<p role="alert">` key `home:loadError` thay `NextLessonCard`; kiểm: test 8.23 pass, mọi file < 300 dòng, component < 5 props
 
 ## 9. Trang chủ: phút hôm nay — `useHome`, `TodayStudyStatus` (design D6)

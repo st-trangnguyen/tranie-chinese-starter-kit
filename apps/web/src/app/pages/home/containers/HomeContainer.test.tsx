@@ -91,4 +91,30 @@ describe('HomeContainer — bài tiếp theo', () => {
     expect(screen.queryByText(LESSON_TITLES.l3)).not.toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
+
+  it('S8.1-AC1 (D6) nạp lộ trình lỗi thì báo lỗi, vẫn có "Xem lộ trình": should show the load error alert instead of the next lesson card', async () => {
+    await seedProgress();
+    vi.mocked(globalThis.fetch).mockImplementation(
+      mockContentFetch((input) =>
+        String(input) === '/content/content.json'
+          ? new Response('', { status: 500 })
+          : respondToContent(input),
+      ),
+    );
+
+    openRoute('/home');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Chưa tải được bài tiếp theo.',
+    );
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText('Đang tải…')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Vào học' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Xem lộ trình' })).toHaveAttribute(
+      'href',
+      '/learning-paths',
+    );
+  });
 });
