@@ -2,6 +2,7 @@ import {
   dailyStatSchema,
   lessonProgressSchema,
   parseSettings,
+  type DailyGoalMinutes,
   type DailyStat,
   type LessonProgress,
   type Settings,
@@ -28,6 +29,10 @@ export interface ProgressStore {
   getDailyStat(date: string): Promise<DailyStat | undefined>;
   /** Cộng dồn số giây đã học vào ngày `date` (S8.1). */
   addStudySeconds(date: string, seconds: number): Promise<void>;
+  /** Mọi thống kê ngày hợp lệ; dòng hỏng bị bỏ qua (S8.3). */
+  getAllDailyStats(): Promise<DailyStat[]>;
+  /** Đổi mục tiêu đang chọn và mục tiêu của ngày `date` cùng lúc (S8.3). */
+  saveDailyGoal(date: string, goalMinutes: DailyGoalMinutes): Promise<void>;
 }
 
 export class DexieProgressStore implements ProgressStore {
@@ -86,6 +91,13 @@ export class DexieProgressStore implements ProgressStore {
     const result = dailyStatSchema.safeParse(row);
     return result.success ? result.data : undefined;
   }
+
+  // Skeleton S8.3 (tasks 1.1): hành vi thêm ở 1.6 và 1.8.
+  async getAllDailyStats(): Promise<DailyStat[]> {
+    return [];
+  }
+
+  async saveDailyGoal(): Promise<void> {}
 
   addStudySeconds(date: string, seconds: number): Promise<void> {
     // Nối vào chuỗi đồng bộ (trước mọi `await`) để lần đọc gọi ngay sau đó chờ được lần ghi này.

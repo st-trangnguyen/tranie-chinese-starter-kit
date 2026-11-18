@@ -23,6 +23,8 @@ const unavailableStore: ProgressStore = {
   saveLessonProgressBatch: unavailable,
   getDailyStat: unavailable,
   addStudySeconds: unavailable,
+  getAllDailyStats: unavailable,
+  saveDailyGoal: unavailable,
 };
 
 const at = (day: number, hours: number, minutes: number, seconds = 0) =>
