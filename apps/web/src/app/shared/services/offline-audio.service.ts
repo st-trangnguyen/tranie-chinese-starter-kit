@@ -12,7 +12,9 @@ export class OfflineAudioService {
 
   /**
    * Rule: trạng thái audio offline của chủ đề theo bảng trạng thái (S8.4 AC1).
-   * Có sẵn offline xét trước các trạng thái khác.
+   * Chủ đề không có audio (`[]` hoặc không có trong audio index) → không có khối (`null`),
+   * xét đầu tiên, trước cả có sẵn offline.
+   * Có sẵn offline xét trước các trạng thái còn lại.
    * Chủ đề chưa đủ audio trên máy → `not-downloaded` kèm dung lượng cần tải.
    * Đủ mọi file → `downloaded` kèm dung lượng; `canRemove` khi có ít nhất một file xóa được.
    */
@@ -22,6 +24,9 @@ export class OfflineAudioService {
     snapshot: OfflineAudioSnapshot,
   ): OfflineAudioTopic | null {
     const unitAudio = snapshot.index?.units[unitId] ?? [];
+    if (this.hasNoAudio(unitAudio)) {
+      return null;
+    }
     if (
       this.isAvailableOffline(
         stageId,
@@ -49,6 +54,11 @@ export class OfflineAudioService {
       };
     }
     return { status: 'not-downloaded', bytes: totalBytes };
+  }
+
+  /** Rule: chủ đề không có audio thì không có khối audio offline (S8.4 AC1). */
+  hasNoAudio(unitAudio: readonly string[]): boolean {
+    return unitAudio.length === 0;
   }
 
   /**
