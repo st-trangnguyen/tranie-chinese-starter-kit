@@ -441,4 +441,42 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
       status: 'available-offline',
     });
   });
+
+  it('S8.4-AC2 Xóa không làm hỏng chủ đề khác đang tải: B={s,b} đủ file, A={s,a} đang tải (thiếu a), s không phải Nhập môn → xóa B không chọn s, vẫn chọn b', () => {
+    const unitA = 'hsk1-loading-a';
+    const unitB = 'hsk1-loaded-b';
+    const s = AUDIO_A;
+    const a = AUDIO_B;
+    const b = AUDIO_C;
+    const index: AudioIndex = {
+      ...HSK_INDEX,
+      units: {
+        intro1: [AUDIO_INTRO],
+        [unitA]: [s, a],
+        [unitB]: [s, b],
+      },
+    };
+    const downloadingUnitIds = new Set([unitA]);
+    const snapshot = makeSnapshot({
+      index,
+      cachedPaths: new Set([s, b, AUDIO_INTRO]),
+      downloadingUnitIds,
+    });
+
+    expect(service.deriveTopic(HSK_STAGE_ID, unitA, snapshot)).toMatchObject({
+      status: 'downloading',
+    });
+    expect(service.deriveTopic(HSK_STAGE_ID, unitB, snapshot)).toMatchObject({
+      status: 'downloaded',
+    });
+
+    const removable = service.selectRemovableAudio(
+      unitB,
+      index,
+      downloadingUnitIds,
+    );
+
+    expect(removable).not.toContain(s);
+    expect(removable).toEqual([b]);
+  });
 });

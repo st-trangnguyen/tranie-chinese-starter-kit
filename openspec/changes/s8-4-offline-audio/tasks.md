@@ -99,8 +99,8 @@ Skeleton service + model `shared/models/offline-audio.model.ts` tạo trong comm
 - [x] 5.28 GREEN: `selectRemovableAudio` trừ audio của chủ đề đang tải; kiểm: test 5.27 pass
 - [x] 5.29 RED: S8.4-AC2 "Xóa không làm mất audio Nhập môn" (Phần 2) — `selectRemovableAudio` không có path ∈ `precached`; kiểm: fail (tạm bỏ phép trừ nếu pass ngay)
 - [x] 5.30 GREEN: trừ `precached`; kiểm: test 5.29 pass
-- [ ] 5.31 RED: S8.4-AC2 "Xóa không làm hỏng chủ đề khác đang tải" (Phần 2) — B đã tải, A đang tải, chung file s → xóa B không chọn s; kiểm: chạy, nếu pass ngay nhờ 5.28 thì tạm bỏ phép trừ để thấy fail rồi trả lại
-- [ ] 5.32 GREEN: sửa đến khi pass; kiểm: test 5.31 pass
+- [x] 5.31 RED: S8.4-AC2 "Xóa không làm hỏng chủ đề khác đang tải" (Phần 2) — B đã tải, A đang tải, chung file s → xóa B không chọn s; kiểm: chạy, nếu pass ngay nhờ 5.28 thì tạm bỏ phép trừ để thấy fail rồi trả lại
+- [x] 5.32 GREEN: sửa đến khi pass; kiểm: test 5.31 pass
 - [ ] 5.33 RED: S8.4-AC2 "Xóa audio dùng chung thì chủ đề khác đã tải về chưa tải" (Phần 2) — A, B đã tải chung file s, không ai tải → xóa A chọn s; sau khi bỏ s khỏi tập có trên máy B là `not-downloaded`; kiểm: như 5.21
 - [ ] 5.34 GREEN: sửa đến khi pass; kiểm: test 5.33 pass
 - [ ] 5.35 RED: S8.4-AC1 "Thông báo mất khi trạng thái đổi mà không bấm gì" (Phần 2) — `pruneStaleMessages`: thông báo `shownWith: 'not-downloaded'` của A, A giờ `downloaded` → bỏ; A vẫn `not-downloaded` → giữ; thông báo của B không đổi; kiểm: fail vì skeleton giữ nguyên
