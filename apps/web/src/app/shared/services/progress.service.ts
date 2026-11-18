@@ -141,17 +141,36 @@ export class ProgressService {
     return minutes >= goalMinutes;
   }
 
-  /** Rule: ngày không có dòng là chưa đạt; ngày có dòng đạt khi số phút ≥ mục tiêu (S8.3 AC1). */
+  /** Rule: ngày đã qua dùng mục tiêu đã lưu của ngày đó; thiếu thì dùng mục tiêu hôm nay (S8.3 AC1). */
+  resolveDayGoal(
+    dayGoalMinutes: DailyGoalMinutes | undefined,
+    todayGoalMinutes: DailyGoalMinutes,
+  ): DailyGoalMinutes {
+    return dayGoalMinutes ?? todayGoalMinutes;
+  }
+
+  /**
+   * Rule: ngày không có dòng là chưa đạt; hôm nay so với mục tiêu đang chọn; ngày đã qua đạt khi số
+   * phút ≥ mục tiêu của ngày đó hoặc ≥ mục tiêu hôm nay (S8.3 AC1).
+   */
   isStreakDayReached(
     stat: DailyStat | undefined,
+    isToday: boolean,
     todayGoalMinutes: DailyGoalMinutes,
   ): boolean {
     if (stat === undefined) {
       return false;
     }
-    return this.isDailyGoalReached(
-      this.toStudyMinutes(stat.studySeconds),
-      todayGoalMinutes,
+    const minutes = this.toStudyMinutes(stat.studySeconds);
+    if (this.isDailyGoalReached(minutes, todayGoalMinutes)) {
+      return true;
+    }
+    return (
+      !isToday &&
+      this.isDailyGoalReached(
+        minutes,
+        this.resolveDayGoal(stat.goalMinutes, todayGoalMinutes),
+      )
     );
   }
 
@@ -166,7 +185,11 @@ export class ProgressService {
   ): number {
     const statsByDate = new Map(stats.map((stat) => [stat.date, stat]));
     const isReached = (date: string): boolean =>
-      this.isStreakDayReached(statsByDate.get(date), todayGoalMinutes);
+      this.isStreakDayReached(
+        statsByDate.get(date),
+        date === today,
+        todayGoalMinutes,
+      );
     let cursor = isReached(today) ? today : previousLocalDateKey(today);
     let streak = 0;
     while (isReached(cursor)) {
