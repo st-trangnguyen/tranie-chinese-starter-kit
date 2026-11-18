@@ -47,6 +47,22 @@ describe('HomeContainer — chuỗi ngày học', () => {
     expect(streak).not.toHaveAttribute('aria-hidden');
     expect(streak.closest('[aria-hidden="true"]')).toBeNull();
   });
+  it('S8.3-AC1 Số phút của một ngày đã qua bị hỏng: should show "Chuỗi ngày học: 1 ngày" and "Hôm nay: 20 / 15 phút" without an alert when yesterday\'s saved study time is "abc"', async () => {
+    await seedProgress();
+    await seedGoal(GOAL_MINUTES);
+    await seedDailyStat(dayKey(-2), REACHED_SECONDS, GOAL_MINUTES);
+    await seedDailyStat(dayKey(-1), 'abc', GOAL_MINUTES);
+    await seedDailyStat(dayKey(0), REACHED_SECONDS, GOAL_MINUTES);
+
+    openRoute('/home');
+
+    expect(
+      await screen.findByText('Chuỗi ngày học: 1 ngày'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Hôm nay: 20 / 15 phút')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
   it('S8.3-AC2 Streak bằng 0 vẫn hiện: should show "Chuỗi ngày học: 0 ngày" when the day before yesterday had 0 minutes and yesterday and today are below the goal', async () => {
     await seedProgress();
     await seedGoal(GOAL_MINUTES);
