@@ -104,8 +104,8 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.streak.test.tsx` và
 - [x] 4.8 GREEN: sửa đến khi pass; kiểm: test 4.7 pass
 - [x] 4.9 RED: S8.3-AC2 "Quay lại app từ nền qua ngày mới thì cập nhật" (file `HomeContainer.streakRefresh.test.tsx`, mẫu `HomeContainer.midnight.test.tsx`) — 23:59 D0, D-3 0, D-2, D-1 đạt, D0 0 → "2 ngày"; tiến `Date` tới 00:01 D+1 không đổi visibility, `settle()` → vẫn "2 ngày" (dòng "Trang chủ đang hiện liên tục qua 0:00" của bảng); `setPageVisibility(true)` rồi `setPageVisibility(false)` → "Chuỗi ngày học: 0 ngày"; kiểm: chạy, nếu pass ngay thì tạm bỏ `isPageVisible` khỏi deps effect để thấy fail rồi trả lại
 - [x] 4.10 GREEN: sửa đến khi pass; kiểm: test 4.9 pass
-- [ ] 4.11 RED: S8.3-AC1 "Ngày mới bắt đầu sau nửa đêm theo giờ máy" (mức màn, `HomeContainer.streakRefresh.test.tsx`) — D-2 0, D-1, D0 đạt; `/home` lúc 23:58 D0 → "2 ngày"; sang 00:01 D+1, `router.navigate('/learning-paths')` rồi về `/home` → "2 ngày" và "Hôm nay: 0 / 15 phút"; sang 00:01 D+2, điều hướng đi rồi về → "0 ngày"; kiểm: chạy, nếu pass ngay thì tạm truyền `today` cố định lúc mount hook đầu tiên (cache theo module) để thấy fail rồi trả lại
-- [ ] 4.12 GREEN: sửa đến khi pass; kiểm: test 4.11 pass, mọi file < 300 dòng, component < 5 props, effect có cleanup, deps đủ (lint sạch)
+- [x] 4.11 RED: S8.3-AC1 "Ngày mới bắt đầu sau nửa đêm theo giờ máy" (mức màn, `HomeContainer.streakRefresh.test.tsx`) — D-2 0, D-1, D0 đạt; `/home` lúc 23:58 D0 → "2 ngày"; sang 00:01 D+1, `router.navigate('/learning-paths')` rồi về `/home` → "2 ngày" và "Hôm nay: 0 / 15 phút"; sang 00:01 D+2, điều hướng đi rồi về → "0 ngày"; kiểm: chạy, nếu pass ngay thì tạm truyền `today` cố định lúc mount hook đầu tiên (cache theo module) để thấy fail rồi trả lại
+- [x] 4.12 GREEN: sửa đến khi pass; kiểm: test 4.11 pass, mọi file < 300 dòng, component < 5 props, effect có cleanup, deps đủ (lint sạch)
 
 ## 5. Luồng thật trên bản build — e2e Playwright (`apps/web/e2e/E8/`)
 
