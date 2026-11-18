@@ -127,6 +127,19 @@ export class ProgressService {
     return minutes >= goalMinutes;
   }
 
+  /**
+   * Rule: bài tiếp theo là bài "Đang mở" đầu tiên theo thứ tự lộ trình; đã xong mọi bài thì không
+   * còn bài tiếp theo (S8.1 AC1).
+   */
+  findNextLessonId(
+    stages: readonly Stage[],
+    statuses: ReadonlyMap<string, LessonStatus>,
+  ): string | undefined {
+    return listLessonIdsInOrder(stages).find(
+      (lessonId) => statuses.get(lessonId) === 'open',
+    );
+  }
+
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
   async needsOnboarding(): Promise<boolean> {
