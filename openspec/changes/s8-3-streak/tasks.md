@@ -72,8 +72,8 @@ Test: `apps/web/src/app/shared/services/progress.service.streak-flow.test.ts` (m
 `new ProgressService(new DexieProgressStore(createDatabase('test-…')))`, fake-indexeddb, dữ liệu ghi thẳng `db.dailyStats` /
 `db.settings` hoặc qua `recordStudyTime`.
 
-- [ ] 3.1 RED: S8.3-AC1 "Người học mới chưa có ngày nào" (Phần 3) — `completeOnboarding(15)`, không học → `getStudyStreak(now)` = 0; store stub `getAllDailyStats`/`getSettings` reject → 0, không throw; kiểm: fail vì skeleton `getStudyStreak` throw/chưa có nhánh `.catch`
-- [ ] 3.2 GREEN: Phần 1 `readAllDailyStats`; Phần 3 `getStudyStreak(now)` (settings + mọi ngày song song, `.catch` như `getTodayStudy`, `countStudyStreak`); kiểm: test 3.1 pass
+- [x] 3.1 RED: S8.3-AC1 "Người học mới chưa có ngày nào" (Phần 3) — `completeOnboarding(15)`, không học → `getStudyStreak(now)` = 0; store stub `getAllDailyStats`/`getSettings` reject → 0, không throw; kiểm: fail vì skeleton `getStudyStreak` throw/chưa có nhánh `.catch`
+- [x] 3.2 GREEN: Phần 1 `readAllDailyStats`; Phần 3 `getStudyStreak(now)` (settings + mọi ngày song song, `.catch` như `getTodayStudy`, `countStudyStreak`); kiểm: test 3.1 pass
 - [ ] 3.3 RED: S8.3-AC1 "Mục tiêu đang chọn bị hỏng" — settings `dailyGoalMinutes: 'abc'`, D-1 không có dòng, D0 900 giây → 1; kiểm: chạy, nếu pass ngay thì tạm đọc mục tiêu thô (không qua `parseSettings`) để thấy fail rồi trả lại
 - [ ] 3.4 GREEN: sửa đến khi pass; kiểm: test 3.3 pass
 - [ ] 3.5 RED: S8.3-AC1 "Học qua nửa đêm thì mỗi ngày so với phần thời gian của ngày đó" (Phần 3) — mục tiêu 15, D-1 600 giây; `recordStudyTime(23:50 D-1, 00:10 D0)` → `getStudyStreak(00:15 D0)` = 1 và `getTodayStudy(00:15 D0).minutes` = 10; kiểm: chạy, nếu pass ngay thì tạm dùng ngày của `now - 1 ngày` làm `today` để thấy fail rồi trả lại

@@ -49,6 +49,10 @@ export class ProgressService {
     return this.store.getDailyStat(date);
   }
 
+  private readAllDailyStats(): Promise<DailyStat[]> {
+    return this.store.getAllDailyStats();
+  }
+
   private addStudySeconds(date: string, seconds: number): Promise<void> {
     return this.store.addStudySeconds(date, seconds);
   }
@@ -259,9 +263,16 @@ export class ProgressService {
     };
   }
 
-  // Skeleton S8.3 (tasks 3.1): hành vi thêm ở 3.2.
-  getStudyStreak(now?: number): Promise<number>;
-  getStudyStreak(): Promise<number> {
-    return Promise.reject(new Error('Chưa cài'));
+  /** Không throw: đọc settings lỗi → mục tiêu mặc định; đọc các ngày lỗi → streak 0 (D4). */
+  async getStudyStreak(now: number = Date.now()): Promise<number> {
+    const [settings, stats] = await Promise.all([
+      this.readSettings().catch((): Settings => DEFAULT_SETTINGS),
+      this.readAllDailyStats().catch((): DailyStat[] => []),
+    ]);
+    return this.countStudyStreak(
+      stats,
+      toLocalDateKey(now),
+      settings.dailyGoalMinutes,
+    );
   }
 }
