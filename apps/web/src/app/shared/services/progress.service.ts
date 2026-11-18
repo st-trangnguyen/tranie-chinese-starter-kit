@@ -28,6 +28,9 @@ import type { StudyTimeShare, TodayStudy } from '@shared/models/home.model';
 
 type LessonType = (typeof LESSON_TYPES)[number];
 
+const INVALID_DAILY_GOAL_MESSAGE =
+  'Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.';
+
 export class ProgressService {
   constructor(private readonly store: ProgressStore = progressStore) {}
 
@@ -55,6 +58,13 @@ export class ProgressService {
 
   private addStudySeconds(date: string, seconds: number): Promise<void> {
     return this.store.addStudySeconds(date, seconds);
+  }
+
+  private writeDailyGoal(
+    date: string,
+    goalMinutes: DailyGoalMinutes,
+  ): Promise<void> {
+    return this.store.saveDailyGoal(date, goalMinutes);
   }
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
@@ -221,7 +231,7 @@ export class ProgressService {
 
   async completeOnboarding(minutes: number): Promise<void> {
     if (!this.isValidDailyGoal(minutes)) {
-      throw new Error('Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.');
+      throw new Error(INVALID_DAILY_GOAL_MESSAGE);
     }
     const settings = await this.readSettings();
     await this.writeSettings({
@@ -276,9 +286,14 @@ export class ProgressService {
     );
   }
 
-  // Skeleton S8.3 (tasks 3.9): hành vi thêm ở 3.10.
-  changeDailyGoal(minutes: number, now?: number): Promise<void>;
-  changeDailyGoal(): Promise<void> {
-    return Promise.resolve();
+  /** Lưu mục tiêu mới và chụp vào dòng hôm nay; ngày đã qua giữ nguyên (D4). */
+  async changeDailyGoal(
+    minutes: number,
+    now: number = Date.now(),
+  ): Promise<void> {
+    if (!this.isValidDailyGoal(minutes)) {
+      throw new Error(INVALID_DAILY_GOAL_MESSAGE);
+    }
+    await this.writeDailyGoal(toLocalDateKey(now), minutes);
   }
 }
