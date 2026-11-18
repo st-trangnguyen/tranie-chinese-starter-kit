@@ -27,7 +27,8 @@
     "passed": "Bạn đã đạt",
     "failed": "Chưa đạt, cần từ {{percent}}%",
     "restart": "Làm lại",
-    "notSaved": "Chưa lưu được kết quả bài này"
+    "notSaved": "Chưa lưu được kết quả bài này",
+    "home": "Trang chủ"
   },
   "soundPair": {
     "groupLabel": "Chọn âm vừa nghe",
