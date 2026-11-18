@@ -27,7 +27,12 @@ export interface ProgressStore {
   saveLessonProgressBatch(rows: LessonProgress[]): Promise<void>;
   /** Thống kê học của một ngày (`YYYY-MM-DD`); chưa có thì `undefined` (S8.1). */
   getDailyStat(date: string): Promise<DailyStat | undefined>;
-  /** Cộng dồn số giây đã học vào ngày `date` (S8.1). */
+  /**
+   * Cộng dồn số giây đã học vào ngày `date` (S8.1) và chụp mục tiêu đang chọn
+   * (`settings.dailyGoalMinutes`) vào `goalMinutes` của dòng (S8.3, design D2).
+   * Store chỉ chụp giá trị mục tiêu đang chọn vào dòng: không rẽ nhánh theo mục tiêu, không so
+   * phút với mục tiêu, không quy tắc nghiệp vụ (quy tắc nằm ở `ProgressService` Phần 2).
+   */
   addStudySeconds(date: string, seconds: number): Promise<void>;
   /** Mọi thống kê ngày hợp lệ; dòng hỏng bị bỏ qua (S8.3). */
   getAllDailyStats(): Promise<DailyStat[]>;
@@ -114,12 +119,23 @@ export class DexieProgressStore implements ProgressStore {
     seconds: number,
   ): Promise<void> {
     // Đọc + cộng + ghi trong một transaction `rw`: IndexedDB tuần tự hoá cả giữa hai tab.
-    await this.db.transaction('rw', this.db.dailyStats, async () => {
-      const row = await this.db.dailyStats.get(date);
-      const result = dailyStatSchema.safeParse(row);
-      const current = result.success ? result.data.studySeconds : 0;
-      await this.db.dailyStats.put({ date, studySeconds: current + seconds });
-    });
+    // Mục tiêu đọc cùng transaction nên đổi mục tiêu ở tab khác không xen giữa đọc và ghi.
+    await this.db.transaction(
+      'rw',
+      this.db.dailyStats,
+      this.db.settings,
+      async () => {
+        const row = await this.db.dailyStats.get(date);
+        const result = dailyStatSchema.safeParse(row);
+        const current = result.success ? result.data.studySeconds : 0;
+        const settings = await this.getSettings();
+        await this.db.dailyStats.put({
+          date,
+          studySeconds: current + seconds,
+          goalMinutes: settings.dailyGoalMinutes,
+        });
+      },
+    );
   }
 }
 
