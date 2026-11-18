@@ -92,8 +92,8 @@ Test: `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.studyTime.
 - [x] 5.6 GREEN: sửa đến khi pass; kiểm: test 5.5 pass
 - [x] 5.7 RED: S8.1-AC2 "Bài kiểm tra cuối chủ đề được tính" — bài `type: 'test'`, làm 3 phút 10 giây tới màn tổng kết, thêm 1 phút trên tổng kết, unmount → tăng 4; kiểm: như 5.3 (tạm dừng ghi khi `phase === 'finished'`)
 - [x] 5.8 GREEN: sửa đến khi pass; kiểm: test 5.7 pass
-- [ ] 5.9 RED: S8.1-AC2 "Bài kiểm tra vượt cấp được tính" — `PlacementTestContainer` route `units/:unitId/placement-test`, 3 phút 10 giây tới tổng kết + 1 phút, unmount → tăng 4; kiểm: chạy, nếu pass ngay thì tạm bỏ ghi khi có `placementUnitId` để thấy fail rồi trả lại
-- [ ] 5.10 GREEN: sửa đến khi pass; kiểm: test 5.9 pass
+- [x] 5.9 RED: S8.1-AC2 "Bài kiểm tra vượt cấp được tính" — `PlacementTestContainer` route `units/:unitId/placement-test`, 3 phút 10 giây tới tổng kết + 1 phút, unmount → tăng 4; kiểm: chạy, nếu pass ngay thì tạm bỏ ghi khi có `placementUnitId` để thấy fail rồi trả lại
+- [x] 5.10 GREEN: sửa đến khi pass; kiểm: test 5.9 pass
 - [ ] 5.11 RED: S8.1-AC2 "Thời gian app chạy nền không tính" (mức màn) — 1 phút 10 giây, ẩn 10 phút, hiện 1 phút, unmount → tăng 2; kiểm: chạy, nếu pass ngay thì tạm truyền interval không dừng khi ẩn để thấy fail rồi trả lại
 - [ ] 5.12 GREEN: sửa đến khi pass; kiểm: test 5.11 pass
 - [ ] 5.13 RED: S8.1-AC2 "Hai tab cùng mở màn bài" (mức màn) — render hai `LessonRunnerContainer` cùng lúc (hai cây), 3 phút 10 giây, unmount cả hai → tăng 6. Phạm vi: chỉ kiểm hai cây trong cùng trang cùng ghi, mỗi cây tính riêng (không gộp, không chặn nhau); hai cây dùng chung singleton `progressStore` và chuỗi `studyTimeWrites` (1.8) nên **không** kiểm được tranh chấp đọc–ghi giữa hai tab — phần đó đã kiểm ở 1.5 (hai `DexieProgressStore` trên cùng tên DB) và e2e 11.3 (AC2-29, hai page cùng context). Kiểm: chạy, nếu pass ngay thì tạm cho `useStudyTimeRecorder` bỏ qua khi đã có một instance khác đang ghi (cờ cấp module) để thấy fail (tăng 3) rồi trả lại; **không** dùng cách bỏ transaction ở 1.6 (chuỗi 1.8 đã xếp các lần ghi nối tiếp nên test vẫn pass)
