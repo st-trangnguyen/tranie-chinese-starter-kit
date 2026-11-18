@@ -164,13 +164,13 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.todayStudy.test.tsx`
 
 - [x] 9.1 RED: S8.1-AC2 "Chưa học hôm nay" — mục tiêu 30, không có dòng hôm nay → "Hôm nay: 0 / 30 phút", không có "Đã đạt mục tiêu hôm nay"; kiểm: fail
 - [x] 9.2 GREEN: effect phút hôm nay trong `useHome` (`getTodayStudy`), `TodayStudyStatus`, key `todayStudy`; kiểm: test 9.1 pass
-- [ ] 9.3 RED: S8.1-AC2 "Đã học một phần mục tiêu" — mục tiêu 15, 430 giây → "Hôm nay: 7 / 15 phút"; kiểm: chạy, nếu pass ngay thì tạm hiện số giây thay vì phút để thấy fail rồi trả lại
-- [ ] 9.4 GREEN: sửa đến khi pass; kiểm: test 9.3 pass
-- [ ] 9.5 RED: S8.1-AC2 "Mục tiêu lưu bị hỏng" (mức màn) — settings `dailyGoalMinutes: 'abc'` → "Hôm nay: 0 / 15 phút"; kiểm: chạy, nếu pass ngay thì tạm đọc mục tiêu thô để thấy fail rồi trả lại
-- [ ] 9.6 GREEN: sửa đến khi pass; kiểm: test 9.5 pass
-- [ ] 9.7 RED: S8.1-AC2 "Vượt mục tiêu" — mục tiêu 30, 2700 giây → "Hôm nay: 45 / 30 phút" và "Đã đạt mục tiêu hôm nay"; kiểm: fail vì chưa có dòng đạt mục tiêu
+- [x] 9.3 RED: S8.1-AC2 "Đã học một phần mục tiêu" — mục tiêu 15, 430 giây → "Hôm nay: 7 / 15 phút"; kiểm: chạy, nếu pass ngay thì tạm hiện số giây thay vì phút để thấy fail rồi trả lại
+- [x] 9.4 GREEN: sửa đến khi pass; kiểm: test 9.3 pass
+- [x] 9.5 RED: S8.1-AC2 "Mục tiêu lưu bị hỏng" (mức màn) — settings `dailyGoalMinutes: 'abc'` → "Hôm nay: 0 / 15 phút"; kiểm: chạy, nếu pass ngay thì tạm đọc mục tiêu thô để thấy fail rồi trả lại
+- [x] 9.6 GREEN: sửa đến khi pass; kiểm: test 9.5 pass
+- [x] 9.7 RED: S8.1-AC2 "Vượt mục tiêu" — mục tiêu 30, 2700 giây → "Hôm nay: 45 / 30 phút" và "Đã đạt mục tiêu hôm nay"; kiểm: fail vì chưa có dòng đạt mục tiêu
 - [ ] 9.8 GREEN: `TodayStudyStatus` dòng `goalReached` khi `isGoalReached`; kiểm: test 9.7 pass
-- [ ] 9.9 RED: S8.1-AC2 "Vừa đúng mục tiêu" (mức màn) — 900 giây → "Hôm nay: 15 / 15 phút" + "Đã đạt mục tiêu hôm nay"; 890 giây → "14 / 15", không có dòng đạt; kiểm: chạy, nếu pass ngay thì tạm dùng `>` trong `isDailyGoalReached` để thấy fail rồi trả lại
+- [x] 9.9 RED: S8.1-AC2 "Vừa đúng mục tiêu" (mức màn) — 900 giây → "Hôm nay: 15 / 15 phút" + "Đã đạt mục tiêu hôm nay"; 890 giây → "14 / 15", không có dòng đạt; kiểm: chạy, nếu pass ngay thì tạm dùng `>` trong `isDailyGoalReached` để thấy fail rồi trả lại
 - [ ] 9.10 GREEN: sửa đến khi pass; kiểm: test 9.9 pass
 - [ ] 9.11 RED: S8.1-AC2 "Thời gian học đã lưu bị hỏng" (mức màn) — dòng hôm nay hỏng → Trang chủ hiện bình thường, "Hôm nay: 0 / 15 phút", không `role="alert"`; kiểm: chạy, nếu pass ngay thì tạm cho store throw khi dòng hỏng để thấy fail rồi trả lại
 - [ ] 9.12 GREEN: sửa đến khi pass; kiểm: test 9.11 pass
