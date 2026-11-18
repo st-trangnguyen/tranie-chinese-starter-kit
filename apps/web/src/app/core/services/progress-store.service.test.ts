@@ -25,6 +25,8 @@ describe('DexieProgressStore', () => {
     const settings: Settings = {
       dailyGoalMinutes: 30,
       hasCompletedOnboarding: true,
+      defaultAudioSpeed: 'normal',
+      isPinyinVisible: true,
     };
 
     await store.saveSettings(settings);

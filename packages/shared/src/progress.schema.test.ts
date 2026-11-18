@@ -16,7 +16,12 @@ describe('parseSettings', () => {
   it('keeps valid stored values', () => {
     expect(
       parseSettings({ dailyGoalMinutes: 60, hasCompletedOnboarding: true }),
-    ).toEqual({ dailyGoalMinutes: 60, hasCompletedOnboarding: true });
+    ).toEqual({
+      dailyGoalMinutes: 60,
+      hasCompletedOnboarding: true,
+      defaultAudioSpeed: 'normal',
+      isPinyinVisible: true,
+    });
   });
 
   it('falls back per field when a stored value is invalid', () => {
@@ -32,6 +37,51 @@ describe('parseSettings', () => {
 
   it('offers exactly 15, 30 and 60 minutes', () => {
     expect(DAILY_GOAL_OPTIONS).toEqual([15, 30, 60]);
+  });
+});
+
+describe('parseSettings — tốc độ audio và hiện pinyin', () => {
+  const AC2 = 'S8.2-AC2 Một tùy chọn đã lưu bị hỏng thì chỉ tùy chọn đó về mặc định';
+
+  it(`${AC2}: bản ghi rỗng có tốc độ bình thường và hiện pinyin`, () => {
+    expect(parseSettings({})).toEqual({
+      dailyGoalMinutes: 15,
+      hasCompletedOnboarding: false,
+      defaultAudioSpeed: 'normal',
+      isPinyinVisible: true,
+    });
+  });
+
+  it(`${AC2}: tốc độ hỏng về bình thường, các tùy chọn khác giữ nguyên`, () => {
+    expect(
+      parseSettings({
+        dailyGoalMinutes: 60,
+        isPinyinVisible: false,
+        defaultAudioSpeed: 'fast',
+        hasCompletedOnboarding: true,
+      }),
+    ).toEqual({
+      dailyGoalMinutes: 60,
+      isPinyinVisible: false,
+      defaultAudioSpeed: 'normal',
+      hasCompletedOnboarding: true,
+    });
+  });
+
+  it(`${AC2}: tốc độ chậm hợp lệ được giữ nguyên`, () => {
+    expect(
+      parseSettings({
+        dailyGoalMinutes: 60,
+        isPinyinVisible: false,
+        defaultAudioSpeed: 'slow',
+        hasCompletedOnboarding: true,
+      }),
+    ).toEqual({
+      dailyGoalMinutes: 60,
+      isPinyinVisible: false,
+      defaultAudioSpeed: 'slow',
+      hasCompletedOnboarding: true,
+    });
   });
 });
 
