@@ -16,7 +16,8 @@ export class OfflineAudioService {
    * Chủ đề không có audio (`[]` hoặc không có trong audio index) → không có khối (`null`),
    * xét đầu tiên, trước cả có sẵn offline.
    * Có sẵn offline xét trước các trạng thái còn lại.
-   * Chủ đề đang tải → `downloading` kèm phần trăm số file đã có trên máy, xét trước chưa tải/đã tải.
+   * Chủ đề đang tải và còn file thiếu → `downloading` kèm phần trăm số file đã có trên máy,
+   * xét trước chưa tải/đã tải. Đang tải mà đủ mọi file trên máy → rơi xuống `downloaded`.
    * Chủ đề chưa đủ audio trên máy → `not-downloaded` kèm dung lượng cần tải.
    * Đủ mọi file → `downloaded` kèm dung lượng; `canRemove` khi có ít nhất một file xóa được.
    */
@@ -38,7 +39,8 @@ export class OfflineAudioService {
     ) {
       return { status: 'available-offline' };
     }
-    if (snapshot.downloadingUnitIds.has(unitId)) {
+    const missingAudio = this.listMissingAudio(unitAudio, snapshot.cachedPaths);
+    if (snapshot.downloadingUnitIds.has(unitId) && missingAudio.length > 0) {
       return {
         status: 'downloading',
         percent: this.calculateDownloadPercent(unitAudio, snapshot.cachedPaths),
@@ -46,10 +48,7 @@ export class OfflineAudioService {
     }
     const bytes = snapshot.index?.bytes ?? {};
     const totalBytes = this.sumBytes(unitAudio, bytes);
-    if (
-      snapshot.index &&
-      this.listMissingAudio(unitAudio, snapshot.cachedPaths).length === 0
-    ) {
+    if (snapshot.index && missingAudio.length === 0) {
       const removable = this.selectRemovableAudio(
         unitId,
         snapshot.index,
