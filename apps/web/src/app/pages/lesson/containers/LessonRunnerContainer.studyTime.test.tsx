@@ -21,6 +21,14 @@ const LESSON = {
   ],
 };
 
+/** Bài kiểm tra cuối chủ đề: cùng schema bài học, `type: 'test'`. */
+const TOPIC_TEST = {
+  ...LESSON,
+  id: 'topic-test',
+  type: 'test',
+  title: 'Kiểm tra chủ đề',
+};
+
 /** Dạng bài giả: hai nút để người học trả lời đúng hoặc sai. */
 const registry: ExerciseRegistry = {
   'tone-choice': ({ exercise, onResult, isLocked }) => (
@@ -35,6 +43,16 @@ const registry: ExerciseRegistry = {
       </button>
     </div>
   ),
+};
+
+const mockLessonContent = (lesson: typeof LESSON): void => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation(
+    mockContentFetch(async (input) =>
+      /\/content\/lessons\/.+\.json$/.test(String(input))
+        ? Response.json(lesson)
+        : new Response('', { status: 404 }),
+    ),
+  );
 };
 
 const renderRunner = () =>
@@ -65,13 +83,7 @@ beforeEach(async () => {
   // Chỉ giả Date: timer và promise thật để Dexie (fake-indexeddb), user-event và waitFor vẫn chạy.
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(START_TIME);
-  vi.spyOn(globalThis, 'fetch').mockImplementation(
-    mockContentFetch(async (input) =>
-      /\/content\/lessons\/.+\.json$/.test(String(input))
-        ? Response.json(LESSON)
-        : new Response('', { status: 404 }),
-    ),
-  );
+  mockLessonContent(LESSON);
 });
 
 afterEach(() => {
@@ -112,6 +124,31 @@ describe('LessonRunnerContainer — thời gian học hôm nay (S8.1)', () => {
       <LessonRunnerContainer registry={registry} lessonId={LESSON.id} />,
     );
     expect(await screen.findByText('Câu về 八')).toBeInTheDocument();
+
+    vi.setSystemTime(START_TIME + 4 * MINUTE + 10 * SECOND);
+    unmount();
+
+    await waitFor(async () => {
+      expect(await readTodayMinutes()).toBe(4);
+    });
+  });
+
+  it('S8.1-AC2 Bài kiểm tra cuối chủ đề được tính: should add 4 minutes to today after 3 min 10 s on a topic test until its summary plus 1 min on the summary', async () => {
+    mockLessonContent(TOPIC_TEST);
+    const { user, unmount } = renderRunner();
+    expect(await screen.findByText('Câu về 八')).toBeInTheDocument();
+
+    for (const [index] of TOPIC_TEST.exercises.entries()) {
+      await user.click(
+        await screen.findByRole('button', { name: 'Chọn đúng' }),
+      );
+      if (index === TOPIC_TEST.exercises.length - 1) {
+        // Câu cuối: đã làm bài 3 phút 10 giây, bấm "Tiếp tục" thì tới màn tổng kết.
+        vi.setSystemTime(START_TIME + 3 * MINUTE + 10 * SECOND);
+      }
+      await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+    }
+    expect(await screen.findByText('Bạn đã đạt')).toBeInTheDocument();
 
     vi.setSystemTime(START_TIME + 4 * MINUTE + 10 * SECOND);
     unmount();
