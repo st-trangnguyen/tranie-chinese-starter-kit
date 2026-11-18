@@ -264,4 +264,45 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
     expect(topic).toMatchObject({ status: 'downloaded', bytes: 2_516_582 });
     expect(topic).not.toHaveProperty('percent');
   });
+  it('S8.4-AC2 Chủ đề dùng chung audio vòng tròn vẫn xóa được: A={x,y}, B={y,z}, C={x,z} đủ file, không chủ đề nào đang tải → cả ba có nút xóa, xóa A chọn {x,y}', () => {
+    const unitA = 'hsk1-circle-a';
+    const unitB = 'hsk1-circle-b';
+    const unitC = 'hsk1-circle-c';
+    const x = AUDIO_A;
+    const y = AUDIO_B;
+    const z = AUDIO_C;
+    const index: AudioIndex = {
+      ...HSK_INDEX,
+      units: {
+        intro1: [AUDIO_INTRO],
+        [unitA]: [x, y],
+        [unitB]: [y, z],
+        [unitC]: [x, z],
+      },
+    };
+    const snapshot = makeSnapshot({
+      index,
+      cachedPaths: new Set([x, y, z]),
+      downloadingUnitIds: new Set<string>(),
+    });
+
+    expect(service.deriveTopic(HSK_STAGE_ID, unitA, snapshot)).toEqual({
+      status: 'downloaded',
+      bytes: 1_300_000,
+      canRemove: true,
+    });
+    expect(service.deriveTopic(HSK_STAGE_ID, unitB, snapshot)).toEqual({
+      status: 'downloaded',
+      bytes: 1_316_582,
+      canRemove: true,
+    });
+    expect(service.deriveTopic(HSK_STAGE_ID, unitC, snapshot)).toEqual({
+      status: 'downloaded',
+      bytes: 1_216_582,
+      canRemove: true,
+    });
+    expect(
+      new Set(service.selectRemovableAudio(unitA, index, new Set<string>())),
+    ).toEqual(new Set([x, y]));
+  });
 });
