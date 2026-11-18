@@ -208,4 +208,20 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
       service.deriveTopic(HSK_STAGE_ID, missingUnitId, snapshot),
     ).toBeNull();
   });
+
+  it('S8.4-AC1 Chủ đề Nhập môn không có audio thì không có khối: nhóm thuộc giai đoạn Nhập môn có danh sách audio rỗng → null, không phải available-offline', () => {
+    const emptyIntroUnitId = 'intro-no-audio';
+    const index: AudioIndex = {
+      ...HSK_INDEX,
+      units: { ...HSK_INDEX.units, [emptyIntroUnitId]: [] },
+    };
+
+    expect(
+      service.deriveTopic(
+        INTRO_STAGE_ID,
+        emptyIntroUnitId,
+        makeSnapshot({ index }),
+      ),
+    ).toBeNull();
+  });
 });
