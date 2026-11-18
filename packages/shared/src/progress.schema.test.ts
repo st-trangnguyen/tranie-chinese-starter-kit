@@ -106,6 +106,24 @@ describe('parseSettings — mục tiêu đã lưu bị hỏng', () => {
   );
 });
 
+describe('parseSettings — tùy chọn pinyin đã lưu bị hỏng', () => {
+  const AC3 = 'S8.2-AC3 Tùy chọn pinyin đã lưu bị hỏng thì về bật';
+
+  it.each<[string, unknown]>([
+    ['chuỗi', 'yes'],
+    ['số 0', 0],
+    ['null', null],
+  ])(
+    `${AC3}: hiện pinyin là %s thì về bật, mục tiêu 30 phút giữ nguyên`,
+    (_label, isPinyinVisible) => {
+      const settings = parseSettings({ dailyGoalMinutes: 30, isPinyinVisible });
+
+      expect(settings.isPinyinVisible).toBe(true);
+      expect(settings.dailyGoalMinutes).toBe(30);
+    },
+  );
+});
+
 describe('lessonProgressSchema', () => {
   it('should accept a completed or in-progress lesson', () => {
     expect(
