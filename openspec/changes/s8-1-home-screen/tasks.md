@@ -187,7 +187,7 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.todayStudy.test.tsx`
 
 ## 10. Giao diện — `styles/tailwind/` (design D8)
 
-- [ ] 10.1 `apps/web/src/styles/tailwind/components/_home.css` (import trong `main.css`): `.home-title`, `.home-next-lesson`, `.home-next-lesson-title` (tiêu đề dài xuống dòng, không tràn), `.home-today-study`, `.home-goal-reached`, `.home-link`; `.learning-path-home-link` trong `_learning-path.css`; JSX chỉ layout/spacing (§6); vùng chạm ≥ 44×44 px cho "Vào học", "Xem lộ trình", "Trang chủ" — ngoại lệ test-first: CSS thuần; kiểm: `pnpm --filter @csk/web test:run tokens` pass, preview `web-dev` 375×812 và 1280×800, sáng và tối: Trang chủ (còn bài, đã xong mọi bài, đạt mục tiêu), bản đồ lộ trình, màn tổng kết
+- [x] 10.1 `apps/web/src/styles/tailwind/components/_home.css` (import trong `main.css`): `.home-title`, `.home-next-lesson`, `.home-next-lesson-title` (tiêu đề dài xuống dòng, không tràn), `.home-today-study`, `.home-goal-reached`, `.home-link`; `.learning-path-home-link` trong `_learning-path.css`; JSX chỉ layout/spacing (§6); vùng chạm ≥ 44×44 px cho "Vào học", "Xem lộ trình", "Trang chủ" — ngoại lệ test-first: CSS thuần; kiểm: `pnpm --filter @csk/web test:run tokens` pass, preview `web-dev` 375×812 và 1280×800, sáng và tối: Trang chủ (còn bài, đã xong mọi bài, đạt mục tiêu), bản đồ lộ trình, màn tổng kết
 
 ## 11. Luồng thật, đồng hồ giả, offline — e2e Playwright (`apps/web/e2e/E8/`)
 

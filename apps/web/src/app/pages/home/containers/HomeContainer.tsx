@@ -24,12 +24,12 @@ const HomeContainer = () => {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-xl p-xl">
-      <h1>{t('title')}</h1>
+      <h1 className="home-title">{t('title')}</h1>
       {nextLessonSection}
       {/* Không phụ thuộc lộ trình: hiện cả khi đã xong mọi bài và khi nạp lộ trình lỗi (design D6). */}
       {todayStudy !== null && <TodayStudyStatus todayStudy={todayStudy} />}
       {/* Luôn hiện, kể cả khi nạp lộ trình lỗi (design D6); đứng sau "Vào học" theo thứ tự focus. */}
-      <Link className="btn btn-ghost self-start" to={ROUTE_PATHS.learningPaths}>
+      <Link className="home-link self-start" to={ROUTE_PATHS.learningPaths}>
         {t('learningPathLink')}
       </Link>
     </main>

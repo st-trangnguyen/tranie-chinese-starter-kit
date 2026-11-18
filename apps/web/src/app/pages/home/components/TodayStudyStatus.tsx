@@ -19,7 +19,7 @@ export function TodayStudyStatus({ todayStudy }: TodayStudyStatusProps) {
         })}
       </p>
       {todayStudy.isGoalReached && (
-        <p className="home-today-study-goal">{t('goalReached')}</p>
+        <p className="home-goal-reached">{t('goalReached')}</p>
       )}
     </div>
   );

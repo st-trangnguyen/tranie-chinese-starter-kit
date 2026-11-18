@@ -24,7 +24,10 @@ const LearningPathContainer = () => {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-xl p-xl">
-      <Link to={ROUTE_PATHS.home} className="btn btn-ghost self-start">
+      <Link
+        to={ROUTE_PATHS.home}
+        className="learning-path-home-link self-start"
+      >
         {t('homeLink')}
       </Link>
       <h1 className="learning-path-title">{t('title')}</h1>
