@@ -83,4 +83,19 @@ describe('LearningPathContainer — liên kết Cài đặt', () => {
       expect(countSelected(group)).toBe(1);
     }
   });
+
+  it('S8.2-AC1 Quay về Lộ trình: should go back to /learning-paths showing the "Lộ trình học" heading when clicking "Về lộ trình" on Cài đặt', async () => {
+    const user = userEvent.setup();
+    const { router } = openRoute('/settings');
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Cài đặt' }),
+    ).toBeInTheDocument();
+
+    await user.click(await screen.findByRole('link', { name: 'Về lộ trình' }));
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Lộ trình học' }),
+    ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/learning-paths');
+  });
 });
