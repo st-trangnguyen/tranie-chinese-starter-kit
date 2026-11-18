@@ -10,3 +10,8 @@ export interface TodayStudy {
   goalMinutes: DailyGoalMinutes;
   isGoalReached: boolean;
 }
+
+/** Bài tiếp theo trên Trang chủ (S8.1 AC1). */
+export type NextLesson =
+  | { status: 'available'; lessonId: string; title: string }
+  | { status: 'all-completed' };

@@ -133,7 +133,7 @@ Test: `apps/web/src/app/pages/home/containers/HomeContainer.test.tsx` — `openR
 `mockContentFetch`, `lessonProgress` ghi thẳng IndexedDB; tách `HomeContainer.nextLesson.test.tsx` nếu > 300 dòng.
 
 - [x] 8.1 RED: S8.1-AC1 "Chưa học bài nào" (mức màn) — tiêu đề bài đầu + link "Vào học"; kiểm: fail vì Trang chủ chưa có nội dung
-- [ ] 8.2 GREEN: `useHome` (effect bài tiếp theo, mẫu `useLearningPath`), `NextLessonCard` nhánh `available`, key `nextLesson`, `startLesson`, `loading`; kiểm: test 8.1 pass
+- [x] 8.2 GREEN: `useHome` (effect bài tiếp theo, mẫu `useLearningPath`), `NextLessonCard` nhánh `available`, key `nextLesson`, `startLesson`, `loading`; kiểm: test 8.1 pass
 - [ ] 8.3 RED: S8.1-AC1 "Đã xong vài bài thì hiện bài kế tiếp" (mức màn) — xong bài 1, 2 → tiêu đề bài 3; kiểm: chạy, nếu pass ngay thì tạm bỏ đọc tiến độ trong `useHome` để thấy fail rồi trả lại
 - [ ] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass
 - [ ] 8.5 RED: S8.1-AC1 "Bài kế tiếp ở nhóm hoặc giai đoạn sau" (mức màn) — xong mọi bài nhóm 1 → tiêu đề bài đầu nhóm 2; kiểm: như 8.3
