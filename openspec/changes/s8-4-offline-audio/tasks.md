@@ -97,8 +97,8 @@ Skeleton service + model `shared/models/offline-audio.model.ts` tạo trong comm
 - [x] 5.26 GREEN: sửa đến khi pass; kiểm: test 5.25 pass
 - [x] 5.27 RED: S8.4-AC2 "Audio đang được chủ đề khác tải thì tạm chưa có nút xóa" (Phần 2) — A ⊆ `precached` ∪ audio(C), C đang tải → A `canRemove: false`; C hết tải → `true`; kiểm: fail
 - [x] 5.28 GREEN: `selectRemovableAudio` trừ audio của chủ đề đang tải; kiểm: test 5.27 pass
-- [ ] 5.29 RED: S8.4-AC2 "Xóa không làm mất audio Nhập môn" (Phần 2) — `selectRemovableAudio` không có path ∈ `precached`; kiểm: fail (tạm bỏ phép trừ nếu pass ngay)
-- [ ] 5.30 GREEN: trừ `precached`; kiểm: test 5.29 pass
+- [x] 5.29 RED: S8.4-AC2 "Xóa không làm mất audio Nhập môn" (Phần 2) — `selectRemovableAudio` không có path ∈ `precached`; kiểm: fail (tạm bỏ phép trừ nếu pass ngay)
+- [x] 5.30 GREEN: trừ `precached`; kiểm: test 5.29 pass
 - [ ] 5.31 RED: S8.4-AC2 "Xóa không làm hỏng chủ đề khác đang tải" (Phần 2) — B đã tải, A đang tải, chung file s → xóa B không chọn s; kiểm: chạy, nếu pass ngay nhờ 5.28 thì tạm bỏ phép trừ để thấy fail rồi trả lại
 - [ ] 5.32 GREEN: sửa đến khi pass; kiểm: test 5.31 pass
 - [ ] 5.33 RED: S8.4-AC2 "Xóa audio dùng chung thì chủ đề khác đã tải về chưa tải" (Phần 2) — A, B đã tải chung file s, không ai tải → xóa A chọn s; sau khi bỏ s khỏi tập có trên máy B là `not-downloaded`; kiểm: như 5.21
