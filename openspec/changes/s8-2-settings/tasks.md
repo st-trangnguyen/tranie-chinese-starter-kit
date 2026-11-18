@@ -98,8 +98,8 @@ Test: `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.preference
 - [x] 5.8 GREEN: sửa đến khi pass; kiểm: test 5.7 pass
 - [x] 5.9 RED: S8.2-AC2 "Tắt Nghe chậm trong bài không đổi Cài đặt" (container) — settings `'slow'`, tắt "Nghe chậm" trong bài → `getSettings()` của store vẫn `'slow'`, spy `saveSettings` không được gọi; kiểm: chạy, nếu pass ngay thì tạm cho `AudioSpeedProvider.toggleSlow` ghi `progressStore.saveSettings({ defaultAudioSpeed })` để thấy fail rồi trả lại (không commit thay đổi tạm)
 - [x] 5.10 GREEN: sửa đến khi pass; kiểm: test 5.9 pass
-- [ ] 5.11 RED: S8.2-AC3 "Tắt pinyin thì câu nói không hiện pinyin" (container) — settings `isPinyinVisible: false`, bài có câu "nói" 你好 (`sentenceOf('s-nihao')`): hiện "你好" và nghĩa, không "nǐ hǎo"; kiểm: fail vì container chưa bọc `PinyinVisibilityProvider`
-- [ ] 5.12 GREEN: bọc `<PinyinVisibilityProvider isVisible={preferences.isPinyinVisible}>`; kiểm: test 5.11 pass
+- [x] 5.11 RED: S8.2-AC3 "Tắt pinyin thì câu nói không hiện pinyin" (container) — settings `isPinyinVisible: false`, bài có câu "nói" 你好 (`sentenceOf('s-nihao')`): hiện "你好" và nghĩa, không "nǐ hǎo"; kiểm: fail vì container chưa bọc `PinyinVisibilityProvider`
+- [x] 5.12 GREEN: bọc `<PinyinVisibilityProvider isVisible={preferences.isPinyinVisible}>`; kiểm: test 5.11 pass
 - [ ] 5.13 RED: S8.2-AC3 "Bật lại pinyin thì câu nói hiện pinyin" (container) — settings tắt rồi `changePinyinVisibility(true)` qua `ProgressService`, mở bài → hiện "你好", "nǐ hǎo", nghĩa; kiểm: chạy, nếu pass ngay thì tạm truyền `isVisible={false}` cố định để thấy fail rồi trả lại
 - [ ] 5.14 GREEN: sửa đến khi pass; kiểm: test 5.13 pass
 - [ ] 5.15 RED: S8.2-AC3 "Tắt pinyin vẫn hiện pinyin trong giải thích khi sai" (container) — settings tắt, ở câu "nói" bấm "Chưa đúng" → phần giải thích của runner hiện chữ, pinyin, nghĩa; kiểm: như 4.9

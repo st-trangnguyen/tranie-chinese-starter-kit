@@ -7,6 +7,7 @@ import {
   type ExerciseRegistry,
 } from '@shared/components/exercises/exercise.registry';
 import { AudioSpeedProvider } from '@shared/contexts/AudioSpeedContext';
+import { PinyinVisibilityProvider } from '@shared/contexts/PinyinVisibilityContext';
 import { RecordingModeProvider } from '@shared/contexts/RecordingModeContext';
 import { LessonRunner } from '../components/LessonRunner';
 import { LessonSummary } from '../components/LessonSummary';
@@ -90,25 +91,27 @@ const LessonRunnerContainer = ({
           key={lessonId}
           initialIsSlow={preferences.isSlowAudio}
         >
-          <RecordingModeProvider key={lessonId}>
-            <LessonRunner
-              view={{
-                exercise,
-                content,
-                current: session.currentIndex + 1,
-                total: session.exerciseIds.length,
-                feedback,
-                strokeWrite,
-              }}
-              registry={registry}
-              shouldFocusProgress={isRestarted}
-              handlers={{
-                onResult: submitResult,
-                onContinue: continueLesson,
-                onSkip: skipExercise,
-              }}
-            />
-          </RecordingModeProvider>
+          <PinyinVisibilityProvider isVisible={preferences.isPinyinVisible}>
+            <RecordingModeProvider key={lessonId}>
+              <LessonRunner
+                view={{
+                  exercise,
+                  content,
+                  current: session.currentIndex + 1,
+                  total: session.exerciseIds.length,
+                  feedback,
+                  strokeWrite,
+                }}
+                registry={registry}
+                shouldFocusProgress={isRestarted}
+                handlers={{
+                  onResult: submitResult,
+                  onContinue: continueLesson,
+                  onSkip: skipExercise,
+                }}
+              />
+            </RecordingModeProvider>
+          </PinyinVisibilityProvider>
         </AudioSpeedProvider>
       )}
     </main>
