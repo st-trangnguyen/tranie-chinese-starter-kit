@@ -162,4 +162,35 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
 
     expect(topic).toEqual({ status: 'available-offline' });
   });
+
+  it('S8.4-AC1 Chủ đề HSK chỉ dùng audio Nhập môn: nhóm HSK mà mọi audio đều là audio Nhập môn (precache) → available-offline, kể cả khi chưa có file nào trên máy', () => {
+    const introOnlyUnitId = 'hsk1-intro-audio-only';
+    const AUDIO_INTRO_2 = 'audio/00000000000000fe.mp3';
+    const index: AudioIndex = {
+      units: {
+        ...HSK_INDEX.units,
+        intro1: [AUDIO_INTRO, AUDIO_INTRO_2],
+        [introOnlyUnitId]: [AUDIO_INTRO, AUDIO_INTRO_2],
+      },
+      bytes: { ...HSK_INDEX.bytes, [AUDIO_INTRO_2]: 40_000 },
+      precached: [AUDIO_INTRO, AUDIO_INTRO_2],
+    };
+
+    const withEmptyCache = service.deriveTopic(
+      HSK_STAGE_ID,
+      introOnlyUnitId,
+      makeSnapshot({ index, cachedPaths: new Set<string>() }),
+    );
+    const withPrecachedFiles = service.deriveTopic(
+      HSK_STAGE_ID,
+      introOnlyUnitId,
+      makeSnapshot({
+        index,
+        cachedPaths: new Set([AUDIO_INTRO, AUDIO_INTRO_2]),
+      }),
+    );
+
+    expect(withEmptyCache).toEqual({ status: 'available-offline' });
+    expect(withPrecachedFiles).toEqual({ status: 'available-offline' });
+  });
 });
