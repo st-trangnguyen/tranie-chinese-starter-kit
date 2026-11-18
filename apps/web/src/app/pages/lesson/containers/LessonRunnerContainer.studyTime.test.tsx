@@ -84,4 +84,17 @@ describe('LessonRunnerContainer — thời gian học hôm nay (S8.1)', () => {
       expect(await readTodayMinutes()).toBe(3);
     });
   });
+
+  it('S8.1-AC2 Thoát giữa bài vẫn được tính: should add 2 minutes to today when leaving after 2 min 10 s without finishing the lesson', async () => {
+    const { user, unmount } = renderRunner();
+    expect(await screen.findByText('Câu về 八')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Chọn đúng' }));
+    vi.setSystemTime(START_TIME + 2 * MINUTE + 10 * SECOND);
+    unmount();
+
+    await waitFor(async () => {
+      expect(await readTodayMinutes()).toBe(2);
+    });
+  });
 });
