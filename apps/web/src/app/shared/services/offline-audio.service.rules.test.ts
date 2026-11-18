@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { AudioIndex } from '@csk/shared';
+import { INTRO_STAGE_ID, type AudioIndex } from '@csk/shared';
 
 import type { OfflineAudioSnapshot } from '@shared/models/offline-audio.model';
 
@@ -151,5 +151,15 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
       bytes: 1_350_000,
       canRemove: true,
     });
+  });
+
+  it('S8.4-AC1 Chủ đề Nhập môn có sẵn offline: nhóm thuộc giai đoạn Nhập môn có audio, chưa có file nào trên máy → available-offline', () => {
+    const topic = service.deriveTopic(
+      INTRO_STAGE_ID,
+      'intro1',
+      makeSnapshot({ cachedPaths: new Set<string>() }),
+    );
+
+    expect(topic).toEqual({ status: 'available-offline' });
   });
 });
