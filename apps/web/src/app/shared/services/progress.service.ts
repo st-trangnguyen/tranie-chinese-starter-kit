@@ -117,6 +117,11 @@ export class ProgressService {
     return shares;
   }
 
+  /** Rule: thời gian học hiển thị theo phút, làm tròn xuống (S8.1 AC2). */
+  toStudyMinutes(seconds: number): number {
+    return Math.floor(seconds / 60);
+  }
+
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
   async needsOnboarding(): Promise<boolean> {

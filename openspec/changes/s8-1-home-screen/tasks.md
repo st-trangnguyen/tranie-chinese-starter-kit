@@ -32,7 +32,7 @@ Test: `apps/web/src/app/shared/utils/date.utils.test.ts`, `apps/web/src/app/shar
 - [x] 2.1 RED: S8.1-AC2 "Học qua nửa đêm chia cho hai ngày" (Phần 2) — `toLocalDateKey(new Date(2026, 10, 17, 23, 50))` = `'2026-11-17'`; `startOfNextLocalDay` của mốc đó = `new Date(2026, 10, 18)`; `splitStudyTimeByDay(23:50 ngày 17, 00:10 ngày 18)` = `[{ '2026-11-17', 600 }, { '2026-11-18', 600 }]`; cùng ngày → một phần; `end <= start` → `[]`; kiểm: fail vì skeleton trả `[]`
 - [x] 2.2 GREEN: `date.utils.ts` (`toLocalDateKey`, `startOfNextLocalDay`), `splitStudyTimeByDay` ở Phần 2 kèm `Rule:`; kiểm: test 2.1 pass
 - [x] 2.3 RED: S8.1-AC2 "Làm tròn xuống phút" (Phần 2) — `toStudyMinutes(470)` = 7, `toStudyMinutes(479.9)` = 7, `toStudyMinutes(480)` = 8, `toStudyMinutes(0)` = 0; kiểm: fail
-- [ ] 2.4 GREEN: `toStudyMinutes` (`Math.floor`, `Rule:`); kiểm: test 2.3 pass
+- [x] 2.4 GREEN: `toStudyMinutes` (`Math.floor`, `Rule:`); kiểm: test 2.3 pass
 - [ ] 2.5 RED: S8.1-AC2 "Vừa đúng mục tiêu" (Phần 2) — `isDailyGoalReached(15, 15)` true, `(14, 15)` false, `(45, 30)` true, `(0, 30)` false; kiểm: fail
 - [ ] 2.6 GREEN: `isDailyGoalReached` (`>=`, `Rule:`); kiểm: test 2.5 pass
 - [ ] 2.7 RED: S8.1-AC1 "Chưa học bài nào" (Phần 2) — lộ trình 2 giai đoạn × 2 nhóm × 2 bài, chưa xong bài nào: `findNextLessonId(stages, deriveLessonStatuses(stages, ∅))` = bài đầu; kiểm: fail vì skeleton trả `undefined`
