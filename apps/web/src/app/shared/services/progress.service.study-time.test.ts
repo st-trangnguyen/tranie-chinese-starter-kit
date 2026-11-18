@@ -147,6 +147,18 @@ describe('ProgressService — thời gian học hôm nay', () => {
     expect(today.goalMinutes).toBe(15);
   });
 
+  it('S8.1-AC2 Thời gian học đã lưu bị hỏng: studySeconds "abc" là 0 phút, học thêm 2 phút 10 giây là 2', async () => {
+    const db = createDatabase(`test-${crypto.randomUUID()}`);
+    await db.dailyStats.put({ date: '2026-11-18', studySeconds: 'abc' });
+    const service = new ProgressService(new DexieProgressStore(db));
+
+    expect((await service.getTodayStudy(at(18, 9, 0))).minutes).toBe(0);
+
+    await service.recordStudyTime(at(18, 9, 0), at(18, 9, 2, 10));
+
+    expect((await service.getTodayStudy(at(18, 9, 5))).minutes).toBe(2);
+  });
+
   it('S8.1-AC2 Mục tiêu lưu bị hỏng: IndexedDB không mở được thì 0 / 15 phút, không throw', async () => {
     const service = new ProgressService(unavailableStore);
 
