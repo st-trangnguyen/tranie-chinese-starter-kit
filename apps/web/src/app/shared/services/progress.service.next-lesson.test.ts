@@ -51,4 +51,10 @@ describe('ProgressService — findNextLessonId', () => {
 
     expect(service.findNextLessonId(STAGES, statuses)).toBe('l1');
   });
+
+  it('S8.1-AC1 Đã học xong mọi bài: không có bài tiếp theo', () => {
+    expect(
+      nextLessonOf(['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8']),
+    ).toBeUndefined();
+  });
 });
