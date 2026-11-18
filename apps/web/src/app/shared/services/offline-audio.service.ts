@@ -117,15 +117,25 @@ export class OfflineAudioService {
   }
 
   /**
-   * Rule (bảng xóa): audio của chủ đề (không trùng) là xóa được (S8.4 AC1).
-   * Trừ `precached` và trừ audio của chủ đề đang tải: task 5.27–5.30.
+   * Rule (bảng xóa): audio xóa được của chủ đề = audio của chủ đề (không trùng), trừ audio
+   * Nhập môn (`precached`), trừ audio mà mọi chủ đề đang tải cần (S8.4 AC2).
+   * Audio dùng chung với chủ đề "Đã tải" khác vẫn xóa được.
    */
-  // Chữ ký D6 giữ tham số `downloadingUnitIds`; task 5.27/5.28 mới dùng tới.
-  readonly selectRemovableAudio: (
+  selectRemovableAudio(
     unitId: string,
     index: AudioIndex,
     downloadingUnitIds: ReadonlySet<string>,
-  ) => string[] = (unitId, index) => [...new Set(index.units[unitId] ?? [])];
+  ): string[] {
+    const keptPaths = new Set(index.precached);
+    downloadingUnitIds.forEach((downloadingUnitId) => {
+      (index.units[downloadingUnitId] ?? []).forEach((path) =>
+        keptPaths.add(path),
+      );
+    });
+    return [...new Set(index.units[unitId] ?? [])].filter(
+      (path) => !keptPaths.has(path),
+    );
+  }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 }
