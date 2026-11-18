@@ -479,4 +479,49 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
     expect(removable).not.toContain(s);
     expect(removable).toEqual([b]);
   });
+
+  it('S8.4-AC2 Xóa audio dùng chung thì chủ đề khác đã tải về chưa tải: A={s,a}, B={s,b} đủ file, s không phải Nhập môn, không ai tải → xóa A chọn s; bỏ file đã chọn khỏi máy thì B là not-downloaded', () => {
+    const unitA = 'hsk1-shared-a';
+    const unitB = 'hsk1-shared-b';
+    const s = AUDIO_A;
+    const a = AUDIO_B;
+    const b = AUDIO_C;
+    const index: AudioIndex = {
+      ...HSK_INDEX,
+      units: {
+        intro1: [AUDIO_INTRO],
+        [unitA]: [s, a],
+        [unitB]: [s, b],
+      },
+    };
+    const cachedPaths = new Set([s, a, b, AUDIO_INTRO]);
+    const downloadingUnitIds = new Set<string>();
+    const before = makeSnapshot({ index, cachedPaths, downloadingUnitIds });
+
+    expect(service.deriveTopic(HSK_STAGE_ID, unitB, before)).toMatchObject({
+      status: 'downloaded',
+    });
+
+    const removable = service.selectRemovableAudio(
+      unitA,
+      index,
+      downloadingUnitIds,
+    );
+
+    expect(removable).toContain(s);
+
+    const removedPaths = new Set(removable);
+    const after = makeSnapshot({
+      index,
+      cachedPaths: new Set(
+        [...cachedPaths].filter((path) => !removedPaths.has(path)),
+      ),
+      downloadingUnitIds,
+    });
+
+    expect(service.deriveTopic(HSK_STAGE_ID, unitB, after)).toEqual({
+      status: 'not-downloaded',
+      bytes: 1_216_582,
+    });
+  });
 });
