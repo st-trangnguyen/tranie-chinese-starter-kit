@@ -5,6 +5,8 @@ export interface AudioCache {
   listCachedPaths(paths: readonly string[]): Promise<ReadonlySet<string>>;
   /** fetch `/${path}` (không Range) rồi `put` vào AUDIO_CACHE_NAME. */
   download(path: string): Promise<void>;
+  /** Xóa khỏi AUDIO_CACHE_NAME; không bao giờ đụng precache. */
+  remove(paths: readonly string[]): Promise<void>;
 }
 
 const toPath = (request: Request): string =>
@@ -40,6 +42,8 @@ export class BrowserAudioCache implements AudioCache {
     const cache = await storage.open(AUDIO_CACHE_NAME);
     await cache.put(url, response);
   }
+
+  async remove(): Promise<void> {}
 }
 
 export const audioCache: AudioCache = new BrowserAudioCache(
