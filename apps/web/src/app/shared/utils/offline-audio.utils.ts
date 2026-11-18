@@ -9,5 +9,7 @@ export function formatAudioSize(bytes: number): string {
   return `${Math.floor(tenths / 10)},${tenths % 10} MB`;
 }
 
-export const toDownloadPercent: (done: number, total: number) => number = () =>
-  0;
+// Phần trăm tiến độ tải (D7): số nguyên, làm tròn xuống.
+export function toDownloadPercent(done: number, total: number): number {
+  return Math.floor((done * 100) / total);
+}

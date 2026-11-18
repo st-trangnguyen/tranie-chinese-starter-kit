@@ -41,8 +41,8 @@ Test: `apps/web/src/app/shared/utils/offline-audio.utils.test.ts` — hàm thu�
 - [x] 3.6 GREEN: nhánh MB khi KB làm tròn lên đạt 1024; kiểm: test 3.5 pass
 - [x] 3.7 RED: S8.4-AC1 "Dung lượng MB làm tròn lên khi chữ số tiếp theo là 5" — `1_310_720` → "1,3 MB", `2_516_582` → "2,4 MB", dấu phẩy thập phân; kiểm: fail nếu làm tròn xuống/`toFixed` (tạm dùng `floor` nếu pass ngay rồi trả lại)
 - [x] 3.8 GREEN: `floor((20 * bytes + 1_048_576) / 2_097_152)` số nguyên; kiểm: test 3.7 pass
-- [ ] 3.9 RED: S8.4-AC1 "Hiện tiến độ khi đang tải" (util) — `toDownloadPercent(1, 4)` = 25, `(3, 4)` = 75; kiểm: fail vì skeleton trả 0
-- [ ] 3.10 GREEN: `toDownloadPercent`; kiểm: test 3.9 pass
+- [x] 3.9 RED: S8.4-AC1 "Hiện tiến độ khi đang tải" (util) — `toDownloadPercent(1, 4)` = 25, `(3, 4)` = 75; kiểm: fail vì skeleton trả 0
+- [x] 3.10 GREEN: `toDownloadPercent`; kiểm: test 3.9 pass
 - [ ] 3.11 RED: S8.4-AC1 "Tiến độ làm tròn xuống" (util) — `(1, 3)` = 33, `(2, 3)` = 66; kiểm: chạy, nếu pass ngay thì tạm dùng `Math.round` để thấy fail rồi trả lại
 - [ ] 3.12 GREEN: sửa đến khi pass; kiểm: test 3.11 pass
 
