@@ -97,21 +97,54 @@ export class DexieProgressStore implements ProgressStore {
     return result.success ? result.data : undefined;
   }
 
-  // Skeleton S8.3 (tasks 1.1): hành vi thêm ở 1.6 và 1.8.
+  // Skeleton S8.3 (tasks 1.1): hành vi thêm ở 1.8.
   async getAllDailyStats(): Promise<DailyStat[]> {
     return [];
   }
 
-  async saveDailyGoal(): Promise<void> {}
+  saveDailyGoal(date: string, goalMinutes: DailyGoalMinutes): Promise<void> {
+    return this.enqueueStudyTimeWrite(() =>
+      this.writeDailyGoal(date, goalMinutes),
+    );
+  }
 
   addStudySeconds(date: string, seconds: number): Promise<void> {
-    // Nối vào chuỗi đồng bộ (trước mọi `await`) để lần đọc gọi ngay sau đó chờ được lần ghi này.
-    const write = this.studyTimeWrites.then(() =>
+    return this.enqueueStudyTimeWrite(() =>
       this.writeStudySeconds(date, seconds),
     );
+  }
+
+  private enqueueStudyTimeWrite(task: () => Promise<void>): Promise<void> {
+    // Nối vào chuỗi đồng bộ (trước mọi `await`) để lần đọc gọi ngay sau đó chờ được lần ghi này.
+    const write = this.studyTimeWrites.then(task);
     // Lỗi vẫn reject cho người gọi qua `write`; bản trong chuỗi chỉ bỏ lỗi để lần sau chạy tiếp.
     this.studyTimeWrites = write.catch(() => undefined);
     return write;
+  }
+
+  private async writeDailyGoal(
+    date: string,
+    goalMinutes: DailyGoalMinutes,
+  ): Promise<void> {
+    // Settings và mục tiêu của ngày `date` đổi cùng lúc hoặc không đổi gì.
+    // Không có dòng hoặc dòng hỏng thì không tạo/không sửa: lần ghi phút sau sẽ chụp mục tiêu mới.
+    await this.db.transaction(
+      'rw',
+      this.db.settings,
+      this.db.dailyStats,
+      async () => {
+        await this.db.settings.put({
+          key: 'dailyGoalMinutes',
+          value: goalMinutes,
+        });
+        const result = dailyStatSchema.safeParse(
+          await this.db.dailyStats.get(date),
+        );
+        if (result.success) {
+          await this.db.dailyStats.put({ ...result.data, goalMinutes });
+        }
+      },
+    );
   }
 
   private async writeStudySeconds(
