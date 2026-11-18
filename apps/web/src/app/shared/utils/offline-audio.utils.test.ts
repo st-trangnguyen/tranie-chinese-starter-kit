@@ -35,4 +35,14 @@ describe('formatAudioSize', () => {
       expect(formatAudioSize(bytes)).toBe(expected);
     },
   );
+
+  it.each([
+    [1_310_720, '1,3 MB'],
+    [2_516_582, '2,4 MB'],
+  ])(
+    'S8.4-AC1 Dung lượng MB làm tròn lên khi chữ số tiếp theo là 5: %d byte → "%s"',
+    (bytes, expected) => {
+      expect(formatAudioSize(bytes)).toBe(expected);
+    },
+  );
 });
