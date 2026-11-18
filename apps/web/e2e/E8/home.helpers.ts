@@ -1,5 +1,16 @@
 /** Helper e2e của Trang chủ S8.1 (design mục Test). */
-import { expect, type Locator, type Page } from '@playwright/test';
+import {
+  expect,
+  type BrowserContext,
+  type Locator,
+  type Page,
+} from '@playwright/test';
+
+import {
+  answerCurrentQuestion,
+  INTRO_LESSON_IDS,
+  INTRO_LESSON_TITLES,
+} from '../E7/intro-lessons.helpers';
 
 export const HOME_URL = /\/home$/;
 export const HOME_TITLE = 'Trang chủ';
@@ -7,6 +18,21 @@ export const START_LESSON_LABEL = 'Vào học';
 export const LEARNING_PATH_LINK_LABEL = 'Xem lộ trình';
 export const GOAL_REACHED_TEXT = 'Đã đạt mục tiêu hôm nay';
 export const ALL_COMPLETED_TEXT = 'Bạn đã học xong lộ trình hiện có.';
+
+/** Mốc giờ máy dựng theo múi giờ cố định để khóa ngày `dailyStats` không phụ thuộc máy chạy. */
+export const TIMEZONE = 'Asia/Ho_Chi_Minh';
+export const NOW = new Date('2026-11-18T10:00:00+07:00');
+export const TODAY = '2026-11-18';
+export const YESTERDAY = '2026-11-17';
+
+export const SECOND = 1_000;
+export const MINUTE = 60 * SECOND;
+export const HOUR = 60 * MINUTE;
+
+export const lessonId = (index: number): string =>
+  INTRO_LESSON_IDS[index] ?? '';
+export const lessonTitle = (index: number): string =>
+  INTRO_LESSON_TITLES[index] ?? '';
 
 const DB_NAME = 'tranie-chinese';
 /** Bảng mới nhất của DB (version 3): có bảng này thì app đã tạo xong schema. */
@@ -166,3 +192,89 @@ export const nextLessonCard = (page: Page): Locator =>
 /** Thanh tiến độ "Câu k / n" của màn bài. */
 export const lessonProgress = (page: Page): Locator =>
   page.getByRole('progressbar', { name: /^Câu \d+ \/ \d+$/ });
+
+/** "Hôm nay: X / Y phút" hiện đúng `minutes` phút với mục tiêu `goal` phút. */
+export const expectTodayMinutes = async (
+  page: Page,
+  minutes: number,
+  goal: DailyGoal = 15,
+): Promise<void> => {
+  await expect(todayStudyText(page)).toHaveText(
+    `Hôm nay: ${minutes} / ${goal} phút`,
+  );
+};
+
+/** Cho đồng hồ giả chạy tới `target` (interval của trang vẫn chạy đủ từng lần). */
+export const runClockUntil = async (
+  page: Page,
+  target: Date,
+): Promise<void> => {
+  const now = await page.evaluate(() => Date.now());
+  await page.clock.runFor(Math.max(0, target.getTime() - now));
+};
+
+/** Trả lời `count` câu đầu, chờ thanh tiến độ sang câu kế tiếp sau mỗi câu. */
+export const answerQuestions = async (
+  page: Page,
+  count: number,
+): Promise<void> => {
+  for (let index = 1; index <= count; index += 1) {
+    await answerCurrentQuestion(page);
+    await expect(lessonProgress(page)).toHaveAccessibleName(
+      new RegExp(`^Câu ${index + 1} /`),
+    );
+  }
+};
+
+/** Trả lời mọi câu tới màn tổng kết (có liên kết "Trang chủ"). */
+export const finishLesson = async (page: Page): Promise<void> => {
+  const summaryHomeLink = page.getByRole('link', { name: 'Trang chủ' });
+  while (!(await summaryHomeLink.isVisible())) {
+    await answerCurrentQuestion(page);
+    await expect(lessonProgress(page).or(summaryHomeLink)).toBeVisible();
+  }
+};
+
+export const expectHomeScreen = async (page: Page): Promise<void> => {
+  await expect(page).toHaveURL(HOME_URL);
+  await expect(homeHeading(page)).toBeVisible();
+};
+
+/** Bấm "Vào học" trên Trang chủ, chờ màn bài hiện. */
+export const startLesson = async (page: Page): Promise<void> => {
+  await startLessonLink(page).click();
+  await expect(lessonProgress(page)).toBeVisible();
+};
+
+/** Rời màn bài bằng nút Quay lại của trình duyệt, về Trang chủ. */
+export const leaveLessonToHome = async (page: Page): Promise<void> => {
+  await page.goBack();
+  await expectHomeScreen(page);
+};
+
+/** Ở màn bài `durationMs` (đồng hồ giả) rồi rời về Trang chủ. */
+export const stayInLessonThenLeave = async (
+  page: Page,
+  durationMs: number,
+): Promise<void> => {
+  await page.clock.runFor(durationMs);
+  await leaveLessonToHome(page);
+};
+
+export const GOAL_15: ProgressSeed = { settings: { dailyGoalMinutes: 15 } };
+
+/** Mở Trang chủ (mục tiêu 15 phút, hôm nay chưa học) rồi bấm "Vào học". */
+export const openHomeThenStartLesson = async (page: Page): Promise<void> => {
+  await seedProgress(page, GOAL_15);
+  await page.goto('/');
+  await expectHomeScreen(page);
+  await startLesson(page);
+};
+
+/** Mở lại app trong cùng trình duyệt (cùng IndexedDB): vào Trang chủ. */
+export const reopenApp = async (context: BrowserContext): Promise<Page> => {
+  const reopened = await context.newPage();
+  await reopened.goto('/');
+  await expectHomeScreen(reopened);
+  return reopened;
+};
