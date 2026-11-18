@@ -157,8 +157,8 @@ giá trị hỏng: `db.settings.put({ key, value })` thô.
 - [x] 8.10 GREEN: sửa đến khi pass (`persistedRef`, `key={saveErrorId}`); kiểm: test 8.9 pass
 - [x] 8.11 RED: S8.2-AC1 "Đổi mục tiêu thì giữ sau khi mở lại app" (biên TC-S8.2-AC1-11, đổi nhanh) — `saveSettings` lần 1 (60) chờ một promise tự điều khiển rồi reject, lần 2 (30) thành công trước: sau cả hai, "30 phút" checked, có thông báo lỗi; render lại → "30 phút"; kiểm: fail nếu lỗi của lần cũ trả giá trị về (tạm bỏ kiểm `latestRequestRef` nếu pass ngay rồi trả lại)
 - [x] 8.12 GREEN: `latestRequestRef[key]` — chỉ lần đổi mới nhất của field được trả giá trị về; kiểm: test 8.11 pass
-- [ ] 8.13 RED: S8.2-AC2 "Một tùy chọn đã lưu bị hỏng thì chỉ tùy chọn đó về mặc định" (container) — thô: mục tiêu 60, pinyin `false`, tốc độ `'fast'` → "Bình thường (1x)", "60 phút" checked, công tắc tắt, không `role="alert"`; kiểm: chạy, nếu pass ngay nhờ nhóm 1 thì tạm cho `getLearningPreferences` trả `DEFAULT_SETTINGS` khi có field hỏng để thấy fail rồi trả lại
-- [ ] 8.14 GREEN: sửa đến khi pass; kiểm: test 8.13 pass
+- [x] 8.13 RED: S8.2-AC2 "Một tùy chọn đã lưu bị hỏng thì chỉ tùy chọn đó về mặc định" (container) — thô: mục tiêu 60, pinyin `false`, tốc độ `'fast'` → "Bình thường (1x)", "60 phút" checked, công tắc tắt, không `role="alert"`; kiểm: chạy, nếu pass ngay nhờ nhóm 1 thì tạm cho `getLearningPreferences` trả `DEFAULT_SETTINGS` khi có field hỏng để thấy fail rồi trả lại
+- [x] 8.14 GREEN: sửa đến khi pass; kiểm: test 8.13 pass
 - [ ] 8.15 RED: S8.2-AC1 "Mục tiêu đã lưu bị hỏng thì về 15 phút" (container) — thô: tốc độ `'slow'`, mục tiêu `'abc'` → "15 phút", "Chậm (0.75x)" checked, không alert; kiểm: như 8.13
 - [ ] 8.16 GREEN: sửa đến khi pass; kiểm: test 8.15 pass
 - [ ] 8.17 RED: S8.2-AC3 "Tùy chọn pinyin đã lưu bị hỏng thì về bật" (container) — thô: mục tiêu 30, pinyin `'yes'` → công tắc bật, "30 phút" checked, không alert; kiểm: như 8.13
