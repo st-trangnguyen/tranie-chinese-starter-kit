@@ -53,8 +53,8 @@ Test: `apps/web/src/app/core/services/audio-cache.service.test.ts` (`FakeCacheSt
 
 - [x] 4.1 RED: S8.4-AC1 "Bấm tải thì audio của chủ đề có trên máy" (adapter) — `download('audio/aaaa….mp3')` gọi `fetch('/audio/aaaa….mp3')` không header `Range`, `put` vào cache `AUDIO_CACHE_NAME`; `listCachedPaths([...])` trả path đó, không trả path khác. Commit test tạo `src/test/cache-storage.fake.ts`, `AUDIO_CACHE_NAME = 'audio-cache'` (`core/constants/audio.constants.ts`), skeleton `BrowserAudioCache` (không làm gì, trả tập rỗng); kiểm: fail ở assertion
 - [x] 4.2 GREEN: `BrowserAudioCache.download`, `listCachedPaths` (một lần `caches.keys()`, so `pathname`); kiểm: test 4.1 pass
-- [ ] 4.3 RED: S8.4-AC2 "Xóa không làm mất audio Nhập môn" (adapter) — cache precache có khóa `/audio/bbbb….mp3?__WB_REVISION__=abc` → `listCachedPaths` có `audio/bbbb….mp3`; `remove(['audio/bbbb….mp3', 'audio/aaaa….mp3'])` chỉ xóa trong `audio-cache`, khóa precache còn nguyên; kiểm: fail (query chưa bỏ / xóa nhầm precache)
-- [ ] 4.4 GREEN: bỏ query khi so, `remove` chỉ mở `AUDIO_CACHE_NAME`; kiểm: test 4.3 pass
+- [x] 4.3 RED: S8.4-AC2 "Xóa không làm mất audio Nhập môn" (adapter) — cache precache có khóa `/audio/bbbb….mp3?__WB_REVISION__=abc` → `listCachedPaths` có `audio/bbbb….mp3`; `remove(['audio/bbbb….mp3', 'audio/aaaa….mp3'])` chỉ xóa trong `audio-cache`, khóa precache còn nguyên; kiểm: fail (query chưa bỏ / xóa nhầm precache)
+- [x] 4.4 GREEN: bỏ query khi so, `remove` chỉ mở `AUDIO_CACHE_NAME`; kiểm: test 4.3 pass
 - [ ] 4.5 RED: S8.4-AC1 "Mất mạng khi đang tải" (adapter) — `fetch` reject `TypeError` / trả 503 / body lỗi → `AudioDownloadError` `reason: 'network'`, cache không có file; kiểm: fail
 - [ ] 4.6 GREEN: phân loại lỗi mạng; kiểm: test 4.5 pass
 - [ ] 4.7 RED: S8.4-AC1 "Không đủ bộ nhớ" (adapter) — `FakeCache.put` ném `new DOMException('…', 'QuotaExceededError')` → `reason: 'storage-full'`; lỗi `put` khác → `'network'`; kiểm: fail

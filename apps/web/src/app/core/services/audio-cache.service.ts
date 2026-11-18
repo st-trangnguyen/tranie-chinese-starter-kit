@@ -43,7 +43,14 @@ export class BrowserAudioCache implements AudioCache {
     await cache.put(url, response);
   }
 
-  async remove(): Promise<void> {}
+  async remove(paths: readonly string[]): Promise<void> {
+    const storage = this.storage();
+    if (storage === undefined) {
+      return;
+    }
+    const cache = await storage.open(AUDIO_CACHE_NAME);
+    await Promise.all(paths.map((path) => cache.delete(`/${path}`)));
+  }
 }
 
 export const audioCache: AudioCache = new BrowserAudioCache(
