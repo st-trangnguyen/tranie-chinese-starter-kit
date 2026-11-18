@@ -48,8 +48,8 @@ DexieProgressStore(createDatabase('test-…')))` (fake-indexeddb), store stub re
 - [x] 2.4 GREEN: `isValidAudioSpeed` (Phần 2, `Rule:`), `changeDefaultAudioSpeed` (Phần 3); kiểm: test 2.3 pass
 - [x] 2.5 RED: S8.2-AC3 "Tùy chọn pinyin giữ sau khi mở lại app" (Phần 3) — `changePinyinVisibility(false)` rồi service/store mới → `isPinyinVisible: false`; bật lại → `true`; kiểm: fail vì skeleton
 - [x] 2.6 GREEN: `changePinyinVisibility`; kiểm: test 2.5 pass
-- [ ] 2.7 RED: S8.2-AC2 "Chọn Chậm thì mở bài là phát chậm" (Phần 2 + 3) — `toLessonPreferences` bảng: `'normal'` → `isSlowAudio: false`, `'slow'` → `true`; `isPinyinVisible` truyền nguyên; sau `changeDefaultAudioSpeed('slow')` thì `getLessonPreferences()` → `{ isSlowAudio: true, isPinyinVisible: true }`; kiểm: fail vì skeleton
-- [ ] 2.8 GREEN: `toLessonPreferences` (Phần 2, `Rule:`), `getLessonPreferences` (Phần 3); kiểm: test 2.7 pass
+- [x] 2.7 RED: S8.2-AC2 "Chọn Chậm thì mở bài là phát chậm" (Phần 2 + 3) — `toLessonPreferences` bảng: `'normal'` → `isSlowAudio: false`, `'slow'` → `true`; `isPinyinVisible` truyền nguyên; sau `changeDefaultAudioSpeed('slow')` thì `getLessonPreferences()` → `{ isSlowAudio: true, isPinyinVisible: true }`; kiểm: fail vì skeleton
+- [x] 2.8 GREEN: `toLessonPreferences` (Phần 2, `Rule:`), `getLessonPreferences` (Phần 3); kiểm: test 2.7 pass
 - [ ] 2.9 RED: S8.2-AC2 "Không đọc được cài đặt thì bài vẫn mở với tốc độ thường và hiện pinyin" (Phần 3) — store stub `getSettings` reject: `getLessonPreferences()` → `{ isSlowAudio: false, isPinyinVisible: true }`, `getLearningPreferences()` → `{ 15, 'normal', true }`, cả hai không reject; kiểm: fail ở `getLessonPreferences` (chưa `.catch`)
 - [ ] 2.10 GREEN: `.catch` → `toLessonPreferences(DEFAULT_SETTINGS)`; kiểm: test 2.9 pass, mọi rule mới có `Rule:`, `progress.service.ts` < 300 dòng
 

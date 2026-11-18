@@ -23,7 +23,10 @@ import {
 } from '@shared/utils/learning-path.utils';
 import { startOfNextLocalDay, toLocalDateKey } from '@shared/utils/date.utils';
 import type { StudyTimeShare, TodayStudy } from '@shared/models/home.model';
-import type { LearningPreferences } from '@shared/models/settings.model';
+import type {
+  LearningPreferences,
+  LessonPreferences,
+} from '@shared/models/settings.model';
 
 type LessonType = (typeof LESSON_TYPES)[number];
 
@@ -62,6 +65,17 @@ export class ProgressService {
   /** Rule: tốc độ audio mặc định chỉ là "Bình thường (1x)" hoặc "Chậm (0.75x)" (S8.2 AC2). */
   isValidAudioSpeed(value: string): value is AudioSpeed {
     return AUDIO_SPEED_OPTIONS.some((option) => option === value);
+  }
+
+  /**
+   * Rule: mỗi lần vào màn học, "Nghe chậm" bật khi tốc độ mặc định là chậm, tắt khi bình thường;
+   * pinyin ở câu "nói" hiện theo tùy chọn hiện pinyin (S8.2 AC2, AC3).
+   */
+  toLessonPreferences(settings: Settings): LessonPreferences {
+    return {
+      isSlowAudio: settings.defaultAudioSpeed === 'slow',
+      isPinyinVisible: settings.isPinyinVisible,
+    };
   }
 
   /** Rule: onboarding chỉ hiện cho tới khi người học hoàn thành (S1.3 AC3). */
@@ -187,6 +201,11 @@ export class ProgressService {
       defaultAudioSpeed: settings.defaultAudioSpeed,
       isPinyinVisible: settings.isPinyinVisible,
     };
+  }
+
+  async getLessonPreferences(): Promise<LessonPreferences> {
+    const settings = await this.readSettings();
+    return this.toLessonPreferences(settings);
   }
 
   /** Chỉ ghi khóa mục tiêu, không đọc–gộp–ghi; lỗi ghi đi thẳng lên hook (design D2, D3). */
