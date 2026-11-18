@@ -95,4 +95,17 @@ describe('ProgressService — thời gian học hôm nay', () => {
     const today = await service.getTodayStudy(at(18, 20, 10));
     expect(today.minutes).toBe(11);
   });
+
+  it('S8.1-AC2 Sang ngày mới đếm lại: hôm qua 20 phút, hôm nay 09:00 là 0 phút', async () => {
+    const store = new DexieProgressStore(
+      createDatabase(`test-${crypto.randomUUID()}`),
+    );
+    const service = new ProgressService(store);
+
+    await service.recordStudyTime(at(17, 20, 0), at(17, 20, 20));
+
+    const today = await service.getTodayStudy(at(18, 9, 0));
+    expect(today.minutes).toBe(0);
+    expect((await store.getDailyStat('2026-11-17'))?.studySeconds).toBe(1200);
+  });
 });

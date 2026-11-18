@@ -54,8 +54,8 @@ Test: `apps/web/src/app/shared/services/progress.service.study-time.test.ts` —
 - [x] 3.2 GREEN: Phần 1 `readDailyStat`, `addStudySeconds`; Phần 3 `recordStudyTime` (gọi ghi đồng bộ cho mọi phần rồi `Promise.all`), `getTodayStudy` (settings + dòng hôm nay song song, `toStudyMinutes`, `isDailyGoalReached`); model `shared/models/home.model.ts`; kiểm: test 3.1 pass
 - [x] 3.3 RED: S8.1-AC2 "Nhiều lần học trong cùng ngày được cộng" — 08:00–08:05 và 20:00–20:06 cùng ngày → 11; kiểm: chạy, nếu pass ngay thì tạm cho `addStudySeconds` ghi đè thay vì cộng để thấy fail rồi trả lại
 - [x] 3.4 GREEN: sửa đến khi pass; kiểm: test 3.3 pass
-- [ ] 3.5 RED: S8.1-AC2 "Sang ngày mới đếm lại" — hôm qua ghi 20 phút, `getTodayStudy(hôm nay 09:00).minutes` = 0; dòng hôm qua vẫn 1200 giây (giữ mọi ngày); kiểm: chạy, nếu pass ngay thì tạm đọc khóa ngày cố định để thấy fail rồi trả lại
-- [ ] 3.6 GREEN: sửa đến khi pass; kiểm: test 3.5 pass
+- [x] 3.5 RED: S8.1-AC2 "Sang ngày mới đếm lại" — hôm qua ghi 20 phút, `getTodayStudy(hôm nay 09:00).minutes` = 0; dòng hôm qua vẫn 1200 giây (giữ mọi ngày); kiểm: chạy, nếu pass ngay thì tạm đọc khóa ngày cố định để thấy fail rồi trả lại
+- [x] 3.6 GREEN: sửa đến khi pass; kiểm: test 3.5 pass
 - [ ] 3.7 RED: S8.1-AC2 "Học qua nửa đêm chia cho hai ngày" (Phần 3) — `recordStudyTime(23:50 ngày 17, 00:10 ngày 18)`: `getTodayStudy(ngày 17 23:59)` = 10, `getTodayStudy(ngày 18 00:15)` = 10; kiểm: chạy, nếu pass ngay thì tạm ghi cả đoạn vào ngày bắt đầu để thấy fail rồi trả lại
 - [ ] 3.8 GREEN: sửa đến khi pass; kiểm: test 3.7 pass
 - [ ] 3.9 RED: S8.1-AC2 "Mục tiêu lưu bị hỏng" (Phần 3) — settings `dailyGoalMinutes: 'abc'` → `goalMinutes` 15; IndexedDB không mở được (store stub reject) → `{ minutes: 0, goalMinutes: 15, isGoalReached: false }`, không throw; kiểm: fail ở nhánh store reject
