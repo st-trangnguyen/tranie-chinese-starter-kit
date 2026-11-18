@@ -12,7 +12,8 @@ export class OfflineAudioService {
 
   /**
    * Rule: trạng thái audio offline của chủ đề theo bảng trạng thái (S8.4 AC1).
-   * Chủ đề chưa có audio trên máy → `not-downloaded` kèm dung lượng cần tải.
+   * Chủ đề chưa đủ audio trên máy → `not-downloaded` kèm dung lượng cần tải.
+   * Đủ mọi file → `downloaded` kèm dung lượng; `canRemove` khi có ít nhất một file xóa được.
    */
   deriveTopic(
     stageId: string,
@@ -21,7 +22,23 @@ export class OfflineAudioService {
   ): OfflineAudioTopic | null {
     const unitAudio = snapshot.index?.units[unitId] ?? [];
     const bytes = snapshot.index?.bytes ?? {};
-    return { status: 'not-downloaded', bytes: this.sumBytes(unitAudio, bytes) };
+    const totalBytes = this.sumBytes(unitAudio, bytes);
+    if (
+      snapshot.index &&
+      this.listMissingAudio(unitAudio, snapshot.cachedPaths).length === 0
+    ) {
+      const removable = this.selectRemovableAudio(
+        unitId,
+        snapshot.index,
+        snapshot.downloadingUnitIds,
+      );
+      return {
+        status: 'downloaded',
+        bytes: totalBytes,
+        canRemove: removable.length > 0,
+      };
+    }
+    return { status: 'not-downloaded', bytes: totalBytes };
   }
 
   /** Rule: dung lượng = tổng byte các audio (không trùng) của chủ đề (S8.4 AC1). */
@@ -43,16 +60,16 @@ export class OfflineAudioService {
     return unitAudio.filter((path) => !cachedPaths.has(path));
   }
 
-  // Skeleton (RED 5.5): giữ chữ ký D6, chưa có hành vi; GREEN thay bằng method thật.
   /**
-   * Rule (bảng xóa): audio của chủ đề trừ `precached`, trừ audio của mọi chủ đề đang tải;
-   * audio dùng chung với chủ đề "Đã tải" khác vẫn bị xóa (S8.4 AC2).
+   * Rule (bảng xóa): audio của chủ đề (không trùng) là xóa được (S8.4 AC1).
+   * Trừ `precached` và trừ audio của chủ đề đang tải: task 5.27–5.30.
    */
+  // Chữ ký D6 giữ tham số `downloadingUnitIds`; task 5.27/5.28 mới dùng tới.
   readonly selectRemovableAudio: (
     unitId: string,
     index: AudioIndex,
     downloadingUnitIds: ReadonlySet<string>,
-  ) => string[] = () => [];
+  ) => string[] = (unitId, index) => [...new Set(index.units[unitId] ?? [])];
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 }
