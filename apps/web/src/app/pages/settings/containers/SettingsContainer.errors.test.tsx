@@ -81,4 +81,31 @@ describe('SettingsContainer — lỗi lưu', () => {
       within(group).getByRole('radio', { name: 'Chậm (0.75x)' }),
     ).not.toBeChecked();
   });
+
+  it('S8.2-AC3 Không lưu được pinyin thì công tắc về trạng thái cũ: pinyin bật, tắt lưu lỗi → thông báo, công tắc vẫn bật', async () => {
+    await new ProgressService().completeOnboarding(15);
+
+    const { user } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const group = await screen.findByRole('group', { name: 'Hiện pinyin' });
+    const pinyinSwitch = within(group).getByRole('switch', {
+      name: 'Hiện pinyin',
+    });
+    expect(pinyinSwitch).toBeChecked();
+
+    vi.spyOn(progressStore, 'saveSettings').mockRejectedValueOnce(
+      new Error('quota'),
+    );
+
+    await user.click(pinyinSwitch);
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(SAVE_ERROR_MESSAGE);
+    expect(
+      within(group).getByRole('switch', { name: 'Hiện pinyin' }),
+    ).toBeChecked();
+    expect(within(group).getByText('Bật')).toBeVisible();
+  });
 });
