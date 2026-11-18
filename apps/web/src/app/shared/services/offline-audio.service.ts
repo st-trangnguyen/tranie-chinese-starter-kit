@@ -1,12 +1,16 @@
 import { INTRO_STAGE_ID, type AudioIndex, type Stage } from '@csk/shared';
 
 import type {
+  OfflineAudioAnnouncement,
   OfflineAudioMessage,
   OfflineAudioSnapshot,
   OfflineAudioTopic,
   OfflineAudioTopicView,
 } from '@shared/models/offline-audio.model';
 import { toDownloadPercent } from '@shared/utils/offline-audio.utils';
+
+/** Số câu thông báo gần nhất giữ trong vùng đọc (S8.4 AC1, D10). */
+export const MAX_ANNOUNCEMENTS = 5;
 
 export class OfflineAudioService {
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
@@ -153,6 +157,16 @@ export class OfflineAudioService {
           topicsNow.get(unitId)?.status === message.shownWith,
       ),
     );
+  }
+
+  /**
+   * Rule: câu thông báo mới nối sau câu cũ (S8.4 AC1). Skeleton RED 5.37: thay cả danh sách.
+   */
+  appendAnnouncement(
+    list: readonly OfflineAudioAnnouncement[],
+    item: Omit<OfflineAudioAnnouncement, 'id'>,
+  ): readonly OfflineAudioAnnouncement[] {
+    return [{ ...item, id: 1 }];
   }
 
   /**
