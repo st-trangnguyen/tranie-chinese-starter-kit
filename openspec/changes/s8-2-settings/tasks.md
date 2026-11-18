@@ -71,8 +71,8 @@ helper mic bị chặn của `SpeakExercise.no-mic.test.tsx`), `apps/web/src/app
 - [x] 4.2 GREEN: `SpeakExercise` đọc `usePinyinVisibility()`, chỉ render dòng pinyin khi `true` (thêm `lang="zh-Latn-pinyin"`); kiểm: test 4.1 pass
 - [x] 4.3 RED: S5.2-AC1 "Câu nói hiện nội dung để đọc và 3 mức" (speak-rating, Scenario sửa: "Hiện pinyin" đang bật) — trong provider `isVisible` true: hiện chữ Hán, pinyin, nghĩa và ba nút; kiểm: chạy, nếu pass ngay thì tạm luôn ẩn pinyin để thấy fail rồi trả lại
 - [x] 4.4 GREEN: sửa đến khi pass; kiểm: test 4.3 pass, `SpeakExercise.test.tsx` cũ (không provider → mặc định hiện) pass
-- [ ] 4.5 RED: S8.2-AC3 "Đọc to rồi tự chấm khi tắt pinyin" (speak-no-mic) — mic bị chặn, bấm "Ghi âm" → chế độ đọc to; provider `false`: hiện chữ Hán và nghĩa, không pinyin; "Nghe mẫu" bấm được; kiểm: chạy, nếu pass ngay nhờ 4.2 thì tạm chỉ ẩn pinyin khi `!isReadAloud` để thấy fail rồi trả lại
-- [ ] 4.6 GREEN: sửa đến khi pass; kiểm: test 4.5 pass
+- [x] 4.5 RED: S8.2-AC3 "Đọc to rồi tự chấm khi tắt pinyin" (speak-no-mic) — mic bị chặn, bấm "Ghi âm" → chế độ đọc to; provider `false`: hiện chữ Hán và nghĩa, không pinyin; "Nghe mẫu" bấm được; kiểm: chạy, nếu pass ngay nhờ 4.2 thì tạm chỉ ẩn pinyin khi `!isReadAloud` để thấy fail rồi trả lại
+- [x] 4.6 GREEN: sửa đến khi pass; kiểm: test 4.5 pass
 - [ ] 4.7 RED: S5.4-AC2 "Vẫn nghe mẫu và thấy chữ để đọc" (speak-no-mic, Scenario sửa: "Hiện pinyin" đang bật) — provider `true`, chế độ đọc to: "Nghe mẫu" bấm được, hiện chữ Hán, pinyin, nghĩa; kiểm: chạy, nếu pass ngay thì tạm ẩn pinyin khi `isReadAloud` để thấy fail rồi trả lại
 - [ ] 4.8 GREEN: sửa đến khi pass; kiểm: test 4.7 pass
 - [ ] 4.9 RED: S8.2-AC3 "Tắt pinyin vẫn hiện pinyin trong giải thích khi sai" (tầng component) — provider `false`, bấm "Chưa đúng" → `onResult` nhận `explanation` chứa chữ Hán, pinyin và nghĩa; kiểm: chạy, nếu pass ngay thì tạm bỏ pinyin khỏi `explanation` khi tắt để thấy fail rồi trả lại
