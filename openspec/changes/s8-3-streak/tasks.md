@@ -84,8 +84,8 @@ Test: `apps/web/src/app/shared/services/progress.service.streak-flow.test.ts` (m
 - [x] 3.10 GREEN: Phần 1 `writeDailyGoal`; Phần 3 `changeDailyGoal(minutes, now)` (`isValidDailyGoal` → throw, `writeDailyGoal(toLocalDateKey(now), minutes)`); kiểm: test 3.9 pass
 - [x] 3.11 RED: S8.3-AC1 "Đổi mục tiêu sau khi đã học, qua 0:00 streak không đổi" (Phần 3) — `completeOnboarding(15)`, D-1 không học, D0 `recordStudyTime` 20 phút, `changeDailyGoal(30, D0)` → `getStudyStreak(D0 23:59)` = 0, `getStudyStreak(D+1 00:01)` = 0; kiểm: chạy, nếu pass ngay thì tạm bỏ cập nhật dòng hôm nay trong `saveDailyGoal` (chỉ ghi settings) để thấy 1 rồi trả lại
 - [x] 3.12 GREEN: sửa đến khi pass; kiểm: test 3.11 pass
-- [ ] 3.13 RED: S8.3-AC1 "Hạ mục tiêu không biến ngày chưa đạt thành đạt" (Phần 3) — `completeOnboarding(30)`, D-2 và D-1 `recordStudyTime` 20 phút, D0 `changeDailyGoal(15)` chưa học → 0; kiểm: chạy, nếu pass ngay thì tạm cho `saveDailyGoal` cập nhật mọi dòng để thấy fail rồi trả lại
-- [ ] 3.14 GREEN: sửa đến khi pass; kiểm: test 3.13 pass, file test < 300 dòng (tách `progress.service.streak-goal.test.ts` nếu vượt)
+- [x] 3.13 RED: S8.3-AC1 "Hạ mục tiêu không biến ngày chưa đạt thành đạt" (Phần 3) — `completeOnboarding(30)`, D-2 và D-1 `recordStudyTime` 20 phút, D0 `changeDailyGoal(15)` chưa học → 0; kiểm: chạy, nếu pass ngay thì tạm cho `saveDailyGoal` cập nhật mọi dòng để thấy fail rồi trả lại
+- [x] 3.14 GREEN: sửa đến khi pass; kiểm: test 3.13 pass, file test < 300 dòng (tách `progress.service.streak-goal.test.ts` nếu vượt)
 
 ## 4. Trang chủ — `useHome`, `StudyStreakStatus`, `HomeContainer` (design D5)
 

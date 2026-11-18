@@ -137,4 +137,15 @@ describe('ProgressService — getStudyStreak', () => {
     await expect(service.getStudyStreak(at(18, 23, 59))).resolves.toBe(0);
     await expect(service.getStudyStreak(at(19, 0, 1))).resolves.toBe(0);
   });
+
+  it('S8.3-AC1 Hạ mục tiêu không biến ngày chưa đạt thành đạt: mục tiêu 30 phút, hôm kia và hôm qua học 20 phút, hôm nay đổi sang 15 phút và chưa học thì streak 0', async () => {
+    const service = createService();
+    await service.completeOnboarding(30);
+    await service.recordStudyTime(at(16, 9, 0), at(16, 9, 20));
+    await service.recordStudyTime(at(17, 9, 0), at(17, 9, 20));
+
+    await service.changeDailyGoal(15, at(18, 8, 0));
+
+    await expect(service.getStudyStreak(at(18, 9, 0))).resolves.toBe(0);
+  });
 });
