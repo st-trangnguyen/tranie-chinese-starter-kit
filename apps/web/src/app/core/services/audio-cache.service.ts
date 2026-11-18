@@ -47,7 +47,7 @@ export class BrowserAudioCache implements AudioCache {
   async download(path: string): Promise<void> {
     const storage = this.storage();
     if (storage === undefined) {
-      throw new Error('Trình duyệt không có bộ nhớ đệm để tải audio');
+      throw new AudioDownloadError('network');
     }
     const url = `/${path}`;
     try {

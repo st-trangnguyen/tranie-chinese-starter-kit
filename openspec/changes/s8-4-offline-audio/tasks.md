@@ -59,8 +59,8 @@ Test: `apps/web/src/app/core/services/audio-cache.service.test.ts` (`FakeCacheSt
 - [x] 4.6 GREEN: phân loại lỗi mạng; kiểm: test 4.5 pass
 - [x] 4.7 RED: S8.4-AC1 "Không đủ bộ nhớ" (adapter) — `FakeCache.put` ném `new DOMException('…', 'QuotaExceededError')` → `reason: 'storage-full'`; lỗi `put` khác → `'network'`; kiểm: fail
 - [x] 4.8 GREEN: nhận `QuotaExceededError`; kiểm: test 4.7 pass
-- [ ] 4.9 RED: S8.4-AC1 "Mở lại app vẫn thấy đã tải" (adapter) — adapter mới trên cùng `FakeCacheStorage` thấy file đã tải; `storage()` trả `undefined` → `listCachedPaths` tập rỗng, `download` ném `'network'`; kiểm: chạy, nếu pass ngay thì tạm giữ tập path trong bộ nhớ instance để thấy fail rồi trả lại
-- [ ] 4.10 GREEN: sửa đến khi pass; kiểm: test 4.9 pass
+- [x] 4.9 RED: S8.4-AC1 "Mở lại app vẫn thấy đã tải" (adapter) — adapter mới trên cùng `FakeCacheStorage` thấy file đã tải; `storage()` trả `undefined` → `listCachedPaths` tập rỗng, `download` ném `'network'`; kiểm: chạy, nếu pass ngay thì tạm giữ tập path trong bộ nhớ instance để thấy fail rồi trả lại
+- [x] 4.10 GREEN: sửa đến khi pass; kiểm: test 4.9 pass
 - [ ] 4.11 RED: S8.4-AC1 "Chủ đề chưa tải có nút tải kèm dung lượng" (nguồn nội dung) — `FetchContentSource.getAudioIndex()` đọc `/content/audio-index.json`, trả dữ liệu đã parse; JSON sai schema → throw "Nội dung không hợp lệ"; skeleton `getAudioIndex` trong interface + stub `getAudioIndex: vi.fn(…)` vào mọi `ContentSource` viết tay (`content.service.test.ts` `makeSource`; `stroke-order.service.test.ts` dòng 17, 109, 149, 167, 184, 201; rà `grep -rn ': ContentSource' apps/web/src`); kiểm: `pnpm typecheck` sạch, fail ở assertion
 - [ ] 4.12 GREEN: `getAudioIndex` = `load(…, audioIndexSchema)`; kiểm: test 4.11 pass
 
