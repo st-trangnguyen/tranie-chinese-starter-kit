@@ -10,7 +10,7 @@ import {
   DexieProgressStore,
   progressStore,
 } from '@core/services/progress-store.service';
-import { mockContentFetch } from '@test/mocks/content-fetch';
+import { mockContentFetch, sentenceOf } from '@test/mocks/content-fetch';
 import {
   fakeAudio,
   installRecordingEnvironment,
@@ -38,6 +38,32 @@ const LESSON = {
     { id: 'e1', kind: 'tone-choice', wordId: BA.id },
     { id: 'e2', kind: 'tone-choice', wordId: BA.id },
   ],
+};
+
+const NIHAO = sentenceOf('s-nihao');
+
+/** Bài có câu "nói" 你好 ở câu 1. */
+const SPEAK_LESSON = {
+  id: 'intro-pinyin',
+  type: 'lesson',
+  title: 'Nói theo Cài đặt',
+  exercises: [
+    { id: 'e1', kind: 'speak', sentenceId: NIHAO.id },
+    { id: 'e2', kind: 'tone-choice', wordId: BA.id },
+  ],
+};
+
+/** Phục vụ SPEAK_LESSON cho mọi bài (thay cho LESSON mặc định). */
+const serveSpeakLesson = (): void => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation(
+    mockContentFetch(
+      async (input) =>
+        /\/content\/lessons\/.+\.json$/.test(String(input))
+          ? Response.json(SPEAK_LESSON)
+          : new Response('', { status: 404 }),
+      { words: [BA] },
+    ),
+  );
 };
 
 /** Ghi settings vào IndexedDB thật (fake-indexeddb) của app; xoá dữ liệu cũ trước. */
@@ -295,6 +321,19 @@ describe('LessonRunnerContainer — theo Cài đặt của người học', () =
 
       expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
       await expectNormalPlayback(user);
+    });
+  });
+
+  describe('S8.2-AC3 Tắt pinyin thì câu nói không hiện pinyin', () => {
+    it('S8.2-AC3 Tắt pinyin thì câu nói không hiện pinyin: Cài đặt tắt pinyin thì câu "nói" 你好 hiện chữ và nghĩa, không "nǐ hǎo"', async () => {
+      await seedSettings({ isPinyinVisible: false });
+      serveSpeakLesson();
+      renderRunner();
+
+      expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
+      expect(await screen.findByText(NIHAO.hanzi)).toBeInTheDocument();
+      expect(screen.getByText(NIHAO.vi)).toBeInTheDocument();
+      expect(screen.queryByText(NIHAO.pinyin)).not.toBeInTheDocument();
     });
   });
 });
