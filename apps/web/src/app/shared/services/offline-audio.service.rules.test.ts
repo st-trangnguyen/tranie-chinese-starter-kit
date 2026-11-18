@@ -224,4 +224,17 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
       ),
     ).toBeNull();
   });
+
+  it('S8.4-AC1 Hiện tiến độ khi đang tải: chủ đề HSK 4 audio đang tải, 1/4 file có trên máy → downloading 25%', () => {
+    const topic = service.deriveTopic(
+      HSK_STAGE_ID,
+      HSK_UNIT_ID,
+      makeSnapshot({
+        cachedPaths: new Set([AUDIO_A]),
+        downloadingUnitIds: new Set([HSK_UNIT_ID]),
+      }),
+    );
+
+    expect(topic).toEqual({ status: 'downloading', percent: 25 });
+  });
 });
