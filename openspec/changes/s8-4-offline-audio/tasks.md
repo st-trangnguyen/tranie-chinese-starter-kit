@@ -85,8 +85,8 @@ Skeleton service + model `shared/models/offline-audio.model.ts` tạo trong comm
 - [x] 5.14 GREEN: sửa đến khi pass; kiểm: test 5.13 pass
 - [x] 5.15 RED: S8.4-AC1 "Chủ đề Nhập môn không có audio thì không có khối" (Phần 2) — nhóm stage `intro`, `[]` → `null` (không `available-offline`); kiểm: fail nếu xét Nhập môn trước (tạm đảo thứ tự nếu pass ngay)
 - [x] 5.16 GREEN: luật "không có audio" xét đầu tiên; kiểm: test 5.15 pass
-- [ ] 5.17 RED: S8.4-AC1 "Hiện tiến độ khi đang tải" (Phần 2) — đang tải, 1/4 có → `{ status: 'downloading', percent: 25 }`; kiểm: fail
-- [ ] 5.18 GREEN: nhánh đang tải dùng `toDownloadPercent`; kiểm: test 5.17 pass
+- [x] 5.17 RED: S8.4-AC1 "Hiện tiến độ khi đang tải" (Phần 2) — đang tải, 1/4 có → `{ status: 'downloading', percent: 25 }`; kiểm: fail
+- [x] 5.18 GREEN: nhánh đang tải dùng `toDownloadPercent`; kiểm: test 5.17 pass
 - [ ] 5.19 RED: S8.4-AC1 "Tiến độ tính cả file đã có từ trước" (Phần 2) — đang tải, 3/4 → 75; đang tải mà đủ 4/4 → `downloaded` (không `percent: 100`); kiểm: fail ở ca đủ file (tạm bỏ điều kiện "còn thiếu" nếu pass ngay)
 - [ ] 5.20 GREEN: đang tải chỉ khi còn file thiếu; kiểm: test 5.19 pass
 - [ ] 5.21 RED: S8.4-AC2 "Chủ đề dùng chung audio vòng tròn vẫn xóa được" (Phần 2) — A={x,y}, B={y,z}, C={x,z} đủ file, không ai tải → cả ba `canRemove: true`; `selectRemovableAudio(A)` = {x,y}; kiểm: chạy, nếu pass ngay thì tạm loại audio dùng chung với chủ đề "Đã tải" để thấy fail rồi trả lại

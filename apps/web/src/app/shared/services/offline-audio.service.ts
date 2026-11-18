@@ -4,6 +4,7 @@ import type {
   OfflineAudioSnapshot,
   OfflineAudioTopic,
 } from '@shared/models/offline-audio.model';
+import { toDownloadPercent } from '@shared/utils/offline-audio.utils';
 
 export class OfflineAudioService {
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
@@ -15,6 +16,7 @@ export class OfflineAudioService {
    * Chủ đề không có audio (`[]` hoặc không có trong audio index) → không có khối (`null`),
    * xét đầu tiên, trước cả có sẵn offline.
    * Có sẵn offline xét trước các trạng thái còn lại.
+   * Chủ đề đang tải → `downloading` kèm phần trăm số file đã có trên máy, xét trước chưa tải/đã tải.
    * Chủ đề chưa đủ audio trên máy → `not-downloaded` kèm dung lượng cần tải.
    * Đủ mọi file → `downloaded` kèm dung lượng; `canRemove` khi có ít nhất một file xóa được.
    */
@@ -35,6 +37,12 @@ export class OfflineAudioService {
       )
     ) {
       return { status: 'available-offline' };
+    }
+    if (snapshot.downloadingUnitIds.has(unitId)) {
+      return {
+        status: 'downloading',
+        percent: this.calculateDownloadPercent(unitAudio, snapshot.cachedPaths),
+      };
     }
     const bytes = snapshot.index?.bytes ?? {};
     const totalBytes = this.sumBytes(unitAudio, bytes);
@@ -86,6 +94,19 @@ export class OfflineAudioService {
       (total, path) => total + (bytes[path] ?? 0),
       0,
     );
+  }
+
+  /**
+   * Rule: tiến độ tải = số file của chủ đề đang có trên máy / tổng số file, nhân 100,
+   * làm tròn xuống (S8.4 AC1).
+   */
+  calculateDownloadPercent(
+    unitAudio: readonly string[],
+    cachedPaths: ReadonlySet<string>,
+  ): number {
+    const done =
+      unitAudio.length - this.listMissingAudio(unitAudio, cachedPaths).length;
+    return toDownloadPercent(done, unitAudio.length);
   }
 
   /** Rule: chỉ tải file chưa có trên máy (S8.4 AC1). */
