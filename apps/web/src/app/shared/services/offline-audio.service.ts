@@ -1,18 +1,40 @@
 import { INTRO_STAGE_ID, type AudioIndex, type Stage } from '@csk/shared';
 
+import {
+  audioCache,
+  type AudioCache,
+} from '@core/services/audio-cache.service';
+import {
+  contentSource,
+  type ContentSource,
+} from '@core/services/content-source.service';
 import type {
   OfflineAudioAnnouncement,
   OfflineAudioMessage,
   OfflineAudioSnapshot,
   OfflineAudioTopic,
   OfflineAudioTopicView,
+  OfflineAudioUnit,
 } from '@shared/models/offline-audio.model';
 import { toDownloadPercent } from '@shared/utils/offline-audio.utils';
 
 /** Số câu thông báo gần nhất giữ trong vùng đọc (S8.4 AC1, D10). */
 export const MAX_ANNOUNCEMENTS = 5;
 
+const INITIAL_SNAPSHOT: OfflineAudioSnapshot = {
+  index: null,
+  cachedPaths: new Set<string>(),
+  downloadingUnitIds: new Set<string>(),
+  messages: new Map(),
+  announcements: [],
+};
+
 export class OfflineAudioService {
+  constructor(
+    private readonly cache: AudioCache = audioCache,
+    private readonly source: ContentSource = contentSource,
+  ) {}
+
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
@@ -199,6 +221,27 @@ export class OfflineAudioService {
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
+
+  // Skeleton RED 6.1: chưa có hành vi (GREEN 6.2).
+  subscribe = (listener: () => void): (() => void) => {
+    void listener;
+    return () => undefined;
+  };
+
+  getSnapshot = (): OfflineAudioSnapshot => INITIAL_SNAPSHOT;
+
+  async refresh(): Promise<void> {
+    void this.cache;
+    void this.source;
+  }
+
+  async startDownload(
+    unit: OfflineAudioUnit,
+    isOnline: boolean,
+  ): Promise<void> {
+    void unit;
+    void isOnline;
+  }
 }
 
 export const offlineAudioService = new OfflineAudioService();
