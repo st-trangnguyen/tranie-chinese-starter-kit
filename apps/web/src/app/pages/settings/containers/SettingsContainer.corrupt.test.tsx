@@ -59,4 +59,32 @@ describe('SettingsContainer — dữ liệu lưu bị hỏng', () => {
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
+
+  it('S8.2-AC1 Mục tiêu đã lưu bị hỏng thì về 15 phút: mục tiêu "abc" → "15 phút", tốc độ "slow" giữ "Chậm (0.75x)"', async () => {
+    await writeRawSettings([
+      { key: 'defaultAudioSpeed', value: 'slow' },
+      { key: 'dailyGoalMinutes', value: 'abc' },
+    ]);
+
+    renderWithProviders(<SettingsContainer />, { route: '/settings' });
+
+    const goalGroup = await screen.findByRole('group', {
+      name: 'Mục tiêu mỗi ngày',
+    });
+    expect(
+      within(goalGroup).getByRole('radio', { name: '15 phút' }),
+    ).toBeChecked();
+
+    const speedGroup = screen.getByRole('group', {
+      name: 'Tốc độ audio mặc định',
+    });
+    expect(
+      within(speedGroup).getByRole('radio', { name: 'Chậm (0.75x)' }),
+    ).toBeChecked();
+    expect(
+      within(speedGroup).getByRole('radio', { name: 'Bình thường (1x)' }),
+    ).not.toBeChecked();
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
 });
