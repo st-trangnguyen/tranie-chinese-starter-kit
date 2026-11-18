@@ -1,4 +1,4 @@
-import type { AudioIndex } from '@csk/shared';
+import { INTRO_STAGE_ID, type AudioIndex } from '@csk/shared';
 
 import type {
   OfflineAudioSnapshot,
@@ -12,6 +12,7 @@ export class OfflineAudioService {
 
   /**
    * Rule: trạng thái audio offline của chủ đề theo bảng trạng thái (S8.4 AC1).
+   * Có sẵn offline xét trước các trạng thái khác.
    * Chủ đề chưa đủ audio trên máy → `not-downloaded` kèm dung lượng cần tải.
    * Đủ mọi file → `downloaded` kèm dung lượng; `canRemove` khi có ít nhất một file xóa được.
    */
@@ -21,6 +22,15 @@ export class OfflineAudioService {
     snapshot: OfflineAudioSnapshot,
   ): OfflineAudioTopic | null {
     const unitAudio = snapshot.index?.units[unitId] ?? [];
+    if (
+      this.isAvailableOffline(
+        stageId,
+        unitAudio,
+        snapshot.index?.precached ?? [],
+      )
+    ) {
+      return { status: 'available-offline' };
+    }
     const bytes = snapshot.index?.bytes ?? {};
     const totalBytes = this.sumBytes(unitAudio, bytes);
     if (
@@ -40,6 +50,17 @@ export class OfflineAudioService {
     }
     return { status: 'not-downloaded', bytes: totalBytes };
   }
+
+  /**
+   * Rule: chủ đề thuộc giai đoạn Nhập môn có sẵn offline, không cần tải (S8.4 AC1).
+   * Nhánh "mọi audio là audio Nhập môn": task 5.11/5.12.
+   */
+  // Chữ ký D6 giữ tham số `unitAudio`, `precached`; task 5.12 mới dùng tới.
+  readonly isAvailableOffline: (
+    stageId: string,
+    unitAudio: readonly string[],
+    precached: readonly string[],
+  ) => boolean = (stageId) => stageId === INTRO_STAGE_ID;
 
   /** Rule: dung lượng = tổng byte các audio (không trùng) của chủ đề (S8.4 AC1). */
   sumBytes(

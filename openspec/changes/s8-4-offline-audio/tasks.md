@@ -77,8 +77,8 @@ Skeleton service + model `shared/models/offline-audio.model.ts` tạo trong comm
 - [x] 5.6 GREEN: nhánh đã tải, `selectRemovableAudio`, `canRemove`; kiểm: test 5.5 pass
 - [x] 5.7 RED: S8.4-AC1 "Đã nghe hết audio thì là đã tải" (Phần 2) — đủ file trong đó một file là audio Nhập môn (precache), chưa từng tải → `downloaded`, `canRemove: true`; kiểm: chạy, nếu pass ngay thì tạm bỏ file precache khỏi tập "có trên máy" để thấy fail rồi trả lại
 - [x] 5.8 GREEN: sửa đến khi pass; kiểm: test 5.7 pass
-- [ ] 5.9 RED: S8.4-AC1 "Chủ đề Nhập môn có sẵn offline" (Phần 2) — nhóm thuộc stage `intro` có audio, cache rỗng → `available-offline`; kiểm: fail
-- [ ] 5.10 GREEN: `isAvailableOffline` (nhánh stage), xét trước các trạng thái khác; kiểm: test 5.9 pass
+- [x] 5.9 RED: S8.4-AC1 "Chủ đề Nhập môn có sẵn offline" (Phần 2) — nhóm thuộc stage `intro` có audio, cache rỗng → `available-offline`; kiểm: fail
+- [x] 5.10 GREEN: `isAvailableOffline` (nhánh stage), xét trước các trạng thái khác; kiểm: test 5.9 pass
 - [ ] 5.11 RED: S8.4-AC1 "Chủ đề HSK chỉ dùng audio Nhập môn" — nhóm HSK mọi audio ∈ `precached` → `available-offline`; kiểm: fail
 - [ ] 5.12 GREEN: nhánh "mọi audio là audio Nhập môn"; kiểm: test 5.11 pass
 - [ ] 5.13 RED: S8.4-AC1 "Chủ đề không có audio" (Phần 2) — `units[id] = []` hoặc không có key → `null`, `deriveTopics` không có key; kiểm: chạy, nếu pass ngay thì tạm trả `not-downloaded` 0 byte để thấy fail rồi trả lại
