@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { createDatabase } from '@core/helpers/db.helper';
+import { DexieProgressStore } from '@core/services/progress-store.service';
+
 import { ProgressService } from './progress.service';
 
 const at = (day: number, hours: number, minutes: number, seconds = 0) =>
@@ -64,5 +67,22 @@ describe('ProgressService — isDailyGoalReached', () => {
 
   it('S8.1-AC2 Vừa đúng mục tiêu: 0 / 30 phút là chưa đạt', () => {
     expect(service.isDailyGoalReached(0, 30)).toBe(false);
+  });
+});
+
+describe('ProgressService — thời gian học hôm nay', () => {
+  const createService = () =>
+    new ProgressService(
+      new DexieProgressStore(createDatabase(`test-${crypto.randomUUID()}`)),
+    );
+
+  it('S8.1-AC2 Giây lẻ được cộng dồn: hai đoạn 40 giây cùng ngày là 1 phút', async () => {
+    const service = createService();
+
+    await service.recordStudyTime(at(18, 8, 0, 0), at(18, 8, 0, 40));
+    await service.recordStudyTime(at(18, 9, 0, 0), at(18, 9, 0, 40));
+
+    const today = await service.getTodayStudy(at(18, 9, 5));
+    expect(today.minutes).toBe(1);
   });
 });
