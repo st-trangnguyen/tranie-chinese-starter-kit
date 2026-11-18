@@ -34,19 +34,6 @@ export const useSettings = (): SettingsState => {
     };
   }, [service]);
 
-  // Cập nhật giá trị hiển thị ngay (lạc quan), chưa lưu.
-  const showChange = useCallback(
-    <K extends keyof LearningPreferences>(
-      key: K,
-      value: LearningPreferences[K],
-    ) => {
-      setPreferences((prev) =>
-        prev === null ? prev : { ...prev, [key]: value },
-      );
-    },
-    [],
-  );
-
   // Đổi một field (design D4): hiển thị ngay, lưu qua service, ghi nhận giá trị đã lưu khi xong.
   // Xử lý lỗi lưu bổ sung ở task 8.x.
   const applyChange = useCallback(
@@ -55,14 +42,16 @@ export const useSettings = (): SettingsState => {
       value: LearningPreferences[K],
       save: () => Promise<void>,
     ) => {
-      showChange(key, value);
+      setPreferences((prev) =>
+        prev === null ? prev : { ...prev, [key]: value },
+      );
       void save().then(() => {
         if (persistedRef.current !== null) {
           persistedRef.current = { ...persistedRef.current, [key]: value };
         }
       });
     },
-    [showChange],
+    [],
   );
 
   const changeDailyGoal = useCallback(
@@ -81,10 +70,12 @@ export const useSettings = (): SettingsState => {
     [applyChange, service],
   );
 
-  // Lưu qua applyChange ở task 7.12.
   const changePinyinVisibility = useCallback(
-    (isVisible: boolean) => showChange('isPinyinVisible', isVisible),
-    [showChange],
+    (isVisible: boolean) =>
+      applyChange('isPinyinVisible', isVisible, () =>
+        service.changePinyinVisibility(isVisible),
+      ),
+    [applyChange, service],
   );
 
   return {
