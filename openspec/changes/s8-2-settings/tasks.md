@@ -94,8 +94,8 @@ Test: `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.preference
 - [x] 5.4 GREEN: sửa đến khi pass (effect deps `[service, lessonId]`); kiểm: test 5.3 pass
 - [x] 5.5 RED: S4.4-AC2 "Mở bài mới thì về tốc độ thường" (audio-replay, Scenario sửa) — settings `'normal'`: bật "Nghe chậm" rồi ba nhánh (a)(b)(c) như 5.3 → công tắc tắt; kiểm: chạy, nếu pass ngay thì tạm truyền `initialIsSlow={true}` để thấy fail rồi trả lại
 - [x] 5.6 GREEN: sửa đến khi pass; kiểm: test 5.5 pass, test dòng 654 cũ pass
-- [ ] 5.7 RED: S4.4-AC2 "Mặc định phát tốc độ thường" (audio-replay, Scenario sửa) — settings `'normal'` (và DB trống): công tắc tắt, "Nghe" phát 1x; kiểm: như 5.5
-- [ ] 5.8 GREEN: sửa đến khi pass; kiểm: test 5.7 pass
+- [x] 5.7 RED: S4.4-AC2 "Mặc định phát tốc độ thường" (audio-replay, Scenario sửa) — settings `'normal'` (và DB trống): công tắc tắt, "Nghe" phát 1x; kiểm: như 5.5
+- [x] 5.8 GREEN: sửa đến khi pass; kiểm: test 5.7 pass
 - [ ] 5.9 RED: S8.2-AC2 "Tắt Nghe chậm trong bài không đổi Cài đặt" (container) — settings `'slow'`, tắt "Nghe chậm" trong bài → `getSettings()` của store vẫn `'slow'`, spy `saveSettings` không được gọi; kiểm: chạy, nếu pass ngay thì tạm cho `AudioSpeedProvider.toggleSlow` ghi `progressStore.saveSettings({ defaultAudioSpeed })` để thấy fail rồi trả lại (không commit thay đổi tạm)
 - [ ] 5.10 GREEN: sửa đến khi pass; kiểm: test 5.9 pass
 - [ ] 5.11 RED: S8.2-AC3 "Tắt pinyin thì câu nói không hiện pinyin" (container) — settings `isPinyinVisible: false`, bài có câu "nói" 你好 (`sentenceOf('s-nihao')`): hiện "你好" và nghĩa, không "nǐ hǎo"; kiểm: fail vì container chưa bọc `PinyinVisibilityProvider`

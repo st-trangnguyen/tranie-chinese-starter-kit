@@ -91,6 +91,27 @@ const expectSlowPlayback = async (
   expect(fakeAudio.playbackRate).toBe(PLAYBACK_RATES.slow);
 };
 
+/** Xoá settings và tiến độ: IndexedDB trống như lần đầu mở app. */
+const clearDatabase = async (): Promise<void> => {
+  const db = createDatabase();
+  await db.settings.clear();
+  await db.lessonProgress.clear();
+  db.close();
+};
+
+/** Công tắc tắt và "Nghe" phát 1x (đặt sẵn tốc độ khác để không pass nhờ giá trị cũ). */
+const expectNormalPlayback = async (
+  user: ReturnType<typeof userEvent.setup>,
+): Promise<void> => {
+  expect(
+    await screen.findByRole('switch', { name: 'Nghe chậm' }),
+  ).toHaveAttribute('aria-checked', 'false');
+  fakeAudio.playbackRate = PLAYBACK_RATES.slow;
+  await user.click(screen.getByRole('button', { name: 'Nghe' }));
+  expect(fakeAudio.src).toBe(`/${BA.audio}`);
+  expect(fakeAudio.playbackRate).toBe(PLAYBACK_RATES.normal);
+};
+
 const renderRunner = () =>
   renderWithProviders(<LessonRunnerContainer />, {
     route: '/lessons/:lessonId',
@@ -242,6 +263,23 @@ describe('LessonRunnerContainer — theo Cài đặt của người học', () =
         ).toHaveAttribute('aria-checked', 'false'),
       );
       expect(screen.getByText('Câu 1 / 2')).toBeInTheDocument();
+    });
+  });
+  describe('S4.4-AC2 Mặc định phát tốc độ thường', () => {
+    it('S4.4-AC2 Mặc định phát tốc độ thường: Cài đặt "Bình thường" thì công tắc tắt, "Nghe" phát 1x', async () => {
+      await seedSettings({ defaultAudioSpeed: 'normal' });
+      const { user } = renderRunner();
+
+      expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
+      await expectNormalPlayback(user);
+    });
+
+    it('S4.4-AC2 Mặc định phát tốc độ thường: IndexedDB trống thì công tắc tắt, "Nghe" phát 1x', async () => {
+      await clearDatabase();
+      const { user } = renderRunner();
+
+      expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
+      await expectNormalPlayback(user);
     });
   });
 });
