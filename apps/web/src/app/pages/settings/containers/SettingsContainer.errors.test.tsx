@@ -7,6 +7,21 @@ import SettingsContainer from './SettingsContainer';
 
 const SAVE_ERROR_MESSAGE = 'Không lưu được cài đặt. Hãy thử lại.';
 
+/** Promise tự điều khiển: test quyết định lúc nào resolve/reject. */
+const createDeferred = (): {
+  promise: Promise<void>;
+  resolve: () => void;
+  reject: (reason: Error) => void;
+} => {
+  let resolve: () => void = () => undefined;
+  let reject: (reason: Error) => void = () => undefined;
+  const promise = new Promise<void>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+};
+
 /** Xoá dữ liệu cũ trong IndexedDB thật (fake-indexeddb) của app. */
 const clearDatabase = async (): Promise<void> => {
   const db = createDatabase();
@@ -212,5 +227,58 @@ describe('SettingsContainer — lỗi lưu', () => {
     expect(
       within(group).getByRole('radio', { name: '60 phút' }),
     ).not.toBeChecked();
+  });
+
+  it('S8.2-AC1 Đổi mục tiêu thì giữ sau khi mở lại app (TC-S8.2-AC1-11, đổi nhanh): "60 phút" lỗi sau khi "30 phút" đã gửi → "30 phút" vẫn chọn, mở lại vẫn "30 phút"', async () => {
+    await new ProgressService().completeOnboarding(15);
+
+    const realSaveSettings = progressStore.saveSettings.bind(progressStore);
+    const firstSave = createDeferred();
+    const secondSave = createDeferred();
+    vi.spyOn(progressStore, 'saveSettings')
+      .mockImplementationOnce(() => firstSave.promise)
+      .mockImplementationOnce((patch) =>
+        secondSave.promise.then(() => realSaveSettings(patch)),
+      );
+
+    const { user, unmount } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const group = await screen.findByRole('group', {
+      name: 'Mục tiêu mỗi ngày',
+    });
+
+    await user.click(within(group).getByRole('radio', { name: '60 phút' }));
+    await user.click(within(group).getByRole('radio', { name: '30 phút' }));
+
+    // Lần đổi cũ (60) lỗi trong khi lần mới nhất (30) đã gửi, chưa xong.
+    firstSave.reject(new Error('quota'));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      SAVE_ERROR_MESSAGE,
+    );
+    expect(within(group).getByRole('radio', { name: '30 phút' })).toBeChecked();
+    expect(
+      within(group).getByRole('radio', { name: '15 phút' }),
+    ).not.toBeChecked();
+
+    secondSave.resolve();
+
+    await waitFor(async () => {
+      const settings = await progressStore.getSettings();
+      expect(settings.dailyGoalMinutes).toBe(30);
+    });
+    expect(within(group).getByRole('radio', { name: '30 phút' })).toBeChecked();
+
+    unmount();
+    renderWithProviders(<SettingsContainer />, { route: '/settings' });
+
+    const reopenedGroup = await screen.findByRole('group', {
+      name: 'Mục tiêu mỗi ngày',
+    });
+    expect(
+      within(reopenedGroup).getByRole('radio', { name: '30 phút' }),
+    ).toBeChecked();
   });
 });
