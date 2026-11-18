@@ -1,17 +1,20 @@
 /* Màn bản đồ lộ trình — S3.1. Trạng thái bài luôn kèm nhãn chữ, màu chỉ là phụ. */
 
 @layer components {
-  /* Liên kết "Trang chủ" — S8.1 D7. Cùng kiểu .home-link: chữ fg + gạch chân, vùng chạm ≥ 44×44 px. */
-  .learning-path-home-link {
+  /* Liên kết "Trang chủ" — S8.1 D7, "Cài đặt" — S8.2 D6. Cùng kiểu .home-link: chữ fg + gạch chân, vùng chạm ≥ 44×44 px. */
+  .learning-path-home-link,
+  .learning-path-settings-link {
     @apply inline-flex min-h-11 min-w-11 items-center rounded-md px-sm text-body font-semibold text-fg underline underline-offset-4;
     @apply transition-colors;
   }
 
-  .learning-path-home-link:hover {
+  .learning-path-home-link:hover,
+  .learning-path-settings-link:hover {
     @apply bg-sunken;
   }
 
-  .learning-path-home-link:focus-visible {
+  .learning-path-home-link:focus-visible,
+  .learning-path-settings-link:focus-visible {
     @apply outline-2 outline-offset-2 outline-accent;
   }
 
@@ -87,6 +90,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .learning-path-home-link,
+    .learning-path-settings-link,
     .learning-path-lesson-link,
     .unit-placement-link {
       @apply transition-none;

@@ -1,6 +1,8 @@
 {
   "title": "Lộ trình học",
   "homeLink": "Trang chủ",
+  "settingsLink": "Cài đặt",
+  "linksLabel": "Liên kết nhanh",
   "status": {
     "completed": "Đã xong",
     "open": "Đang mở",

@@ -1,0 +1,22 @@
+{
+  "title": "Cài đặt",
+  "backLink": "Về lộ trình",
+  "loading": "Đang tải cài đặt…",
+  "dailyGoal": {
+    "label": "Mục tiêu mỗi ngày",
+    "option": "{{count}} phút"
+  },
+  "audioSpeed": {
+    "label": "Tốc độ audio mặc định",
+    "options": {
+      "normal": "Bình thường (1x)",
+      "slow": "Chậm (0.75x)"
+    }
+  },
+  "pinyin": {
+    "label": "Hiện pinyin",
+    "on": "Bật",
+    "off": "Tắt"
+  },
+  "saveError": "Không lưu được cài đặt. Hãy thử lại."
+}

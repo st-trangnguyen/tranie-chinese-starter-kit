@@ -113,8 +113,8 @@ Test: `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.preference
 Test: `apps/web/src/app/pages/learning-path/containers/LearningPathContainer.settingsLink.test.tsx` — router bộ nhớ dựng từ
 `pageRoutes` thật (mẫu `src/test/stroke-order-route.tsx`), fetch nội dung giả như `LearningPathContainer.homeLink.test.tsx`.
 
-- [ ] 6.1 RED: S8.2-AC1 "Mở Cài đặt từ màn Lộ trình" — ở `/learning-paths` bấm liên kết "Cài đặt" → heading "Cài đặt"; có ba `role="group"` tên "Mục tiêu mỗi ngày", "Tốc độ audio mặc định", "Hiện pinyin", mỗi nhóm có một lựa chọn đang chọn/bật; tạo `settings.json` (D6) và thêm namespace vào `src/test/i18n.ts` trong commit test; kiểm: fail vì chưa có liên kết
-- [ ] 6.2 GREEN: `ROUTE_PATHS.settings`, `settings.routes.ts` (lazy), gom vào `page.routes.ts`; liên kết "Cài đặt" trong `<nav>` trên Lộ trình; `I18N_NAMESPACES` thêm `settings`; `SettingsContainer` + `useSettings` (nạp `getLearningPreferences`) + ba component (D4); kiểm: test 6.1 pass, `LearningPathContainer*.test.tsx` cũ pass
+- [x] 6.1 RED: S8.2-AC1 "Mở Cài đặt từ màn Lộ trình" — ở `/learning-paths` bấm liên kết "Cài đặt" → heading "Cài đặt"; có ba `role="group"` tên "Mục tiêu mỗi ngày", "Tốc độ audio mặc định", "Hiện pinyin", mỗi nhóm có một lựa chọn đang chọn/bật; tạo `settings.json` (D6) và thêm namespace vào `src/test/i18n.ts` trong commit test; kiểm: fail vì chưa có liên kết
+- [x] 6.2 GREEN: `ROUTE_PATHS.settings`, `settings.routes.ts` (lazy), gom vào `page.routes.ts`; liên kết "Cài đặt" trong `<nav>` trên Lộ trình; `I18N_NAMESPACES` thêm `settings`; `SettingsContainer` + `useSettings` (nạp `getLearningPreferences`) + ba component (D4); kiểm: test 6.1 pass, `LearningPathContainer*.test.tsx` cũ pass
 - [ ] 6.3 RED: S8.2-AC1 "Quay về Lộ trình" — ở `/settings` bấm "Về lộ trình" → heading "Lộ trình học", URL `/learning-paths`; kiểm: chạy, nếu pass ngay nhờ 6.2 thì tạm trỏ liên kết về `ROUTE_PATHS.home` để thấy fail rồi trả lại
 - [ ] 6.4 GREEN: sửa đến khi pass; kiểm: test 6.3 pass
 

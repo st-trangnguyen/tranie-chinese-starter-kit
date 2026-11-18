@@ -1,0 +1,49 @@
+/* Màn Cài đặt — S8.2 D6. Lựa chọn đang chọn luôn có radio/công tắc gốc, màu chỉ là phụ. */
+
+@layer components {
+  .settings-title {
+    @apply text-title-lg text-fg;
+  }
+
+  .settings-group {
+    @apply rounded-lg border-2 border-line bg-surface;
+  }
+
+  .settings-group-label {
+    @apply text-title-sm text-fg;
+  }
+
+  .settings-option {
+    @apply cursor-pointer rounded-md border-2 border-line text-body text-fg transition-colors;
+  }
+
+  .settings-option:hover {
+    @apply border-line-strong;
+  }
+
+  .settings-option.is-active {
+    @apply border-accent bg-accent-soft;
+  }
+
+  .settings-option:focus-within {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .settings-option-input {
+    @apply size-5 accent-accent;
+  }
+
+  .settings-switch {
+    @apply size-6 cursor-pointer accent-accent;
+  }
+
+  .settings-switch:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .settings-option {
+      @apply transition-none;
+    }
+  }
+}

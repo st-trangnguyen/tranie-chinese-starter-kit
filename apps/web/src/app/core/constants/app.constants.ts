@@ -7,6 +7,7 @@ export const ROUTE_PATHS = {
   home: '/home',
   onboarding: '/onboarding',
   learningPaths: '/learning-paths',
+  settings: '/settings',
   lesson: (lessonId: string): string => `/lessons/${lessonId}`,
   placementTest: (unitId: string): string => `/units/${unitId}/placement-test`,
   strokeOrder: (character: string): string =>
