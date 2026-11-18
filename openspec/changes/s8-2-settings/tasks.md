@@ -57,8 +57,8 @@ DexieProgressStore(createDatabase('test-…')))` (fake-indexeddb), store stub re
 
 Test: `apps/web/src/app/shared/contexts/AudioSpeedContext.test.tsx` (thêm case), `apps/web/src/app/shared/contexts/PinyinVisibilityContext.test.tsx`.
 
-- [ ] 3.1 RED: S8.2-AC2 "Mở bài mới thì theo tốc độ mặc định Chậm" (tầng context) — `<AudioSpeedProvider initialIsSlow>`: `isSlow` true; `toggleSlow` → false; render lại provider với `key` khác → true lại; không truyền prop → false (S4.4 cũ); skeleton: prop khai báo nhưng chưa dùng; kiểm: fail ở `isSlow` true
-- [ ] 3.2 GREEN: `useState(initialIsSlow)`, mặc định `false`; kiểm: test 3.1 pass, `AudioSpeedContext.test.tsx` và `SlowToggle.test.tsx` cũ pass
+- [x] 3.1 RED: S8.2-AC2 "Mở bài mới thì theo tốc độ mặc định Chậm" (tầng context) — `<AudioSpeedProvider initialIsSlow>`: `isSlow` true; `toggleSlow` → false; render lại provider với `key` khác → true lại; không truyền prop → false (S4.4 cũ); skeleton: prop khai báo nhưng chưa dùng; kiểm: fail ở `isSlow` true
+- [x] 3.2 GREEN: `useState(initialIsSlow)`, mặc định `false`; kiểm: test 3.1 pass, `AudioSpeedContext.test.tsx` và `SlowToggle.test.tsx` cũ pass
 - [ ] 3.3 RED: S8.2-AC3 "Tắt pinyin thì câu nói không hiện pinyin" (tầng context) — `usePinyinVisibility()` ngoài provider `true`; trong `<PinyinVisibilityProvider isVisible={false}>` → `false`; skeleton hai file, hook luôn trả `true`; kiểm: fail ở case `false`
 - [ ] 3.4 GREEN: `PinyinVisibilityContext = createContext<boolean>(true)`, provider truyền `isVisible`; kiểm: test 3.3 pass
 
