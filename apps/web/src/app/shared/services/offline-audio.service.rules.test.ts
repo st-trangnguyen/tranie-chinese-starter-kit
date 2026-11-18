@@ -67,4 +67,34 @@ describe('OfflineAudioService — Phần 2 (quy tắc)', () => {
       ),
     ).toBe(2_516_582);
   });
+
+  it('S8.4-AC1 Thiếu một phần audio thì là chưa tải: 3/4 audio có trên máy → not-downloaded, dung lượng cả chủ đề', () => {
+    const topic = service.deriveTopic(
+      HSK_STAGE_ID,
+      HSK_UNIT_ID,
+      makeSnapshot({ cachedPaths: new Set([AUDIO_A, AUDIO_B, AUDIO_C]) }),
+    );
+
+    expect(topic).toEqual({ status: 'not-downloaded', bytes: 2_516_582 });
+  });
+
+  it('S8.4-AC1 Thiếu một phần audio thì là chưa tải: chỉ file chưa có trên máy là còn thiếu', () => {
+    const unitAudio = HSK_INDEX.units[HSK_UNIT_ID] ?? [];
+
+    expect(
+      service.listMissingAudio(unitAudio, new Set([AUDIO_A, AUDIO_B, AUDIO_C])),
+    ).toEqual([AUDIO_D]);
+    expect(service.listMissingAudio(unitAudio, new Set<string>())).toEqual([
+      AUDIO_A,
+      AUDIO_B,
+      AUDIO_C,
+      AUDIO_D,
+    ]);
+    expect(
+      service.listMissingAudio(
+        unitAudio,
+        new Set([AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D]),
+      ),
+    ).toEqual([]);
+  });
 });
