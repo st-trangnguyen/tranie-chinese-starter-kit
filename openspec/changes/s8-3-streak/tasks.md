@@ -24,8 +24,8 @@ Test: `packages/shared/src/progress.schema.test.ts` (schema), `apps/web/src/app/
 - [x] 1.6 GREEN: `saveDailyGoal` nối vào chuỗi `studyTimeWrites`, một transaction `rw` trên `settings` + `dailyStats` (design D2); kiểm: test 1.5 pass
 - [x] 1.7 RED: S8.3-AC1 "Số phút của một ngày đã qua bị hỏng" (tầng store: đọc mọi ngày) — dòng D-2, D0 hợp lệ, D-1 `studySeconds: 'abc'`, một dòng `date: 'xyz'` → `getAllDailyStats()` trả đúng hai dòng D-2, D0 (thứ tự không quan trọng, so bằng `arrayContaining` + độ dài); kiểm: fail vì skeleton trả `[]`
 - [x] 1.8 GREEN: `getAllDailyStats` (`toArray` + `safeParse` từng dòng, bỏ dòng hỏng); kiểm: test 1.7 pass
-- [ ] 1.9 RED: S8.3-AC2 "Học đủ mục tiêu rồi quay lại trang chủ thì số tăng ngay" (tầng store: ghi trước đọc) — `addStudySeconds(D0, 120)` **không await**, ngay sau đó `await getAllDailyStats()` thấy D0 120 giây; kiểm: chạy, nếu pass ngay nhờ thứ tự transaction của Dexie thì vẫn giữ test, tạm bỏ dòng chờ chuỗi để thấy fail rồi trả lại
-- [ ] 1.10 GREEN: `getAllDailyStats` chờ `studyTimeWrites` trước khi đọc; kiểm: test 1.9 pass, `progress-store.service.ts` < 300 dòng
+- [x] 1.9 RED: S8.3-AC2 "Học đủ mục tiêu rồi quay lại trang chủ thì số tăng ngay" (tầng store: ghi trước đọc) — `addStudySeconds(D0, 120)` **không await**, ngay sau đó `await getAllDailyStats()` thấy D0 120 giây; kiểm: chạy, nếu pass ngay nhờ thứ tự transaction của Dexie thì vẫn giữ test, tạm bỏ dòng chờ chuỗi để thấy fail rồi trả lại
+- [x] 1.10 GREEN: `getAllDailyStats` chờ `studyTimeWrites` trước khi đọc; kiểm: test 1.9 pass, `progress-store.service.ts` < 300 dòng
 - [ ] 1.11 Docs `docs/03-architecture.md`: §6.2 hàng `dailyStats` thêm `goalMinutes` (mục tiêu chụp mỗi lần ghi phút và khi đổi mục tiêu; ngày trước S8.3 không có; không đổi version Dexie); §6.3 thêm `getAllDailyStats()`, `saveDailyGoal(date, goalMinutes)` và ghi chú `addStudySeconds` chỉ chụp giá trị mục tiêu đang chọn vào dòng (không rẽ nhánh, không quy tắc nghiệp vụ; dùng mục tiêu thế nào là việc của `ProgressService` Phần 2) — ngoại lệ test-first: docs thuần; kiểm: đọc lại diff
 
 ## 2. Quy tắc streak — `shared/utils/date.utils.ts` + `ProgressService` Phần 2 (design D3)

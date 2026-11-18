@@ -42,8 +42,9 @@ export interface ProgressStore {
 
 export class DexieProgressStore implements ProgressStore {
   /**
-   * Chuỗi các lần ghi thời gian học trong tab này (design D2): `getDailyStat` chờ nó để đọc
-   * thấy cả lần ghi chưa xong (màn bài unmount ghi phần cuối, Trang chủ mount đọc ngay).
+   * Chuỗi các lần ghi thời gian học trong tab này (design D2): `getDailyStat` và
+   * `getAllDailyStats` chờ nó để đọc thấy cả lần ghi chưa xong
+   * (màn bài unmount ghi phần cuối, Trang chủ mount đọc ngay).
    * Luôn resolve: lỗi một lần ghi không gãy chuỗi.
    */
   private studyTimeWrites: Promise<void> = Promise.resolve();
@@ -98,6 +99,7 @@ export class DexieProgressStore implements ProgressStore {
   }
 
   async getAllDailyStats(): Promise<DailyStat[]> {
+    await this.studyTimeWrites;
     const rows = await this.db.dailyStats.toArray();
     return rows.flatMap((row) => {
       const result = dailyStatSchema.safeParse(row);
