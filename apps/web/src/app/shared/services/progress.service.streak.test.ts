@@ -74,4 +74,19 @@ describe('ProgressService — countStudyStreak', () => {
 
     expect(service.countStudyStreak(stats, TODAY, 15)).toBe(0);
   });
+
+  it('S8.3-AC1 Đếm lại sau khi chuỗi đứt: 5 ngày đạt, hôm kia chỉ 5 phút, hôm qua và hôm nay đạt thì streak là 2', () => {
+    const stats = [
+      day(-7, REACHED),
+      day(-6, REACHED),
+      day(-5, REACHED),
+      day(-4, REACHED),
+      day(-3, REACHED),
+      day(-2, 300),
+      day(-1, REACHED),
+      day(0, REACHED),
+    ];
+
+    expect(service.countStudyStreak(stats, TODAY, 15)).toBe(2);
+  });
 });
