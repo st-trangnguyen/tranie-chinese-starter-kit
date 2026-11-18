@@ -14,7 +14,11 @@ export interface LessonProgressRow {
   [field: string]: unknown;
 }
 
-/** Một dòng của bảng `dailyStats`: chưa tin cậy, validate khi đọc. */
+/**
+ * Một dòng của bảng `dailyStats`: chưa tin cậy, validate khi đọc.
+ * Field dự kiến: `studySeconds` (S8.1) và `goalMinutes` (S8.3, mục tiêu của ngày đó;
+ * không phải index nên không cần `db.version` mới, dòng cũ thiếu field này).
+ */
 export interface DailyStatRow {
   date: string;
   [field: string]: unknown;
