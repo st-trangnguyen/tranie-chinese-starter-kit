@@ -10,6 +10,7 @@ import {
   DexieProgressStore,
   progressStore,
 } from '@core/services/progress-store.service';
+import { ProgressService } from '@shared/services/progress.service';
 import { mockContentFetch, sentenceOf } from '@test/mocks/content-fetch';
 import {
   fakeAudio,
@@ -334,6 +335,20 @@ describe('LessonRunnerContainer — theo Cài đặt của người học', () =
       expect(await screen.findByText(NIHAO.hanzi)).toBeInTheDocument();
       expect(screen.getByText(NIHAO.vi)).toBeInTheDocument();
       expect(screen.queryByText(NIHAO.pinyin)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('S8.2-AC3 Bật lại pinyin thì câu nói hiện pinyin', () => {
+    it('S8.2-AC3 Bật lại pinyin thì câu nói hiện pinyin: Cài đặt tắt rồi bật lại pinyin thì câu "nói" 你好 hiện chữ, "nǐ hǎo" và nghĩa', async () => {
+      await seedSettings({ isPinyinVisible: false });
+      await new ProgressService().changePinyinVisibility(true);
+      serveSpeakLesson();
+      renderRunner();
+
+      expect(await screen.findByText('Câu 1 / 2')).toBeInTheDocument();
+      expect(await screen.findByText(NIHAO.hanzi)).toBeInTheDocument();
+      expect(screen.getByText(NIHAO.pinyin)).toBeInTheDocument();
+      expect(screen.getByText(NIHAO.vi)).toBeInTheDocument();
     });
   });
 });

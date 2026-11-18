@@ -100,8 +100,8 @@ Test: `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.preference
 - [x] 5.10 GREEN: sửa đến khi pass; kiểm: test 5.9 pass
 - [x] 5.11 RED: S8.2-AC3 "Tắt pinyin thì câu nói không hiện pinyin" (container) — settings `isPinyinVisible: false`, bài có câu "nói" 你好 (`sentenceOf('s-nihao')`): hiện "你好" và nghĩa, không "nǐ hǎo"; kiểm: fail vì container chưa bọc `PinyinVisibilityProvider`
 - [x] 5.12 GREEN: bọc `<PinyinVisibilityProvider isVisible={preferences.isPinyinVisible}>`; kiểm: test 5.11 pass
-- [ ] 5.13 RED: S8.2-AC3 "Bật lại pinyin thì câu nói hiện pinyin" (container) — settings tắt rồi `changePinyinVisibility(true)` qua `ProgressService`, mở bài → hiện "你好", "nǐ hǎo", nghĩa; kiểm: chạy, nếu pass ngay thì tạm truyền `isVisible={false}` cố định để thấy fail rồi trả lại
-- [ ] 5.14 GREEN: sửa đến khi pass; kiểm: test 5.13 pass
+- [x] 5.13 RED: S8.2-AC3 "Bật lại pinyin thì câu nói hiện pinyin" (container) — settings tắt rồi `changePinyinVisibility(true)` qua `ProgressService`, mở bài → hiện "你好", "nǐ hǎo", nghĩa; kiểm: chạy, nếu pass ngay thì tạm truyền `isVisible={false}` cố định để thấy fail rồi trả lại
+- [x] 5.14 GREEN: sửa đến khi pass; kiểm: test 5.13 pass
 - [ ] 5.15 RED: S8.2-AC3 "Tắt pinyin vẫn hiện pinyin trong giải thích khi sai" (container) — settings tắt, ở câu "nói" bấm "Chưa đúng" → phần giải thích của runner hiện chữ, pinyin, nghĩa; kiểm: như 4.9
 - [ ] 5.16 GREEN: sửa đến khi pass; kiểm: test 5.15 pass
 - [ ] 5.17 RED: S8.2-AC2 "Không đọc được cài đặt thì bài vẫn mở với tốc độ thường và hiện pinyin" (container) — DB có `'slow'` + tắt pinyin nhưng `vi.spyOn(progressStore, 'getSettings').mockRejectedValue(…)`: bài mở, công tắc tắt, câu "nói" hiện "你好", "nǐ hǎo", nghĩa, không có `role="alert"`; kiểm: chạy, nếu pass ngay nhờ 2.10 thì tạm cho hook giữ `null` khi lỗi để thấy fail (bài kẹt "Đang mở bài…") rồi trả lại
