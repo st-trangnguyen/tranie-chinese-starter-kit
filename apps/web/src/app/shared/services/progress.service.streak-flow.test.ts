@@ -102,4 +102,28 @@ describe('ProgressService — getStudyStreak', () => {
     const today = await service.getTodayStudy(at(18, 9, 0));
     expect(today.minutes).toBe(20);
   });
+
+  it('S8.3-AC1 Tăng mục tiêu không đổi các ngày đã qua: đạt 15 phút 3 ngày liền, hôm nay đổi sang 30 phút và học 20 phút thì streak 3', async () => {
+    const service = createService();
+    await service.completeOnboarding(15);
+    for (const day of [15, 16, 17]) {
+      await service.recordStudyTime(at(day, 9, 0), at(day, 9, 20));
+    }
+
+    await service.changeDailyGoal(30, at(18, 8, 0));
+    await service.recordStudyTime(at(18, 9, 0), at(18, 9, 20));
+
+    await expect(service.getStudyStreak(at(18, 10, 0))).resolves.toBe(3);
+    const today = await service.getTodayStudy(at(18, 10, 0));
+    expect(today.goalMinutes).toBe(30);
+  });
+
+  it('S8.3-AC1 Tăng mục tiêu không đổi các ngày đã qua: đổi sang mục tiêu không hợp lệ (45 phút) thì báo lỗi', async () => {
+    const service = createService();
+    await service.completeOnboarding(15);
+
+    await expect(service.changeDailyGoal(45, at(18, 8, 0))).rejects.toThrow(
+      'Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.',
+    );
+  });
 });

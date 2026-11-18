@@ -275,4 +275,10 @@ export class ProgressService {
       settings.dailyGoalMinutes,
     );
   }
+
+  // Skeleton S8.3 (tasks 3.9): hành vi thêm ở 3.10.
+  changeDailyGoal(minutes: number, now?: number): Promise<void>;
+  changeDailyGoal(): Promise<void> {
+    return Promise.resolve();
+  }
 }
