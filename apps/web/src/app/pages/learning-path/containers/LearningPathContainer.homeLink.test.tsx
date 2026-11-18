@@ -70,8 +70,6 @@ describe('LearningPathContainer — liên kết Trang chủ', () => {
 
     await user.click(homeLink);
 
-    expect(await screen.findByTestId('location')).toHaveTextContent(
-      /^\/home$/,
-    );
+    expect(await screen.findByTestId('location')).toHaveTextContent(/^\/home$/);
   });
 });
