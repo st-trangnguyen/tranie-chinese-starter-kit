@@ -106,7 +106,7 @@ Test: `apps/web/src/app/pages/lesson/containers/LessonRunnerContainer.preference
 - [x] 5.16 GREEN: sửa đến khi pass; kiểm: test 5.15 pass
 - [x] 5.17 RED: S8.2-AC2 "Không đọc được cài đặt thì bài vẫn mở với tốc độ thường và hiện pinyin" (container) — DB có `'slow'` + tắt pinyin nhưng `vi.spyOn(progressStore, 'getSettings').mockRejectedValue(…)`: bài mở, công tắc tắt, câu "nói" hiện "你好", "nǐ hǎo", nghĩa, không có `role="alert"`; kiểm: chạy, nếu pass ngay nhờ 2.10 thì tạm cho hook giữ `null` khi lỗi để thấy fail (bài kẹt "Đang mở bài…") rồi trả lại
 - [x] 5.18 GREEN: sửa đến khi pass; kiểm: test 5.17 pass, `LessonRunnerContainer.tsx` < 300 dòng
-- [ ] 5.19 Hồi quy audio-replay (Scenario giữ nguyên): S4.4-AC2 "Bật Nghe chậm thì phát 0.75x", "Tắt Nghe chậm thì về tốc độ thường", "Nghe chậm giữ qua các câu trong bài"; kiểm: `pnpm --filter @csk/web test:run SlowToggle AudioSpeedContext LessonRunnerContainer` pass, không sửa kỳ vọng cũ
+- [x] 5.19 Hồi quy audio-replay (Scenario giữ nguyên): S4.4-AC2 "Bật Nghe chậm thì phát 0.75x", "Tắt Nghe chậm thì về tốc độ thường", "Nghe chậm giữ qua các câu trong bài"; kiểm: `pnpm --filter @csk/web test:run SlowToggle AudioSpeedContext LessonRunnerContainer` pass, không sửa kỳ vọng cũ
 
 ## 6. Route + liên kết từ Lộ trình — `pages/settings/settings.routes.ts`, `LearningPathContainer` (design D4, D6)
 
