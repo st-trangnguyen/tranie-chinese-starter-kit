@@ -198,4 +198,51 @@ describe('SpeakExercise — Hiện pinyin ở chế độ đọc to', () => {
       expect(fakeAudio.src).toContain(sentence.audio);
     });
   });
+  it('S5.4-AC2: đọc to rồi tự chấm khi bật pinyin (từ) hiện chữ Hán, pinyin, nghĩa, Nghe mẫu bấm được', async () => {
+    const { user } = renderSpeakReadAloud(
+      true,
+      { id: 'ex-word', wordId: 'w-nihao' },
+      { words: [nihao], sentences: [] },
+    );
+    await user.click(screen.getByRole('button', { name: 'Ghi âm' }));
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Hãy đọc to chữ trên màn rồi tự chọn mức bên dưới.',
+    );
+
+    expect(screen.getByText('你好')).toBeInTheDocument();
+    expect(screen.getByText('nǐ hǎo')).toBeInTheDocument();
+    expect(screen.getByText('xin chào')).toBeInTheDocument();
+    const listen = screen.getByRole('button', { name: 'Nghe mẫu' });
+    expect(listen).toBeEnabled();
+
+    await user.click(listen);
+
+    await waitFor(() => {
+      expect(fakeAudio.src).toContain(nihao.audio);
+    });
+  });
+
+  it('S5.4-AC2: đọc to rồi tự chấm khi bật pinyin (câu) hiện chữ Hán, pinyin, nghĩa, Nghe mẫu bấm được', async () => {
+    const { user } = renderSpeakReadAloud(
+      true,
+      { id: 'ex-sentence', sentenceId: 's-xiexie' },
+      { words: [], sentences: [sentence] },
+    );
+    await user.click(screen.getByRole('button', { name: 'Ghi âm' }));
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Hãy đọc to chữ trên màn rồi tự chọn mức bên dưới.',
+    );
+
+    expect(screen.getByText('谢谢你')).toBeInTheDocument();
+    expect(screen.getByText('xièxie nǐ')).toBeInTheDocument();
+    expect(screen.getByText('Cảm ơn bạn')).toBeInTheDocument();
+    const listen = screen.getByRole('button', { name: 'Nghe mẫu' });
+    expect(listen).toBeEnabled();
+
+    await user.click(listen);
+
+    await waitFor(() => {
+      expect(fakeAudio.src).toContain(sentence.audio);
+    });
+  });
 });
