@@ -4,14 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { useOnlineStatus } from '@core/hooks/useOnlineStatus';
 import { useSpeechRecognition } from '@core/hooks/useSpeechRecognition';
 import { usePinyinVisibility } from '@shared/contexts/usePinyinVisibility';
-
-import type { ExerciseContent, ExerciseProps } from './exercise.types';
+import { useRecordingMode } from '@shared/contexts/useRecordingMode';
 import {
   isRatingCorrect,
   SPEAK_RATINGS,
   type SpeakRating,
-} from '../../utils/speak-rating.utils';
-import { useRecordingMode } from '../../contexts/useRecordingMode';
+} from '@shared/utils/speak-rating.utils';
+
+import type { ExerciseContent, ExerciseProps } from './exercise.types';
 import { RecordCompare } from '../RecordCompare';
 import { SpeakAutoCheck } from './SpeakAutoCheck';
 

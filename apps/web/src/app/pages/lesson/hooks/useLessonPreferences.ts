@@ -21,7 +21,7 @@ export const useLessonPreferences = (
 
   useEffect(() => {
     let isActive = true;
-    service.getLessonPreferences().then((preferences) => {
+    void service.getLessonPreferences().then((preferences) => {
       if (isActive) {
         setLoaded({ lessonId, preferences });
       }
