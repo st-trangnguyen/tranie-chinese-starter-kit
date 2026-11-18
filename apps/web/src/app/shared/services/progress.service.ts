@@ -17,6 +17,7 @@ import {
   findConfirmedPlacementTestLessonId,
   listLessonIdsInOrder,
 } from '@shared/utils/learning-path.utils';
+import { startOfNextLocalDay, toLocalDateKey } from '@shared/utils/date.utils';
 import type { StudyTimeShare } from '@shared/models/home.model';
 
 type LessonType = (typeof LESSON_TYPES)[number];
@@ -103,9 +104,17 @@ export class ProgressService {
    * Đồng hồ lùi hoặc đoạn rỗng thì không tính (S8.1 AC2).
    */
   splitStudyTimeByDay(startMs: number, endMs: number): StudyTimeShare[] {
-    void startMs;
-    void endMs;
-    return [];
+    const shares: StudyTimeShare[] = [];
+    let cursor = startMs;
+    while (cursor < endMs) {
+      const segmentEnd = Math.min(startOfNextLocalDay(cursor), endMs);
+      shares.push({
+        date: toLocalDateKey(cursor),
+        seconds: (segmentEnd - cursor) / 1000,
+      });
+      cursor = segmentEnd;
+    }
+    return shares;
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
