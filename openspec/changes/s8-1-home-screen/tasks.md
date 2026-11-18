@@ -39,8 +39,8 @@ Test: `apps/web/src/app/shared/utils/date.utils.test.ts`, `apps/web/src/app/shar
 - [x] 2.8 GREEN: `findNextLessonId` (bài `'open'` đầu tiên theo `listLessonIdsInOrder`, `Rule:`); kiểm: test 2.7 pass
 - [x] 2.9 RED: S8.1-AC1 "Đã xong vài bài thì hiện bài kế tiếp" (Phần 2) — xong bài 1, 2 → bài 3; kiểm: chạy, nếu pass ngay thì tạm trả bài đầu tiên chưa `completed` bỏ qua trạng thái để thấy fail ở 2.13 hoặc đảo điều kiện `'open'` để thấy fail rồi trả lại
 - [x] 2.10 GREEN: sửa đến khi pass; kiểm: test 2.9 pass
-- [ ] 2.11 RED: S8.1-AC1 "Bài kế tiếp ở nhóm hoặc giai đoạn sau" (Phần 2) — xong mọi bài nhóm 1 → bài đầu nhóm 2; xong mọi bài giai đoạn 1 → bài đầu giai đoạn 2; kiểm: như 2.9
-- [ ] 2.12 GREEN: sửa đến khi pass; kiểm: test 2.11 pass
+- [x] 2.11 RED: S8.1-AC1 "Bài kế tiếp ở nhóm hoặc giai đoạn sau" (Phần 2) — xong mọi bài nhóm 1 → bài đầu nhóm 2; xong mọi bài giai đoạn 1 → bài đầu giai đoạn 2; kiểm: như 2.9
+- [x] 2.12 GREEN: sửa đến khi pass; kiểm: test 2.11 pass
 - [ ] 2.13 RED: S8.1-AC1 "Còn bài đang mở ở trước một bài đã xong" (Phần 2) — chỉ xong một bài ở nhóm 3 → bài đầu lộ trình (không phải bài ngay sau bài đã xong, dù bài đó cũng `'open'`); kiểm: chạy, nếu pass ngay thì tạm duyệt ngược từ bài đã xong cuối để thấy fail rồi trả lại
 - [ ] 2.14 GREEN: sửa đến khi pass; kiểm: test 2.13 pass
 - [ ] 2.15 RED: S8.1-AC1 "Đã học xong mọi bài" (Phần 2) — xong mọi bài → `undefined`; kiểm: chạy, nếu pass ngay thì tạm trả bài cuối khi không còn bài mở để thấy fail rồi trả lại
