@@ -75,7 +75,7 @@ Test: `apps/web/src/app/core/hooks/useVisibleTimeSegments.test.ts`, `apps/web/sr
 - [x] 4.5 RED: S8.1-AC2 "Để app mở ở màn bài không thao tác vẫn tính" (tầng hook) — hiện 2 giờ không sự kiện nào rồi unmount → tổng 7200 giây; kiểm: chạy, nếu pass ngay thì tạm dừng interval sau N lần để thấy fail rồi trả lại
 - [x] 4.6 GREEN: sửa đến khi pass; kiểm: test 4.5 pass, effect có cleanup, deps đủ (lint sạch)
 - [x] 4.7 RED: S8.1-AC2 "Trang chủ hiện lại sau khi app bị ẩn qua nửa đêm" (tầng hook) — `usePageVisibility()` trả `true` lúc đầu, `false` sau `setPageVisibility(true)`, `true` sau `setPageVisibility(false)`; unmount gỡ listener; kiểm: fail vì skeleton luôn `true`
-- [ ] 4.8 GREEN: `usePageVisibility` bằng `useSyncExternalStore` (mẫu `useOnlineStatus`); kiểm: test 4.7 pass
+- [x] 4.8 GREEN: `usePageVisibility` bằng `useSyncExternalStore` (mẫu `useOnlineStatus`); kiểm: test 4.7 pass
 
 ## 5. Ghi thời gian ở màn bài — `pages/lesson/hooks/useStudyTimeRecorder.ts` + `LessonRunnerContainer` (design D5)
 
