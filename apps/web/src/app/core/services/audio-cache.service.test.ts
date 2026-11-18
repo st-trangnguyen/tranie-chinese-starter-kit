@@ -153,4 +153,37 @@ describe('BrowserAudioCache', () => {
       expect([...(await cache.listCachedPaths([PATH_A]))]).toEqual([]);
     },
   );
+
+  it.each([
+    [
+      'storage-full',
+      'put throws QuotaExceededError',
+      (): Error => new DOMException('Quota exceeded', 'QuotaExceededError'),
+    ],
+    [
+      'network',
+      'put throws another error',
+      (): Error => new DOMException('Operation failed', 'InvalidStateError'),
+    ],
+  ])(
+    'S8.4-AC1 Không đủ bộ nhớ: should throw AudioDownloadError with reason %s when %s',
+    async (reason, _label, makeError) => {
+      const storage = new FakeCacheStorage();
+      storage.cacheFor(AUDIO_CACHE_NAME).beforePut = () => {
+        throw makeError();
+      };
+      vi.spyOn(globalThis, 'fetch').mockImplementation(async () =>
+        mp3Response(),
+      );
+      const cache: AudioCache = new BrowserAudioCache(() => storage);
+
+      const error = await captureError(() => cache.download(PATH_A));
+
+      expect(error).toBeInstanceOf(AudioDownloadError);
+      expect(
+        error instanceof AudioDownloadError ? error.reason : undefined,
+      ).toBe(reason);
+      expect([...(await cache.listCachedPaths([PATH_A]))]).toEqual([]);
+    },
+  );
 });
