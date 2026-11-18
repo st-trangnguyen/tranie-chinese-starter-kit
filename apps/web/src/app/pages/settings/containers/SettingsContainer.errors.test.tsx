@@ -1,7 +1,7 @@
 import { createDatabase } from '@core/helpers/db.helper';
 import { progressStore } from '@core/services/progress-store.service';
 import { ProgressService } from '@shared/services/progress.service';
-import { renderWithProviders, screen, within } from '@test/render';
+import { renderWithProviders, screen, waitFor, within } from '@test/render';
 
 import SettingsContainer from './SettingsContainer';
 
@@ -107,5 +107,74 @@ describe('SettingsContainer — lỗi lưu', () => {
       within(group).getByRole('switch', { name: 'Hiện pinyin' }),
     ).toBeChecked();
     expect(within(group).getByText('Bật')).toBeVisible();
+  });
+
+  it('S8.2-AC1 Lưu được lại thì thông báo lỗi biến mất: sau lỗi, chọn lại "30 phút" lưu được → hết thông báo, "30 phút" chọn', async () => {
+    await new ProgressService().completeOnboarding(15);
+
+    const { user } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const group = await screen.findByRole('group', {
+      name: 'Mục tiêu mỗi ngày',
+    });
+
+    vi.spyOn(progressStore, 'saveSettings').mockRejectedValueOnce(
+      new Error('quota'),
+    );
+
+    await user.click(within(group).getByRole('radio', { name: '30 phút' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      SAVE_ERROR_MESSAGE,
+    );
+
+    await user.click(within(group).getByRole('radio', { name: '30 phút' }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('alert')).toBeNull();
+    });
+    expect(within(group).getByRole('radio', { name: '30 phút' })).toBeChecked();
+    expect(
+      within(group).getByRole('radio', { name: '15 phút' }),
+    ).not.toBeChecked();
+  });
+
+  it('S8.2-AC1 Lưu được lại thì thông báo lỗi biến mất (TC-S8.2-AC1-17): lỗi ở mục tiêu, đổi tốc độ lưu được → hết thông báo, "15 phút" và "Chậm (0.75x)" chọn', async () => {
+    await new ProgressService().completeOnboarding(15);
+
+    const { user } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const goalGroup = await screen.findByRole('group', {
+      name: 'Mục tiêu mỗi ngày',
+    });
+    const speedGroup = screen.getByRole('group', {
+      name: 'Tốc độ audio mặc định',
+    });
+
+    vi.spyOn(progressStore, 'saveSettings').mockRejectedValueOnce(
+      new Error('quota'),
+    );
+
+    await user.click(within(goalGroup).getByRole('radio', { name: '30 phút' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      SAVE_ERROR_MESSAGE,
+    );
+
+    await user.click(
+      within(speedGroup).getByRole('radio', { name: 'Chậm (0.75x)' }),
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByRole('alert')).toBeNull();
+    });
+    expect(
+      within(goalGroup).getByRole('radio', { name: '15 phút' }),
+    ).toBeChecked();
+    expect(
+      within(speedGroup).getByRole('radio', { name: 'Chậm (0.75x)' }),
+    ).toBeChecked();
   });
 });
