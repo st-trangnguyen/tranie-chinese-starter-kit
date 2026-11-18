@@ -257,4 +257,18 @@ describe('DexieProgressStore — mục tiêu của ngày (S8.3)', () => {
       ]),
     );
   });
+
+  it('S8.3-AC2 Học đủ mục tiêu rồi quay lại trang chủ thì số tăng ngay: đọc mọi ngày ngay sau lần ghi chưa xong thấy phần vừa ghi', async () => {
+    const { store } = openStore();
+
+    // Màn bài unmount ghi phần cuối (không chờ), Trang chủ mount đọc mọi ngày ngay.
+    const pendingWrite = store.addStudySeconds(TODAY, 120);
+
+    const stats = await store.getAllDailyStats();
+
+    expect(stats).toEqual([
+      expect.objectContaining({ date: TODAY, studySeconds: 120 }),
+    ]);
+    await expect(pendingWrite).resolves.toBeUndefined();
+  });
 });
