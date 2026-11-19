@@ -205,7 +205,7 @@ container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fake
 - [x] 8.36 GREEN: `OfflineAudioAnnouncer` (D10) trong `LearningPathContainer`, i18n `announce.*`; kiểm: test 8.35 pass
 - [x] 8.37 RED: S8.4-AC1 "Hai chủ đề báo cùng lúc thì đọc đủ cả hai" — "Chào hỏi" và "Gia đình" tải, thả file cuối của hai chủ đề liên tiếp → vùng chứa cả hai câu "Đã tải xong…", câu thứ nhất vẫn còn khi câu thứ hai xuất hiện (hai phần tử `<p>`); kiểm: chạy, nếu pass ngay thì tạm render chỉ câu mới nhất để thấy fail rồi trả lại
 - [x] 8.38 GREEN: sửa đến khi pass; kiểm: test 8.37 pass
-- [ ] 8.39 RED: S8.4-AC1 "Focus khi bắt đầu và khi tải xong" (`OfflineAudioBlock.test.tsx`, rerender theo topic) — focus nút tải, đổi topic sang `downloading` (nút bị gỡ) → `document.activeElement` là dòng "Đang tải …%"; sang `downloaded` có `canRemove` → nút "Xóa audio"; kiểm: fail (focus rơi về `body`)
+- [x] 8.39 RED: S8.4-AC1 "Focus khi bắt đầu và khi tải xong" (`OfflineAudioBlock.test.tsx`, rerender theo topic) — focus nút tải, đổi topic sang `downloading` (nút bị gỡ) → `document.activeElement` là dòng "Đang tải …%"; sang `downloaded` có `canRemove` → nút "Xóa audio"; kiểm: fail (focus rơi về `body`)
 - [ ] 8.40 GREEN: `ownedFocusRef` + `onFocus`, `useLayoutEffect` (ref khác `null`, đã gỡ, `activeElement` là `body`; reset ref sau khi chuyển), `resolveFocusTarget`, `tabIndex={-1}` cho hai dòng chữ (design D9); kiểm: test 8.39 pass
 - [ ] 8.41 RED: S8.4-AC1 "Tải xong mà không có nút xóa thì focus tới dòng đã tải" — focus ở dòng tiến độ, sang `downloaded` `canRemove: false` → dòng "Đã tải audio (…)"; kiểm: chạy, nếu pass ngay thì tạm luôn nhắm nút xóa để thấy fail rồi trả lại
 - [ ] 8.42 GREEN: sửa đến khi pass; kiểm: test 8.41 pass
