@@ -100,4 +100,17 @@ describe('BackupService.exportProgress', () => {
       file: { lessonProgress: [], dailyStats: [] },
     });
   });
+
+  it('S8.5-AC1 Không đọc được tiến độ thì báo lỗi: reject với lỗi rõ nghĩa, không lưu file nào', async () => {
+    const { store, backup, savedFiles } = createMachine();
+    await new ProgressService(store).completeOnboarding(15);
+    vi.spyOn(store, 'exportAll').mockRejectedValue(
+      new Error('DatabaseClosedError: Database has been closed'),
+    );
+
+    await expect(backup.exportProgress(NOW)).rejects.toThrow(
+      new Error('Không đọc được tiến độ để xuất.'),
+    );
+    expect(savedFiles).toHaveLength(0);
+  });
 });
