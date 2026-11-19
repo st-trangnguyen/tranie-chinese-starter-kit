@@ -6,9 +6,13 @@ import { ROUTE_PATHS } from '@core/constants/app.constants';
 import { AudioSpeedSetting } from '../components/AudioSpeedSetting';
 import { DailyGoalSetting } from '../components/DailyGoalSetting';
 import { PinyinVisibilitySetting } from '../components/PinyinVisibilitySetting';
+import { ProgressBackupSection } from '../components/ProgressBackupSection';
 import { useSettings } from '../hooks/useSettings';
 
-/** Màn Cài đặt (S8.2): mục tiêu mỗi ngày, tốc độ audio mặc định, hiện pinyin. */
+/**
+ * Màn Cài đặt (S8.2): mục tiêu mỗi ngày, tốc độ audio mặc định, hiện pinyin.
+ * Mục Sao lưu tiến độ (S8.5) không phụ thuộc việc nạp tùy chọn xong.
+ */
 const SettingsContainer = () => {
   const { t } = useTranslation('settings');
   const {
@@ -51,6 +55,7 @@ const SettingsContainer = () => {
           />
         </>
       )}
+      <ProgressBackupSection />
     </main>
   );
 };

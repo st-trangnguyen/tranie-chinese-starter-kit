@@ -18,5 +18,10 @@
     "on": "Bật",
     "off": "Tắt"
   },
-  "saveError": "Không lưu được cài đặt. Hãy thử lại."
+  "saveError": "Không lưu được cài đặt. Hãy thử lại.",
+  "backup": {
+    "title": "Sao lưu tiến độ",
+    "export": "Xuất tiến độ",
+    "import": "Nhập tiến độ"
+  }
 }

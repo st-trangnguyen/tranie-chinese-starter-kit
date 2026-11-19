@@ -1,0 +1,11 @@
+/* Mục Sao lưu tiến độ trong màn Cài đặt — S8.5 D7. */
+
+@layer components {
+  .backup-section {
+    @apply rounded-lg border-2 border-line bg-surface;
+  }
+
+  .backup-section-title {
+    @apply text-title-sm text-fg;
+  }
+}
