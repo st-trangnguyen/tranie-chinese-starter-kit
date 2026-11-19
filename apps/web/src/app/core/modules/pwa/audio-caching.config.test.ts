@@ -2,9 +2,11 @@ import { matchesGlob } from 'node:path';
 import { runInNewContext } from 'node:vm';
 
 import {
+  createAudioRuntimeCaching,
   listPrecachedAudioPatterns,
   PRECACHE_BASE_PATTERNS,
   stripRangeRequest,
+  toPartialResponse,
 } from './audio-caching.config';
 
 const INTRO_AUDIO = 'audio/00000000000000aa.mp3';
@@ -124,5 +126,126 @@ describe('audio-caching.config stripRangeRequest', () => {
 
     expect(result.url).toBe(AUDIO_URL);
     expect(result.headers.has('Range')).toBe(false);
+  });
+});
+
+type ToPartialResponse = typeof toPartialResponse;
+
+const isToPartialResponse = (value: unknown): value is ToPartialResponse =>
+  typeof value === 'function';
+
+/** Như `rebuildFromSource`, chỉ còn global mà sw.js có (`Request`, `Response`, `Headers`, `Blob`). */
+const rebuildPartialFromSource = (fn: ToPartialResponse): ToPartialResponse => {
+  const rebuilt: unknown = runInNewContext(`(${fn.toString()})`, {
+    Request,
+    Response,
+    Headers,
+    Blob,
+  });
+  if (!isToPartialResponse(rebuilt)) {
+    throw new Error('Không dựng lại được hàm từ toString()');
+  }
+  return rebuilt;
+};
+
+describe('audio-caching.config toPartialResponse', () => {
+  const SCENARIO = 'S8.4-AC1 Đã tải thì học offline vẫn nghe được';
+  const AUDIO_URL = `https://app.example/${HSK_AUDIO}`;
+  const BODY = Uint8Array.from({ length: 1000 }, (_, i) => i % 256);
+
+  const audioRequest = (range?: string): Request =>
+    new Request(AUDIO_URL, range ? { headers: { Range: range } } : {});
+
+  const fullResponse = (): Response =>
+    new Response(BODY, {
+      status: 200,
+      headers: { 'Content-Type': 'audio/mpeg' },
+    });
+
+  const readBytes = async (response: Response): Promise<Uint8Array> =>
+    new Uint8Array(await response.arrayBuffer());
+
+  const expectPartial = async (
+    fn: ToPartialResponse,
+    range: string,
+    [start, end]: readonly [number, number],
+  ): Promise<void> => {
+    const result = await fn({
+      request: audioRequest(range),
+      response: fullResponse(),
+    });
+
+    expect(result.status).toBe(206);
+    expect(result.headers.get('Content-Range')).toBe(
+      `bytes ${start}-${end}/1000`,
+    );
+    expect(result.headers.get('Content-Length')).toBe(String(end - start + 1));
+    expect(await readBytes(result)).toEqual(BODY.slice(start, end + 1));
+  };
+
+  it(`${SCENARIO}: Range: bytes=0- trên response 200 thành 206 đủ 1000 byte`, async () => {
+    await expectPartial(toPartialResponse, 'bytes=0-', [0, 999]);
+  });
+
+  it(`${SCENARIO}: Range: bytes=100-199 trả đúng 100 byte giữa file`, async () => {
+    await expectPartial(toPartialResponse, 'bytes=100-199', [100, 199]);
+  });
+
+  it(`${SCENARIO}: không có Range hoặc response đã là 206 thì giữ nguyên`, async () => {
+    const plain = fullResponse();
+    expect(
+      await toPartialResponse({ request: audioRequest(), response: plain }),
+    ).toBe(plain);
+
+    const partial = new Response(BODY.slice(0, 10), {
+      status: 206,
+      headers: { 'Content-Range': 'bytes 0-9/1000' },
+    });
+    expect(
+      await toPartialResponse({
+        request: audioRequest('bytes=0-'),
+        response: partial,
+      }),
+    ).toBe(partial);
+  });
+
+  it(`${SCENARIO}: Range không đọc được thì giữ nguyên response`, async () => {
+    for (const range of ['bytes=abc-', 'not-a-range']) {
+      const response = fullResponse();
+      const result = await toPartialResponse({
+        request: audioRequest(range),
+        response,
+      });
+      expect(result, range).toBe(response);
+    }
+  });
+
+  it(`${SCENARIO}: bản dựng lại từ toString() cho cùng kết quả (hàm tự chứa)`, async () => {
+    const rebuilt = rebuildPartialFromSource(toPartialResponse);
+
+    await expectPartial(rebuilt, 'bytes=0-', [0, 999]);
+    await expectPartial(rebuilt, 'bytes=100-199', [100, 199]);
+  });
+
+  it(`${SCENARIO}: route runtime CacheFirst vào audio-cache, chỉ lưu 200, có Range và hai plugin`, () => {
+    const config = createAudioRuntimeCaching();
+
+    expect(config.handler).toBe('CacheFirst');
+    expect(config.urlPattern).toBeInstanceOf(RegExp);
+    if (config.urlPattern instanceof RegExp) {
+      expect(config.urlPattern.test(AUDIO_URL)).toBe(true);
+      expect(
+        config.urlPattern.test('https://app.example/content/content.json'),
+      ).toBe(false);
+    }
+    expect(config.options?.cacheName).toBe('audio-cache');
+    expect(config.options?.cacheableResponse?.statuses).toEqual([200]);
+    expect(config.options?.rangeRequests).toBe(true);
+    expect(config.options?.plugins).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ requestWillFetch: stripRangeRequest }),
+        expect.objectContaining({ handlerWillRespond: toPartialResponse }),
+      ]),
+    );
   });
 });

@@ -1,4 +1,5 @@
 import { audioIndexSchema } from '@csk/shared';
+import type { VitePWAOptions } from 'vite-plugin-pwa';
 
 /*
  * Cấu hình cache audio của service worker (S8.4, design D3). `vite.config.ts` dùng file này nên
@@ -34,3 +35,26 @@ export const stripRangeRequest = async ({
   request: Request;
 }): Promise<Request> =>
   new Request(request.url, { credentials: 'same-origin' });
+
+/**
+ * Plugin `handlerWillRespond` của route audio: request có `Range` mà response 200 thì dựng 206.
+ * Hàm tự chứa: workbox-build chép `toString()` của nó vào `sw.js`.
+ * RED 7.5: skeleton chưa có hành vi, GREEN 7.6 cài đặt.
+ */
+export const toPartialResponse = async ({
+  response,
+}: {
+  request: Request;
+  response: Response;
+}): Promise<Response> => response;
+
+/** Một mục `workbox.runtimeCaching` của vite-plugin-pwa (generateSW). */
+export type AudioRuntimeCaching = NonNullable<
+  NonNullable<VitePWAOptions['workbox']>['runtimeCaching']
+>[number];
+
+/** Route cache-first cho audio ngoài precache. RED 7.5: skeleton, GREEN 7.6 cài đặt. */
+export const createAudioRuntimeCaching = (): AudioRuntimeCaching => ({
+  urlPattern: /$^/,
+  handler: 'NetworkOnly',
+});
