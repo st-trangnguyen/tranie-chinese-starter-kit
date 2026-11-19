@@ -56,4 +56,33 @@ describe('BackupService.inspectImportFile + importProgress', () => {
       defaultAudioSpeed: 'slow',
     });
   });
+
+  it('S8.5-AC1 File có lựa chọn hiện pinyin: máy A tắt hiện pinyin, máy B đang bật, nhập file của A thì máy B tắt', async () => {
+    const machineA = createMachine();
+    const progressA = new ProgressService(machineA.store);
+    await progressA.completeOnboarding(15);
+    await progressA.changePinyinVisibility(false);
+    await machineA.backup.exportProgress(NOW);
+    const exported = machineA.savedFiles[0]?.content ?? '';
+
+    const machineB = createMachine();
+    const progressB = new ProgressService(machineB.store);
+    await progressB.completeOnboarding(15);
+    expect((await progressB.getLearningPreferences()).isPinyinVisible).toBe(
+      true,
+    );
+
+    const inspection = await machineB.backup.inspectImportFile(
+      toBackupFileSource(exported),
+    );
+    expect(inspection.status).toBe('valid');
+    if (inspection.status !== 'valid') {
+      return;
+    }
+    await machineB.backup.importProgress(inspection.snapshot);
+
+    expect((await progressB.getLearningPreferences()).isPinyinVisible).toBe(
+      false,
+    );
+  });
 });
