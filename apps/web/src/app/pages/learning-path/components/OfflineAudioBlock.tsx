@@ -13,6 +13,9 @@ export function OfflineAudioBlock({ topic }: OfflineAudioBlockProps) {
 
   return (
     <div className="offline-audio flex flex-col gap-xs">
+      {topic.status === 'available-offline' && (
+        <p>{t('offlineAudio.available')}</p>
+      )}
       {topic.status === 'not-downloaded' && (
         <button
           type="button"

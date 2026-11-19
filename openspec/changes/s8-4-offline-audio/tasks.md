@@ -172,7 +172,7 @@ container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fake
 - [x] 8.3 RED: S8.4-AC1 "Khối audio nằm trên link kiểm tra vượt cấp" (container) — nhóm khóa có bài `test`: thứ tự DOM `<h3>` → nút tải → link "Kiểm tra vượt cấp" (`compareDocumentPosition`); Tab tới nút tải trước link; kiểm: chạy, nếu pass ngay thì tạm render khối sau link để thấy fail rồi trả lại
 - [x] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass
 - [x] 8.5 RED: S8.4-AC1 "Chủ đề Nhập môn có sẵn offline" (container) — nhóm Nhập môn có audio hiện "Audio có sẵn offline", không nút tải/xóa; kiểm: fail
-- [ ] 8.6 GREEN: nhánh `available-offline` trong `OfflineAudioBlock`; kiểm: test 8.5 pass
+- [x] 8.6 GREEN: nhánh `available-offline` trong `OfflineAudioBlock`; kiểm: test 8.5 pass
 - [ ] 8.7 RED: S8.4-AC1 "Chủ đề không có audio" (container) — nhóm HSK `[]` không có khối (không "Tải audio", "Đã tải audio", "Xóa audio", "Audio có sẵn offline"); kiểm: chạy, nếu pass ngay thì tạm render khối rỗng có chữ để thấy fail rồi trả lại
 - [ ] 8.8 GREEN: sửa đến khi pass; kiểm: test 8.7 pass
 - [ ] 8.9 RED: S8.4-AC1 "Chủ đề Nhập môn không có audio thì không có khối" (container) — nhóm Nhập môn `[]` không khối, nhóm Nhập môn có audio vẫn "Audio có sẵn offline"; kiểm: như 8.7
