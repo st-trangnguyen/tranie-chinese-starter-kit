@@ -118,7 +118,7 @@ Test S8.2 cũ (`SettingsContainer*.test.tsx`) phải vẫn pass sau mỗi GREEN.
 - [x] 7.19 RED: S8.5-AC3 "Thông báo thành công được đọc cho trình đọc màn hình" — DB mục tiêu 60, "Hiện pinyin" bật; hộp mở với `hop-le-5-bai` (mục tiêu 15), bấm "Ghi đè" → `status` trong region "Đã nhập tiến độ.", focus ở "Nhập tiến độ", radio "15 phút" trong nhóm "Mục tiêu mỗi ngày" được chọn mà không remount (nạp lại qua `useSettings.reloadPreferences`); `DexieProgressStore.prototype.importAll` reject (spy) → `alert` "Không nhập được tiến độ. Tiến độ trên máy vẫn giữ nguyên.", radio "60 phút" vẫn chọn; kiểm: fail
 - [x] 7.20 GREEN: `confirmImport` (pha `importing`, `imported`/`importFailed`); `useSettings` thêm `reloadPreferences` (state `loadId` trong dependency của effect nạp, D6); `SettingsContainer` gọi `useProgressBackup(reloadPreferences)` (không có context cấp app phải nạp lại, design D1); kiểm: test 7.19 pass, test S8.2 cũ vẫn pass
 - [x] 7.21 RED: S8.5-AC3 "Màn khác hiện tiến độ mới không cần tải lại" — `openRoute('/settings')`, DB `intro-01` completed; nhập `hop-le-5-bai`, "Ghi đè", bấm liên kết "Về lộ trình" → `intro-01`…`05` "Đã xong", `intro-06` "Đang mở"; kiểm: chạy, nếu pass ngay (Lộ trình đọc lại khi mount) thì tạm cho `confirmImport` không gọi `importProgress` để thấy fail rồi trả lại
-- [ ] 7.22 GREEN: sửa đến khi pass; kiểm: test 7.21 pass, mỗi file < 300 dòng, component < 5 props, JSX chỉ class layout/spacing
+- [x] 7.22 GREEN: sửa đến khi pass; kiểm: test 7.21 pass, mỗi file < 300 dòng, component < 5 props, JSX chỉ class layout/spacing — GREEN không đổi code: RED 7.21 chứng minh bằng tạm bỏ `importProgress` trong `confirmImport`; đã kiểm số dòng, props, class JSX
 
 ## 8. Luồng người dùng — Playwright `apps/web/e2e/E8/` (design D10)
 
