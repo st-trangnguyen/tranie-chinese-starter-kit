@@ -134,4 +134,47 @@ describe('OfflineAudioService.removeAudio', () => {
       expect(percent).toBeGreaterThanOrEqual(percents[position - 1] ?? 0);
     });
   });
+
+  it('S8.4-AC2 Xóa audio dùng chung thì chủ đề khác đã tải về chưa tải: A, B đã tải chung một audio, xóa A thì B về chưa tải, B không có thông báo, audio chỉ thuộc B còn', async () => {
+    const { service, cache } = setupOfflineAudioService(
+      [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D, AUDIO_E],
+      HSK_TWO_UNITS_INDEX,
+    );
+    await service.refresh();
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, service.getSnapshot()),
+    ).toEqual({ status: 'downloaded', bytes: 2_516_582, canRemove: true });
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_2_ID, service.getSnapshot()),
+    ).toEqual({ status: 'downloaded', bytes: 1_016_582, canRemove: true });
+
+    await service.removeAudio(CHAO_HOI);
+
+    expect(cache.removeCalls).toHaveLength(1);
+    expect([...(cache.removeCalls[0] ?? [])].sort()).toEqual(
+      [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D].sort(),
+    );
+    expect(cache.cachedPaths).toEqual(new Set([AUDIO_E]));
+    const snapshot = service.getSnapshot();
+    expect(service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, snapshot)).toEqual({
+      status: 'not-downloaded',
+      bytes: 2_516_582,
+    });
+    expect(service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_2_ID, snapshot)).toEqual({
+      status: 'not-downloaded',
+      bytes: 1_016_582,
+    });
+    expect(snapshot.cachedPaths.has(AUDIO_E)).toBe(true);
+    expect(snapshot.messages.get(HSK_UNIT_ID)).toEqual({
+      kind: 'removed',
+      shownWith: 'not-downloaded',
+    });
+    expect(snapshot.messages.has(HSK_UNIT_2_ID)).toBe(false);
+    expect(
+      snapshot.announcements.map(({ kind, unitTitle }) => ({
+        kind,
+        unitTitle,
+      })),
+    ).toEqual([{ kind: 'removed', unitTitle: 'Chào hỏi' }]);
+  });
 });
