@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import type { OfflineAudioUnit } from '@shared/models/offline-audio.model';
-import { setupOfflineAudioService } from '@test/offline-audio.fakes';
+import {
+  flushAsync,
+  setupOfflineAudioService,
+} from '@test/offline-audio.fakes';
 import {
   AUDIO_A,
   AUDIO_B,
@@ -87,5 +90,48 @@ describe('OfflineAudioService.removeAudio', () => {
         unitTitle,
       })),
     ).toEqual([{ kind: 'removed', unitTitle: 'Chào hỏi' }]);
+  });
+  it('S8.4-AC2 Xóa không làm hỏng chủ đề khác đang tải: B đã tải, A đang tải đã có file chung, xóa B giữa chừng thì file chung còn, A tải xong và tiến độ A không lùi', async () => {
+    const { service, cache, snapshots } = setupOfflineAudioService(
+      [AUDIO_C, AUDIO_E],
+      HSK_TWO_UNITS_INDEX,
+    );
+    await service.refresh();
+    const download = service.startDownload(CHAO_HOI, true);
+    await flushAsync();
+    await cache.release(AUDIO_A);
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, service.getSnapshot()),
+    ).toEqual({ status: 'downloading', percent: 50 });
+
+    await service.removeAudio(GIA_DINH);
+
+    expect(cache.removeCalls).toHaveLength(1);
+    expect(cache.removeCalls[0]).not.toContain(AUDIO_C);
+    expect(cache.cachedPaths.has(AUDIO_C)).toBe(true);
+    expect(service.getSnapshot().cachedPaths.has(AUDIO_C)).toBe(true);
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_2_ID, service.getSnapshot()),
+    ).toEqual({ status: 'not-downloaded', bytes: 1_016_582 });
+
+    await cache.release(AUDIO_B);
+    await cache.release(AUDIO_D);
+    await download;
+
+    const finalSnapshot = service.getSnapshot();
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, finalSnapshot),
+    ).toEqual({ status: 'downloaded', bytes: 2_516_582, canRemove: true });
+    expect(cache.cachedPaths.has(AUDIO_C)).toBe(true);
+    expect(finalSnapshot.cachedPaths.has(AUDIO_C)).toBe(true);
+
+    const percents = snapshots.flatMap((snapshot) => {
+      const topic = service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, snapshot);
+      return topic?.status === 'downloading' ? [topic.percent] : [];
+    });
+    expect(percents.length).toBeGreaterThan(0);
+    percents.forEach((percent, position) => {
+      expect(percent).toBeGreaterThanOrEqual(percents[position - 1] ?? 0);
+    });
   });
 });
