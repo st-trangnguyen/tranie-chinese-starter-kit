@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  formatLocalDateKey,
   previousLocalDateKey,
   startOfNextLocalDay,
   toLocalDateKey,
@@ -34,5 +35,12 @@ describe('date.utils — ngày liền trước', () => {
     expect(previousLocalDateKey('2026-11-18')).toBe('2026-11-17');
     expect(previousLocalDateKey('2026-03-01')).toBe('2026-02-28');
     expect(previousLocalDateKey('2026-01-01')).toBe('2025-12-31');
+  });
+});
+
+describe('date.utils — hiện ngày cho người học', () => {
+  it('S8.5-AC3 File hợp lệ thì hiện hộp xác nhận: khóa ngày hiện dạng dd/mm/yyyy', () => {
+    expect(formatLocalDateKey('2026-11-17')).toBe('17/11/2026');
+    expect(formatLocalDateKey('2027-01-05')).toBe('05/01/2027');
   });
 });

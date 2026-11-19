@@ -21,3 +21,8 @@ export function previousLocalDateKey(dateKey: string): string {
   const [year = 0, month = 1, day = 1] = dateKey.split('-').map(Number);
   return toLocalDateKey(new Date(year, month - 1, day - 1).getTime());
 }
+
+/** Khóa ngày `YYYY-MM-DD` hiện cho người học dạng `dd/mm/yyyy`. */
+export function formatLocalDateKey(dateKey: string): string {
+  return dateKey;
+}
