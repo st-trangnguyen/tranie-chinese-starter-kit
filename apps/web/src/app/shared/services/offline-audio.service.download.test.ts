@@ -68,4 +68,45 @@ describe('OfflineAudioService.startDownload', () => {
       { kind: 'download-finished', unitTitle: 'Chào hỏi' },
     ]);
   });
+
+  it('S8.4-AC1 Hiện tiến độ khi đang tải: sau file 1 là đang tải 25%, không bao giờ 100%, file cuối và hết đang tải cùng một snapshot', async () => {
+    const { service, cache, snapshots } = setup();
+    await service.refresh();
+
+    const download = service.startDownload(CHAO_HOI, true);
+    await flushAsync();
+    await cache.release(AUDIO_A);
+
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, service.getSnapshot()),
+    ).toEqual({ status: 'downloading', percent: 25 });
+
+    for (const path of [AUDIO_B, AUDIO_C, AUDIO_D]) {
+      await cache.release(path);
+    }
+    await download;
+
+    const topics = snapshots.map((snapshot) =>
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, snapshot),
+    );
+    expect(topics).not.toContainEqual({ status: 'downloading', percent: 100 });
+    const allAudio = [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D];
+    const fullyCached = snapshots.filter((snapshot) =>
+      allAudio.every((path) => snapshot.cachedPaths.has(path)),
+    );
+    expect(fullyCached.length).toBeGreaterThan(0);
+    expect(
+      fullyCached.map((snapshot) =>
+        snapshot.downloadingUnitIds.has(HSK_UNIT_ID),
+      ),
+    ).not.toContain(true);
+    const lastFileIndex = snapshots.findIndex((snapshot) =>
+      snapshot.cachedPaths.has(AUDIO_D),
+    );
+    const finishedIndex = snapshots.findIndex(
+      (snapshot, position) =>
+        position > 0 && !snapshot.downloadingUnitIds.has(HSK_UNIT_ID),
+    );
+    expect(finishedIndex).toBe(lastFileIndex);
+  });
 });
