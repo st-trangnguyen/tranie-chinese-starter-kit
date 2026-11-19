@@ -22,8 +22,9 @@ const SettingsContainer = () => {
     changeDailyGoal,
     changeDefaultAudioSpeed,
     changePinyinVisibility,
+    reloadPreferences,
   } = useSettings();
-  const backup = useProgressBackup();
+  const backup = useProgressBackup(reloadPreferences);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-xl p-xl">

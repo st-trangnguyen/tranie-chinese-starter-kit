@@ -11,8 +11,6 @@ import type {
 } from '@shared/models/progress-backup.model';
 import { BackupService } from '@shared/services/backup.service';
 
-const ignore = (): void => undefined;
-
 /** Thông báo lỗi theo lý do file bị từ chối (spec "Thông báo cho từng loại file lỗi"). */
 const REJECT_MESSAGE_KEYS: Record<BackupRejectReason, BackupMessageKey> = {
   'not-backup': 'notBackup',
@@ -22,9 +20,11 @@ const REJECT_MESSAGE_KEYS: Record<BackupRejectReason, BackupMessageKey> = {
 
 /**
  * Mục Sao lưu tiến độ trong màn Cài đặt (S8.5, design D6).
- * Các handler nhập file được nối dần theo từng Scenario.
+ * Nhập xong thì gọi `onImported` để màn nạp lại dữ liệu đang hiện.
  */
-export const useProgressBackup = (): ProgressBackupView => {
+export const useProgressBackup = (
+  onImported: () => void,
+): ProgressBackupView => {
   const service = useMemo(() => new BackupService(), []);
   const [phase, setPhase] = useState<ProgressBackupPhase>('idle');
   const [message, setMessage] = useState<BackupMessage | null>(null);
@@ -110,13 +110,34 @@ export const useProgressBackup = (): ProgressBackupView => {
     changePhase('idle');
   }, [changePhase]);
 
+  const confirmImport = useCallback(() => {
+    const snapshot = snapshotRef.current;
+    if (phaseRef.current !== 'confirming' || snapshot === null) {
+      return;
+    }
+    snapshotRef.current = null;
+    if (isActiveRef.current) {
+      setPreview(null);
+    }
+    changePhase('importing');
+    void service.importProgress(snapshot).then(
+      () => {
+        finish({ tone: 'success', key: 'imported' });
+        if (isActiveRef.current) {
+          onImported();
+        }
+      },
+      () => finish({ tone: 'error', key: 'importFailed' }),
+    );
+  }, [changePhase, finish, onImported, service]);
+
   return {
     phase,
     preview,
     message,
     exportProgress,
     selectFile,
-    confirmImport: ignore,
+    confirmImport,
     cancelImport,
   };
 };

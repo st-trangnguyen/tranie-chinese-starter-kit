@@ -30,6 +30,7 @@
       "notBackup": "File này không phải file tiến độ của Tranie Chinese.",
       "corrupted": "File tiến độ bị hỏng, không nhập được.",
       "newerVersion": "File này được tạo từ phiên bản app mới hơn. Hãy cập nhật app rồi thử lại.",
+      "imported": "Đã nhập tiến độ.",
       "importFailed": "Không nhập được tiến độ. Tiến độ trên máy vẫn giữ nguyên."
     },
     "confirm": {
