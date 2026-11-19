@@ -32,4 +32,5 @@ export const stripRangeRequest = async ({
   request,
 }: {
   request: Request;
-}): Promise<Request> => request;
+}): Promise<Request> =>
+  new Request(request.url, { credentials: 'same-origin' });
