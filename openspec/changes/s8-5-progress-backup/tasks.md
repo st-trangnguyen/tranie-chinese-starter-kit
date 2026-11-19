@@ -136,9 +136,9 @@ Helper `apps/web/e2e/E8/backup.helpers.ts`: `backupSection`, `exportProgress` (c
 - [x] 8.6 GREEN: sửa đến khi pass; kiểm: test 8.5 pass — GREEN không đổi code: RED 8.5 chứng minh bằng tạm `fetch` trong `importProgress`
 - [x] 8.7 Test e2e nghiệm thu (hành vi đã có test RED ở tầng dưới; commit `test(e2e)`) `s8.5-backup-section.spec.ts`: TC-S8.5-AC1-1, AC1-4, AC1-15, AC2-11, AC3-8, AC3-16; kiểm: `pnpm e2e` file này pass
 - [x] 8.8 Test e2e nghiệm thu `s8.5-export.spec.ts` (đồng hồ 2026-11-17, `TIMEZONE`): TC-S8.5-AC1-6 (tên file, nội dung JSON đọc được), AC1-8, AC1-10 (bài 2 làm tiếp đúng câu), AC1-11, AC1-13 (`breakSettingsReads` sau khi màn Cài đặt hiện: không có `download`, `alert` "Không xuất được tiến độ. Hãy thử lại."); kiểm: file này pass
-- [ ] 8.9 Test e2e nghiệm thu `s8.5-roundtrip.spec.ts` (hai `browser.newContext()`): TC-S8.5-AC1-16, AC1-19, AC1-20 (`serveBackupPath`, `serviceWorkers: 'block'`), AC1-21 (`expectStreak(page, 1)` trên Trang chủ cả hai máy, dữ liệu `reachedDay`/`dayKey`), AC1-22 (`pinyinSwitch` tắt ở máy B), AC3-5 (hộp nêu 1 + N); kiểm: file này pass
-- [ ] 8.10 Test e2e nghiệm thu `s8.5-import-reject.spec.ts`: TC-S8.5-AC2-1, AC2-2, AC2-3, AC2-4 (buffer 21 000 000 byte tạo trong test), AC2-5, AC2-6, AC2-7; kiểm: file này pass
-- [ ] 8.11 Test e2e nghiệm thu `s8.5-import-confirm.spec.ts`: TC-S8.5-AC3-1, AC3-6, AC3-7, AC3-10, AC3-12, AC3-13 (`breakLessonProgressWrites` khi hộp đang mở; Lộ trình chỉ bài 1, `goalRadio` không đổi), AC3-17, AC3-18; kiểm: file này pass
+- [x] 8.9 Test e2e nghiệm thu `s8.5-roundtrip.spec.ts` (hai `browser.newContext()`): TC-S8.5-AC1-16, AC1-19, AC1-20 (`serveBackupPath`, `serviceWorkers: 'block'`), AC1-21 (`expectStreak(page, 1)` trên Trang chủ cả hai máy, dữ liệu `reachedDay`/`dayKey`), AC1-22 (`pinyinSwitch` tắt ở máy B), AC3-5 (hộp nêu 1 + N); kiểm: file này pass
+- [x] 8.10 Test e2e nghiệm thu `s8.5-import-reject.spec.ts`: TC-S8.5-AC2-1, AC2-2, AC2-3, AC2-4 (buffer 21 000 000 byte tạo trong test), AC2-5, AC2-6, AC2-7; kiểm: file này pass
+- [x] 8.11 Test e2e nghiệm thu `s8.5-import-confirm.spec.ts`: TC-S8.5-AC3-1, AC3-6, AC3-7, AC3-10, AC3-12, AC3-13 (`breakLessonProgressWrites` khi hộp đang mở; Lộ trình chỉ bài 1, `goalRadio` không đổi), AC3-17, AC3-18; kiểm: file này pass
 
 ## 9. Tài liệu (docs thuần, miễn test-first)
 

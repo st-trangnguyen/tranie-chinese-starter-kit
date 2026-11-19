@@ -7,7 +7,10 @@ import {
   type Download,
   type Locator,
   type Page,
+  type Route,
 } from '@playwright/test';
+
+import { INTRO_LESSON_IDS } from '../E7/intro-lessons.helpers';
 
 export const BACKUP_SECTION_TITLE = 'Sao lưu tiến độ';
 export const EXPORT_LABEL = 'Xuất tiến độ';
@@ -17,7 +20,13 @@ export const EXPORT_FAILED_MESSAGE = 'Không xuất được tiến độ. Hãy 
 export const NOT_BACKUP_MESSAGE =
   'File này không phải file tiến độ của Tranie Chinese.';
 export const CORRUPTED_MESSAGE = 'File tiến độ bị hỏng, không nhập được.';
+export const NEWER_VERSION_MESSAGE =
+  'File này được tạo từ phiên bản app mới hơn. Hãy cập nhật app rồi thử lại.';
 export const IMPORTED_MESSAGE = 'Đã nhập tiến độ.';
+export const IMPORT_FAILED_MESSAGE =
+  'Không nhập được tiến độ. Tiến độ trên máy vẫn giữ nguyên.';
+export const CONFIRM_WARNING =
+  'Toàn bộ tiến độ hiện có trên máy này sẽ bị thay bằng tiến độ trong file. Không hoàn tác được.';
 export const OVERWRITE_LABEL = 'Ghi đè';
 export const CANCEL_LABEL = 'Hủy';
 
@@ -75,8 +84,11 @@ export const cancelButton = (page: Page): Locator =>
  * Chọn file `path` cho "Nhập tiến độ": gắn file thẳng vào ô chọn file (ẩn) của mục, giống người
  * học chọn file trong hộp chọn file của máy (không mở được hộp đó trong Playwright).
  */
-export const importFile = async (page: Page, path: string): Promise<void> => {
-  await backupSection(page).locator('input[type="file"]').setInputFiles(path);
+export const importFile = async (
+  page: Page,
+  file: string | { name: string; mimeType: string; buffer: Buffer },
+): Promise<void> => {
+  await backupSection(page).locator('input[type="file"]').setInputFiles(file);
 };
 
 /** Bấm "Xuất tiến độ" và chờ trình duyệt nhận file tải về. */
@@ -114,4 +126,113 @@ export const expectInLiveRegion = async (target: Locator): Promise<void> => {
       ) !== null,
   );
   expect(isLive).toBe(true);
+};
+
+const introLessonId = (index: number): string => INTRO_LESSON_IDS[index] ?? '';
+
+/** Bài kiểm tra vượt cấp của chủ đề C (bài cuối của chủ đề, design D10). */
+export const SKIP_AHEAD_TEST_LESSON_ID = introLessonId(5);
+
+/** Chủ đề hai bài liền nhau, bắt đầu từ bài Nhập môn thứ `first` (0-based). */
+const backupPathUnit = (id: string, title: string, first: number) => ({
+  id,
+  title,
+  lessonIds: [introLessonId(first), introLessonId(first + 1)],
+});
+
+/**
+ * Lộ trình 4 chủ đề dựng từ bài Nhập môn thật (design D10): A (bài 1, 2), B (bài 3, 4), C (bài 5, 6;
+ * bài 6 là bài kiểm tra vượt cấp), D (bài 7, 8).
+ */
+const BACKUP_PATH_CONTENT_ROOT = {
+  contentVersion: '0123456789ab',
+  stages: [
+    {
+      id: 'intro',
+      title: 'Nhập môn',
+      units: [
+        backupPathUnit('unit-a', 'Chủ đề A', 0),
+        backupPathUnit('unit-b', 'Chủ đề B', 2),
+        backupPathUnit('unit-c', 'Chủ đề C', 4),
+        backupPathUnit('unit-d', 'Chủ đề D', 6),
+      ],
+    },
+  ],
+};
+
+/**
+ * Thay nội dung bằng lộ trình 4 chủ đề (mẫu `serveMultiUnitPath`). Cần `serviceWorkers: 'block'`:
+ * page.route không chặn request do service worker phục vụ.
+ */
+export const serveBackupPath = async (page: Page): Promise<void> => {
+  await page.route('**/content/content.json', (route: Route) =>
+    route.fulfill({ json: BACKUP_PATH_CONTENT_ROOT }),
+  );
+  await page.route(
+    `**/content/lessons/${SKIP_AHEAD_TEST_LESSON_ID}.json`,
+    async (route) => {
+      const response = await route.fetch();
+      const lesson: unknown = await response.json();
+      const json =
+        typeof lesson === 'object' && lesson !== null
+          ? { ...lesson, type: 'test' }
+          : lesson;
+      await route.fulfill({ response, json });
+    },
+  );
+};
+
+const BREAK_LESSON_PROGRESS_WRITES_FLAG =
+  'csk-e2e-break-lesson-progress-writes';
+
+declare global {
+  interface Window {
+    cskLessonProgressGuardInstalled?: boolean;
+  }
+}
+
+/**
+ * Bọc `put`/`add` của `IDBObjectStore.prototype` (mẫu guard của `settings.helpers.ts`): ghi bảng
+ * `lessonProgress` thì throw `UnknownError` khi cờ trong `sessionStorage` bật. `clear` vẫn chạy,
+ * nên lần ghi đè hỏng ở giữa transaction (sau khi đã xoá bảng và ghi cài đặt).
+ */
+const installLessonProgressWriteGuard = (flag: string): void => {
+  if (window.cskLessonProgressGuardInstalled === true) {
+    return;
+  }
+  window.cskLessonProgressGuardInstalled = true;
+  ['put', 'add'].forEach((methodName) => {
+    const original: unknown = Reflect.get(IDBObjectStore.prototype, methodName);
+    if (typeof original !== 'function') {
+      return;
+    }
+    Reflect.set(
+      IDBObjectStore.prototype,
+      methodName,
+      function guarded(this: IDBObjectStore, ...args: unknown[]): unknown {
+        if (
+          this.name === 'lessonProgress' &&
+          sessionStorage.getItem(flag) === 'on'
+        ) {
+          throw new DOMException('E2E: ghi lessonProgress lỗi', 'UnknownError');
+        }
+        return Reflect.apply(original, this, args);
+      },
+    );
+  });
+};
+
+/** Từ giờ mọi lần ghi bảng `lessonProgress` đều lỗi (kể cả sau khi tải lại trang). */
+export const breakLessonProgressWrites = async (page: Page): Promise<void> => {
+  await page.addInitScript(
+    installLessonProgressWriteGuard,
+    BREAK_LESSON_PROGRESS_WRITES_FLAG,
+  );
+  await page.evaluate(
+    installLessonProgressWriteGuard,
+    BREAK_LESSON_PROGRESS_WRITES_FLAG,
+  );
+  await page.evaluate((key) => {
+    sessionStorage.setItem(key, 'on');
+  }, BREAK_LESSON_PROGRESS_WRITES_FLAG);
 };
