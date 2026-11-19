@@ -56,4 +56,37 @@ describe('LearningPathContainer — audio offline: tải, xóa, thông báo', ()
     await cache.release(AUDIO_D);
     unmount();
   });
+  it('S8.4-AC1 Chủ đề đang khóa vẫn tải được: should download audio of locked "Chào hỏi" and keep its lessons locked', async () => {
+    // Tiến độ trống: chỉ bài đầu của Nhập môn mở, mọi bài của "Chào hỏi" (HSK 1) đang khóa.
+    const { user, cache, unmount } = renderPathWithOfflineAudio();
+
+    const unit = await findUnitSection('Chào hỏi');
+    const lessonsBefore = within(unit).getAllByRole('listitem');
+    expect(lessonsBefore.length).toBeGreaterThan(0);
+    lessonsBefore.forEach((lesson) =>
+      expect(lesson).toHaveTextContent('Đã khóa'),
+    );
+
+    const label = await within(unit).findByText('Tải audio (2,4 MB)');
+    const downloadButton = label.closest('button');
+    if (!downloadButton) {
+      throw new Error('Không tìm thấy nút "Tải audio (2,4 MB)"');
+    }
+
+    await user.click(downloadButton);
+    await cache.release(AUDIO_A);
+    await cache.release(AUDIO_B);
+    await cache.release(AUDIO_C);
+    await cache.release(AUDIO_D);
+
+    expect(
+      await within(unit).findByText('Đã tải audio (2,4 MB)'),
+    ).toBeInTheDocument();
+    const lessonsAfter = within(unit).getAllByRole('listitem');
+    expect(lessonsAfter).toHaveLength(lessonsBefore.length);
+    lessonsAfter.forEach((lesson) =>
+      expect(lesson).toHaveTextContent('Đã khóa'),
+    );
+    unmount();
+  });
 });
