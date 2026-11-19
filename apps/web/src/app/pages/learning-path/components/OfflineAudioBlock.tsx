@@ -71,8 +71,23 @@ export function OfflineAudioBlock({
     }
   }
 
+  // Focus rời khối thì bỏ ref; phần tử bị gỡ khi đang focus thì giữ ref cho layout effect (D9).
+  function handleBlur(event: FocusEvent<HTMLDivElement>) {
+    const next = event.relatedTarget;
+    if (next instanceof Node && event.currentTarget.contains(next)) {
+      return;
+    }
+    if (event.target.isConnected) {
+      ownedFocusRef.current = null;
+    }
+  }
+
   return (
-    <div className="offline-audio flex flex-col gap-xs" onFocus={handleFocus}>
+    <div
+      className="offline-audio flex flex-col gap-xs"
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+    >
       {topic.status === 'available-offline' && (
         <p>{t('offlineAudio.available')}</p>
       )}
