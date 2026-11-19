@@ -220,7 +220,7 @@ container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fake
 
 ## 9. Style — `styles/tailwind/` (design D11)
 
-- [ ] 9.1 `apps/web/src/styles/tailwind/components/_offline-audio.css` (import trong `main.css`): `.offline-audio`, `.offline-audio-status` (focus nhìn thấy ≥ 3:1), `.offline-audio-message`, `.offline-audio-button` (vùng chạm ≥ 44×44 px, chữ dài xuống dòng), `.offline-audio-announcer` (`@apply sr-only`); token semantic, không `transition`/`animation`; JSX chỉ layout/spacing (§6) — ngoại lệ test-first: CSS thuần; kiểm: `pnpm --filter @csk/web test:run tokens` pass, preview `web-dev` 375×812 và 1280×800, sáng và tối: khối chưa tải, đang tải, đã tải, có thông báo, có sẵn offline
+- [x] 9.1 `apps/web/src/styles/tailwind/components/_offline-audio.css` (import trong `main.css`): `.offline-audio`, `.offline-audio-status` (focus nhìn thấy ≥ 3:1), `.offline-audio-message`, `.offline-audio-button` (vùng chạm ≥ 44×44 px, chữ dài xuống dòng), `.offline-audio-announcer` (`@apply sr-only`); token semantic, không `transition`/`animation`; JSX chỉ layout/spacing (§6) — ngoại lệ test-first: CSS thuần; kiểm: `pnpm --filter @csk/web test:run tokens` pass, preview `web-dev` 375×812 và 1280×800, sáng và tối: khối chưa tải, đang tải, đã tải, có thông báo, có sẵn offline
 
 ## 10. Nội dung mẫu và điều khiển mạng cho e2e (design D12)
 
