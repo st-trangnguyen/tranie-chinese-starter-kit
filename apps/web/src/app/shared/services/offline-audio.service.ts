@@ -4,6 +4,7 @@ import {
   audioCache,
   AudioDownloadError,
   type AudioCache,
+  type AudioDownloadFailure,
 } from '@core/services/audio-cache.service';
 import {
   contentSource,
@@ -22,6 +23,14 @@ import { toDownloadPercent } from '@shared/utils/offline-audio.utils';
 
 /** Số câu thông báo gần nhất giữ trong vùng đọc (S8.4 AC1, D10). */
 export const MAX_ANNOUNCEMENTS = 5;
+
+/** Lỗi tải audio → thông báo của chủ đề (bước 7). */
+const DOWNLOAD_FAILURE_MESSAGES: Readonly<
+  Record<AudioDownloadFailure, OfflineAudioMessageKind>
+> = {
+  network: 'download-incomplete',
+  'storage-full': 'storage-full',
+};
 
 const INITIAL_SNAPSHOT: OfflineAudioSnapshot = {
   index: null,
@@ -284,7 +293,8 @@ export class OfflineAudioService {
 
   /**
    * Tải tuần tự (theo thứ tự trong index) các audio còn thiếu của chủ đề. Không reject: mất mạng
-   * giữa chừng thành thông báo `download-incomplete`, file đã tải giữ nguyên (bước 7).
+   * hoặc hết bộ nhớ giữa chừng thành thông báo `download-incomplete` / `storage-full`, file đã tải
+   * giữ nguyên (bước 7).
    * Chủ đề đang tải thì bỏ qua.
    */
   async startDownload(
@@ -321,14 +331,15 @@ export class OfflineAudioService {
         ),
       );
     } catch (error) {
-      if (
-        !(error instanceof AudioDownloadError) ||
-        error.reason !== 'network'
-      ) {
+      if (!(error instanceof AudioDownloadError)) {
         throw error;
       }
       this.writeSnapshot(
-        this.stopWithMessage(this.readSnapshot(), unit, 'download-incomplete'),
+        this.stopWithMessage(
+          this.readSnapshot(),
+          unit,
+          DOWNLOAD_FAILURE_MESSAGES[error.reason],
+        ),
       );
     }
   }
