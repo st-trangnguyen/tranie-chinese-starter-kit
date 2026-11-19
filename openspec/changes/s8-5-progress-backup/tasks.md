@@ -11,8 +11,8 @@ Vitest: `pnpm --filter @csk/web test:run <mẫu>` (`pnpm --filter @csk/shared te
 
 ## 1. Kiểm điều kiện và file mẫu (design D1, D10)
 
-- [ ] 1.1 Kiểm điều kiện đã thoả (không chặn): nhánh `feat/s8-5-progress-backup` cắt từ `main` ≥ `8a88004` có merge PR code S8.2 (#136) và S8.3 (#138); `grep` thấy đủ tên ở bảng design D1 (`ROUTE_PATHS.settings`, `SettingsContainer`, `useSettings`, `Settings.defaultAudioSpeed`/`isPinyinVisible`, `dailyStatSchema.goalMinutes`, `ProgressService.getStudyStreak`, `ProgressStore.getAllDailyStats`/`saveDailyGoal`, Dexie version 3); lệch thì dừng, báo điều phối; kiểm: `git log --oneline main | grep -E '#136|#138'` có hai dòng
-- [ ] 1.2 File mẫu ở `apps/web/e2e/E8/fixtures/progress-backup/` (asset thuần, miễn test-first; được kiểm ở 2.13): `hop-le-5-bai.json`, `hop-le-3-bai-15-phut.json`, `bai-la.json`, `trang-thai-sai.json`, `muc-tieu-45.json`, `rong.json` (0 byte), `json-noi-khac.json`, `ban-moi-hon.json`, `anh.png` theo nội dung design D10 (file hợp lệ có đủ 4 field `settings`, dòng `dailyStats` có `goalMinutes`); kiểm: `ls` đủ 9 file, `rong.json` 0 byte
+- [x] 1.1 Kiểm điều kiện đã thoả (không chặn): nhánh `feat/s8-5-progress-backup` cắt từ `main` ≥ `8a88004` có merge PR code S8.2 (#136) và S8.3 (#138); `grep` thấy đủ tên ở bảng design D1 (`ROUTE_PATHS.settings`, `SettingsContainer`, `useSettings`, `Settings.defaultAudioSpeed`/`isPinyinVisible`, `dailyStatSchema.goalMinutes`, `ProgressService.getStudyStreak`, `ProgressStore.getAllDailyStats`/`saveDailyGoal`, Dexie version 3); lệch thì dừng, báo điều phối; kiểm: `git log --oneline main | grep -E '#136|#138'` có hai dòng
+- [x] 1.2 File mẫu ở `apps/web/e2e/E8/fixtures/progress-backup/` (asset thuần, miễn test-first; được kiểm ở 2.13): `hop-le-5-bai.json`, `hop-le-3-bai-15-phut.json`, `bai-la.json`, `trang-thai-sai.json`, `muc-tieu-45.json`, `rong.json` (0 byte), `json-noi-khac.json`, `ban-moi-hon.json`, `anh.png` theo nội dung design D10 (file hợp lệ có đủ 4 field `settings`, dòng `dailyStats` có `goalMinutes`); kiểm: `ls` đủ 9 file, `rong.json` 0 byte
 
 ## 2. Kiểm tra file nhập — `@csk/shared` schema + `BackupService.checkBackupText` (design D2, D4)
 
