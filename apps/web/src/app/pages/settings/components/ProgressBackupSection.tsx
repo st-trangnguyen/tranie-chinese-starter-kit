@@ -1,4 +1,4 @@
-import { useId, type ChangeEvent } from 'react';
+import { useId, useRef, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { ProgressBackupView } from '@shared/models/progress-backup.model';
@@ -11,6 +11,7 @@ interface ProgressBackupSectionProps {
 export function ProgressBackupSection({ backup }: ProgressBackupSectionProps) {
   const { t } = useTranslation('settings');
   const titleId = useId();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { message } = backup;
   const successText =
     message?.tone === 'success' ? t(`backup.messages.${message.key}`) : '';
@@ -25,6 +26,10 @@ export function ProgressBackupSection({ backup }: ProgressBackupSectionProps) {
     // Xoá lựa chọn để chọn lại cùng file vẫn có sự kiện `change` (design D7).
     input.value = '';
     backup.selectFile(file);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -43,11 +48,20 @@ export function ProgressBackupSection({ backup }: ProgressBackupSectionProps) {
         >
           {t('backup.export')}
         </button>
-        <button type="button" className="btn btn-ghost">
+        <button
+          type="button"
+          className="btn btn-ghost"
+          onClick={handleImportClick}
+        >
           {t('backup.import')}
         </button>
       </div>
-      <input type="file" hidden onChange={handleFileChange} />
+      <input
+        ref={fileInputRef}
+        type="file"
+        hidden
+        onChange={handleFileChange}
+      />
       <p role="status" className="backup-message">
         {successText}
       </p>
