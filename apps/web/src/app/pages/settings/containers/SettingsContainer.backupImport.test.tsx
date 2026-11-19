@@ -1,8 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { fireEvent } from '@testing-library/react';
+
 import { createDatabase } from '@core/helpers/db.helper';
 import { contentSource } from '@core/services/content-source.service';
+import { fileSaver } from '@core/services/file-saver.service';
 import { renderWithProviders, screen, within } from '@test/render';
 
 import SettingsContainer from './SettingsContainer';
@@ -134,6 +137,49 @@ describe('SettingsContainer — nhập file sao lưu bị từ chối', () => {
         'Không nhập được tiến độ. Tiến độ trên máy vẫn giữ nguyên.',
       );
     });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(await readLessonIds()).toEqual(['intro-01']);
+  });
+});
+
+describe('SettingsContainer — đóng hộp chọn file', () => {
+  beforeEach(async () => {
+    await clearDatabase();
+    await seedFirstLessonCompleted();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('S8.5-AC2 Đóng hộp chọn file thì không có gì xảy ra: bấm "Nhập tiến độ" mở hộp chọn file, đóng không chọn thì không báo lỗi, không hiện hộp, tiến độ giữ nguyên', async () => {
+    vi.spyOn(fileSaver, 'save').mockImplementation(() => undefined);
+    // Hộp chọn file là của trình duyệt: chỉ cần thấy input được mở (click), không mở thật.
+    const openPicker = vi
+      .spyOn(HTMLInputElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+    const { user, section } = await renderBackupSection();
+    const input = getFileInput(section);
+
+    // Thông báo cũ từ lần xuất trước.
+    await user.click(
+      within(section).getByRole('button', { name: 'Xuất tiến độ' }),
+    );
+    await vi.waitFor(() => {
+      expect(within(section).getByRole('status')).toHaveTextContent(
+        'Đã xuất tiến độ.',
+      );
+    });
+
+    await user.click(
+      within(section).getByRole('button', { name: 'Nhập tiến độ' }),
+    );
+    expect(openPicker.mock.contexts).toContain(input);
+
+    // Người học đóng hộp chọn file mà không chọn file nào.
+    fireEvent.change(input, { target: { files: [] } });
+
+    expect(within(section).getByRole('alert')).toBeEmptyDOMElement();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(await readLessonIds()).toEqual(['intro-01']);
   });
