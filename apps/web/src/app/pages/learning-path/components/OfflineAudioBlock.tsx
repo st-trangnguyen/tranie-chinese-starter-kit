@@ -24,6 +24,23 @@ export function OfflineAudioBlock({ topic }: OfflineAudioBlockProps) {
           {t('offlineAudio.download', { size: formatAudioSize(topic.bytes) })}
         </button>
       )}
+      {topic.status === 'downloaded' && (
+        <>
+          <p tabIndex={-1} className="offline-audio-status">
+            {t('offlineAudio.downloaded', {
+              size: formatAudioSize(topic.bytes),
+            })}
+          </p>
+          {topic.canRemove && (
+            <button
+              type="button"
+              className="btn btn-secondary offline-audio-button"
+            >
+              {t('offlineAudio.remove')}
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 }
