@@ -152,7 +152,7 @@ Test: `apps/web/src/app/shared/services/offline-audio.service.download.test.ts`,
 
 Test: `apps/web/src/app/core/modules/pwa/audio-caching.config.test.ts` (hàm thuần; `Request`/`Response` của môi trường test).
 
-- [ ] 7.1 RED: S8.4-AC1 "Mới cài app thì audio HSK chưa có trên máy" (tầng cấu hình) — `PRECACHE_BASE_PATTERNS` không khớp `mp3`; `listPrecachedAudioPatterns(index)` = đúng `index.precached`; JSON sai → throw; kiểm: fail vì skeleton trả `[]`/còn `mp3`
+- [x] 7.1 RED: S8.4-AC1 "Mới cài app thì audio HSK chưa có trên máy" (tầng cấu hình) — `PRECACHE_BASE_PATTERNS` không khớp `mp3`; `listPrecachedAudioPatterns(index)` = đúng `index.precached`; JSON sai → throw; kiểm: fail vì skeleton trả `[]`/còn `mp3`
 - [ ] 7.2 GREEN: `audio-caching.config.ts` + `vite.config.ts` dùng (`globPatterns` = gốc + audio Nhập môn + `OFFLINE_FIXTURE_PATHS.audio` khi `mode === 'e2e'`); kiểm: test 7.1 pass, `pnpm --filter @csk/web build` thành công và `dist/sw.js` chứa một audio trong `precached`, không chứa một audio từ ngoài `precached` (grep)
 - [ ] 7.3 RED: S8.4-AC1 "Đã nghe hết audio thì là đã tải" (tầng cấu hình) — `stripRangeRequest({ request })` với `Range: bytes=0-` → request cùng URL, không `Range`; bản dựng lại từ `new Function(\`return (${fn.toString()})\`)()` cho cùng kết quả (hàm tự chứa); kiểm: fail
 - [ ] 7.4 GREEN: `stripRangeRequest`; kiểm: test 7.3 pass
