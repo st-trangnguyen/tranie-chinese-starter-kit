@@ -47,4 +47,27 @@ describe('OfflineAudioService: mở lại app', () => {
     ).toEqual({ status: 'downloaded', bytes: 2_516_582, canRemove: true });
     expect(cache.downloadCalls).toEqual([AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D]);
   });
+
+  it('S8.4-AC1 Đóng app giữa chừng: lần mở sau là chưa tải (không phải đang tải) và 2 file đã tải vẫn trong cache', async () => {
+    const cache = new FakeAudioCache();
+    const firstOpen = openApp(cache);
+    await firstOpen.refresh();
+    void firstOpen.startDownload(CHAO_HOI, true);
+    await flushAsync();
+    await cache.release(AUDIO_A);
+    await cache.release(AUDIO_B);
+    // Đóng app: lần mở trước bị bỏ, AUDIO_C và AUDIO_D không bao giờ tải xong.
+
+    const secondOpen = openApp(cache);
+    await secondOpen.refresh();
+
+    expect(
+      secondOpen.deriveTopic(
+        HSK_STAGE_ID,
+        HSK_UNIT_ID,
+        secondOpen.getSnapshot(),
+      ),
+    ).toEqual({ status: 'not-downloaded', bytes: 2_516_582 });
+    expect(cache.cachedPaths).toEqual(new Set([AUDIO_A, AUDIO_B]));
+  });
 });
