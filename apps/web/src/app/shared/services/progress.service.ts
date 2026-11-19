@@ -21,17 +21,26 @@ import {
   findConfirmedPlacementTestLessonId,
   listLessonIdsInOrder,
 } from '@shared/utils/learning-path.utils';
-import { startOfNextLocalDay, toLocalDateKey } from '@shared/utils/date.utils';
+import { toLocalDateKey } from '@shared/utils/date.utils';
 import type { StudyTimeShare, TodayStudy } from '@shared/models/home.model';
 import type {
   LearningPreferences,
   LessonPreferences,
 } from '@shared/models/settings.model';
 
+import { StudyTimeService } from './study-time.service';
+
 type LessonType = (typeof LESSON_TYPES)[number];
 
+const INVALID_DAILY_GOAL_MESSAGE =
+  'Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.';
+
 export class ProgressService {
-  constructor(private readonly store: ProgressStore = progressStore) {}
+  private readonly studyTime: StudyTimeService;
+
+  constructor(private readonly store: ProgressStore = progressStore) {
+    this.studyTime = new StudyTimeService(store);
+  }
 
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
 
@@ -47,12 +56,11 @@ export class ProgressService {
     return this.store.getAllLessonProgress();
   }
 
-  private readDailyStat(date: string): Promise<DailyStat | undefined> {
-    return this.store.getDailyStat(date);
-  }
-
-  private addStudySeconds(date: string, seconds: number): Promise<void> {
-    return this.store.addStudySeconds(date, seconds);
+  private writeDailyGoal(
+    date: string,
+    goalMinutes: DailyGoalMinutes,
+  ): Promise<void> {
+    return this.store.saveDailyGoal(date, goalMinutes);
   }
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
@@ -131,32 +139,26 @@ export class ProgressService {
     return findConfirmedPlacementTestLessonId(unit.lessonIds, lessonTypes);
   }
 
-  /**
-   * Rule: mỗi phần thời gian học tính vào ngày (giờ máy) nó diễn ra; qua 0 giờ thì cắt tại 0 giờ.
-   * Đồng hồ lùi hoặc đoạn rỗng thì không tính (S8.1 AC2).
-   */
+  // Rule thời gian học (S8.1) và streak (S8.3) ở StudyTimeService; ủy quyền để giữ API hiện có.
+
   splitStudyTimeByDay(startMs: number, endMs: number): StudyTimeShare[] {
-    const shares: StudyTimeShare[] = [];
-    let cursor = startMs;
-    while (cursor < endMs) {
-      const segmentEnd = Math.min(startOfNextLocalDay(cursor), endMs);
-      shares.push({
-        date: toLocalDateKey(cursor),
-        seconds: (segmentEnd - cursor) / 1000,
-      });
-      cursor = segmentEnd;
-    }
-    return shares;
+    return this.studyTime.splitStudyTimeByDay(startMs, endMs);
   }
 
-  /** Rule: thời gian học hiển thị theo phút, làm tròn xuống (S8.1 AC2). */
   toStudyMinutes(seconds: number): number {
-    return Math.floor(seconds / 60);
+    return this.studyTime.toStudyMinutes(seconds);
   }
 
-  /** Rule: đạt mục tiêu ngày khi số phút đã học ≥ mục tiêu; vừa đúng mục tiêu là đạt (S8.1 AC2). */
   isDailyGoalReached(minutes: number, goalMinutes: number): boolean {
-    return minutes >= goalMinutes;
+    return this.studyTime.isDailyGoalReached(minutes, goalMinutes);
+  }
+
+  countStudyStreak(
+    stats: readonly DailyStat[],
+    today: string,
+    todayGoalMinutes: DailyGoalMinutes,
+  ): number {
+    return this.studyTime.countStudyStreak(stats, today, todayGoalMinutes);
   }
 
   /**
@@ -181,7 +183,7 @@ export class ProgressService {
 
   async completeOnboarding(minutes: number): Promise<void> {
     if (!this.isValidDailyGoal(minutes)) {
-      throw new Error('Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.');
+      throw new Error(INVALID_DAILY_GOAL_MESSAGE);
     }
     const settings = await this.readSettings();
     await this.writeSettings({
@@ -211,12 +213,15 @@ export class ProgressService {
     return this.toLessonPreferences(settings);
   }
 
-  /** Chỉ ghi khóa mục tiêu, không đọc–gộp–ghi; lỗi ghi đi thẳng lên hook (design D2, D3). */
-  async changeDailyGoal(minutes: number): Promise<void> {
+  /**
+   * Màn Cài đặt (S8.2) đổi mục tiêu: chỉ ghi khóa mục tiêu (không đọc–gộp–ghi) và chụp vào dòng
+   * hôm nay, ngày đã qua giữ nguyên (S8.3 D4); lỗi ghi đi thẳng lên hook.
+   */
+  async changeDailyGoal(minutes: number, now = Date.now()): Promise<void> {
     if (!this.isValidDailyGoal(minutes)) {
-      throw new Error('Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.');
+      throw new Error(INVALID_DAILY_GOAL_MESSAGE);
     }
-    await this.writeSettings({ dailyGoalMinutes: minutes });
+    await this.writeDailyGoal(toLocalDateKey(now), minutes);
   }
 
   /** Chỉ ghi khóa tốc độ; lỗi ghi đi thẳng lên hook (design D2, D3). */
@@ -241,26 +246,15 @@ export class ProgressService {
     );
   }
 
-  /** Ghi một đoạn thời gian học, chia theo ngày; xếp hàng mọi lần ghi đồng bộ (design D2, D4). */
-  async recordStudyTime(startMs: number, endMs: number): Promise<void> {
-    const writes = this.splitStudyTimeByDay(startMs, endMs).map((share) =>
-      this.addStudySeconds(share.date, share.seconds),
-    );
-    await Promise.all(writes);
+  recordStudyTime(startMs: number, endMs: number): Promise<void> {
+    return this.studyTime.recordStudyTime(startMs, endMs);
   }
 
-  /** Không throw: đọc settings lỗi → mục tiêu mặc định; đọc dòng ngày lỗi → 0 giây (D4). */
-  async getTodayStudy(now: number = Date.now()): Promise<TodayStudy> {
-    const [settings, dailyStat] = await Promise.all([
-      this.readSettings().catch((): Settings => DEFAULT_SETTINGS),
-      this.readDailyStat(toLocalDateKey(now)).catch(() => undefined),
-    ]);
-    const minutes = this.toStudyMinutes(dailyStat?.studySeconds ?? 0);
-    const goalMinutes = settings.dailyGoalMinutes;
-    return {
-      minutes,
-      goalMinutes,
-      isGoalReached: this.isDailyGoalReached(minutes, goalMinutes),
-    };
+  getTodayStudy(now: number = Date.now()): Promise<TodayStudy> {
+    return this.studyTime.getTodayStudy(now);
+  }
+
+  getStudyStreak(now: number = Date.now()): Promise<number> {
+    return this.studyTime.getStudyStreak(now);
   }
 }

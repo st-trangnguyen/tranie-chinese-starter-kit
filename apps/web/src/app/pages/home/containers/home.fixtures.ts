@@ -109,12 +109,21 @@ export const seedGoal = async (dailyGoalMinutes: unknown): Promise<void> => {
   db.close();
 };
 
-/** Số giây đã học của ngày `date` (`YYYY-MM-DD`); `unknown` để ghi được cả dòng hỏng. */
+/**
+ * Số giây đã học của ngày `date` (`YYYY-MM-DD`); `unknown` để ghi được cả dòng hỏng.
+ * `goalMinutes` là mục tiêu đã chụp cho ngày đó; bỏ trống thì dòng không có field này
+ * (như dữ liệu trước S8.3).
+ */
 export const seedDailyStat = async (
   date: string,
   studySeconds: unknown,
+  goalMinutes?: unknown,
 ): Promise<void> => {
   const db = createDatabase();
-  await db.dailyStats.put({ date, studySeconds });
+  await db.dailyStats.put(
+    goalMinutes === undefined
+      ? { date, studySeconds }
+      : { date, studySeconds, goalMinutes },
+  );
   db.close();
 };

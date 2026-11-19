@@ -233,3 +233,46 @@ describe('dailyStatSchema', () => {
     expect(dailyStatSchema.safeParse(row).success).toBe(false);
   });
 });
+
+describe('dailyStatSchema — goalMinutes (S8.3)', () => {
+  const DATE = '2026-11-17';
+
+  it('S8.3-AC1 Ngày đã qua không có mục tiêu đọc được: giữ mục tiêu hợp lệ của ngày', () => {
+    expect(
+      dailyStatSchema.parse({
+        date: DATE,
+        studySeconds: 1200,
+        goalMinutes: 30,
+      }),
+    ).toEqual({ date: DATE, studySeconds: 1200, goalMinutes: 30 });
+  });
+
+  it.each<[string, unknown]>([
+    ['là chuỗi', 'abc'],
+    ['ngoài 15/30/60', 45],
+    ['là null', null],
+  ])(
+    'S8.3-AC1 Ngày đã qua không có mục tiêu đọc được: mục tiêu %s thành undefined, dòng vẫn dùng được',
+    (_label, goalMinutes) => {
+      const result = dailyStatSchema.safeParse({
+        date: DATE,
+        studySeconds: 1200,
+        goalMinutes,
+      });
+
+      // `toEqual` coi field `undefined` như không có: không có mục tiêu đọc được.
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({ date: DATE, studySeconds: 1200 });
+    },
+  );
+
+  it('S8.3-AC1 Ngày đã qua không có mục tiêu đọc được: thiếu mục tiêu thì undefined', () => {
+    const result = dailyStatSchema.safeParse({
+      date: DATE,
+      studySeconds: 1200,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({ date: DATE, studySeconds: 1200 });
+  });
+});

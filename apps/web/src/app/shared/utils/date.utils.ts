@@ -15,3 +15,9 @@ export function startOfNextLocalDay(ms: number): number {
     date.getDate() + 1,
   ).getTime();
 }
+
+/** Khóa ngày `YYYY-MM-DD` của ngày liền trước (giờ máy). */
+export function previousLocalDateKey(dateKey: string): string {
+  const [year = 0, month = 1, day = 1] = dateKey.split('-').map(Number);
+  return toLocalDateKey(new Date(year, month - 1, day - 1).getTime());
+}

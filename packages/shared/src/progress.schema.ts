@@ -67,10 +67,13 @@ export const localDateKeySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 /**
  * Số giây đã học trong một ngày (S8.1), lưu trong bảng `dailyStats`.
  * `studySeconds` là số thực để giữ phần lẻ dưới 1 giây giữa các lần ghi.
+ * `goalMinutes` là mục tiêu của chính ngày đó (S8.3); thiếu hoặc hỏng thành `undefined`
+ * mà không làm hỏng cả dòng (ngày ghi trước S8.3 không có mục tiêu).
  */
 export const dailyStatSchema = z.object({
   date: localDateKeySchema,
   studySeconds: z.number().finite().nonnegative(),
+  goalMinutes: dailyGoalMinutesSchema.optional().catch(undefined),
 });
 export type DailyStat = z.infer<typeof dailyStatSchema>;
 

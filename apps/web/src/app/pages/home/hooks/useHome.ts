@@ -10,6 +10,8 @@ export interface HomeState {
   nextLesson: NextLesson | null;
   /** null khi đang nạp. */
   todayStudy: TodayStudy | null;
+  /** Số ngày liên tiếp đạt mục tiêu; null khi đang nạp (design D5). */
+  streakDays: number | null;
   /** true khi nạp lộ trình lỗi (design D6). */
   hasNextLessonError: boolean;
 }
@@ -19,6 +21,7 @@ export const useHome = (): HomeState => {
   const progressService = useMemo(() => new ProgressService(), []);
   const [nextLesson, setNextLesson] = useState<NextLesson | null>(null);
   const [todayStudy, setTodayStudy] = useState<TodayStudy | null>(null);
+  const [streakDays, setStreakDays] = useState<number | null>(null);
   const [hasNextLessonError, setHasNextLessonError] = useState(false);
   const isPageVisible = usePageVisibility();
 
@@ -63,16 +66,21 @@ export const useHome = (): HomeState => {
     };
   }, [contentService, progressService]);
 
-  // Phút hôm nay tính khi mount và mỗi lần trang hiện lại (qua nửa đêm thì sang ngày mới);
-  // getTodayStudy không throw (design D4, D6).
+  // Phút hôm nay và streak tính khi mount và mỗi lần trang hiện lại (qua nửa đêm thì sang ngày mới),
+  // cùng một `now` để không lệch ngày; hai use case không throw (design D4, D5, D6).
   useEffect(() => {
     if (!isPageVisible) {
       return undefined;
     }
     let isActive = true;
-    void progressService.getTodayStudy(Date.now()).then((study) => {
+    const now = Date.now();
+    void Promise.all([
+      progressService.getTodayStudy(now),
+      progressService.getStudyStreak(now),
+    ]).then(([study, streak]) => {
       if (isActive) {
         setTodayStudy(study);
+        setStreakDays(streak);
       }
     });
     return () => {
@@ -80,5 +88,5 @@ export const useHome = (): HomeState => {
     };
   }, [progressService, isPageVisible]);
 
-  return { nextLesson, todayStudy, hasNextLessonError };
+  return { nextLesson, todayStudy, streakDays, hasNextLessonError };
 };

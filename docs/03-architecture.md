@@ -292,7 +292,7 @@ Luật câu viết của `content:check` (`lessonStrokeWriteIssues` trong `conte
 | `lessonProgress` | `lessonId` | `status`, `bestScore`, `cursor` (vị trí câu đang dở) |
 | `cards` | `"wordId:facet"` | Trạng thái FSRS, `due` (có index) |
 | `reviewLogs` | auto | `cardId`, `rating`, `reviewedAt`… |
-| `dailyStats` | `date` (`YYYY-MM-DD` theo giờ máy) | `studySeconds` (giây, số thực, giữ phần lẻ giữa các lần ghi; Trang chủ hiện phút làm tròn xuống). Giữ mọi ngày, không xoá. Dexie version 3. S8.3 dùng cho streak (sẽ thêm mục tiêu của ngày, `reviews`, `newCards`…); S8.5 phải sao lưu bảng này |
+| `dailyStats` | `date` (`YYYY-MM-DD` theo giờ máy) | `studySeconds` (giây, số thực, giữ phần lẻ giữa các lần ghi; Trang chủ hiện phút làm tròn xuống). `goalMinutes` (S8.3, optional): mục tiêu của chính ngày đó, chụp từ `settings.dailyGoalMinutes` mỗi lần ghi phút và khi đổi mục tiêu; ngày ghi trước S8.3 không có, thiếu hoặc hỏng thì đọc ra `undefined` mà không làm hỏng cả dòng. Giữ mọi ngày, không xoá. Dexie version 3 (thêm `goalMinutes` không đổi version vì không đổi khóa hay index). S8.3 dùng cho streak (sẽ thêm `reviews`, `newCards`…); S8.5 phải sao lưu bảng này |
 
 **Bản ghi âm không được lưu.**
 
@@ -320,7 +320,9 @@ interface ProgressStore {
   upsertCard(card): Promise<void>;
   logReview(log): Promise<void>;
   getDailyStat(date): Promise<DailyStat | undefined>;  // không có dòng hoặc dòng hỏng (Zod) → undefined; chờ các lần ghi đang chờ trong tab
-  addStudySeconds(date, seconds): Promise<void>;        // một transaction rw: đọc + cộng + ghi; dòng hỏng coi là 0 và bị thay
+  addStudySeconds(date, seconds): Promise<void>;        // một transaction rw: đọc + cộng + ghi; dòng hỏng coi là 0 và bị thay; chụp settings.dailyGoalMinutes vào goalMinutes
+  getAllDailyStats(): Promise<DailyStat[]>;              // mọi ngày; dòng hỏng (Zod) bị bỏ qua; chờ các lần ghi đang chờ trong tab
+  saveDailyGoal(date, goalMinutes): Promise<void>;       // một transaction rw đổi goalMinutes của ngày date, rồi ghi settings qua saveSettings; bước dòng ngày lỗi thì settings không đổi; ngày chưa có dòng hoặc dòng hỏng thì không tạo/không sửa
   getSettings(): Promise<Settings>;                     // gom mọi dòng rồi parseSettings: khóa hỏng → mặc định riêng khóa đó
   saveSettings(patch: Partial<Settings>): Promise<void>; // chỉ ghi các khóa có trong patch với giá trị khác undefined;
                                                          // khóa khác giữ nguyên; patch rỗng thì không ghi
@@ -334,6 +336,9 @@ type ExerciseProps<K extends ExerciseKind> = {
   isLocked: boolean; // true sau khi chấm: khóa đáp án
 };
 ```
+
+- `addStudySeconds` chỉ chụp giá trị mục tiêu đang chọn (`settings.dailyGoalMinutes`, đọc trong cùng transaction) vào `goalMinutes` của dòng: không rẽ nhánh theo mục tiêu, không so phút với mục tiêu, không quy tắc nghiệp vụ. Dùng mục tiêu thế nào (ngày đạt, streak) là việc của `ProgressService` Phần 2 (S8.3).
+- `addStudySeconds` và `saveDailyGoal` nối vào cùng một chuỗi ghi trong tab; `getDailyStat` và `getAllDailyStats` chờ chuỗi này nên đọc thấy cả lần ghi vừa gửi.
 
 Lesson runner, màn ôn tập và màn luyện tự do chỉ làm việc qua `exercise.registry.ts` (map từ `kind` sang component), không cần biết bên trong từng dạng bài. **Ngoại lệ: `stroke-write`** (S7.1).
 
