@@ -53,7 +53,24 @@ export const speedRadio = (page: Page, label: SpeedLabel): Locator =>
 export const pinyinSwitch = (page: Page): Locator =>
   pinyinGroup(page).getByRole('switch', { name: PINYIN_GROUP_LABEL });
 
-export const saveErrorAlert = (page: Page): Locator => page.getByRole('alert');
+/** Tên region của mục "Sao lưu tiến độ" (S8.5, design D7). */
+const BACKUP_REGION_NAME = 'Sao lưu tiến độ';
+
+/**
+ * Mọi `role="alert"` trên trang **ngoài** mục "Sao lưu tiến độ". Mục sao lưu luôn render sẵn một
+ * vùng alert (rỗng khi không có lỗi) cho trình đọc màn hình; vùng đó không phải thông báo lỗi lưu
+ * cài đặt của S8.2. Region được nhận theo tên truy cập (`aria-label` hoặc `aria-labelledby` trỏ tới
+ * phần tử có đúng chữ đó), không lọc alert theo chữ.
+ */
+export const alertsOutsideBackup = (page: Page): Locator =>
+  page.locator(
+    `xpath=//*[@role="alert"][not(ancestor::*[@aria-label="${BACKUP_REGION_NAME}"` +
+      ` or @aria-labelledby = //*[normalize-space(.)="${BACKUP_REGION_NAME}"]/@id])]`,
+  );
+
+/** Thông báo lỗi lưu cài đặt (S8.2): alert ngoài mục "Sao lưu tiến độ". */
+export const saveErrorAlert = (page: Page): Locator =>
+  alertsOutsideBackup(page);
 
 export const expectLearningPathScreen = async (page: Page): Promise<void> => {
   await expect(page).toHaveURL(LEARNING_PATH_URL_PATTERN);
