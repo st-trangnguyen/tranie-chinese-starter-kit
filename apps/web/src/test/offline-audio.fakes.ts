@@ -32,15 +32,21 @@ export const flushAsync = (): Promise<void> =>
     setTimeout(resolve, 0);
   });
 
+type PresetOutcome =
+  { kind: 'released' } | { kind: 'failed'; reason: AudioDownloadFailure };
+
 /**
  * `AudioCache` trong bộ nhớ. Mỗi `download(path)` treo cho tới khi test `release(path)` (file vào cache)
- * hoặc `fail(path, reason)` (ném `AudioDownloadError`). Thả trước khi service gọi cũng được.
+ * hoặc `fail(path, reason)` (ném `AudioDownloadError`). Nhiều lượt `download` cùng path đang treo thì
+ * chờ chung một kết quả. Thả trước khi service gọi cũng được: kết quả được giữ lại, lượt `download`
+ * kế tiếp của path đó trả ngay (file vào cache lúc đó) thay vì treo.
  */
 export class FakeAudioCache implements AudioCache {
   readonly downloadCalls: string[] = [];
   readonly removeCalls: string[][] = [];
   private readonly cached: Set<string>;
   private readonly pending = new Map<string, Deferred>();
+  private readonly presets = new Map<string, PresetOutcome>();
 
   constructor(initialCached: Iterable<string> = []) {
     this.cached = new Set(initialCached);
@@ -59,7 +65,22 @@ export class FakeAudioCache implements AudioCache {
 
   download(path: string): Promise<void> {
     this.downloadCalls.push(path);
-    return this.deferredFor(path).promise;
+    const preset = this.presets.get(path);
+    if (preset) {
+      this.presets.delete(path);
+      if (preset.kind === 'failed') {
+        return Promise.reject(new AudioDownloadError(preset.reason));
+      }
+      this.cached.add(path);
+      return Promise.resolve();
+    }
+    const existing = this.pending.get(path);
+    if (existing) {
+      return existing.promise;
+    }
+    const deferred = createDeferred();
+    this.pending.set(path, deferred);
+    return deferred.promise;
   }
 
   async remove(paths: readonly string[]): Promise<void> {
@@ -69,31 +90,27 @@ export class FakeAudioCache implements AudioCache {
 
   /** Cho file `path` tải xong rồi chờ service xử lý. */
   async release(path: string): Promise<void> {
-    const deferred = this.deferredFor(path);
-    this.pending.delete(path);
-    this.cached.add(path);
-    deferred.resolve();
+    const deferred = this.pending.get(path);
+    if (deferred) {
+      this.pending.delete(path);
+      this.cached.add(path);
+      deferred.resolve();
+    } else {
+      this.presets.set(path, { kind: 'released' });
+    }
     await flushAsync();
   }
 
   /** Cho file `path` tải lỗi rồi chờ service xử lý. */
   async fail(path: string, reason: AudioDownloadFailure): Promise<void> {
-    const deferred = this.deferredFor(path);
-    this.pending.delete(path);
-    deferred.reject(new AudioDownloadError(reason));
-    await flushAsync();
-  }
-
-  private deferredFor(path: string): Deferred {
-    const existing = this.pending.get(path);
-    if (existing) {
-      return existing;
+    const deferred = this.pending.get(path);
+    if (deferred) {
+      this.pending.delete(path);
+      deferred.reject(new AudioDownloadError(reason));
+    } else {
+      this.presets.set(path, { kind: 'failed', reason });
     }
-    const deferred = createDeferred();
-    // Tránh cảnh báo "unhandled rejection" khi `fail` trước lúc service gọi `download`.
-    deferred.promise.catch(() => undefined);
-    this.pending.set(path, deferred);
-    return deferred;
+    await flushAsync();
   }
 }
 

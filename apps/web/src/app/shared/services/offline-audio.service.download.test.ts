@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import type { AudioIndex } from '@csk/shared';
+
 import type {
   OfflineAudioSnapshot,
   OfflineAudioUnit,
@@ -14,16 +16,23 @@ import {
   AUDIO_B,
   AUDIO_C,
   AUDIO_D,
+  AUDIO_E,
   HSK_INDEX,
   HSK_STAGE_ID,
+  HSK_TWO_UNITS_INDEX,
+  HSK_UNIT_2_ID,
   HSK_UNIT_ID,
 } from '@test/offline-audio.fixtures';
 
 import { OfflineAudioService } from './offline-audio.service';
 
 const CHAO_HOI: OfflineAudioUnit = { id: HSK_UNIT_ID, title: 'Chào hỏi' };
+const GIA_DINH: OfflineAudioUnit = { id: HSK_UNIT_2_ID, title: 'Gia đình' };
 
-function setup(initialCached: readonly string[] = []): {
+function setup(
+  initialCached: readonly string[] = [],
+  index: AudioIndex = HSK_INDEX,
+): {
   service: OfflineAudioService;
   cache: FakeAudioCache;
   snapshots: OfflineAudioSnapshot[];
@@ -31,7 +40,7 @@ function setup(initialCached: readonly string[] = []): {
   const cache = new FakeAudioCache(initialCached);
   const service = new OfflineAudioService(
     cache,
-    fakeContentSourceWithIndex(HSK_INDEX),
+    fakeContentSourceWithIndex(index),
   );
   const snapshots: OfflineAudioSnapshot[] = [];
   service.subscribe(() => {
@@ -133,5 +142,72 @@ describe('OfflineAudioService.startDownload', () => {
     expect(
       service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, service.getSnapshot()),
     ).toEqual({ status: 'downloaded', bytes: 2_516_582, canRemove: true });
+  });
+
+  it('S8.4-AC1 Tải hai chủ đề cùng lúc: mỗi chủ đề tiến độ riêng, file dùng chung chỉ tải một lần, bấm lại khi đang tải thì không tải lại', async () => {
+    const { service, cache } = setup([], HSK_TWO_UNITS_INDEX);
+    await service.refresh();
+    const topicOf = (unitId: string) =>
+      service.deriveTopic(HSK_STAGE_ID, unitId, service.getSnapshot());
+
+    const downloadA = service.startDownload(CHAO_HOI, true);
+    await flushAsync();
+    await cache.release(AUDIO_A);
+    const downloadB = service.startDownload(GIA_DINH, true);
+    await flushAsync();
+
+    expect(topicOf(HSK_UNIT_ID)).toEqual({
+      status: 'downloading',
+      percent: 25,
+    });
+    expect(topicOf(HSK_UNIT_2_ID)).toEqual({
+      status: 'downloading',
+      percent: 0,
+    });
+
+    let isSecondClickDone = false;
+    const secondClick = service.startDownload(CHAO_HOI, true).then(() => {
+      isSecondClickDone = true;
+    });
+    await flushAsync();
+
+    expect(isSecondClickDone).toBe(true);
+    expect(
+      service
+        .getSnapshot()
+        .announcements.map(({ kind, unitTitle }) => ({ kind, unitTitle })),
+    ).toEqual([
+      { kind: 'download-started', unitTitle: 'Chào hỏi' },
+      { kind: 'download-started', unitTitle: 'Gia đình' },
+    ]);
+
+    for (const path of [AUDIO_B, AUDIO_C, AUDIO_D, AUDIO_E]) {
+      await cache.release(path);
+    }
+    await Promise.all([downloadA, downloadB, secondClick]);
+
+    expect([...cache.downloadCalls].sort()).toEqual(
+      [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D, AUDIO_E].sort(),
+    );
+    expect(topicOf(HSK_UNIT_ID)).toEqual({
+      status: 'downloaded',
+      bytes: 2_516_582,
+      canRemove: true,
+    });
+    expect(topicOf(HSK_UNIT_2_ID)).toEqual({
+      status: 'downloaded',
+      bytes: 1_016_582,
+      canRemove: true,
+    });
+    expect(
+      service
+        .getSnapshot()
+        .announcements.map(({ kind, unitTitle }) => ({ kind, unitTitle })),
+    ).toEqual([
+      { kind: 'download-started', unitTitle: 'Chào hỏi' },
+      { kind: 'download-started', unitTitle: 'Gia đình' },
+      { kind: 'download-finished', unitTitle: 'Chào hỏi' },
+      { kind: 'download-finished', unitTitle: 'Gia đình' },
+    ]);
   });
 });

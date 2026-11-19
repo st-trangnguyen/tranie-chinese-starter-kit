@@ -9,6 +9,7 @@ export const AUDIO_A = 'audio/0000000000000001.mp3';
 export const AUDIO_B = 'audio/0000000000000002.mp3';
 export const AUDIO_C = 'audio/0000000000000003.mp3';
 export const AUDIO_D = 'audio/0000000000000004.mp3';
+export const AUDIO_E = 'audio/0000000000000005.mp3';
 export const AUDIO_INTRO = 'audio/00000000000000ff.mp3';
 
 // Tổng 4 audio của chủ đề HSK = 2 516 582 byte ("2,4 MB").
@@ -25,6 +26,22 @@ export const HSK_INDEX: AudioIndex = {
     [AUDIO_INTRO]: 50_000,
   },
   precached: [AUDIO_INTRO],
+};
+
+/** Chủ đề HSK thứ hai, dùng chung `AUDIO_C` với chủ đề "Chào hỏi". */
+export const HSK_UNIT_2_ID = 'hsk1-family';
+
+// Chủ đề thứ hai: `AUDIO_C` (dùng chung) + `AUDIO_E` = 1 016 582 byte.
+export const HSK_TWO_UNITS_INDEX: AudioIndex = {
+  units: {
+    ...HSK_INDEX.units,
+    [HSK_UNIT_2_ID]: [AUDIO_C, AUDIO_E],
+  },
+  bytes: {
+    ...HSK_INDEX.bytes,
+    [AUDIO_E]: 400_000,
+  },
+  precached: HSK_INDEX.precached,
 };
 
 export function makeSnapshot(
