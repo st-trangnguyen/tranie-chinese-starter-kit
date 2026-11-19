@@ -169,8 +169,8 @@ container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fake
 
 - [x] 8.1 RED: S8.4-AC1 "Chủ đề chưa tải có nút tải kèm dung lượng" (container) — dưới `<h3>` "Chào hỏi" có nút hiện chữ "Tải audio (2,4 MB)", không có "Đang tải", "Đã tải audio", "Xóa audio". Skeleton trong commit test: `shared/contexts/useOfflineAudioService.ts`, `useOfflineAudio` trả map rỗng; kiểm: fail vì không có nút
 - [x] 8.2 GREEN: `useOfflineAudio` (snapshot, `refresh` lúc mount, `deriveTopics`), `OfflineAudioBlock` (nhánh chưa tải, chữ dung lượng = `formatAudioSize(topic.bytes)` gọi trong component), `LearningPathStage` đổi sang `renderUnitActions`, `LearningPathContainer` cung cấp khối + link vượt cấp, i18n `offlineAudio.*` (D11); kiểm: test 8.1 pass, `LearningPathContainer.test.tsx` và `.homeLink.test.tsx` cũ pass
-- [ ] 8.3 RED: S8.4-AC1 "Khối audio nằm trên link kiểm tra vượt cấp" (container) — nhóm khóa có bài `test`: thứ tự DOM `<h3>` → nút tải → link "Kiểm tra vượt cấp" (`compareDocumentPosition`); Tab tới nút tải trước link; kiểm: chạy, nếu pass ngay thì tạm render khối sau link để thấy fail rồi trả lại
-- [ ] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass
+- [x] 8.3 RED: S8.4-AC1 "Khối audio nằm trên link kiểm tra vượt cấp" (container) — nhóm khóa có bài `test`: thứ tự DOM `<h3>` → nút tải → link "Kiểm tra vượt cấp" (`compareDocumentPosition`); Tab tới nút tải trước link; kiểm: chạy, nếu pass ngay thì tạm render khối sau link để thấy fail rồi trả lại
+- [x] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass
 - [ ] 8.5 RED: S8.4-AC1 "Chủ đề Nhập môn có sẵn offline" (container) — nhóm Nhập môn có audio hiện "Audio có sẵn offline", không nút tải/xóa; kiểm: fail
 - [ ] 8.6 GREEN: nhánh `available-offline` trong `OfflineAudioBlock`; kiểm: test 8.5 pass
 - [ ] 8.7 RED: S8.4-AC1 "Chủ đề không có audio" (container) — nhóm HSK `[]` không có khối (không "Tải audio", "Đã tải audio", "Xóa audio", "Audio có sẵn offline"); kiểm: chạy, nếu pass ngay thì tạm render khối rỗng có chữ để thấy fail rồi trả lại
