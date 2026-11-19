@@ -12,6 +12,8 @@ export const BACKUP_SECTION_TITLE = 'Sao lưu tiến độ';
 export const EXPORT_LABEL = 'Xuất tiến độ';
 export const EXPORTED_MESSAGE = 'Đã xuất tiến độ.';
 export const CORRUPTED_MESSAGE = 'File tiến độ bị hỏng, không nhập được.';
+export const IMPORTED_MESSAGE = 'Đã nhập tiến độ.';
+export const OVERWRITE_LABEL = 'Ghi đè';
 
 /** File mẫu nằm ở `e2e/E8/fixtures/progress-backup/` (design D10). */
 export type BackupFixture =
@@ -47,6 +49,12 @@ export const backupAlert = (page: Page): Locator =>
 
 export const importConfirmDialog = (page: Page): Locator =>
   page.getByRole('dialog');
+
+export const overwriteButton = (page: Page): Locator =>
+  importConfirmDialog(page).getByRole('button', {
+    name: OVERWRITE_LABEL,
+    exact: true,
+  });
 
 /**
  * Chọn file `path` cho "Nhập tiến độ": gắn file thẳng vào ô chọn file (ẩn) của mục, giống người
