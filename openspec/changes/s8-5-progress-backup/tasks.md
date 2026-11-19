@@ -19,7 +19,7 @@ Vitest: `pnpm --filter @csk/web test:run <mẫu>` (`pnpm --filter @csk/shared te
 Test: `packages/shared/src/progress-backup.schema.test.ts` (schema), `apps/web/src/app/shared/services/backup.service.test.ts`
 (Phần 2, pure, không store).
 
-- [ ] 2.1 RED: S8.5-AC2 "File không phải JSON bị từ chối" (Phần 2) — `checkBackupText` với `'abc'`, `'{'`, chuỗi byte PNG đọc thành text → `{ status: 'rejected', reason: 'not-backup' }`. Skeleton trong commit test: `backup.service.ts` (class rỗng 3 banner, `checkBackupText` trả `{ status: 'valid' … }` giả), `shared/models/progress-backup.model.ts` (type `BackupCheck`, `BackupRejectReason`, `ImportPreview`, `ImportInspection`); kiểm: fail ở assertion
+- [x] 2.1 RED: S8.5-AC2 "File không phải JSON bị từ chối" (Phần 2) — `checkBackupText` với `'abc'`, `'{'`, chuỗi byte PNG đọc thành text → `{ status: 'rejected', reason: 'not-backup' }`. Skeleton trong commit test: `backup.service.ts` (class rỗng 3 banner, `checkBackupText` trả `{ status: 'valid' … }` giả), `shared/models/progress-backup.model.ts` (type `BackupCheck`, `BackupRejectReason`, `ImportPreview`, `ImportInspection`); kiểm: fail ở assertion
 - [ ] 2.2 GREEN: bước 1 bảng D4 (`JSON.parse` trong `try`, lỗi → `not-backup`); kiểm: test 2.1 pass
 - [ ] 2.3 RED: S8.5-AC2 "File rỗng bị từ chối" (Phần 2) — `''`, `'   \n'` → `not-backup`; kiểm: chạy, nếu pass ngay nhờ 2.2 (`JSON.parse('')` throw) thì tạm cho chuỗi rỗng trả `valid` để thấy fail rồi trả lại
 - [ ] 2.4 GREEN: kiểm `text.trim() === ''` trước `JSON.parse`; kiểm: test 2.3 pass
