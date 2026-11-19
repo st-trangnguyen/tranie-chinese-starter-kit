@@ -1,4 +1,7 @@
-import { progressBackupEnvelopeSchema } from '@csk/shared';
+import {
+  PROGRESS_BACKUP_FORMAT_VERSION,
+  progressBackupEnvelopeSchema,
+} from '@csk/shared';
 
 import type { BackupCheck } from '@shared/models/progress-backup.model';
 
@@ -18,8 +21,12 @@ export class BackupService {
     } catch {
       return { status: 'rejected', reason: 'not-backup' };
     }
-    if (!progressBackupEnvelopeSchema.safeParse(parsed).success) {
+    const envelope = progressBackupEnvelopeSchema.safeParse(parsed);
+    if (!envelope.success) {
       return { status: 'rejected', reason: 'not-backup' };
+    }
+    if (envelope.data.formatVersion > PROGRESS_BACKUP_FORMAT_VERSION) {
+      return { status: 'rejected', reason: 'newer-version' };
     }
     return { status: 'valid', file: parsed };
   }
