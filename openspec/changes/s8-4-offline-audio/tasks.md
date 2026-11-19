@@ -167,7 +167,7 @@ Test: `apps/web/src/app/pages/learning-path/containers/LearningPathContainer.off
 container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fakeCache, fakeSource)}>`, `fetch` giả nội dung như
 `LearningPathContainer.test.tsx` (lộ trình có nhóm Nhập môn + nhóm HSK "Chào hỏi" 4 file 2 516 582 byte).
 
-- [ ] 8.1 RED: S8.4-AC1 "Chủ đề chưa tải có nút tải kèm dung lượng" (container) — dưới `<h3>` "Chào hỏi" có nút hiện chữ "Tải audio (2,4 MB)", không có "Đang tải", "Đã tải audio", "Xóa audio". Skeleton trong commit test: `shared/contexts/useOfflineAudioService.ts`, `useOfflineAudio` trả map rỗng; kiểm: fail vì không có nút
+- [x] 8.1 RED: S8.4-AC1 "Chủ đề chưa tải có nút tải kèm dung lượng" (container) — dưới `<h3>` "Chào hỏi" có nút hiện chữ "Tải audio (2,4 MB)", không có "Đang tải", "Đã tải audio", "Xóa audio". Skeleton trong commit test: `shared/contexts/useOfflineAudioService.ts`, `useOfflineAudio` trả map rỗng; kiểm: fail vì không có nút
 - [ ] 8.2 GREEN: `useOfflineAudio` (snapshot, `refresh` lúc mount, `deriveTopics`), `OfflineAudioBlock` (nhánh chưa tải, chữ dung lượng = `formatAudioSize(topic.bytes)` gọi trong component), `LearningPathStage` đổi sang `renderUnitActions`, `LearningPathContainer` cung cấp khối + link vượt cấp, i18n `offlineAudio.*` (D11); kiểm: test 8.1 pass, `LearningPathContainer.test.tsx` và `.homeLink.test.tsx` cũ pass
 - [ ] 8.3 RED: S8.4-AC1 "Khối audio nằm trên link kiểm tra vượt cấp" (container) — nhóm khóa có bài `test`: thứ tự DOM `<h3>` → nút tải → link "Kiểm tra vượt cấp" (`compareDocumentPosition`); Tab tới nút tải trước link; kiểm: chạy, nếu pass ngay thì tạm render khối sau link để thấy fail rồi trả lại
 - [ ] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass
