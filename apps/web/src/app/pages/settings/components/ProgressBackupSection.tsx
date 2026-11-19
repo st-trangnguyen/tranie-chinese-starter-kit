@@ -11,6 +11,11 @@ interface ProgressBackupSectionProps {
 export function ProgressBackupSection({ backup }: ProgressBackupSectionProps) {
   const { t } = useTranslation('settings');
   const titleId = useId();
+  const { message } = backup;
+  const successText =
+    message?.tone === 'success' ? t(`backup.messages.${message.key}`) : '';
+  const errorText =
+    message?.tone === 'error' ? t(`backup.messages.${message.key}`) : '';
 
   return (
     <section
@@ -32,6 +37,12 @@ export function ProgressBackupSection({ backup }: ProgressBackupSectionProps) {
           {t('backup.import')}
         </button>
       </div>
+      <p role="status" className="backup-message">
+        {successText}
+      </p>
+      <p role="alert" className="backup-message has-error">
+        {errorText}
+      </p>
     </section>
   );
 }

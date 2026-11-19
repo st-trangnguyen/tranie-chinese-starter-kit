@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type {
+  BackupMessage,
   ProgressBackupPhase,
   ProgressBackupView,
 } from '@shared/models/progress-backup.model';
@@ -15,6 +16,7 @@ const ignore = (): void => undefined;
 export const useProgressBackup = (): ProgressBackupView => {
   const service = useMemo(() => new BackupService(), []);
   const [phase, setPhase] = useState<ProgressBackupPhase>('idle');
+  const [message, setMessage] = useState<BackupMessage | null>(null);
   // Đọc đồng bộ để bỏ qua lần bấm lặp trước khi state kịp render lại (design D6).
   const phaseRef = useRef<ProgressBackupPhase>('idle');
   const isActiveRef = useRef(true);
@@ -33,21 +35,32 @@ export const useProgressBackup = (): ProgressBackupView => {
     }
   }, []);
 
+  const finish = useCallback(
+    (next: BackupMessage) => {
+      changePhase('idle');
+      if (isActiveRef.current) {
+        setMessage(next);
+      }
+    },
+    [changePhase],
+  );
+
   const exportProgress = useCallback(() => {
     if (phaseRef.current !== 'idle') {
       return;
     }
+    setMessage(null);
     changePhase('exporting');
     void service.exportProgress().then(
-      () => changePhase('idle'),
-      () => changePhase('idle'),
+      () => finish({ tone: 'success', key: 'exported' }),
+      () => finish({ tone: 'error', key: 'exportFailed' }),
     );
-  }, [changePhase, service]);
+  }, [changePhase, finish, service]);
 
   return {
     phase,
     preview: null,
-    message: null,
+    message,
     exportProgress,
     selectFile: ignore,
     confirmImport: ignore,

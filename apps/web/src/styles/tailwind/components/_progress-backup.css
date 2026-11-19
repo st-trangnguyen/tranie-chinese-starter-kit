@@ -8,4 +8,12 @@
   .backup-section-title {
     @apply text-title-sm text-fg;
   }
+
+  .backup-message {
+    @apply text-body-sm text-fg;
+  }
+
+  .backup-message.has-error {
+    @apply text-danger-text;
+  }
 }

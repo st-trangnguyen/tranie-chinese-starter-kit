@@ -22,6 +22,10 @@
   "backup": {
     "title": "Sao lưu tiến độ",
     "export": "Xuất tiến độ",
-    "import": "Nhập tiến độ"
+    "import": "Nhập tiến độ",
+    "messages": {
+      "exported": "Đã xuất tiến độ.",
+      "exportFailed": "Không xuất được tiến độ. Hãy thử lại."
+    }
   }
 }
