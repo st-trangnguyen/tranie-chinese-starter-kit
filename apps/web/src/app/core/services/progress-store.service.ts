@@ -140,13 +140,13 @@ export class DexieProgressStore implements ProgressStore {
     );
   }
 
-  // Skeleton S8.5 (tasks 3.1): chưa có hành vi, GREEN ở tasks 3.2/3.6.
+  // Skeleton S8.5 (tasks 3.5): chưa có hành vi, GREEN ở tasks 3.6.
   async exportAll(): Promise<ProgressSnapshot> {
     return { settings: DEFAULT_SETTINGS, lessonProgress: [], dailyStats: [] };
   }
 
-  async importAll(snapshot: ProgressSnapshot): Promise<void> {
-    void snapshot;
+  importAll(snapshot: ProgressSnapshot): Promise<void> {
+    return this.enqueueStudyTimeWrite(() => this.writeSnapshot(snapshot));
   }
 
   addStudySeconds(date: string, seconds: number): Promise<void> {
@@ -161,6 +161,29 @@ export class DexieProgressStore implements ProgressStore {
     // Lỗi vẫn reject cho người gọi qua `write`; bản trong chuỗi chỉ bỏ lỗi để lần sau chạy tiếp.
     this.studyTimeWrites = write.catch(() => undefined);
     return write;
+  }
+
+  private async writeSnapshot(snapshot: ProgressSnapshot): Promise<void> {
+    // Xóa + ghi cả ba bảng trong một transaction: bước nào lỗi thì Dexie abort,
+    // dữ liệu cũ còn nguyên.
+    await this.db.transaction(
+      'rw',
+      this.db.settings,
+      this.db.lessonProgress,
+      this.db.dailyStats,
+      async () => {
+        await this.db.settings.clear();
+        await this.db.lessonProgress.clear();
+        await this.db.dailyStats.clear();
+        const settingsRows = Object.entries(snapshot.settings).map(
+          ([key, value]) => ({ key, value }),
+        );
+        await this.db.settings.bulkPut(settingsRows);
+        await this.db.lessonProgress.bulkPut(snapshot.lessonProgress);
+        // Giữ nguyên `goalMinutes` của từng ngày như trong snapshot.
+        await this.db.dailyStats.bulkPut(snapshot.dailyStats);
+      },
+    );
   }
 
   private async writeDailyGoal(
