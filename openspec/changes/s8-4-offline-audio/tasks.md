@@ -183,7 +183,7 @@ container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fake
 - [x] 8.14 GREEN: nhánh `downloading`, `download` của hook gọi `startDownload(unit, isOnline)`; kiểm: test 8.13 pass
 - [x] 8.15 RED: S8.4-AC1 "Chủ đề đang khóa vẫn tải được" (container) — nhóm mọi bài "Đã khóa", bấm tải, thả hết → "Đã tải audio (…)", bài vẫn "Đã khóa"; kiểm: chạy, nếu pass ngay thì tạm ẩn khối ở nhóm khóa để thấy fail rồi trả lại
 - [x] 8.16 GREEN: sửa đến khi pass; kiểm: test 8.15 pass
-- [ ] 8.17 RED: S8.4-AC1 "Bấm tải khi không có mạng" (container) — `navigator.onLine` false (spy getter + sự kiện `offline`), bấm → trong khối "Cần có mạng để tải audio.", vẫn nút "Tải audio (2,4 MB)"; kiểm: fail
+- [x] 8.17 RED: S8.4-AC1 "Bấm tải khi không có mạng" (container) — `navigator.onLine` false (spy getter + sự kiện `offline`), bấm → trong khối "Cần có mạng để tải audio.", vẫn nút "Tải audio (2,4 MB)"; kiểm: fail
 - [ ] 8.18 GREEN: hiện `message` trong khối; kiểm: test 8.17 pass
 - [ ] 8.19 RED: S8.4-AC1 "Mất mạng khi đang tải" (container) — xong 2/4, file 3 lỗi mạng → khối có "Tải chưa xong. Hãy kiểm tra mạng rồi thử lại." + nút tải; kiểm: chạy, nếu pass ngay thì tạm bỏ key `download-incomplete` để thấy fail rồi trả lại
 - [ ] 8.20 GREEN: sửa đến khi pass; kiểm: test 8.19 pass

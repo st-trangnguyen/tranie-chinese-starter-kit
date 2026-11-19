@@ -1,4 +1,4 @@
-import { screen, within } from '@test/render';
+import { act, screen, within } from '@test/render';
 import {
   mockPathContent,
   renderPathWithOfflineAudio,
@@ -87,6 +87,34 @@ describe('LearningPathContainer — audio offline: tải, xóa, thông báo', ()
     lessonsAfter.forEach((lesson) =>
       expect(lesson).toHaveTextContent('Đã khóa'),
     );
+    unmount();
+  });
+  it('S8.4-AC1 Bấm tải khi không có mạng: should show "Cần có mạng để tải audio." under "Chào hỏi" and keep the download button without downloading', async () => {
+    const { user, cache, unmount } = renderPathWithOfflineAudio();
+
+    const unit = await findUnitSection('Chào hỏi');
+    const label = await within(unit).findByText('Tải audio (2,4 MB)');
+    const downloadButton = label.closest('button');
+    if (!downloadButton) {
+      throw new Error('Không tìm thấy nút "Tải audio (2,4 MB)"');
+    }
+
+    // Mất mạng: getter trả false và phát sự kiện `offline` để màn hình biết.
+    // Spy được khôi phục bởi `vi.restoreAllMocks()` trong afterEach.
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    act(() => {
+      window.dispatchEvent(new Event('offline'));
+    });
+    expect(navigator.onLine).toBe(false);
+
+    await user.click(downloadButton);
+
+    expect(
+      await within(unit).findByText('Cần có mạng để tải audio.'),
+    ).toBeInTheDocument();
+    expect(within(unit).getByText('Tải audio (2,4 MB)')).toBeInTheDocument();
+    expect(within(unit).queryByText(/Đang tải/)).not.toBeInTheDocument();
+    expect(cache.downloadCalls).toEqual([]);
     unmount();
   });
 });
