@@ -6,6 +6,7 @@ import { ROUTE_PATHS } from '@core/constants/app.constants';
 
 import { LearningPathLessonItem } from '../components/LearningPathLessonItem';
 import { LearningPathStage } from '../components/LearningPathStage';
+import { OfflineAudioAnnouncer } from '../components/OfflineAudioAnnouncer';
 import { OfflineAudioBlock } from '../components/OfflineAudioBlock';
 import { useLearningPath } from '../hooks/useLearningPath';
 import { useOfflineAudio } from '../hooks/useOfflineAudio';
@@ -15,7 +16,9 @@ const LearningPathContainer = () => {
   const { t } = useTranslation('learning-path');
   const { pathMap, statuses, placementTestUnitIds, hasError } =
     useLearningPath();
-  const { topics, download, remove } = useOfflineAudio(pathMap?.stages);
+  const { topics, announcements, download, remove } = useOfflineAudio(
+    pathMap?.stages,
+  );
 
   const renderLesson = (lessonId: string) => (
     <LearningPathLessonItem
@@ -74,6 +77,7 @@ const LearningPathContainer = () => {
           renderUnitActions={renderUnitActions}
         />
       ))}
+      <OfflineAudioAnnouncer announcements={announcements} />
     </main>
   );
 };
