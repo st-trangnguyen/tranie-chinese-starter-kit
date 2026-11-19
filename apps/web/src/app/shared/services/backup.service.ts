@@ -8,6 +8,7 @@ import {
   type ProgressSnapshot,
 } from '@csk/shared';
 
+import { MAX_BACKUP_FILE_BYTES } from '@core/constants/backup.constants';
 import {
   contentSource,
   type ContentSource,
@@ -78,10 +79,9 @@ export class BackupService {
     return JSON.stringify(file, null, 2);
   }
 
-  // TODO(S8.5 task 6.16): skeleton RED, chưa có hành vi.
+  /** Rule: file lớn hơn MAX_BACKUP_FILE_BYTES (20 × 10⁶ byte) không được đọc khi nhập. */
   public isBackupFileTooLarge(bytes: number): boolean {
-    void bytes;
-    return false;
+    return bytes > MAX_BACKUP_FILE_BYTES;
   }
 
   /** Rule: chỉ file JSON do app xuất, đúng định dạng và phiên bản, mới được nhập. */
@@ -142,7 +142,16 @@ export class BackupService {
   public async inspectImportFile(
     file: BackupFileSource,
   ): Promise<ImportInspection> {
-    const check = this.checkBackupText(await file.text());
+    if (this.isBackupFileTooLarge(file.size)) {
+      return { status: 'rejected', reason: 'not-backup' };
+    }
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      return { status: 'rejected', reason: 'not-backup' };
+    }
+    const check = this.checkBackupText(text);
     if (check.status === 'rejected') {
       return check;
     }
