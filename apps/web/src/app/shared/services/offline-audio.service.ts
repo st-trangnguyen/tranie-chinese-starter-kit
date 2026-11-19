@@ -289,13 +289,26 @@ export class OfflineAudioService {
     unit: OfflineAudioUnit,
     isOnline: boolean,
   ): Promise<void> {
-    void isOnline;
     const started = this.readSnapshot();
     if (started.downloadingUnitIds.has(unit.id)) {
       return;
     }
     const messages = new Map(started.messages);
     messages.delete(unit.id);
+    if (!isOnline) {
+      this.writeSnapshot({
+        ...started,
+        messages: messages.set(unit.id, {
+          kind: 'needs-network',
+          shownWith: 'not-downloaded',
+        }),
+        announcements: this.appendAnnouncement(started.announcements, {
+          kind: 'needs-network',
+          unitTitle: unit.title,
+        }),
+      });
+      return;
+    }
     this.writeSnapshot({
       ...started,
       messages,

@@ -122,7 +122,7 @@ Test: `apps/web/src/app/shared/services/offline-audio.service.download.test.ts`,
 - [x] 6.7 RED: S8.4-AC1 "Tải hai chủ đề cùng lúc" (Phần 3) — A rồi B đang tải song song, mỗi chủ đề `percent` riêng; file dùng chung chỉ `download` một lần (`inFlight`); cả hai xong `downloaded`; gọi `startDownload(A, true)` lần hai khi A đang tải → return ngay: mỗi file của A vẫn chỉ `download` một lần, `announcements` chỉ có một câu `download-started` của A; kiểm: fail (gọi hai lần)
 - [x] 6.8 GREEN: `inFlight` trong `downloadFile`, bỏ qua file đã có, bước 1 (chủ đề đã đang tải thì return sớm); kiểm: test 6.7 pass
 - [x] 6.9 RED: S8.4-AC1 "Bấm tải khi không có mạng" (Phần 3) — `startDownload(unit, false)` → không gọi `download`, thông báo `needs-network`, câu đọc `needs-network`, chủ đề vẫn `not-downloaded`; kiểm: fail
-- [ ] 6.10 GREEN: bước 3; kiểm: test 6.9 pass
+- [x] 6.10 GREEN: bước 3; kiểm: test 6.9 pass
 - [ ] 6.11 RED: S8.4-AC1 "Mất mạng khi đang tải" (Phần 3) — 4 file, xong 2, file 3 `fail('network')` → hết đang tải, thông báo + câu đọc `download-incomplete`, 2 file vẫn trong cache, chủ đề `not-downloaded`; `startDownload` không reject; kiểm: fail
 - [ ] 6.12 GREEN: bước 7 (nhánh `network`); kiểm: test 6.11 pass
 - [ ] 6.13 RED: S8.4-AC1 "Không đủ bộ nhớ" (Phần 3) — `fail('storage-full')` → thông báo + câu đọc `storage-full`; kiểm: fail
