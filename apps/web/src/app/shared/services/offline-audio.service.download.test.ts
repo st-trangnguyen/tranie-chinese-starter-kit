@@ -1,15 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import type { AudioIndex } from '@csk/shared';
-
-import type {
-  OfflineAudioSnapshot,
-  OfflineAudioUnit,
-} from '@shared/models/offline-audio.model';
+import type { OfflineAudioUnit } from '@shared/models/offline-audio.model';
 import {
-  FakeAudioCache,
-  fakeContentSourceWithIndex,
   flushAsync,
+  setupOfflineAudioService,
 } from '@test/offline-audio.fakes';
 import {
   AUDIO_A,
@@ -17,37 +11,16 @@ import {
   AUDIO_C,
   AUDIO_D,
   AUDIO_E,
-  HSK_INDEX,
   HSK_STAGE_ID,
   HSK_TWO_UNITS_INDEX,
   HSK_UNIT_2_ID,
   HSK_UNIT_ID,
 } from '@test/offline-audio.fixtures';
 
-import { OfflineAudioService } from './offline-audio.service';
-
 const CHAO_HOI: OfflineAudioUnit = { id: HSK_UNIT_ID, title: 'Chào hỏi' };
 const GIA_DINH: OfflineAudioUnit = { id: HSK_UNIT_2_ID, title: 'Gia đình' };
 
-function setup(
-  initialCached: readonly string[] = [],
-  index: AudioIndex = HSK_INDEX,
-): {
-  service: OfflineAudioService;
-  cache: FakeAudioCache;
-  snapshots: OfflineAudioSnapshot[];
-} {
-  const cache = new FakeAudioCache(initialCached);
-  const service = new OfflineAudioService(
-    cache,
-    fakeContentSourceWithIndex(index),
-  );
-  const snapshots: OfflineAudioSnapshot[] = [];
-  service.subscribe(() => {
-    snapshots.push(service.getSnapshot());
-  });
-  return { service, cache, snapshots };
-}
+const setup = setupOfflineAudioService;
 
 describe('OfflineAudioService.startDownload', () => {
   it('S8.4-AC1 Bấm tải thì audio của chủ đề có trên máy: tải đủ 4 file thì chủ đề đã tải và đọc câu bắt đầu, xong', async () => {

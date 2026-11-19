@@ -9,6 +9,10 @@ import {
   type AudioDownloadFailure,
 } from '@core/services/audio-cache.service';
 import type { ContentSource } from '@core/services/content-source.service';
+import type { OfflineAudioSnapshot } from '@shared/models/offline-audio.model';
+import { OfflineAudioService } from '@shared/services/offline-audio.service';
+
+import { HSK_INDEX } from './offline-audio.fixtures';
 
 interface Deferred {
   promise: Promise<void>;
@@ -130,4 +134,27 @@ export function fakeContentSourceWithIndex(index: AudioIndex): ContentSource {
     getStrokeData: () => notUsed('getStrokeData'),
     getAudioIndex: () => Promise.resolve(index),
   };
+}
+
+/**
+ * Service thật trên adapter giả. `snapshots` ghi lại mọi snapshot service báo qua `subscribe`.
+ */
+export function setupOfflineAudioService(
+  initialCached: readonly string[] = [],
+  index: AudioIndex = HSK_INDEX,
+): {
+  service: OfflineAudioService;
+  cache: FakeAudioCache;
+  snapshots: OfflineAudioSnapshot[];
+} {
+  const cache = new FakeAudioCache(initialCached);
+  const service = new OfflineAudioService(
+    cache,
+    fakeContentSourceWithIndex(index),
+  );
+  const snapshots: OfflineAudioSnapshot[] = [];
+  service.subscribe(() => {
+    snapshots.push(service.getSnapshot());
+  });
+  return { service, cache, snapshots };
 }
