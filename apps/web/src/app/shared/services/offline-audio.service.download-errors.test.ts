@@ -53,4 +53,54 @@ describe('OfflineAudioService.startDownload khi không tải được', () => {
     }
     await download;
   });
+
+  it('S8.4-AC1 Mất mạng khi đang tải: xong 2/4 file thì lỗi mạng, hết đang tải, thông báo và câu đọc tải chưa xong, 2 file vẫn trên máy, chủ đề chưa tải', async () => {
+    const { service, cache } = setupOfflineAudioService();
+    await service.refresh();
+
+    let settled: 'pending' | 'resolved' | 'rejected' = 'pending';
+    const download = service.startDownload(CHAO_HOI, true).then(
+      () => {
+        settled = 'resolved';
+      },
+      () => {
+        settled = 'rejected';
+      },
+    );
+    await flushAsync();
+    await cache.release(AUDIO_A);
+    await cache.release(AUDIO_B);
+    await cache.fail(AUDIO_C, 'network');
+    await flushAsync();
+
+    expect(settled).toBe('resolved');
+
+    const snapshot = service.getSnapshot();
+    expect(snapshot.downloadingUnitIds.has(HSK_UNIT_ID)).toBe(false);
+    expect(service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, snapshot)).toEqual({
+      status: 'not-downloaded',
+      bytes: 2_516_582,
+    });
+    expect(snapshot.messages.get(HSK_UNIT_ID)).toEqual({
+      kind: 'download-incomplete',
+      shownWith: 'not-downloaded',
+    });
+    expect(
+      snapshot.announcements.map(({ kind, unitTitle }) => ({
+        kind,
+        unitTitle,
+      })),
+    ).toEqual([
+      { kind: 'download-started', unitTitle: 'Chào hỏi' },
+      { kind: 'download-incomplete', unitTitle: 'Chào hỏi' },
+    ]);
+    expect(cache.cachedPaths).toEqual(new Set([AUDIO_A, AUDIO_B]));
+    expect(snapshot.cachedPaths.has(AUDIO_A)).toBe(true);
+    expect(snapshot.cachedPaths.has(AUDIO_B)).toBe(true);
+    expect(cache.downloadCalls).toEqual([AUDIO_A, AUDIO_B, AUDIO_C]);
+
+    // Nếu service vẫn tải tiếp (hành vi sai) thì thả file còn lại để promise kết thúc, không treo test.
+    await cache.release(AUDIO_D);
+    await download;
+  });
 });
