@@ -51,6 +51,11 @@ export function OfflineAudioBlock({
           )}
         </>
       )}
+      {topic.message && (
+        <p className="offline-audio-message">
+          {t(`offlineAudio.message.${topic.message}`)}
+        </p>
+      )}
     </div>
   );
 }
