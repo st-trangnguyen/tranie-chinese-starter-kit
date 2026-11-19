@@ -131,7 +131,7 @@ Helper `apps/web/e2e/E8/backup.helpers.ts`: `backupSection`, `exportProgress` (c
 - [x] 8.1 RED: S8.5-AC1 "Xuất khi không có mạng" — `s8.5-backup-offline.spec.ts`: `openOnceWithServiceWorker` (mẫu `e2e/E1/s1.2-offline.spec.ts`), onboarding, `setOffline(true)`, `openSettingsFromPath`, bấm "Xuất tiến độ" → có `download` tên đúng, `status` "Đã xuất tiến độ." (TC-S8.5-AC1-12); kiểm: chạy, nếu pass ngay (không có nhánh mạng) thì tạm cho `exportProgress` gọi `fetch` một URL nội bộ trước khi xuất để thấy test bắt được phụ thuộc mạng, rồi trả lại
 - [x] 8.2 GREEN: sửa đến khi pass (chunk `/settings` và chuỗi i18n có trong precache); kiểm: test 8.1 pass — GREEN không đổi code: RED 8.1 chứng minh bằng tạm `fetch` trong `exportProgress`
 - [x] 8.3 RED: S8.5-AC2 "Nhập file lỗi khi không có mạng" — cùng file; offline, `intro-01` completed, nhập `trang-thai-sai.json` → `alert` "File tiến độ bị hỏng, không nhập được.", không `dialog`, Lộ trình vẫn `intro-01` "Đã xong" (TC-S8.5-AC2-8); kiểm: như 8.1 (tạm `fetch` trong `inspectImportFile`)
-- [ ] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass
+- [x] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass — GREEN không đổi code: RED 8.3 chứng minh bằng tạm `fetch` trong `inspectImportFile`
 - [ ] 8.5 RED: S8.5-AC3 "Nhập khi không có mạng" — cùng file; offline, `intro-01` completed, nhập `hop-le-5-bai.json`, "Ghi đè" → `status` "Đã nhập tiến độ.", Lộ trình `intro-01`…`05` "Đã xong" (TC-S8.5-AC3-14); kiểm: như 8.1 (tạm `fetch` trong `importProgress`)
 - [ ] 8.6 GREEN: sửa đến khi pass; kiểm: test 8.5 pass
 - [ ] 8.7 Test e2e nghiệm thu (hành vi đã có test RED ở tầng dưới; commit `test(e2e)`) `s8.5-backup-section.spec.ts`: TC-S8.5-AC1-1, AC1-4, AC1-15, AC2-11, AC3-8, AC3-16; kiểm: `pnpm e2e` file này pass
