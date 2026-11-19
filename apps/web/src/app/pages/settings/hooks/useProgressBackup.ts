@@ -2,12 +2,21 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type {
   BackupMessage,
+  BackupMessageKey,
+  BackupRejectReason,
   ProgressBackupPhase,
   ProgressBackupView,
 } from '@shared/models/progress-backup.model';
 import { BackupService } from '@shared/services/backup.service';
 
 const ignore = (): void => undefined;
+
+/** Thông báo lỗi theo lý do file bị từ chối (spec "Thông báo cho từng loại file lỗi"). */
+const REJECT_MESSAGE_KEYS: Record<BackupRejectReason, BackupMessageKey> = {
+  'not-backup': 'notBackup',
+  corrupted: 'corrupted',
+  'newer-version': 'newerVersion',
+};
 
 /**
  * Mục Sao lưu tiến độ trong màn Cài đặt (S8.5, design D6).
@@ -57,12 +66,36 @@ export const useProgressBackup = (): ProgressBackupView => {
     );
   }, [changePhase, finish, service]);
 
+  const selectFile = useCallback(
+    (file: File | undefined) => {
+      if (file === undefined || phaseRef.current !== 'idle') {
+        return;
+      }
+      setMessage(null);
+      changePhase('checking');
+      void service.inspectImportFile(file).then(
+        (inspection) => {
+          if (inspection.status === 'rejected') {
+            finish({
+              tone: 'error',
+              key: REJECT_MESSAGE_KEYS[inspection.reason],
+            });
+            return;
+          }
+          changePhase('idle');
+        },
+        () => finish({ tone: 'error', key: 'importFailed' }),
+      );
+    },
+    [changePhase, finish, service],
+  );
+
   return {
     phase,
     preview: null,
     message,
     exportProgress,
-    selectFile: ignore,
+    selectFile,
     confirmImport: ignore,
     cancelImport: ignore,
   };

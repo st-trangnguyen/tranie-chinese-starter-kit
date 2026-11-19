@@ -156,7 +156,14 @@ export class BackupService {
       return check;
     }
     const { exportedOn, settings, lessonProgress, dailyStats } = check.file;
-    const knownLessonIds = await this.readKnownLessonIds();
+    let knownLessonIds: ReadonlySet<string>;
+    try {
+      knownLessonIds = await this.readKnownLessonIds();
+    } catch (error) {
+      throw new Error('Không đọc được nội dung app để đếm bài đã xong.', {
+        cause: error,
+      });
+    }
     return {
       status: 'valid',
       snapshot: { settings, lessonProgress, dailyStats },
