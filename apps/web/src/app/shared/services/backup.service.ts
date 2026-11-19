@@ -3,6 +3,7 @@ import {
   PROGRESS_BACKUP_FORMAT_VERSION,
   progressBackupEnvelopeSchema,
   progressBackupV1Schema,
+  type LessonProgress,
   type ProgressBackupFile,
   type ProgressSnapshot,
 } from '@csk/shared';
@@ -63,6 +64,16 @@ export class BackupService {
       return { status: 'rejected', reason: 'corrupted' };
     }
     return { status: 'valid', file: file.data };
+  }
+
+  // TODO(S8.5 task 4.4): skeleton RED, chưa có hành vi.
+  public countCompletedLessons(
+    lessonProgress: readonly LessonProgress[],
+    knownLessonIds: ReadonlySet<string>,
+  ): number {
+    void lessonProgress;
+    void knownLessonIds;
+    return 0;
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   PROGRESS_BACKUP_FORMAT,
   PROGRESS_BACKUP_FORMAT_VERSION,
+  type LessonProgress,
   type ProgressSnapshot,
 } from '@csk/shared';
 
@@ -232,5 +233,35 @@ describe('BackupService — xuất file sao lưu', () => {
         exportedOn: '2026-11-17',
       },
     });
+  });
+});
+
+describe('BackupService.countCompletedLessons — bài qua bằng kiểm tra vượt cấp', () => {
+  /**
+   * Lộ trình 4 chủ đề (design D10): A (intro-01, 02), B (03, 04),
+   * C (05, 06; bài cuối là bài kiểm tra), D (07, 08).
+   */
+  const TOPIC_LESSON_IDS = [
+    ['intro-01', 'intro-02'],
+    ['intro-03', 'intro-04'],
+    ['intro-05', 'intro-06'],
+    ['intro-07', 'intro-08'],
+  ];
+  const knownLessonIds: ReadonlySet<string> = new Set(TOPIC_LESSON_IDS.flat());
+
+  it('S8.5-AC3 Số bài đã xong gồm bài qua bằng kiểm tra vượt cấp: bài 1 + chủ đề thứ 3 (2 bài) → 3', () => {
+    const service = new BackupService();
+    const lessonProgress: LessonProgress[] = [
+      { lessonId: 'intro-01', status: 'completed' },
+      { lessonId: 'intro-02', status: 'in-progress', cursor: 1 },
+      { lessonId: 'intro-05', status: 'completed' },
+      { lessonId: 'intro-06', status: 'completed' },
+    ];
+    const passedTopicLessonCount = TOPIC_LESSON_IDS[2]?.length ?? 0;
+
+    expect(service.countCompletedLessons(lessonProgress, knownLessonIds)).toBe(
+      1 + passedTopicLessonCount,
+    );
+    expect(passedTopicLessonCount).toBe(2);
   });
 });
