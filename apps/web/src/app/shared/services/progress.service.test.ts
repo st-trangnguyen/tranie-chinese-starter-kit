@@ -28,6 +28,12 @@ const makeStore = (
     addStudySeconds: vi.fn(async () => undefined),
     getAllDailyStats: vi.fn(async () => []),
     saveDailyGoal: vi.fn(async () => undefined),
+    exportAll: vi.fn(async () => ({
+      settings: saved,
+      lessonProgress,
+      dailyStats: [],
+    })),
+    importAll: vi.fn(async () => undefined),
   };
   return store;
 };

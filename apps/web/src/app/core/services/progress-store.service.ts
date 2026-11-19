@@ -1,10 +1,12 @@
 import {
+  DEFAULT_SETTINGS,
   dailyStatSchema,
   lessonProgressSchema,
   parseSettings,
   type DailyGoalMinutes,
   type DailyStat,
   type LessonProgress,
+  type ProgressSnapshot,
   type Settings,
 } from '@csk/shared';
 
@@ -43,6 +45,24 @@ export interface ProgressStore {
    * (dòng ngày có thể đã mang mục tiêu mới; lần ghi phút kế tiếp chụp lại mục tiêu đang chọn).
    */
   saveDailyGoal(date: string, goalMinutes: DailyGoalMinutes): Promise<void>;
+  /**
+   * Toàn bộ tiến độ trên máy, đọc trong một transaction (S8.5, design D3): chờ mọi lần ghi
+   * phút/mục tiêu đang chờ trong tab, rồi đọc đúng như app đang thấy (settings qua
+   * `parseSettings`, dòng `lessonProgress`/`dailyStats` hỏng bị bỏ, `goalMinutes` hỏng thành
+   * không có). Không ghi gì. Lỗi IndexedDB thì reject.
+   * Thêm bảng dữ liệu người dùng (E9 `cards`, `reviewLogs`…) phải thêm vào cả `exportAll`,
+   * `importAll` và schema file sao lưu.
+   */
+  exportAll(): Promise<ProgressSnapshot>;
+  /**
+   * Ghi đè toàn bộ tiến độ bằng `snapshot` (S8.5, design D3): xếp hàng sau mọi lần ghi
+   * phút/mục tiêu đang chờ, rồi trong một transaction xóa cả ba bảng (`settings`,
+   * `lessonProgress`, `dailyStats`) và ghi dữ liệu của snapshot (giữ `goalMinutes` từng ngày).
+   * Không gộp: dòng trên máy không có trong snapshot bị xóa. Bất kỳ bước nào lỗi thì reject
+   * và dữ liệu cũ còn nguyên.
+   * Thêm bảng dữ liệu người dùng phải thêm vào cả `exportAll`, `importAll` và schema file.
+   */
+  importAll(snapshot: ProgressSnapshot): Promise<void>;
 }
 
 export class DexieProgressStore implements ProgressStore {
@@ -118,6 +138,15 @@ export class DexieProgressStore implements ProgressStore {
     return this.enqueueStudyTimeWrite(() =>
       this.writeDailyGoal(date, goalMinutes),
     );
+  }
+
+  // Skeleton S8.5 (tasks 3.1): chưa có hành vi, GREEN ở tasks 3.2/3.6.
+  async exportAll(): Promise<ProgressSnapshot> {
+    return { settings: DEFAULT_SETTINGS, lessonProgress: [], dailyStats: [] };
+  }
+
+  async importAll(snapshot: ProgressSnapshot): Promise<void> {
+    void snapshot;
   }
 
   addStudySeconds(date: string, seconds: number): Promise<void> {
