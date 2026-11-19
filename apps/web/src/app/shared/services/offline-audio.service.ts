@@ -2,6 +2,7 @@ import { INTRO_STAGE_ID, type AudioIndex, type Stage } from '@csk/shared';
 
 import {
   audioCache,
+  AudioDownloadError,
   type AudioCache,
 } from '@core/services/audio-cache.service';
 import {
@@ -11,6 +12,7 @@ import {
 import type {
   OfflineAudioAnnouncement,
   OfflineAudioMessage,
+  OfflineAudioMessageKind,
   OfflineAudioSnapshot,
   OfflineAudioTopic,
   OfflineAudioTopicView,
@@ -281,9 +283,9 @@ export class OfflineAudioService {
   }
 
   /**
-   * Tải tuần tự (theo thứ tự trong index) các audio còn thiếu của chủ đề. File cuối và việc
-   * bỏ "đang tải" + câu `download-finished` nằm trong cùng một lần ghi snapshot. Chủ đề đang tải
-   * thì bỏ qua; file đã có trên máy (chủ đề khác vừa tải) thì không tải lại.
+   * Tải tuần tự (theo thứ tự trong index) các audio còn thiếu của chủ đề. Không reject: mất mạng
+   * giữa chừng thành thông báo `download-incomplete`, file đã tải giữ nguyên (bước 7).
+   * Chủ đề đang tải thì bỏ qua.
    */
   async startDownload(
     unit: OfflineAudioUnit,
@@ -296,17 +298,9 @@ export class OfflineAudioService {
     const messages = new Map(started.messages);
     messages.delete(unit.id);
     if (!isOnline) {
-      this.writeSnapshot({
-        ...started,
-        messages: messages.set(unit.id, {
-          kind: 'needs-network',
-          shownWith: 'not-downloaded',
-        }),
-        announcements: this.appendAnnouncement(started.announcements, {
-          kind: 'needs-network',
-          unitTitle: unit.title,
-        }),
-      });
+      this.writeSnapshot(
+        this.stopWithMessage({ ...started, messages }, unit, 'needs-network'),
+      );
       return;
     }
     this.writeSnapshot({
@@ -318,10 +312,35 @@ export class OfflineAudioService {
         unitTitle: unit.title,
       }),
     });
-    const missingAudio = this.listMissingAudio(
-      started.index?.units[unit.id] ?? [],
-      started.cachedPaths,
-    );
+    try {
+      await this.downloadMissing(
+        unit,
+        this.listMissingAudio(
+          started.index?.units[unit.id] ?? [],
+          started.cachedPaths,
+        ),
+      );
+    } catch (error) {
+      if (
+        !(error instanceof AudioDownloadError) ||
+        error.reason !== 'network'
+      ) {
+        throw error;
+      }
+      this.writeSnapshot(
+        this.stopWithMessage(this.readSnapshot(), unit, 'download-incomplete'),
+      );
+    }
+  }
+
+  /**
+   * Bước 5–6: tải lần lượt từng file thiếu; file đã có trên máy (chủ đề khác vừa tải) thì không
+   * tải lại. File cuối và việc bỏ "đang tải" + câu `download-finished` nằm trong cùng một lần ghi.
+   */
+  private async downloadMissing(
+    unit: OfflineAudioUnit,
+    missingAudio: readonly string[],
+  ): Promise<void> {
     for (const [position, path] of missingAudio.entries()) {
       const isLast = position === missingAudio.length - 1;
       const isCached = this.readSnapshot().cachedPaths.has(path);
@@ -341,6 +360,28 @@ export class OfflineAudioService {
     if (missingAudio.length === 0) {
       this.writeSnapshot(this.finishDownload(this.readSnapshot(), unit));
     }
+  }
+
+  /** Bỏ chủ đề khỏi "đang tải", gắn thông báo (chủ đề chưa tải) kèm câu đọc cùng chữ (bước 3, 7). */
+  private stopWithMessage(
+    snapshot: OfflineAudioSnapshot,
+    unit: OfflineAudioUnit,
+    kind: OfflineAudioMessageKind,
+  ): OfflineAudioSnapshot {
+    const downloadingUnitIds = new Set(snapshot.downloadingUnitIds);
+    downloadingUnitIds.delete(unit.id);
+    return {
+      ...snapshot,
+      downloadingUnitIds,
+      messages: new Map(snapshot.messages).set(unit.id, {
+        kind,
+        shownWith: 'not-downloaded',
+      }),
+      announcements: this.appendAnnouncement(snapshot.announcements, {
+        kind,
+        unitTitle: unit.title,
+      }),
+    };
   }
 
   /** Bỏ chủ đề khỏi "đang tải" kèm câu `download-finished` (bước 6). */

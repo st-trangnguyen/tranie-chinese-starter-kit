@@ -124,7 +124,7 @@ Test: `apps/web/src/app/shared/services/offline-audio.service.download.test.ts`,
 - [x] 6.9 RED: S8.4-AC1 "Bấm tải khi không có mạng" (Phần 3) — `startDownload(unit, false)` → không gọi `download`, thông báo `needs-network`, câu đọc `needs-network`, chủ đề vẫn `not-downloaded`; kiểm: fail
 - [x] 6.10 GREEN: bước 3; kiểm: test 6.9 pass
 - [x] 6.11 RED: S8.4-AC1 "Mất mạng khi đang tải" (Phần 3) — 4 file, xong 2, file 3 `fail('network')` → hết đang tải, thông báo + câu đọc `download-incomplete`, 2 file vẫn trong cache, chủ đề `not-downloaded`; `startDownload` không reject; kiểm: fail
-- [ ] 6.12 GREEN: bước 7 (nhánh `network`); kiểm: test 6.11 pass
+- [x] 6.12 GREEN: bước 7 (nhánh `network`); kiểm: test 6.11 pass
 - [ ] 6.13 RED: S8.4-AC1 "Không đủ bộ nhớ" (Phần 3) — `fail('storage-full')` → thông báo + câu đọc `storage-full`; kiểm: fail
 - [ ] 6.14 GREEN: bước 7 (nhánh `storage-full`); kiểm: test 6.13 pass
 - [ ] 6.15 RED: S8.4-AC1 "Thông báo mất khi bấm nút kế tiếp" (Phần 3) — A có `download-incomplete`, `startDownload(A, true)` → snapshot ngay sau đó không còn thông báo của A, A `downloading`; kiểm: fail
