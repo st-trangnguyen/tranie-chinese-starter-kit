@@ -81,3 +81,18 @@ export const EMPTY_AUDIO_UNITS_INDEX: AudioIndex = {
   bytes: HSK_INDEX.bytes,
   precached: HSK_INDEX.precached,
 };
+
+// "Chào hỏi" = `AUDIO_A` + `AUDIO_B` + `AUDIO_C` (1 916 582 byte); "Gia đình" = `AUDIO_E` rồi `AUDIO_C`
+// (dùng chung, tải sau cùng). Seed `AUDIO_A`, `AUDIO_B` thì "Chào hỏi" chỉ còn thiếu `AUDIO_C` của "Gia đình".
+export const GREETINGS_MISSING_SHARED_INDEX: AudioIndex = {
+  units: {
+    intro1: [AUDIO_INTRO],
+    [HSK_UNIT_ID]: [AUDIO_A, AUDIO_B, AUDIO_C],
+    [HSK_UNIT_2_ID]: [AUDIO_E, AUDIO_C],
+  },
+  bytes: {
+    ...HSK_INDEX.bytes,
+    [AUDIO_E]: 400_000,
+  },
+  precached: HSK_INDEX.precached,
+};
