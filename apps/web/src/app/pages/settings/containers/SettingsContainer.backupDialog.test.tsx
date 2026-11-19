@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { createDatabase } from '@core/helpers/db.helper';
+import { contentSource } from '@core/services/content-source.service';
+import { ROOT } from '@test/backup-machine.helpers';
 import { renderWithProviders, screen, within } from '@test/render';
 
 import SettingsContainer from './SettingsContainer';
@@ -68,6 +70,8 @@ const renderBackupSection = async () => {
 
 describe('SettingsContainer — hộp xác nhận nhập tiến độ', () => {
   beforeEach(async () => {
+    // Nội dung app (D4: đếm bài đã xong theo lộ trình): 4 chủ đề intro-01…intro-08.
+    vi.spyOn(contentSource, 'getContentRoot').mockResolvedValue(ROOT);
     await clearDatabase();
     await seedFirstLessonCompleted();
   });
