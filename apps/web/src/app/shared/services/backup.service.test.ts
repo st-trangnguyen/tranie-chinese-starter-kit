@@ -28,3 +28,17 @@ describe('BackupService.checkBackupText — file không phải JSON', () => {
     },
   );
 });
+
+describe('BackupService.checkBackupText — file rỗng', () => {
+  it.each([
+    ['chuỗi rỗng', ''],
+    ['chỉ có khoảng trắng và xuống dòng', '   \n'],
+  ])('S8.5-AC2 File rỗng bị từ chối: %s → not-backup', (_label, text) => {
+    const service = new BackupService();
+
+    expect(service.checkBackupText(text)).toEqual({
+      status: 'rejected',
+      reason: 'not-backup',
+    });
+  });
+});
