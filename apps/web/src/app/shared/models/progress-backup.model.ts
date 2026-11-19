@@ -18,3 +18,9 @@ export interface ImportPreview {
 export type ImportInspection =
   | { status: 'valid'; snapshot: ProgressSnapshot; preview: ImportPreview }
   | { status: 'rejected'; reason: BackupRejectReason };
+
+/** Nguồn file người học chọn để nhập: `File` thỏa mãn; test truyền object thường. */
+export interface BackupFileSource {
+  size: number;
+  text(): Promise<string>;
+}

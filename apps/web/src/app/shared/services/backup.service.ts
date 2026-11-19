@@ -17,7 +17,11 @@ import {
   progressStore,
   type ProgressStore,
 } from '@core/services/progress-store.service';
-import type { BackupCheck } from '@shared/models/progress-backup.model';
+import type {
+  BackupCheck,
+  BackupFileSource,
+  ImportInspection,
+} from '@shared/models/progress-backup.model';
 import { toLocalDateKey } from '@shared/utils/date.utils';
 
 export class BackupService {
@@ -116,5 +120,18 @@ export class BackupService {
     }
     const text = this.serializeBackupFile(this.buildBackupFile(snapshot, now));
     this.saveFile(this.buildBackupFileName(now), text);
+  }
+
+  /** Skeleton RED (tasks 6.5): chưa có hành vi, GREEN 6.6 cài đặt. */
+  public async inspectImportFile(
+    file: BackupFileSource,
+  ): Promise<ImportInspection> {
+    void file;
+    return { status: 'rejected', reason: 'not-backup' };
+  }
+
+  /** Skeleton RED (tasks 6.5): chưa có hành vi, GREEN 6.6 cài đặt. */
+  public async importProgress(snapshot: ProgressSnapshot): Promise<void> {
+    void snapshot;
   }
 }
