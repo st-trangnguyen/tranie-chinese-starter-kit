@@ -223,3 +223,28 @@ describe('BackupService — file lớn hơn 20 MB', () => {
     );
   });
 });
+
+describe('BackupService — không đọc được nội dung file', () => {
+  it('S8.5-AC2 File không phải JSON bị từ chối: đọc nội dung file lỗi thì báo not-backup, máy vẫn có bài 1 đã xong', async () => {
+    const machine = createMachine();
+    const progress = new ProgressService(machine.store);
+    await progress.completeOnboarding(15);
+    await machine.store.saveLessonProgress({
+      lessonId: 'intro-01',
+      status: 'completed',
+    });
+
+    const inspecting = machine.backup.inspectImportFile({
+      size: 1_024,
+      text: () => Promise.reject(new Error('NotReadableError')),
+    });
+
+    await expect(inspecting).resolves.toEqual({
+      status: 'rejected',
+      reason: 'not-backup',
+    });
+    expect(await progress.getCompletedLessonIds()).toEqual(
+      new Set(['intro-01']),
+    );
+  });
+});
