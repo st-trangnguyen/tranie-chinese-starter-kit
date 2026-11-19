@@ -194,3 +194,10 @@ mở chủ đề tiếp theo. Chưa đạt thì chủ đề MUST giữ nguyên k
 #### Scenario: S3.6-AC2 Còn câu bỏ qua thì chưa đạt
 - **WHEN** người học làm hết bài kiểm tra vượt cấp nhưng còn 1 câu bỏ qua vì dạng bài chưa có
 - **THEN** trên bản đồ mọi bài của chủ đề đó vẫn "Đã khóa"
+
+### Requirement: Bản đồ lộ trình có đường về Trang chủ
+Hệ thống SHALL có trên màn bản đồ lộ trình liên kết "Trang chủ" đưa người học về màn Trang chủ (S8.1).
+
+#### Scenario: S8.1-AC1 Từ bản đồ lộ trình về Trang chủ
+- **WHEN** người học đang ở bản đồ lộ trình và bấm "Trang chủ"
+- **THEN** người học thấy màn Trang chủ
