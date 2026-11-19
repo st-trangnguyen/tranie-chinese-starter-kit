@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { ImportPreview } from '@shared/models/progress-backup.model';
@@ -20,6 +20,12 @@ export function ImportConfirmDialog({
   const titleId = useId();
   const descriptionId = useId();
 
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'Escape') {
+      onCancel();
+    }
+  }
+
   return (
     <div className="confirm-dialog-overlay flex items-center justify-center p-md">
       <div
@@ -27,6 +33,7 @@ export function ImportConfirmDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
+        onKeyDown={handleKeyDown}
         className="confirm-dialog flex max-h-full w-full max-w-md flex-col gap-md overflow-y-auto p-lg"
       >
         <h2 id={titleId} className="confirm-dialog-title">

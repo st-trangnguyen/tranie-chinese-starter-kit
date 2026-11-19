@@ -112,7 +112,7 @@ Test S8.2 cũ (`SettingsContainer*.test.tsx`) phải vẫn pass sau mỗi GREEN.
 - [x] 7.13 RED: S8.5-AC3 "Hủy thì không đổi gì" — mở hộp với `hop-le-5-bai`, bấm "Hủy" → không còn `dialog`, `status`/`alert` rỗng, DB chỉ `intro-01`; kiểm: fail vì "Hủy" chưa nối
 - [x] 7.14 GREEN: `cancelImport`; kiểm: test 7.13 pass
 - [x] 7.15 RED: S8.5-AC3 "Esc thì như Hủy" — hộp mở, `keyboard('{Escape}')` → hộp đóng, không thông báo, DB không đổi; kiểm: fail
-- [ ] 7.16 GREEN: `onKeyDown` `Escape` → `onCancel`; kiểm: test 7.15 pass
+- [x] 7.16 GREEN: `onKeyDown` `Escape` → `onCancel`; kiểm: test 7.15 pass
 - [ ] 7.17 RED: S8.5-AC3 "Hộp xác nhận dùng được bằng bàn phím" — hộp vừa mở: "Hủy" có focus; `tab()` → "Ghi đè"; `tab()` → "Hủy" (không ra nền); `tab({ shift: true })` từ "Hủy" → "Ghi đè"; Enter ở "Hủy" → hộp đóng, focus ở "Nhập tiến độ"; kiểm: fail
 - [ ] 7.18 GREEN: focus "Hủy" khi mở, vòng Tab, trả focus về nút Nhập (ref) khi đóng; kiểm: test 7.17 pass
 - [ ] 7.19 RED: S8.5-AC3 "Thông báo thành công được đọc cho trình đọc màn hình" — DB mục tiêu 60, "Hiện pinyin" bật; hộp mở với `hop-le-5-bai` (mục tiêu 15), bấm "Ghi đè" → `status` trong region "Đã nhập tiến độ.", focus ở "Nhập tiến độ", radio "15 phút" trong nhóm "Mục tiêu mỗi ngày" được chọn mà không remount (nạp lại qua `useSettings.reloadPreferences`); `DexieProgressStore.prototype.importAll` reject (spy) → `alert` "Không nhập được tiến độ. Tiến độ trên máy vẫn giữ nguyên.", radio "60 phút" vẫn chọn; kiểm: fail
