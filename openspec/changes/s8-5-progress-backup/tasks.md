@@ -109,7 +109,7 @@ Test S8.2 cũ (`SettingsContainer*.test.tsx`) phải vẫn pass sau mỗi GREEN.
 - [x] 7.10 GREEN: `selectFile(undefined)` không làm gì; kiểm: test 7.9 pass
 - [x] 7.11 RED: S8.5-AC3 "File hợp lệ thì hiện hộp xác nhận" — `formatLocalDateKey('2026-11-17')` = `'17/11/2026'`; DB `intro-01` completed; upload `hop-le-5-bai` → `getByRole('dialog', { name: 'Nhập tiến độ từ file?' })` có "17/11/2026", "5 bài đã xong", câu cảnh báo nguyên văn spec, nút "Ghi đè", "Hủy"; khi hộp đang mở DB vẫn chỉ `intro-01`; kiểm: fail vì chưa có hộp
 - [x] 7.12 GREEN: `formatLocalDateKey` (`date.utils.ts`), `ImportConfirmDialog` (D7), pha `confirming`, giữ snapshot trong `useRef`; kiểm: test 7.11 pass
-- [ ] 7.13 RED: S8.5-AC3 "Hủy thì không đổi gì" — mở hộp với `hop-le-5-bai`, bấm "Hủy" → không còn `dialog`, `status`/`alert` rỗng, DB chỉ `intro-01`; kiểm: fail vì "Hủy" chưa nối
+- [x] 7.13 RED: S8.5-AC3 "Hủy thì không đổi gì" — mở hộp với `hop-le-5-bai`, bấm "Hủy" → không còn `dialog`, `status`/`alert` rỗng, DB chỉ `intro-01`; kiểm: fail vì "Hủy" chưa nối
 - [ ] 7.14 GREEN: `cancelImport`; kiểm: test 7.13 pass
 - [ ] 7.15 RED: S8.5-AC3 "Esc thì như Hủy" — hộp mở, `keyboard('{Escape}')` → hộp đóng, không thông báo, DB không đổi; kiểm: fail
 - [ ] 7.16 GREEN: `onKeyDown` `Escape` → `onCancel`; kiểm: test 7.15 pass
