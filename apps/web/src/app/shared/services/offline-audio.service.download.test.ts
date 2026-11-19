@@ -109,4 +109,29 @@ describe('OfflineAudioService.startDownload', () => {
     );
     expect(finishedIndex).toBe(lastFileIndex);
   });
+
+  it('S8.4-AC1 Tải lại chỉ tải phần còn thiếu: 2/4 file đã có thì chỉ tải 2 file thiếu, ngay khi bấm là đang tải 50%', async () => {
+    const { service, cache, snapshots } = setup([AUDIO_A, AUDIO_B]);
+    await service.refresh();
+    const beforeClick = snapshots.length;
+
+    const download = service.startDownload(CHAO_HOI, true);
+    await flushAsync();
+
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, snapshots[beforeClick]),
+    ).toEqual({ status: 'downloading', percent: 50 });
+
+    // Thả cả 2 file đã có (trước, theo thứ tự chủ đề) để lượt tải vẫn kết thúc nếu service tải lại
+    // chúng: test khi đó fail ở assertion, không treo.
+    for (const path of [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D]) {
+      await cache.release(path);
+    }
+    await download;
+
+    expect(cache.downloadCalls).toEqual([AUDIO_C, AUDIO_D]);
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, service.getSnapshot()),
+    ).toEqual({ status: 'downloaded', bytes: 2_516_582, canRemove: true });
+  });
 });

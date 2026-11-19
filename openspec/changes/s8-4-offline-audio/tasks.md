@@ -117,8 +117,8 @@ Test: `apps/web/src/app/shared/services/offline-audio.service.download.test.ts`,
 - [x] 6.2 GREEN: Phần 1 (`readAudioIndex`, `readCachedPaths`, `downloadFile`, `readSnapshot`/`writeSnapshot`), `subscribe`/`getSnapshot`, `refresh`, `startDownload` (bước 2, 4–6); singleton `offlineAudioService`; kiểm: test 6.1 pass
 - [x] 6.3 RED: S8.4-AC1 "Hiện tiến độ khi đang tải" (Phần 3) — sau file 1: `downloading` 25; không snapshot nào có `percent: 100`; file cuối và hết "đang tải" cùng một snapshot; kiểm: fail nếu bỏ "đang tải" ở lần ghi riêng (tạm tách nếu pass ngay rồi trả lại)
 - [x] 6.4 GREEN: sửa đến khi pass; kiểm: test 6.3 pass
-- [ ] 6.5 RED: S8.4-AC1 "Tải lại chỉ tải phần còn thiếu" (Phần 3) — 2/4 đã có → `FakeAudioCache.download` được gọi đúng 2 lần với 2 path thiếu; snapshot đầu tiên sau bấm là 50; kiểm: chạy, nếu pass ngay thì tạm tải mọi file để thấy fail rồi trả lại
-- [ ] 6.6 GREEN: sửa đến khi pass; kiểm: test 6.5 pass
+- [x] 6.5 RED: S8.4-AC1 "Tải lại chỉ tải phần còn thiếu" (Phần 3) — 2/4 đã có → `FakeAudioCache.download` được gọi đúng 2 lần với 2 path thiếu; snapshot đầu tiên sau bấm là 50; kiểm: chạy, nếu pass ngay thì tạm tải mọi file để thấy fail rồi trả lại
+- [x] 6.6 GREEN: sửa đến khi pass; kiểm: test 6.5 pass
 - [ ] 6.7 RED: S8.4-AC1 "Tải hai chủ đề cùng lúc" (Phần 3) — A rồi B đang tải song song, mỗi chủ đề `percent` riêng; file dùng chung chỉ `download` một lần (`inFlight`); cả hai xong `downloaded`; gọi `startDownload(A, true)` lần hai khi A đang tải → return ngay: mỗi file của A vẫn chỉ `download` một lần, `announcements` chỉ có một câu `download-started` của A; kiểm: fail (gọi hai lần)
 - [ ] 6.8 GREEN: `inFlight` trong `downloadFile`, bỏ qua file đã có, bước 1 (chủ đề đã đang tải thì return sớm); kiểm: test 6.7 pass
 - [ ] 6.9 RED: S8.4-AC1 "Bấm tải khi không có mạng" (Phần 3) — `startDownload(unit, false)` → không gọi `download`, thông báo `needs-network`, câu đọc `needs-network`, chủ đề vẫn `not-downloaded`; kiểm: fail
