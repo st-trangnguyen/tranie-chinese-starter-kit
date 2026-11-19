@@ -9,11 +9,15 @@ import {
   AUDIO_B,
   AUDIO_C,
   AUDIO_D,
+  AUDIO_E,
+  HSK_TWO_UNITS_INDEX,
 } from '@test/offline-audio.fixtures';
 
 const DOWNLOAD_NAME = 'Tải audio (2,4 MB), chủ đề Chào hỏi';
 const REMOVE_NAME = 'Xóa audio, chủ đề Chào hỏi';
 const ANNOUNCER_NAME = 'Thông báo audio offline';
+const FINISHED_GREETINGS = 'Đã tải xong audio chủ đề Chào hỏi.';
+const FINISHED_FAMILY = 'Đã tải xong audio chủ đề Gia đình.';
 const MAX_TAB_STEPS = 30;
 
 const findUnitSection = async (title: string): Promise<HTMLElement> => {
@@ -112,6 +116,43 @@ describe('LearningPathContainer — audio offline: tên nút cho trình đọc m
       expect(text).not.toContain('Đang tải 50%');
       expect(text).not.toContain('Đang tải 75%');
     });
+    unmount();
+  });
+
+  it('S8.4-AC1 Hai chủ đề báo cùng lúc thì đọc đủ cả hai: should keep "Đã tải xong audio chủ đề Chào hỏi." in the region when "Đã tải xong audio chủ đề Gia đình." is added right after', async () => {
+    const { user, cache, unmount } = renderPathWithOfflineAudio({
+      index: HSK_TWO_UNITS_INDEX,
+    });
+
+    const greetings = await findUnitSection('Chào hỏi');
+    const family = await findUnitSection('Gia đình');
+    await user.click(
+      await findButtonByVisibleText(greetings, 'Tải audio (2,4 MB)'),
+    );
+    const familyLabel = await within(family).findByText(/^Tải audio \(/);
+    const familyButton = familyLabel.closest('button');
+    if (!familyButton) {
+      throw new Error('Không tìm thấy nút tải audio của "Gia đình"');
+    }
+    await user.click(familyButton);
+
+    const announcer = screen.getByRole('status', { name: ANNOUNCER_NAME });
+    const sentencesOf = (region: HTMLElement): string[] =>
+      Array.from(region.querySelectorAll('p'), (p) => p.textContent ?? '');
+
+    // A, B, C (chung) về trước; D là file cuối của "Chào hỏi", E là file cuối của "Gia đình".
+    await releaseInAct(cache, AUDIO_A, AUDIO_B, AUDIO_C);
+    await releaseInAct(cache, AUDIO_D);
+    expect(sentencesOf(announcer)).toContain(FINISHED_GREETINGS);
+
+    await releaseInAct(cache, AUDIO_E);
+    const sentences = sentencesOf(announcer);
+
+    expect(sentences).toContain(FINISHED_GREETINGS);
+    expect(sentences).toContain(FINISHED_FAMILY);
+    expect(sentences.indexOf(FINISHED_GREETINGS)).toBeLessThan(
+      sentences.indexOf(FINISHED_FAMILY),
+    );
     unmount();
   });
 });
