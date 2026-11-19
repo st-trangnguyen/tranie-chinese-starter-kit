@@ -103,4 +103,53 @@ describe('OfflineAudioService.startDownload khi không tải được', () => {
     await cache.release(AUDIO_D);
     await download;
   });
+
+  it('S8.4-AC1 Không đủ bộ nhớ: xong 1/4 file thì máy hết bộ nhớ, hết đang tải, thông báo và câu đọc không đủ bộ nhớ, file đã tải giữ nguyên, chủ đề chưa tải', async () => {
+    const { service, cache } = setupOfflineAudioService();
+    await service.refresh();
+
+    let settled: 'pending' | 'resolved' | 'rejected' = 'pending';
+    const download = service.startDownload(CHAO_HOI, true).then(
+      () => {
+        settled = 'resolved';
+      },
+      () => {
+        settled = 'rejected';
+      },
+    );
+    await flushAsync();
+    await cache.release(AUDIO_A);
+    await cache.fail(AUDIO_B, 'storage-full');
+    await flushAsync();
+
+    expect(settled).toBe('resolved');
+
+    const snapshot = service.getSnapshot();
+    expect(snapshot.downloadingUnitIds.has(HSK_UNIT_ID)).toBe(false);
+    expect(service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, snapshot)).toEqual({
+      status: 'not-downloaded',
+      bytes: 2_516_582,
+    });
+    expect(snapshot.messages.get(HSK_UNIT_ID)).toEqual({
+      kind: 'storage-full',
+      shownWith: 'not-downloaded',
+    });
+    expect(
+      snapshot.announcements.map(({ kind, unitTitle }) => ({
+        kind,
+        unitTitle,
+      })),
+    ).toEqual([
+      { kind: 'download-started', unitTitle: 'Chào hỏi' },
+      { kind: 'storage-full', unitTitle: 'Chào hỏi' },
+    ]);
+    expect(cache.cachedPaths).toEqual(new Set([AUDIO_A]));
+    expect(snapshot.cachedPaths.has(AUDIO_A)).toBe(true);
+    expect(cache.downloadCalls).toEqual([AUDIO_A, AUDIO_B]);
+
+    // Nếu service vẫn tải tiếp (hành vi sai) thì thả file còn lại để promise kết thúc, không treo test.
+    await cache.release(AUDIO_C);
+    await cache.release(AUDIO_D);
+    await download;
+  });
 });
