@@ -177,4 +177,46 @@ describe('OfflineAudioService.removeAudio', () => {
       })),
     ).toEqual([{ kind: 'removed', unitTitle: 'Chào hỏi' }]);
   });
+
+  it('S8.4-AC2 Tải lại sau khi xóa: chủ đề đã xóa audio bấm tải lại khi có mạng thì tải lại đủ file, về đã tải và thông báo đã xóa mất', async () => {
+    const { service, cache } = setupOfflineAudioService(
+      [AUDIO_A, AUDIO_B, AUDIO_INTRO, AUDIO_C, AUDIO_D],
+      HSK_WITH_INTRO_AUDIO_INDEX,
+    );
+    await service.refresh();
+    await service.removeAudio(CHAO_HOI);
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, service.getSnapshot()),
+    ).toEqual({ status: 'not-downloaded', bytes: 2_566_582 });
+    expect(service.getSnapshot().messages.get(HSK_UNIT_ID)?.kind).toBe(
+      'removed',
+    );
+
+    const download = service.startDownload(CHAO_HOI, true);
+
+    const startedSnapshot = service.getSnapshot();
+    expect(startedSnapshot.messages.has(HSK_UNIT_ID)).toBe(false);
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, startedSnapshot)?.status,
+    ).toBe('downloading');
+
+    await flushAsync();
+    await cache.release(AUDIO_A);
+    await cache.release(AUDIO_B);
+    await cache.release(AUDIO_C);
+    await cache.release(AUDIO_D);
+    await download;
+
+    expect([...cache.downloadCalls].sort()).toEqual(
+      [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D].sort(),
+    );
+    expect(cache.cachedPaths).toEqual(
+      new Set([AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D, AUDIO_INTRO]),
+    );
+    const finalSnapshot = service.getSnapshot();
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, finalSnapshot),
+    ).toEqual({ status: 'downloaded', bytes: 2_566_582, canRemove: true });
+    expect(finalSnapshot.messages.has(HSK_UNIT_ID)).toBe(false);
+  });
 });
