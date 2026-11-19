@@ -44,6 +44,17 @@ export const HSK_TWO_UNITS_INDEX: AudioIndex = {
   precached: HSK_INDEX.precached,
 };
 
+// Chủ đề "Chào hỏi" dùng thêm một audio Nhập môn (`AUDIO_INTRO`, precached):
+// 4 audio HSK + `AUDIO_INTRO` = 2 566 582 byte.
+export const HSK_WITH_INTRO_AUDIO_INDEX: AudioIndex = {
+  units: {
+    ...HSK_INDEX.units,
+    [HSK_UNIT_ID]: [AUDIO_A, AUDIO_B, AUDIO_INTRO, AUDIO_C, AUDIO_D],
+  },
+  bytes: HSK_INDEX.bytes,
+  precached: HSK_INDEX.precached,
+};
+
 export function makeSnapshot(
   overrides: Partial<OfflineAudioSnapshot> = {},
 ): OfflineAudioSnapshot {
