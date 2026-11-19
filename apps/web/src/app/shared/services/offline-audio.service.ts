@@ -298,6 +298,27 @@ export class OfflineAudioService {
     );
   }
 
+  /**
+   * Rule: tập file trên máy sau khi đọc cache = tập đọc được, cộng file tải xong trong lúc đọc
+   * (có ở `current`, không có ở `before`), trừ file bị xóa trong lúc đọc (có ở `before`, không có
+   * ở `current`) (S8.4 AC1: quay lại màn không làm lùi tiến độ đang chạy).
+   */
+  mergeCachedPaths(
+    readPaths: ReadonlySet<string>,
+    before: ReadonlySet<string>,
+    current: ReadonlySet<string>,
+  ): ReadonlySet<string> {
+    const merged = new Set(
+      [...readPaths].filter((path) => current.has(path) || !before.has(path)),
+    );
+    current.forEach((path) => {
+      if (!before.has(path)) {
+        merged.add(path);
+      }
+    });
+    return merged;
+  }
+
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
   subscribe = (listener: () => void): (() => void) => {
@@ -309,13 +330,26 @@ export class OfflineAudioService {
 
   getSnapshot = (): OfflineAudioSnapshot => this.readSnapshot();
 
-  /** Nạp audio index và tập file đang có trên máy cho mọi audio trong index. */
+  /**
+   * Nạp audio index và tập file đang có trên máy cho mọi audio trong index. File tải xong hoặc bị
+   * xóa trong lúc đọc được gộp vào kết quả đọc (không làm lùi tiến độ đang chạy).
+   */
   async refresh(): Promise<void> {
     const index = await this.readAudioIndex();
-    const cachedPaths = await this.readCachedPaths([
+    const before = this.readSnapshot().cachedPaths;
+    const readPaths = await this.readCachedPaths([
       ...new Set(Object.values(index.units).flat()),
     ]);
-    this.writeSnapshot({ ...this.readSnapshot(), index, cachedPaths });
+    const current = this.readSnapshot();
+    this.writeSnapshot({
+      ...current,
+      index,
+      cachedPaths: this.mergeCachedPaths(
+        readPaths,
+        before,
+        current.cachedPaths,
+      ),
+    });
   }
 
   /**
