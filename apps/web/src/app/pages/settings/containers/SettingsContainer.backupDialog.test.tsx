@@ -3,6 +3,8 @@ import { join } from 'node:path';
 
 import { createDatabase } from '@core/helpers/db.helper';
 import { contentSource } from '@core/services/content-source.service';
+import { DexieProgressStore } from '@core/services/progress-store.service';
+import { ProgressService } from '@shared/services/progress.service';
 import { ROOT } from '@test/backup-machine.helpers';
 import {
   act,
@@ -72,6 +74,33 @@ const renderBackupSection = async () => {
     name: 'Sao lưu tiến độ',
   });
   return { user, section };
+};
+
+/** Máy đang đặt mục tiêu 60 phút, "Hiện pinyin" bật (mặc định); file `hop-le-5-bai` có mục tiêu 15. */
+const seedGoalSixtyMinutes = async (): Promise<void> => {
+  await new ProgressService().completeOnboarding(60);
+};
+
+/** Mở màn Cài đặt (mục tiêu 60 đã hiện) rồi chọn `hop-le-5-bai` để mở hộp xác nhận. */
+const openConfirmDialogWithGoalSixty = async () => {
+  await seedGoalSixtyMinutes();
+  const { user, section } = await renderBackupSection();
+  const goalGroup = await screen.findByRole('group', {
+    name: 'Mục tiêu mỗi ngày',
+  });
+  expect(
+    within(goalGroup).getByRole('radio', { name: '60 phút' }),
+  ).toBeChecked();
+  const pinyinGroup = screen.getByRole('group', { name: 'Hiện pinyin' });
+  expect(
+    within(pinyinGroup).getByRole('switch', { name: 'Hiện pinyin' }),
+  ).toBeChecked();
+
+  await user.upload(getFileInput(section), fixtureFile('hop-le-5-bai.json'));
+  const dialog = await screen.findByRole('dialog', {
+    name: 'Nhập tiến độ từ file?',
+  });
+  return { user, section, goalGroup, dialog };
 };
 
 describe('SettingsContainer — hộp xác nhận nhập tiến độ', () => {
@@ -185,6 +214,70 @@ describe('SettingsContainer — hộp xác nhận nhập tiến độ', () => {
     expect(
       within(section).getByRole('button', { name: 'Nhập tiến độ' }),
     ).toHaveFocus();
+    expect(await readLessonIds()).toEqual(['intro-01']);
+  });
+  it('S8.5-AC3 Thông báo thành công được đọc cho trình đọc màn hình: bấm "Ghi đè" → vùng status có "Đã nhập tiến độ.", focus về "Nhập tiến độ", mục tiêu hiện "15 phút" mà không mở lại màn', async () => {
+    const { user, section, goalGroup, dialog } =
+      await openConfirmDialogWithGoalSixty();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Ghi đè' }));
+
+    await waitFor(() => {
+      expect(within(section).getByRole('status')).toHaveTextContent(
+        'Đã nhập tiến độ.',
+      );
+    });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(within(section).getByRole('alert')).toBeEmptyDOMElement();
+    expect(
+      within(section).getByRole('button', { name: 'Nhập tiến độ' }),
+    ).toHaveFocus();
+
+    // Tùy chọn nạp lại tại chỗ (useSettings.reloadPreferences): cùng nhóm radio, không remount.
+    await waitFor(() => {
+      expect(
+        within(goalGroup).getByRole('radio', { name: '15 phút' }),
+      ).toBeChecked();
+    });
+    expect(goalGroup).toBeInTheDocument();
+    expect(
+      within(goalGroup).getByRole('radio', { name: '60 phút' }),
+    ).not.toBeChecked();
+    expect(
+      within(screen.getByRole('group', { name: 'Hiện pinyin' })).getByRole(
+        'switch',
+        { name: 'Hiện pinyin' },
+      ),
+    ).toBeChecked();
+    expect(await readLessonIds()).toEqual([
+      'intro-01',
+      'intro-02',
+      'intro-03',
+      'intro-04',
+      'intro-05',
+    ]);
+  });
+  it('S8.5-AC3 Thông báo thành công được đọc cho trình đọc màn hình: ghi lỗi → vùng alert báo không nhập được, mục tiêu vẫn "60 phút"', async () => {
+    vi.spyOn(DexieProgressStore.prototype, 'importAll').mockRejectedValue(
+      new Error('Ghi IndexedDB lỗi (giả lập)'),
+    );
+    const { user, section, goalGroup, dialog } =
+      await openConfirmDialogWithGoalSixty();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Ghi đè' }));
+
+    await waitFor(() => {
+      expect(within(section).getByRole('alert')).toHaveTextContent(
+        'Không nhập được tiến độ. Tiến độ trên máy vẫn giữ nguyên.',
+      );
+    });
+    expect(within(section).getByRole('status')).toBeEmptyDOMElement();
+    expect(
+      within(goalGroup).getByRole('radio', { name: '60 phút' }),
+    ).toBeChecked();
+    expect(
+      within(goalGroup).getByRole('radio', { name: '15 phút' }),
+    ).not.toBeChecked();
     expect(await readLessonIds()).toEqual(['intro-01']);
   });
 });
