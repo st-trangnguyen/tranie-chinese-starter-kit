@@ -68,7 +68,7 @@ Test: `apps/web/src/app/shared/services/backup.service.export.test.ts`, `backup.
 thật trên DB tên ngẫu nhiên (máy A, máy B là hai DB), `ContentSource` fake (lộ trình D10), `FileSaver` fake ghi nhận
 `{ fileName, content }`. Nhập dùng object `{ size, text }` dựng từ nội dung đã xuất.
 
-- [ ] 6.1 RED: S8.5-AC1 "Chưa học gì vẫn xuất được" (Phần 3) — DB chỉ có settings onboarding; `exportProgress(new Date(2026, 10, 17, 10).getTime())` → fake saver được gọi một lần, tên `tranie-tien-do-2026-11-17.json`, nội dung `checkBackupText` → `valid` với `lessonProgress: []`, `dailyStats: []`; kiểm: fail vì skeleton no-op
+- [x] 6.1 RED: S8.5-AC1 "Chưa học gì vẫn xuất được" (Phần 3) — DB chỉ có settings onboarding; `exportProgress(new Date(2026, 10, 17, 10).getTime())` → fake saver được gọi một lần, tên `tranie-tien-do-2026-11-17.json`, nội dung `checkBackupText` → `valid` với `lessonProgress: []`, `dailyStats: []`; kiểm: fail vì skeleton no-op
 - [ ] 6.2 GREEN: Phần 1 (`readSnapshot`, `saveFile`), `exportProgress`; constructor 3 tham số mặc định singleton; kiểm: test 6.1 pass
 - [ ] 6.3 RED: S8.5-AC1 "Không đọc được tiến độ thì báo lỗi" (Phần 3) — store có `exportAll` reject → `exportProgress` reject với `Error` message rõ nghĩa, fake saver **không** được gọi; kiểm: chạy, nếu pass ngay thì tạm gọi `saveFile` với snapshot rỗng khi đọc lỗi để thấy fail rồi trả lại
 - [ ] 6.4 GREEN: bọc lỗi đọc thành `Error('Không đọc được tiến độ để xuất.')` trước `saveFile`; kiểm: test 6.3 pass

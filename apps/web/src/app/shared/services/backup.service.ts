@@ -8,10 +8,25 @@ import {
   type ProgressSnapshot,
 } from '@csk/shared';
 
+import {
+  contentSource,
+  type ContentSource,
+} from '@core/services/content-source.service';
+import { fileSaver, type FileSaver } from '@core/services/file-saver.service';
+import {
+  progressStore,
+  type ProgressStore,
+} from '@core/services/progress-store.service';
 import type { BackupCheck } from '@shared/models/progress-backup.model';
 import { toLocalDateKey } from '@shared/utils/date.utils';
 
 export class BackupService {
+  constructor(
+    private readonly store: ProgressStore = progressStore,
+    private readonly content: ContentSource = contentSource,
+    private readonly saver: FileSaver = fileSaver,
+  ) {}
+
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
@@ -82,4 +97,9 @@ export class BackupService {
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
+
+  /** Skeleton RED (tasks 6.1): chưa có hành vi, GREEN 6.2 cài đặt. */
+  public async exportProgress(now: number = Date.now()): Promise<void> {
+    void now;
+  }
 }
