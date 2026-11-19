@@ -117,4 +117,55 @@ describe('LearningPathContainer — audio offline: tải, xóa, thông báo', ()
     expect(cache.downloadCalls).toEqual([]);
     unmount();
   });
+  it('S8.4-AC1 Mất mạng khi đang tải: should show "Tải chưa xong. Hãy kiểm tra mạng rồi thử lại." under "Chào hỏi" and bring back the download button when the 3rd of 4 files fails on network', async () => {
+    const { user, cache, unmount } = renderPathWithOfflineAudio();
+
+    const unit = await findUnitSection('Chào hỏi');
+    const label = await within(unit).findByText('Tải audio (2,4 MB)');
+    const downloadButton = label.closest('button');
+    if (!downloadButton) {
+      throw new Error('Không tìm thấy nút "Tải audio (2,4 MB)"');
+    }
+
+    await user.click(downloadButton);
+    await cache.release(AUDIO_A);
+    await cache.release(AUDIO_B);
+    await cache.fail(AUDIO_C, 'network');
+    // File 4 không được tải sau lỗi; thả trước nếu service vẫn gọi, để không để promise treo.
+    await cache.release(AUDIO_D);
+
+    expect(
+      await within(unit).findByText(
+        'Tải chưa xong. Hãy kiểm tra mạng rồi thử lại.',
+      ),
+    ).toBeInTheDocument();
+    expect(within(unit).getByText('Tải audio (2,4 MB)')).toBeInTheDocument();
+    expect(within(unit).queryByText(/Đang tải/)).not.toBeInTheDocument();
+    unmount();
+  });
+  it('S8.4-AC1 Không đủ bộ nhớ: should show the storage-full message under "Chào hỏi" and bring back the download button when a file fails with storage-full', async () => {
+    const { user, cache, unmount } = renderPathWithOfflineAudio();
+
+    const unit = await findUnitSection('Chào hỏi');
+    const label = await within(unit).findByText('Tải audio (2,4 MB)');
+    const downloadButton = label.closest('button');
+    if (!downloadButton) {
+      throw new Error('Không tìm thấy nút "Tải audio (2,4 MB)"');
+    }
+
+    await user.click(downloadButton);
+    await cache.release(AUDIO_A);
+    await cache.fail(AUDIO_B, 'storage-full');
+    await cache.release(AUDIO_C);
+    await cache.release(AUDIO_D);
+
+    expect(
+      await within(unit).findByText(
+        'Không đủ bộ nhớ để tải audio. Hãy xóa audio của chủ đề khác rồi thử lại.',
+      ),
+    ).toBeInTheDocument();
+    expect(within(unit).getByText('Tải audio (2,4 MB)')).toBeInTheDocument();
+    expect(within(unit).queryByText(/Đang tải/)).not.toBeInTheDocument();
+    unmount();
+  });
 });
