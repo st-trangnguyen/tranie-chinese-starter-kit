@@ -20,7 +20,7 @@ Test: `packages/shared/src/progress-backup.schema.test.ts` (schema), `apps/web/s
 (Phần 2, pure, không store).
 
 - [x] 2.1 RED: S8.5-AC2 "File không phải JSON bị từ chối" (Phần 2) — `checkBackupText` với `'abc'`, `'{'`, chuỗi byte PNG đọc thành text → `{ status: 'rejected', reason: 'not-backup' }`. Skeleton trong commit test: `backup.service.ts` (class rỗng 3 banner, `checkBackupText` trả `{ status: 'valid' … }` giả), `shared/models/progress-backup.model.ts` (type `BackupCheck`, `BackupRejectReason`, `ImportPreview`, `ImportInspection`); kiểm: fail ở assertion
-- [ ] 2.2 GREEN: bước 1 bảng D4 (`JSON.parse` trong `try`, lỗi → `not-backup`); kiểm: test 2.1 pass
+- [x] 2.2 GREEN: bước 1 bảng D4 (`JSON.parse` trong `try`, lỗi → `not-backup`); kiểm: test 2.1 pass
 - [ ] 2.3 RED: S8.5-AC2 "File rỗng bị từ chối" (Phần 2) — `''`, `'   \n'` → `not-backup`; kiểm: chạy, nếu pass ngay nhờ 2.2 (`JSON.parse('')` throw) thì tạm cho chuỗi rỗng trả `valid` để thấy fail rồi trả lại
 - [ ] 2.4 GREEN: kiểm `text.trim() === ''` trước `JSON.parse`; kiểm: test 2.3 pass
 - [ ] 2.5 RED: S8.5-AC2 "File JSON của nơi khác bị từ chối" (schema + Phần 2) — `progressBackupEnvelopeSchema` từ chối `{"name":"abc"}`, `[]`, `null`, `42`, `format` sai chữ, thiếu `formatVersion`; `checkBackupText` của các chuỗi đó → `not-backup`. Skeleton: hằng `PROGRESS_BACKUP_FORMAT`, `PROGRESS_BACKUP_FORMAT_VERSION`, schema envelope `z.unknown()`, export từ `packages/shared/src/index.ts`; kiểm: fail
