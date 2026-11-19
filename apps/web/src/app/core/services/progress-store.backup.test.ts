@@ -21,6 +21,8 @@ const completed = (lessonId: string): LessonProgress => ({
 
 const SCENARIO_OVERWRITE_STUDY_TIME =
   'S8.5-AC3 Ghi đè xóa số phút học mà file không có';
+const SCENARIO_WRITE_FAILS =
+  'S8.5-AC3 Ghi lỗi giữa chừng thì giữ nguyên tiến độ cũ';
 
 describe('DexieProgressStore — sao lưu tiến độ (S8.5)', () => {
   it(`${SCENARIO_OVERWRITE_STUDY_TIME}: ghi đè thay toàn bộ ba bảng, ngày không có trong file bị xóa`, async () => {
@@ -70,5 +72,47 @@ describe('DexieProgressStore — sao lưu tiến độ (S8.5)', () => {
       ),
     );
     await expect(store.getSettings()).resolves.toEqual(snapshot.settings);
+  });
+  it(`${SCENARIO_WRITE_FAILS}: một bước ghi lỗi thì cả ba bảng giữ nguyên dữ liệu cũ`, async () => {
+    const { db, store } = openStore();
+    const oldSettings = {
+      dailyGoalMinutes: 30,
+      hasCompletedOnboarding: true,
+      defaultAudioSpeed: 'normal',
+      isPinyinVisible: true,
+    } as const;
+    await store.saveSettings(oldSettings);
+    await store.saveLessonProgressBatch([completed('intro-01')]);
+    const oldDailyStat = { date: TODAY, studySeconds: 600, goalMinutes: 30 };
+    await db.dailyStats.put(oldDailyStat);
+
+    vi.spyOn(db.lessonProgress, 'bulkPut').mockRejectedValueOnce(
+      new Error('ghi lỗi'),
+    );
+
+    const snapshot: ProgressSnapshot = {
+      settings: {
+        dailyGoalMinutes: 15,
+        hasCompletedOnboarding: true,
+        defaultAudioSpeed: 'slow',
+        isPinyinVisible: false,
+      },
+      lessonProgress: [
+        'intro-01',
+        'intro-02',
+        'intro-03',
+        'intro-04',
+        'intro-05',
+      ].map(completed),
+      dailyStats: [],
+    };
+
+    await expect(store.importAll(snapshot)).rejects.toThrow();
+
+    await expect(store.getSettings()).resolves.toEqual(oldSettings);
+    await expect(store.getAllLessonProgress()).resolves.toEqual([
+      completed('intro-01'),
+    ]);
+    await expect(store.getAllDailyStats()).resolves.toEqual([oldDailyStat]);
   });
 });
