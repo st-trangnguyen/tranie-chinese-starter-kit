@@ -244,8 +244,8 @@ plugin Range, giữ state tải trong hook) để thấy fail rồi trả lại.
 - [x] 11.8 GREEN: sửa đến khi pass; kiểm: test 11.7 pass
 - [x] 11.9 RED: `s8.4-offline-audio-remove.spec.ts` — S8.4-AC2 "Xóa audio đã tải" (AC2-1, -2, -3), "Xóa không làm hỏng chủ đề khác đang tải" (AC2-6), "Tải lại sau khi xóa" (AC2-8), "Xóa audio dùng chung thì chủ đề khác đã tải về chưa tải" (AC2-9), "Chủ đề dùng chung audio vòng tròn vẫn xóa được" (AC2-10), "Hai chủ đề cùng bộ audio vẫn xóa được" (AC2-11), "Chủ đề đã tải luôn có nút xóa khi không có chủ đề nào đang tải" (AC2-12, -13), "Audio đang được chủ đề khác tải thì tạm chưa có nút xóa" (AC2-14, -15), "Nút xóa có tên kèm chủ đề" (AC2-16); kiểm: fail đúng lý do
 - [x] 11.10 GREEN: sửa đến khi pass; kiểm: test 11.9 pass
-- [ ] 11.11 RED: `s8.4-offline-audio-a11y.spec.ts` — S8.4-AC1 "Tải bằng bàn phím và nghe được kết quả" (AC1-56), "Hai chủ đề báo cùng lúc thì đọc đủ cả hai" (AC1-58, `holdPaths` + `release` cách nhau < 1 giây), "Focus khi bắt đầu và khi tải xong" (AC1-60), "Tải xong mà không có nút xóa thì focus tới dòng đã tải" (AC1-62), "Focus khi tải lỗi" (AC1-63), "Không kéo focus khi người học đã đi chỗ khác" (AC1-64), "Nút tải đang focus biến mất vì chủ đề tự thành đã tải" (AC1-65, -66), S8.4-AC2 "Focus và thông báo khi xóa bằng bàn phím" (AC2-19); kiểm: fail đúng lý do
-- [ ] 11.12 GREEN: sửa đến khi pass; kiểm: test 11.11 pass
+- [x] 11.11 RED: `s8.4-offline-audio-a11y.spec.ts` — S8.4-AC1 "Tải bằng bàn phím và nghe được kết quả" (AC1-56), "Hai chủ đề báo cùng lúc thì đọc đủ cả hai" (AC1-58, `holdPaths` + `release` cách nhau < 1 giây), "Focus khi bắt đầu và khi tải xong" (AC1-60), "Tải xong mà không có nút xóa thì focus tới dòng đã tải" (AC1-62), "Focus khi tải lỗi" (AC1-63), "Không kéo focus khi người học đã đi chỗ khác" (AC1-64), "Nút tải đang focus biến mất vì chủ đề tự thành đã tải" (AC1-65, -66), S8.4-AC2 "Focus và thông báo khi xóa bằng bàn phím" (AC2-19); kiểm: fail đúng lý do
+- [x] 11.12 GREEN: sửa đến khi pass; kiểm: test 11.11 pass
 
 ## 12. Tài liệu và kiểm tra
 
