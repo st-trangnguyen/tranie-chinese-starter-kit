@@ -15,7 +15,8 @@ import { createDatabase, type AppDatabase } from '@core/helpers/db.helper';
  */
 export interface ProgressStore {
   getSettings(): Promise<Settings>;
-  saveSettings(settings: Settings): Promise<void>;
+  /** Chỉ ghi các khóa có trong `patch` với giá trị khác `undefined`; khóa khác giữ nguyên. */
+  saveSettings(patch: Partial<Settings>): Promise<void>;
   /** Mọi tiến độ bài hợp lệ; dòng hỏng bị bỏ qua (S3.1 AC2). */
   getAllLessonProgress(): Promise<LessonProgress[]>;
   /** Tiến độ một bài; không có dòng hoặc dòng hỏng thì `undefined` (S3.3). */
@@ -46,11 +47,13 @@ export class DexieProgressStore implements ProgressStore {
     return parseSettings(record);
   }
 
-  async saveSettings(settings: Settings): Promise<void> {
-    const rows = Object.entries(settings).map(([key, value]) => ({
-      key,
-      value,
-    }));
+  async saveSettings(patch: Partial<Settings>): Promise<void> {
+    const rows = Object.entries(patch)
+      .filter(([, value]) => value !== undefined)
+      .map(([key, value]) => ({ key, value }));
+    if (rows.length === 0) {
+      return;
+    }
     await this.db.settings.bulkPut(rows);
   }
 

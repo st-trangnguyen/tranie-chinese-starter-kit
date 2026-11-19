@@ -1,19 +1,40 @@
 import { describe, expect, it } from 'vitest';
 
+import { PLAYBACK_RATES } from '@core/constants/audio.constants';
+
 import { AudioService } from './audio.service';
 
-/** Audio giả ở ranh giới: ghi lại thao tác, phát sự kiện `ended` theo lệnh của test. */
+/**
+ * Audio giả ở ranh giới: ghi lại thao tác, phát sự kiện `ended` theo lệnh của test.
+ * Gán `src` mô phỏng thuật toán load của trình duyệt: `playbackRate` về `defaultPlaybackRate`
+ * và `currentTime` về 0.
+ */
 class FakeAudio extends EventTarget {
-  src = '';
   currentTime = 0;
+  defaultPlaybackRate = 1;
   playbackRate = 1;
   playCount = 0;
   pauseCount = 0;
+  /** `playbackRate` tại thời điểm mỗi lần `play()` được gọi. */
+  playRates: number[] = [];
+
+  private currentSrc = '';
 
   playResult: () => Promise<void> = () => Promise.resolve();
 
+  get src(): string {
+    return this.currentSrc;
+  }
+
+  set src(value: string) {
+    this.currentSrc = value;
+    this.playbackRate = this.defaultPlaybackRate;
+    this.currentTime = 0;
+  }
+
   play(): Promise<void> {
     this.playCount += 1;
+    this.playRates.push(this.playbackRate);
     return this.playResult();
   }
 
@@ -55,6 +76,31 @@ describe('AudioService', () => {
 
     audio?.finish();
     await expect(result).resolves.toBe('ended');
+  });
+
+  it('S4.4-AC2: bật Nghe chậm thì phát 0.75x, kể cả bấm lại cùng câu; tắt thì về 1x', () => {
+    const { service, audios } = createService();
+    const src = '/audio/ffffffffffffffff.mp3';
+
+    void service.play(src, PLAYBACK_RATES.slow);
+    const [audio] = audios;
+    if (!audio) {
+      throw new Error('AudioService chưa tạo element audio.');
+    }
+
+    expect(audio.playRates).toEqual([0.75]);
+    expect(audio.playbackRate).toBe(0.75);
+
+    void service.play(src, PLAYBACK_RATES.slow);
+
+    expect(audio.playRates).toEqual([0.75, 0.75]);
+    expect(audio.playbackRate).toBe(0.75);
+
+    void service.play(src, PLAYBACK_RATES.normal);
+
+    expect(audio.playRates).toEqual([0.75, 0.75, 1]);
+    expect(audio.playbackRate).toBe(1);
+    service.stop();
   });
 
   it('S4.4-AC1: bấm Nghe khi đang phát thì phát lại từ đầu, không có hai luồng âm', async () => {

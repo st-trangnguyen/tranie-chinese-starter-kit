@@ -203,6 +203,8 @@ describe('ProgressService — use cases', () => {
     expect(store.saveSettings).toHaveBeenCalledWith({
       dailyGoalMinutes: 30,
       hasCompletedOnboarding: true,
+      defaultAudioSpeed: 'normal',
+      isPinyinVisible: true,
     });
     await expect(service.needsOnboarding()).resolves.toBe(false);
   });

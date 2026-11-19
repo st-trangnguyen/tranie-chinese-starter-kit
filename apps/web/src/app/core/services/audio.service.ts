@@ -39,9 +39,11 @@ export class AudioService {
       audio.addEventListener('ended', handleEnded);
       audio.addEventListener('error', handleError);
 
-      audio.currentTime = 0;
-      audio.playbackRate = rate;
+      // Gán src trước: thuật toán load của trình duyệt đặt playbackRate = defaultPlaybackRate.
       audio.src = src;
+      audio.currentTime = 0;
+      audio.defaultPlaybackRate = rate;
+      audio.playbackRate = rate;
       audio.play().catch((error: unknown) => {
         // AbortError do chính ta ngắt (stop/play khác) không phải lỗi thật.
         if (isSettled) {

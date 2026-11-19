@@ -226,6 +226,11 @@ export interface AudioPlayRecord {
   src: string;
   /** Thời lượng (giây) đọc được khi phát đã bắt đầu; `null` khi chưa bắt đầu hoặc lỗi. */
   duration: number | null;
+  /**
+   * Tốc độ phát đọc được khi phát đã bắt đầu (không phải lúc gọi `play`: thuật toán load khi gán
+   * `src` có thể đặt lại tốc độ); `null` khi chưa bắt đầu hoặc lỗi.
+   */
+  playbackRate: number | null;
   error: string | null;
 }
 
@@ -238,7 +243,8 @@ declare global {
 
 /**
  * Bọc `HTMLMediaElement.prototype.play` trước khi trang chạy: mỗi lần phát ghi `src`, rồi khi
- * phát bắt đầu ghi `duration` (hoặc `error` khi không phát được). Gọi trước `page.goto`.
+ * phát bắt đầu ghi `duration` và `playbackRate` (hoặc `error` khi không phát được). Gọi trước
+ * `page.goto`.
  */
 export const installAudioRecorder = async (page: Page): Promise<void> => {
   await page.addInitScript(() => {
@@ -251,6 +257,7 @@ export const installAudioRecorder = async (page: Page): Promise<void> => {
       const record: AudioPlayRecord = {
         src: this.src,
         duration: null,
+        playbackRate: null,
         error: null,
       };
       plays.push(record);
@@ -259,6 +266,7 @@ export const installAudioRecorder = async (page: Page): Promise<void> => {
       result.then(
         () => {
           record.duration = this.duration;
+          record.playbackRate = this.playbackRate;
         },
         (error: unknown) => {
           record.error = error instanceof Error ? error.message : String(error);

@@ -1,0 +1,71 @@
+/* Màn Cài đặt — S8.2 D6. Lựa chọn đang chọn luôn có radio/công tắc gốc, màu chỉ là phụ. */
+
+@layer components {
+  .settings-back-link {
+    @apply inline-flex min-h-11 min-w-11 items-center rounded-md px-sm text-body font-semibold text-fg underline underline-offset-4;
+    @apply transition-colors;
+  }
+
+  .settings-back-link:hover {
+    @apply bg-sunken;
+  }
+
+  .settings-back-link:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .settings-title {
+    @apply text-title-lg text-fg;
+  }
+
+  .settings-error {
+    @apply rounded-md bg-danger-soft text-body-sm text-danger-text;
+  }
+
+  .settings-group {
+    @apply rounded-lg border-2 border-line bg-surface;
+  }
+
+  .settings-group-label {
+    @apply text-title-sm text-fg;
+  }
+
+  .settings-option {
+    @apply cursor-pointer rounded-md border-2 border-line text-body text-fg transition-colors;
+  }
+
+  .settings-option:hover {
+    @apply border-line-strong;
+  }
+
+  .settings-option.is-active {
+    @apply border-accent bg-accent-soft;
+  }
+
+  .settings-option:focus-within {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .settings-option-input {
+    @apply size-5 accent-accent;
+  }
+
+  .settings-switch {
+    @apply size-6 cursor-pointer accent-accent;
+  }
+
+  .settings-switch:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .settings-switch-state {
+    @apply text-body font-semibold text-fg;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .settings-back-link,
+    .settings-option {
+      @apply transition-none;
+    }
+  }
+}

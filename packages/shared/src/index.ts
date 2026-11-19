@@ -1,9 +1,11 @@
 // Public entry of @csk/shared. Schemas and utils are re-exported here as they are added.
 export { PINYIN_CHARSET, findUnsupportedPinyinChars } from './pinyin.charset';
 export {
+  AUDIO_SPEED_OPTIONS,
   DAILY_GOAL_OPTIONS,
   DEFAULT_SETTINGS,
   LESSON_PROGRESS_STATUSES,
+  audioSpeedSchema,
   dailyGoalMinutesSchema,
   dailyStatSchema,
   lessonProgressSchema,
@@ -12,6 +14,7 @@ export {
   settingsSchema,
 } from './progress.schema';
 export type {
+  AudioSpeed,
   DailyGoalMinutes,
   DailyStat,
   LessonProgress,

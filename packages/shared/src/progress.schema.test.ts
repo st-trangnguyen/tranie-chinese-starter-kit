@@ -16,7 +16,12 @@ describe('parseSettings', () => {
   it('keeps valid stored values', () => {
     expect(
       parseSettings({ dailyGoalMinutes: 60, hasCompletedOnboarding: true }),
-    ).toEqual({ dailyGoalMinutes: 60, hasCompletedOnboarding: true });
+    ).toEqual({
+      dailyGoalMinutes: 60,
+      hasCompletedOnboarding: true,
+      defaultAudioSpeed: 'normal',
+      isPinyinVisible: true,
+    });
   });
 
   it('falls back per field when a stored value is invalid', () => {
@@ -33,6 +38,90 @@ describe('parseSettings', () => {
   it('offers exactly 15, 30 and 60 minutes', () => {
     expect(DAILY_GOAL_OPTIONS).toEqual([15, 30, 60]);
   });
+});
+
+describe('parseSettings — tốc độ audio và hiện pinyin', () => {
+  const AC2 =
+    'S8.2-AC2 Một tùy chọn đã lưu bị hỏng thì chỉ tùy chọn đó về mặc định';
+
+  it(`${AC2}: bản ghi rỗng có tốc độ bình thường và hiện pinyin`, () => {
+    expect(parseSettings({})).toEqual({
+      dailyGoalMinutes: 15,
+      hasCompletedOnboarding: false,
+      defaultAudioSpeed: 'normal',
+      isPinyinVisible: true,
+    });
+  });
+
+  it(`${AC2}: tốc độ hỏng về bình thường, các tùy chọn khác giữ nguyên`, () => {
+    expect(
+      parseSettings({
+        dailyGoalMinutes: 60,
+        isPinyinVisible: false,
+        defaultAudioSpeed: 'fast',
+        hasCompletedOnboarding: true,
+      }),
+    ).toEqual({
+      dailyGoalMinutes: 60,
+      isPinyinVisible: false,
+      defaultAudioSpeed: 'normal',
+      hasCompletedOnboarding: true,
+    });
+  });
+
+  it(`${AC2}: tốc độ chậm hợp lệ được giữ nguyên`, () => {
+    expect(
+      parseSettings({
+        dailyGoalMinutes: 60,
+        isPinyinVisible: false,
+        defaultAudioSpeed: 'slow',
+        hasCompletedOnboarding: true,
+      }),
+    ).toEqual({
+      dailyGoalMinutes: 60,
+      isPinyinVisible: false,
+      defaultAudioSpeed: 'slow',
+      hasCompletedOnboarding: true,
+    });
+  });
+});
+
+describe('parseSettings — mục tiêu đã lưu bị hỏng', () => {
+  const AC1 = 'S8.2-AC1 Mục tiêu đã lưu bị hỏng thì về 15 phút';
+
+  it.each<[string, unknown]>([
+    ['chuỗi không đọc được', 'abc'],
+    ['số ngoài ba mức', 45],
+  ])(
+    `${AC1}: mục tiêu là %s thì về 15, tốc độ chậm giữ nguyên`,
+    (_label, dailyGoalMinutes) => {
+      const settings = parseSettings({
+        dailyGoalMinutes,
+        defaultAudioSpeed: 'slow',
+      });
+
+      expect(settings.dailyGoalMinutes).toBe(15);
+      expect(settings.defaultAudioSpeed).toBe('slow');
+    },
+  );
+});
+
+describe('parseSettings — tùy chọn pinyin đã lưu bị hỏng', () => {
+  const AC3 = 'S8.2-AC3 Tùy chọn pinyin đã lưu bị hỏng thì về bật';
+
+  it.each<[string, unknown]>([
+    ['chuỗi', 'yes'],
+    ['số 0', 0],
+    ['null', null],
+  ])(
+    `${AC3}: hiện pinyin là %s thì về bật, mục tiêu 30 phút giữ nguyên`,
+    (_label, isPinyinVisible) => {
+      const settings = parseSettings({ dailyGoalMinutes: 30, isPinyinVisible });
+
+      expect(settings.isPinyinVisible).toBe(true);
+      expect(settings.dailyGoalMinutes).toBe(30);
+    },
+  );
 });
 
 describe('lessonProgressSchema', () => {

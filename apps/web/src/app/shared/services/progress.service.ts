@@ -1,7 +1,9 @@
 import {
+  AUDIO_SPEED_OPTIONS,
   DAILY_GOAL_OPTIONS,
   DEFAULT_SETTINGS,
   type LESSON_TYPES,
+  type AudioSpeed,
   type DailyGoalMinutes,
   type DailyStat,
   type LessonProgress,
@@ -21,6 +23,10 @@ import {
 } from '@shared/utils/learning-path.utils';
 import { startOfNextLocalDay, toLocalDateKey } from '@shared/utils/date.utils';
 import type { StudyTimeShare, TodayStudy } from '@shared/models/home.model';
+import type {
+  LearningPreferences,
+  LessonPreferences,
+} from '@shared/models/settings.model';
 
 type LessonType = (typeof LESSON_TYPES)[number];
 
@@ -33,8 +39,8 @@ export class ProgressService {
     return this.store.getSettings();
   }
 
-  private writeSettings(settings: Settings): Promise<void> {
-    return this.store.saveSettings(settings);
+  private writeSettings(patch: Partial<Settings>): Promise<void> {
+    return this.store.saveSettings(patch);
   }
 
   private readAllLessonProgress(): Promise<LessonProgress[]> {
@@ -54,6 +60,22 @@ export class ProgressService {
   /** Rule: mục tiêu mỗi ngày chỉ được là 15, 30 hoặc 60 phút (S1.3 AC1). */
   isValidDailyGoal(minutes: number): minutes is DailyGoalMinutes {
     return DAILY_GOAL_OPTIONS.some((option) => option === minutes);
+  }
+
+  /** Rule: tốc độ audio mặc định chỉ là "Bình thường (1x)" hoặc "Chậm (0.75x)" (S8.2 AC2). */
+  isValidAudioSpeed(value: string): value is AudioSpeed {
+    return AUDIO_SPEED_OPTIONS.some((option) => option === value);
+  }
+
+  /**
+   * Rule: mỗi lần vào màn học, "Nghe chậm" bật khi tốc độ mặc định là chậm, tắt khi bình thường;
+   * pinyin ở câu "nói" hiện theo tùy chọn hiện pinyin (S8.2 AC2, AC3).
+   */
+  toLessonPreferences(settings: Settings): LessonPreferences {
+    return {
+      isSlowAudio: settings.defaultAudioSpeed === 'slow',
+      isPinyinVisible: settings.isPinyinVisible,
+    };
   }
 
   /** Rule: onboarding chỉ hiện cho tới khi người học hoàn thành (S1.3 AC3). */
@@ -167,6 +189,47 @@ export class ProgressService {
       dailyGoalMinutes: minutes,
       hasCompletedOnboarding: true,
     });
+  }
+
+  /** Không throw: đọc settings lỗi → tùy chọn mặc định (design D3). */
+  async getLearningPreferences(): Promise<LearningPreferences> {
+    const settings = await this.readSettings().catch(
+      (): Settings => DEFAULT_SETTINGS,
+    );
+    return {
+      dailyGoalMinutes: settings.dailyGoalMinutes,
+      defaultAudioSpeed: settings.defaultAudioSpeed,
+      isPinyinVisible: settings.isPinyinVisible,
+    };
+  }
+
+  /** Không throw: đọc settings lỗi → tốc độ thường + hiện pinyin (design D3). */
+  async getLessonPreferences(): Promise<LessonPreferences> {
+    const settings = await this.readSettings().catch(
+      (): Settings => DEFAULT_SETTINGS,
+    );
+    return this.toLessonPreferences(settings);
+  }
+
+  /** Chỉ ghi khóa mục tiêu, không đọc–gộp–ghi; lỗi ghi đi thẳng lên hook (design D2, D3). */
+  async changeDailyGoal(minutes: number): Promise<void> {
+    if (!this.isValidDailyGoal(minutes)) {
+      throw new Error('Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.');
+    }
+    await this.writeSettings({ dailyGoalMinutes: minutes });
+  }
+
+  /** Chỉ ghi khóa tốc độ; lỗi ghi đi thẳng lên hook (design D2, D3). */
+  async changeDefaultAudioSpeed(speed: string): Promise<void> {
+    if (!this.isValidAudioSpeed(speed)) {
+      throw new Error('Tốc độ audio mặc định phải là bình thường hoặc chậm.');
+    }
+    await this.writeSettings({ defaultAudioSpeed: speed });
+  }
+
+  /** Chỉ ghi khóa pinyin; lỗi ghi đi thẳng lên hook (design D2, D3). */
+  async changePinyinVisibility(isVisible: boolean): Promise<void> {
+    await this.writeSettings({ isPinyinVisible: isVisible });
   }
 
   async getCompletedLessonIds(): Promise<Set<string>> {
