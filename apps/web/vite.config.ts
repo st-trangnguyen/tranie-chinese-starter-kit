@@ -1,13 +1,18 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, runnerImport } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import svgr from 'vite-plugin-svgr';
 import { createHtmlPlugin } from 'vite-plugin-html';
 import { VitePWA } from 'vite-plugin-pwa';
+import { readFileSync } from 'fs';
 import Path from 'path';
 
 import { alias } from './aliases';
-import { offlineFixturesPlugin } from './e2e/fixtures/offlineFixturesPlugin';
+import {
+  OFFLINE_FIXTURE_PATHS,
+  offlineFixturesPlugin,
+} from './e2e/fixtures/offlineFixturesPlugin';
+import type * as AudioCachingConfig from './src/app/core/modules/pwa/audio-caching.config';
 
 // Màu `bg` sáng của design system: nền splash và thanh trạng thái khi cài PWA.
 const APP_BACKGROUND = '#F6F5EF';
@@ -17,11 +22,32 @@ const PATHS = {
   output: Path.join(__dirname, './dist'),
   source: Path.join(__dirname, './src'),
   fixed: '/',
+  audioIndex: Path.join(__dirname, './src/assets/content/audio-index.json'),
+  audioCachingConfig: Path.join(
+    __dirname,
+    './src/app/core/modules/pwa/audio-caching.config.ts',
+  ),
 };
 
+const readJson = (file: string): unknown =>
+  JSON.parse(readFileSync(file, 'utf8'));
+
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }) => {
   const env = loadEnv(mode, __dirname);
+  /*
+   * Nạp qua module runner của Vite thay vì import tĩnh: bundler config của Vite để `@csk/shared`
+   * là external và Node không chạy được mã nguồn TS của package đó (import không đuôi).
+   */
+  const { module: audioCaching } = await runnerImport<
+    typeof AudioCachingConfig
+  >(PATHS.audioCachingConfig, { root: __dirname, logLevel: 'error' });
+  const { listPrecachedAudioPatterns, PRECACHE_BASE_PATTERNS } = audioCaching;
+  // S8.4: chỉ precache audio Nhập môn; audio HSK tải theo chủ đề hoặc khi phát.
+  const precachedAudio = [
+    ...listPrecachedAudioPatterns(readJson(PATHS.audioIndex)),
+    ...(mode === 'e2e' ? [OFFLINE_FIXTURE_PATHS.audio] : []),
+  ];
 
   return {
     root: PATHS.source,
@@ -87,7 +113,7 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           // S1.2: precache toàn bộ khung app, font, i18n, nội dung và audio Nhập môn.
-          globPatterns: ['**/*.{js,css,html,woff2,svg,png,ico,json,mp3}'],
+          globPatterns: [...PRECACHE_BASE_PATTERNS, ...precachedAudio],
           navigateFallback: 'index.html',
           maximumFileSizeToCacheInBytes: MAX_PRECACHE_FILE_BYTES,
           cleanupOutdatedCaches: true,
