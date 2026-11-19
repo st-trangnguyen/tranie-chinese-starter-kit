@@ -67,3 +67,17 @@ export function makeSnapshot(
     ...overrides,
   };
 }
+
+/** Chủ đề Nhập môn thứ hai, không có audio nào (`[]` trong index). */
+export const INTRO_EMPTY_UNIT_ID = 'intro2';
+
+// Chủ đề "Gia đình" (HSK) và chủ đề Nhập môn thứ hai có danh sách audio rỗng (`[]`).
+export const EMPTY_AUDIO_UNITS_INDEX: AudioIndex = {
+  units: {
+    ...HSK_INDEX.units,
+    [HSK_UNIT_2_ID]: [],
+    [INTRO_EMPTY_UNIT_ID]: [],
+  },
+  bytes: HSK_INDEX.bytes,
+  precached: HSK_INDEX.precached,
+};

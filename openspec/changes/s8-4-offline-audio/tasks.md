@@ -173,10 +173,10 @@ container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fake
 - [x] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass
 - [x] 8.5 RED: S8.4-AC1 "Chủ đề Nhập môn có sẵn offline" (container) — nhóm Nhập môn có audio hiện "Audio có sẵn offline", không nút tải/xóa; kiểm: fail
 - [x] 8.6 GREEN: nhánh `available-offline` trong `OfflineAudioBlock`; kiểm: test 8.5 pass
-- [ ] 8.7 RED: S8.4-AC1 "Chủ đề không có audio" (container) — nhóm HSK `[]` không có khối (không "Tải audio", "Đã tải audio", "Xóa audio", "Audio có sẵn offline"); kiểm: chạy, nếu pass ngay thì tạm render khối rỗng có chữ để thấy fail rồi trả lại
-- [ ] 8.8 GREEN: sửa đến khi pass; kiểm: test 8.7 pass
-- [ ] 8.9 RED: S8.4-AC1 "Chủ đề Nhập môn không có audio thì không có khối" (container) — nhóm Nhập môn `[]` không khối, nhóm Nhập môn có audio vẫn "Audio có sẵn offline"; kiểm: như 8.7
-- [ ] 8.10 GREEN: sửa đến khi pass; kiểm: test 8.9 pass
+- [x] 8.7 RED: S8.4-AC1 "Chủ đề không có audio" (container) — nhóm HSK `[]` không có khối (không "Tải audio", "Đã tải audio", "Xóa audio", "Audio có sẵn offline"); kiểm: chạy, nếu pass ngay thì tạm render khối rỗng có chữ để thấy fail rồi trả lại
+- [x] 8.8 GREEN: sửa đến khi pass; kiểm: test 8.7 pass
+- [x] 8.9 RED: S8.4-AC1 "Chủ đề Nhập môn không có audio thì không có khối" (container) — nhóm Nhập môn `[]` không khối, nhóm Nhập môn có audio vẫn "Audio có sẵn offline"; kiểm: như 8.7
+- [x] 8.10 GREEN: sửa đến khi pass; kiểm: test 8.9 pass
 - [ ] 8.11 RED: S8.4-AC1 "Đã tải thì hiện dung lượng và nút xóa" (container) — cache giả đủ file → "Đã tải audio (2,4 MB)" + nút "Xóa audio"; kiểm: fail
 - [ ] 8.12 GREEN: nhánh `downloaded` (dòng + nút xóa khi `canRemove`); kiểm: test 8.11 pass
 - [ ] 8.13 RED: S8.4-AC1 "Hiện tiến độ khi đang tải" (container) — bấm nút, thả 1/4 → "Đang tải 25%", không nút tải hay xóa; kiểm: fail
