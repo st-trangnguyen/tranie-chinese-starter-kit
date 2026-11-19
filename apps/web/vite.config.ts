@@ -42,7 +42,11 @@ export default defineConfig(async ({ mode }) => {
   const { module: audioCaching } = await runnerImport<
     typeof AudioCachingConfig
   >(PATHS.audioCachingConfig, { root: __dirname, logLevel: 'error' });
-  const { listPrecachedAudioPatterns, PRECACHE_BASE_PATTERNS } = audioCaching;
+  const {
+    createAudioRuntimeCaching,
+    listPrecachedAudioPatterns,
+    PRECACHE_BASE_PATTERNS,
+  } = audioCaching;
   // S8.4: chỉ precache audio Nhập môn; audio HSK tải theo chủ đề hoặc khi phát.
   const precachedAudio = [
     ...listPrecachedAudioPatterns(readJson(PATHS.audioIndex)),
@@ -114,6 +118,8 @@ export default defineConfig(async ({ mode }) => {
         workbox: {
           // S1.2: precache toàn bộ khung app, font, i18n, nội dung và audio Nhập môn.
           globPatterns: [...PRECACHE_BASE_PATTERNS, ...precachedAudio],
+          // S8.4: audio ngoài precache lưu vào `audio-cache` khi phát hoặc tải theo chủ đề.
+          runtimeCaching: [createAudioRuntimeCaching()],
           navigateFallback: 'index.html',
           maximumFileSizeToCacheInBytes: MAX_PRECACHE_FILE_BYTES,
           cleanupOutdatedCaches: true,

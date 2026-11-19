@@ -157,7 +157,7 @@ Test: `apps/web/src/app/core/modules/pwa/audio-caching.config.test.ts` (hàm thu
 - [x] 7.3 RED: S8.4-AC1 "Đã nghe hết audio thì là đã tải" (tầng cấu hình) — `stripRangeRequest({ request })` với `Range: bytes=0-` → request cùng URL, không `Range`; bản dựng lại từ `new Function(\`return (${fn.toString()})\`)()` cho cùng kết quả (hàm tự chứa); kiểm: fail
 - [x] 7.4 GREEN: `stripRangeRequest`; kiểm: test 7.3 pass
 - [x] 7.5 RED: S8.4-AC1 "Đã tải thì học offline vẫn nghe được" (tầng cấu hình) — `toPartialResponse`: 200 body 1000 byte + `Range: bytes=0-` → 206, `Content-Range: bytes 0-999/1000`; `bytes=100-199` → 100 byte; không `Range` hoặc response 206 → giữ nguyên; `Range` hỏng → giữ nguyên; bản dựng lại từ `toString()` cũng đúng; `createAudioRuntimeCaching()` có `CacheFirst`, `cacheName: 'audio-cache'`, `statuses: [200]`, `rangeRequests: true`, hai plugin; kiểm: fail
-- [ ] 7.6 GREEN: `toPartialResponse`, `createAudioRuntimeCaching`, `vite.config.ts` thêm `runtimeCaching`; kiểm: test 7.5 pass, build thành công, `dist/sw.js` có route `audio-cache`
+- [x] 7.6 GREEN: `toPartialResponse`, `createAudioRuntimeCaching`, `vite.config.ts` thêm `runtimeCaching`; kiểm: test 7.5 pass, build thành công, `dist/sw.js` có route `audio-cache`
 
 ## 8. Giao diện bản đồ — context, hook, component, container (design D8–D11)
 
