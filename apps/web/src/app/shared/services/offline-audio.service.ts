@@ -344,6 +344,12 @@ export class OfflineAudioService {
     }
   }
 
+  /** Xóa audio đã tải của chủ đề (skeleton RED 6.17, chưa có hành vi). */
+  removeAudio = (unit: OfflineAudioUnit): Promise<void> => {
+    void unit;
+    return Promise.resolve();
+  };
+
   /**
    * Bước 5–6: tải lần lượt từng file thiếu; file đã có trên máy (chủ đề khác vừa tải) thì không
    * tải lại. File cuối và việc bỏ "đang tải" + câu `download-finished` nằm trong cùng một lần ghi.
