@@ -16,4 +16,21 @@
   .backup-message.has-error {
     @apply text-danger-text;
   }
+
+  /* Hộp xác nhận nhập tiến độ: lớp phủ cả màn, hộp cuộn được trên mobile (TC-S8.5-AC3-3). */
+  .confirm-dialog-overlay {
+    @apply fixed inset-0 z-50 bg-black/50;
+  }
+
+  .confirm-dialog {
+    @apply rounded-lg border-2 border-line bg-surface text-body text-fg shadow-lg;
+  }
+
+  .confirm-dialog-title {
+    @apply text-title-sm text-fg;
+  }
+
+  .confirm-dialog-warning {
+    @apply text-body-sm text-danger-text;
+  }
 }

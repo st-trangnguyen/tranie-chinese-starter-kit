@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import type { ProgressBackupView } from '@shared/models/progress-backup.model';
 
+import { ImportConfirmDialog } from './ImportConfirmDialog';
+
 interface ProgressBackupSectionProps {
   backup: ProgressBackupView;
 }
@@ -12,7 +14,7 @@ export function ProgressBackupSection({ backup }: ProgressBackupSectionProps) {
   const { t } = useTranslation('settings');
   const titleId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { message } = backup;
+  const { message, phase, preview } = backup;
   const successText =
     message?.tone === 'success' ? t(`backup.messages.${message.key}`) : '';
   const errorText =
@@ -68,6 +70,13 @@ export function ProgressBackupSection({ backup }: ProgressBackupSectionProps) {
       <p role="alert" className="backup-message has-error">
         {errorText}
       </p>
+      {phase === 'confirming' && preview !== null && (
+        <ImportConfirmDialog
+          preview={preview}
+          onConfirm={backup.confirmImport}
+          onCancel={backup.cancelImport}
+        />
+      )}
     </section>
   );
 }

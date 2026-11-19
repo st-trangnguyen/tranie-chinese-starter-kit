@@ -31,6 +31,13 @@
       "corrupted": "File tiến độ bị hỏng, không nhập được.",
       "newerVersion": "File này được tạo từ phiên bản app mới hơn. Hãy cập nhật app rồi thử lại.",
       "importFailed": "Không nhập được tiến độ. Tiến độ trên máy vẫn giữ nguyên."
+    },
+    "confirm": {
+      "title": "Nhập tiến độ từ file?",
+      "summary": "File xuất ngày {{date}}, có {{count}} bài đã xong.",
+      "warning": "Toàn bộ tiến độ hiện có trên máy này sẽ bị thay bằng tiến độ trong file. Không hoàn tác được.",
+      "overwrite": "Ghi đè",
+      "cancel": "Hủy"
     }
   }
 }

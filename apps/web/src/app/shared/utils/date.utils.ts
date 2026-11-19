@@ -24,5 +24,7 @@ export function previousLocalDateKey(dateKey: string): string {
 
 /** Khóa ngày `YYYY-MM-DD` hiện cho người học dạng `dd/mm/yyyy`. */
 export function formatLocalDateKey(dateKey: string): string {
-  return dateKey;
+  // Tách chuỗi, không qua `Date` để không lệch múi giờ (design D7).
+  const [year = '', month = '', day = ''] = dateKey.split('-');
+  return `${day}/${month}/${year}`;
 }

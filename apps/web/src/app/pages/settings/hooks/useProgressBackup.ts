@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ProgressSnapshot } from '@csk/shared';
 
 import type {
   BackupMessage,
   BackupMessageKey,
   BackupRejectReason,
+  ImportPreview,
   ProgressBackupPhase,
   ProgressBackupView,
 } from '@shared/models/progress-backup.model';
@@ -26,6 +28,9 @@ export const useProgressBackup = (): ProgressBackupView => {
   const service = useMemo(() => new BackupService(), []);
   const [phase, setPhase] = useState<ProgressBackupPhase>('idle');
   const [message, setMessage] = useState<BackupMessage | null>(null);
+  const [preview, setPreview] = useState<ImportPreview | null>(null);
+  // Snapshot chờ người học xác nhận ghi đè; không render nên không để trong state (design D6).
+  const snapshotRef = useRef<ProgressSnapshot | null>(null);
   // Đọc đồng bộ để bỏ qua lần bấm lặp trước khi state kịp render lại (design D6).
   const phaseRef = useRef<ProgressBackupPhase>('idle');
   const isActiveRef = useRef(true);
@@ -82,7 +87,11 @@ export const useProgressBackup = (): ProgressBackupView => {
             });
             return;
           }
-          changePhase('idle');
+          snapshotRef.current = inspection.snapshot;
+          if (isActiveRef.current) {
+            setPreview(inspection.preview);
+          }
+          changePhase('confirming');
         },
         () => finish({ tone: 'error', key: 'importFailed' }),
       );
@@ -92,7 +101,7 @@ export const useProgressBackup = (): ProgressBackupView => {
 
   return {
     phase,
-    preview: null,
+    preview,
     message,
     exportProgress,
     selectFile,
