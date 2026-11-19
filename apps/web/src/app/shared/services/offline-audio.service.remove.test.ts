@@ -12,6 +12,7 @@ import {
   AUDIO_D,
   AUDIO_E,
   AUDIO_INTRO,
+  HSK_INDEX,
   HSK_STAGE_ID,
   HSK_TWO_UNITS_INDEX,
   HSK_WITH_INTRO_AUDIO_INDEX,
@@ -218,5 +219,33 @@ describe('OfflineAudioService.removeAudio', () => {
       service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, finalSnapshot),
     ).toEqual({ status: 'downloaded', bytes: 2_566_582, canRemove: true });
     expect(finalSnapshot.messages.has(HSK_UNIT_ID)).toBe(false);
+  });
+  it('S8.4-AC2 Xóa mà bộ nhớ báo lỗi: đọc lại trạng thái từ máy, không thêm thông báo hay câu đọc', async () => {
+    const { service, cache } = setupOfflineAudioService(
+      [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D, AUDIO_INTRO],
+      HSK_INDEX,
+    );
+    await service.refresh();
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, service.getSnapshot()),
+    ).toEqual({ status: 'downloaded', bytes: 2_516_582, canRemove: true });
+    cache.failNextRemove([AUDIO_A, AUDIO_B]);
+
+    const settled = await service.removeAudio(CHAO_HOI).then(
+      () => 'resolved',
+      () => 'rejected',
+    );
+    await flushAsync();
+
+    expect(settled).toBe('resolved');
+    expect(cache.cachedPaths).toEqual(new Set([AUDIO_C, AUDIO_D, AUDIO_INTRO]));
+    const snapshot = service.getSnapshot();
+    expect(snapshot.cachedPaths).toEqual(cache.cachedPaths);
+    expect(service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, snapshot)).toEqual({
+      status: 'not-downloaded',
+      bytes: 2_516_582,
+    });
+    expect(snapshot.messages.has(HSK_UNIT_ID)).toBe(false);
+    expect(snapshot.announcements).toEqual([]);
   });
 });

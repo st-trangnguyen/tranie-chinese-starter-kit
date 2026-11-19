@@ -52,6 +52,7 @@ export class FakeAudioCache implements AudioCache {
   private readonly pending = new Map<string, Deferred>();
   private readonly presets = new Map<string, PresetOutcome>();
   private heldListing: Deferred | null = null;
+  private failingRemove: ReadonlySet<string> | null = null;
 
   constructor(initialCached: Iterable<string> = []) {
     this.cached = new Set(initialCached);
@@ -109,7 +110,23 @@ export class FakeAudioCache implements AudioCache {
 
   async remove(paths: readonly string[]): Promise<void> {
     this.removeCalls.push([...paths]);
+    const failing = this.failingRemove;
+    this.failingRemove = null;
+    if (failing) {
+      paths
+        .filter((path) => failing.has(path))
+        .forEach((path) => this.cached.delete(path));
+      throw new Error('FakeAudioCache: xóa lỗi giữa chừng');
+    }
     paths.forEach((path) => this.cached.delete(path));
+  }
+
+  /**
+   * Lượt `remove` kế tiếp chỉ xóa các path trong `removedBeforeError` (nếu có trong danh sách xóa)
+   * rồi reject, như bộ nhớ báo lỗi giữa chừng.
+   */
+  failNextRemove(removedBeforeError: readonly string[]): void {
+    this.failingRemove = new Set(removedBeforeError);
   }
 
   /** Cho file `path` tải xong rồi chờ service xử lý. */
