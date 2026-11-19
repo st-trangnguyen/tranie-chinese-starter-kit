@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -246,5 +249,48 @@ describe('BackupService — không đọc được nội dung file', () => {
     expect(await progress.getCompletedLessonIds()).toEqual(
       new Set(['intro-01']),
     );
+  });
+});
+
+describe('BackupService — ghi đè bằng file', () => {
+  it('S8.5-AC3 Ghi đè thì tiến độ đúng bằng file: máy có bài 1–6 xong, mục tiêu 60, nhập file bài 1–3 xong, mục tiêu 15', async () => {
+    const machine = createMachine();
+    const progress = new ProgressService(machine.store);
+    await progress.completeOnboarding(60);
+    await Promise.all(
+      ['01', '02', '03', '04', '05', '06'].map((n) =>
+        machine.store.saveLessonProgress({
+          lessonId: `intro-${n}`,
+          status: 'completed',
+        }),
+      ),
+    );
+    // File mẫu e2e (design D10): bài 1–3 xong, mục tiêu 15 phút.
+    const fileText = readFileSync(
+      join(
+        __dirname,
+        '../../../../e2e/E8/fixtures/progress-backup/hop-le-3-bai-15-phut.json',
+      ),
+      'utf8',
+    );
+
+    const inspection = await machine.backup.inspectImportFile(
+      toBackupFileSource(fileText),
+    );
+    expect(inspection.status).toBe('valid');
+    if (inspection.status !== 'valid') {
+      return;
+    }
+    await machine.backup.importProgress(inspection.snapshot);
+
+    const completed = await progress.getCompletedLessonIds();
+    expect(completed).toEqual(new Set(['intro-01', 'intro-02', 'intro-03']));
+    const statuses = progress.deriveLessonStatuses(ROOT.stages, completed);
+    expect(Object.fromEntries(statuses)).toMatchObject({
+      'intro-04': 'open',
+      'intro-05': 'locked',
+      'intro-06': 'locked',
+    });
+    expect((await progress.getLearningPreferences()).dailyGoalMinutes).toBe(15);
   });
 });

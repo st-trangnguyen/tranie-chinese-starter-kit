@@ -84,7 +84,7 @@ thật trên DB tên ngẫu nhiên (máy A, máy B là hai DB), `ContentSource` 
 - [x] 6.14 GREEN: sửa đến khi pass (`exportAll`/`writeSnapshot` giữ `goalMinutes`, `dailyStatStrictSchema` có `goalMinutes` optional, D2, D3); kiểm: test 6.13 pass — GREEN không đổi code: RED 6.13 chứng minh bằng tạm bỏ `goalMinutes` khỏi `exportAll`
 - [x] 6.15 RED: S8.5-AC2 "File lớn hơn 20 MB bị từ chối" (Phần 2 + 3) — `isBackupFileTooLarge(20_000_001)` true, `(20_000_000)` false, `(0)` false; `inspectImportFile({ size: 20_000_001, text: vi.fn() })` → `rejected/not-backup` và `text` **không** được gọi; B không đổi; kiểm: fail
 - [x] 6.16 GREEN: `MAX_BACKUP_FILE_BYTES` (`core/constants/backup.constants.ts`), `isBackupFileTooLarge` (`Rule:`), kiểm kích thước trước `text()`; `text()` reject → `not-backup`; kiểm: test 6.15 pass
-- [ ] 6.17 RED: S8.5-AC3 "Ghi đè thì tiến độ đúng bằng file" (Phần 3) — B: `intro-01`…`06` completed, mục tiêu 60; nhập `hop-le-3-bai-15-phut` → `getCompletedLessonIds` = {01, 02, 03}, `deriveLessonStatuses`: 04 open, 05, 06 locked; `getLearningPreferences().dailyGoalMinutes` 15; kiểm: chạy, nếu pass ngay thì tạm cho `importAll` bỏ `clear()` (gộp) để thấy fail rồi trả lại
+- [x] 6.17 RED: S8.5-AC3 "Ghi đè thì tiến độ đúng bằng file" (Phần 3) — B: `intro-01`…`06` completed, mục tiêu 60; nhập `hop-le-3-bai-15-phut` → `getCompletedLessonIds` = {01, 02, 03}, `deriveLessonStatuses`: 04 open, 05, 06 locked; `getLearningPreferences().dailyGoalMinutes` 15; kiểm: chạy, nếu pass ngay thì tạm cho `importAll` bỏ `clear()` (gộp) để thấy fail rồi trả lại
 - [ ] 6.18 GREEN: sửa đến khi pass; kiểm: test 6.17 pass, `backup.service.ts` < 300 dòng, không import React/Dexie (`pnpm lint`)
 
 ## 7. Mục "Sao lưu tiến độ" trong Cài đặt — hook + component (design D6, D7)
