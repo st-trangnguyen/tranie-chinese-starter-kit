@@ -151,9 +151,9 @@ Helper `apps/web/e2e/E8/backup.helpers.ts`: `backupSection`, `exportProgress` (c
 
 ## 10. Kiểm tra cuối
 
-- [ ] 10.1 `pnpm typecheck && pnpm lint && pnpm test:run` pass; `pnpm content:check` pass (không đổi nội dung nhưng hook chạy)
-- [ ] 10.2 `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts` pass; `pnpm e2e` pass (toàn bộ, gồm E1/E3/E8 cũ)
-- [ ] 10.3 Self-review theo `CLAUDE.md` §0, §2 (bảng D8), §7: không `any`/`as` dữ liệu ngoài, mọi dữ liệu file qua Zod, service không import React/Dexie, mỗi file < 300 dòng; kiểm: `grep -rn " as \| any" ` trên file mới không có kết quả cho dữ liệu ngoài
+- [x] 10.1 `pnpm typecheck && pnpm lint && pnpm test:run` pass; `pnpm content:check` pass (không đổi nội dung nhưng hook chạy) — pass: shared 128, content 71, web 998
+- [x] 10.2 `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts` pass; `pnpm e2e` pass (toàn bộ, gồm E1/E3/E8 cũ) — build + check:fonts OK; e2e 379 pass, 2 fail cùng TC-S6.2-AC1-31 (E6 giảm chuyển động, đã fail sẵn trên main, ghi ở PR S8.3), không liên quan S8.5
+- [x] 10.3 Self-review theo `CLAUDE.md` §0, §2 (bảng D8), §7: không `any`/`as` dữ liệu ngoài, mọi dữ liệu file qua Zod, service không import React/Dexie, mỗi file < 300 dòng; kiểm: `grep -rn " as \| any" ` trên file mới không có kết quả cho dữ liệu ngoài — grep không có `any`/`as`/`@ts-ignore`/`eslint-disable` trong file production mới; service không import React/Dexie; file lớn nhất 256 dòng
 
 ## Workflow follow-up
 
