@@ -23,6 +23,7 @@ import type {
   ImportInspection,
 } from '@shared/models/progress-backup.model';
 import { toLocalDateKey } from '@shared/utils/date.utils';
+import { listLessonIdsInOrder } from '@shared/utils/learning-path.utils';
 
 export class BackupService {
   constructor(
@@ -35,6 +36,15 @@ export class BackupService {
 
   private readSnapshot(): Promise<ProgressSnapshot> {
     return this.store.exportAll();
+  }
+
+  private writeSnapshot(snapshot: ProgressSnapshot): Promise<void> {
+    return this.store.importAll(snapshot);
+  }
+
+  private async readKnownLessonIds(): Promise<ReadonlySet<string>> {
+    const root = await this.content.getContentRoot();
+    return new Set(listLessonIdsInOrder(root.stages));
   }
 
   private saveFile(fileName: string, text: string): void {
@@ -122,16 +132,31 @@ export class BackupService {
     this.saveFile(this.buildBackupFileName(now), text);
   }
 
-  /** Skeleton RED (tasks 6.5): chưa có hành vi, GREEN 6.6 cài đặt. */
+  /** Đọc file người học chọn, kiểm tra và dựng bản xem trước; không ghi gì vào máy. */
   public async inspectImportFile(
     file: BackupFileSource,
   ): Promise<ImportInspection> {
-    void file;
-    return { status: 'rejected', reason: 'not-backup' };
+    const check = this.checkBackupText(await file.text());
+    if (check.status === 'rejected') {
+      return check;
+    }
+    const { exportedOn, settings, lessonProgress, dailyStats } = check.file;
+    const knownLessonIds = await this.readKnownLessonIds();
+    return {
+      status: 'valid',
+      snapshot: { settings, lessonProgress, dailyStats },
+      preview: {
+        exportedOn,
+        completedLessonCount: this.countCompletedLessons(
+          lessonProgress,
+          knownLessonIds,
+        ),
+      },
+    };
   }
 
-  /** Skeleton RED (tasks 6.5): chưa có hành vi, GREEN 6.6 cài đặt. */
-  public async importProgress(snapshot: ProgressSnapshot): Promise<void> {
-    void snapshot;
+  /** Ghi đè toàn bộ tiến độ trên máy bằng tiến độ từ file đã kiểm tra. */
+  public importProgress(snapshot: ProgressSnapshot): Promise<void> {
+    return this.writeSnapshot(snapshot);
   }
 }
