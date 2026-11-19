@@ -1,6 +1,8 @@
 import { act, screen, within } from '@test/render';
 import {
+  failInAct,
   mockPathContent,
+  releaseInAct,
   renderPathWithOfflineAudio,
 } from '@test/offline-audio.render';
 import {
@@ -43,7 +45,7 @@ describe('LearningPathContainer — audio offline: tải, xóa, thông báo', ()
     }
 
     await user.click(downloadButton);
-    await cache.release(AUDIO_A);
+    await releaseInAct(cache, AUDIO_A);
 
     expect(await within(unit).findByText('Đang tải 25%')).toBeInTheDocument();
     expect(within(unit).queryByText(/Tải audio \(/)).not.toBeInTheDocument();
@@ -53,9 +55,9 @@ describe('LearningPathContainer — audio offline: tải, xóa, thông báo', ()
     ).not.toBeInTheDocument();
 
     // Thả nốt các file còn lại để việc tải kết thúc, không để promise treo sau test.
-    await cache.release(AUDIO_B);
-    await cache.release(AUDIO_C);
-    await cache.release(AUDIO_D);
+    await releaseInAct(cache, AUDIO_B);
+    await releaseInAct(cache, AUDIO_C);
+    await releaseInAct(cache, AUDIO_D);
     unmount();
   });
   it('S8.4-AC1 Chủ đề đang khóa vẫn tải được: should download audio of locked "Chào hỏi" and keep its lessons locked', async () => {
@@ -76,10 +78,10 @@ describe('LearningPathContainer — audio offline: tải, xóa, thông báo', ()
     }
 
     await user.click(downloadButton);
-    await cache.release(AUDIO_A);
-    await cache.release(AUDIO_B);
-    await cache.release(AUDIO_C);
-    await cache.release(AUDIO_D);
+    await releaseInAct(cache, AUDIO_A);
+    await releaseInAct(cache, AUDIO_B);
+    await releaseInAct(cache, AUDIO_C);
+    await releaseInAct(cache, AUDIO_D);
 
     expect(
       await within(unit).findByText('Đã tải audio (2,4 MB)'),
@@ -130,11 +132,11 @@ describe('LearningPathContainer — audio offline: tải, xóa, thông báo', ()
     }
 
     await user.click(downloadButton);
-    await cache.release(AUDIO_A);
-    await cache.release(AUDIO_B);
-    await cache.fail(AUDIO_C, 'network');
+    await releaseInAct(cache, AUDIO_A);
+    await releaseInAct(cache, AUDIO_B);
+    await failInAct(cache, AUDIO_C, 'network');
     // File 4 không được tải sau lỗi; thả trước nếu service vẫn gọi, để không để promise treo.
-    await cache.release(AUDIO_D);
+    await releaseInAct(cache, AUDIO_D);
 
     expect(
       await within(unit).findByText(
@@ -156,10 +158,10 @@ describe('LearningPathContainer — audio offline: tải, xóa, thông báo', ()
     }
 
     await user.click(downloadButton);
-    await cache.release(AUDIO_A);
-    await cache.fail(AUDIO_B, 'storage-full');
-    await cache.release(AUDIO_C);
-    await cache.release(AUDIO_D);
+    await releaseInAct(cache, AUDIO_A);
+    await failInAct(cache, AUDIO_B, 'storage-full');
+    await releaseInAct(cache, AUDIO_C);
+    await releaseInAct(cache, AUDIO_D);
 
     expect(
       await within(unit).findByText(

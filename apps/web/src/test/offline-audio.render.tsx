@@ -2,8 +2,16 @@
 // Chỉ thay ranh giới ngoài: `fetch` nội dung (content.json, bài), Cache Storage + mạng (`FakeAudioCache`)
 // và audio index (`fakeContentSourceWithIndex`).
 
+import { Suspense } from 'react';
+import { I18nextProvider } from 'react-i18next';
+import { Outlet, RouterProvider, createMemoryRouter } from 'react-router-dom';
+import { act, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { AudioIndex } from '@csk/shared';
 
+import type { AudioDownloadFailure } from '@core/services/audio-cache.service';
+import { renderChildren } from '@core/modules/custom-router-dom/RouterOutlet';
+import pageRoutes from '@app/pages/page.routes';
 import LearningPathContainer from '@app/pages/learning-path/containers/LearningPathContainer';
 import { OfflineAudioServiceContext } from '@shared/contexts/useOfflineAudioService';
 import { OfflineAudioService } from '@shared/services/offline-audio.service';
@@ -18,6 +26,8 @@ import {
   HSK_UNIT_2_ID,
   HSK_UNIT_ID,
 } from './offline-audio.fixtures';
+import testI18n from './i18n';
+import { mockContentFetch } from './mocks/content-fetch';
 import { renderWithProviders } from './render';
 
 export interface PathUnit {
@@ -60,18 +70,47 @@ export function mockPathContent(
   stages: readonly PathStage[] = OFFLINE_AUDIO_STAGES,
   testLessonIds: readonly string[] = [],
 ): void {
-  vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
-    const url = String(input);
-    if (url === '/content/content.json') {
-      return Response.json({ contentVersion: '0123456789ab', stages });
-    }
-    const lessonId = /\/content\/lessons\/(.+)\.json$/.exec(url)?.[1] ?? '';
-    return Response.json({
-      id: lessonId,
-      type: testLessonIds.includes(lessonId) ? 'test' : 'lesson',
-      title: `Bài ${lessonId}`,
-      exercises: [{ id: 'e1', kind: 'tone-choice', wordId: '八' }],
+  // `mockContentFetch` phục vụ thêm words.json/sentences.json để màn bài mở được (S8.4 đổi màn).
+  vi.spyOn(globalThis, 'fetch').mockImplementation(
+    mockContentFetch(async (input) => {
+      const url = String(input);
+      if (url === '/content/content.json') {
+        return Response.json({ contentVersion: '0123456789ab', stages });
+      }
+      const lessonId = /\/content\/lessons\/(.+)\.json$/.exec(url)?.[1] ?? '';
+      return Response.json({
+        id: lessonId,
+        type: testLessonIds.includes(lessonId) ? 'test' : 'lesson',
+        title: `Bài ${lessonId}`,
+        exercises: [{ id: 'e1', kind: 'tone-choice', wordId: '八' }],
+      });
+    }),
+  );
+}
+
+/**
+ * Thả các file theo thứ tự trong `act`: màn hình cập nhật theo snapshot mới của service
+ * mà không sinh cảnh báo "not wrapped in act(...)".
+ */
+export async function releaseInAct(
+  cache: FakeAudioCache,
+  ...paths: readonly string[]
+): Promise<void> {
+  for (const path of paths) {
+    await act(async () => {
+      await cache.release(path);
     });
+  }
+}
+
+/** Cho file `path` tải lỗi trong `act` (xem `releaseInAct`). */
+export async function failInAct(
+  cache: FakeAudioCache,
+  path: string,
+  reason: AudioDownloadFailure,
+): Promise<void> {
+  await act(async () => {
+    await cache.fail(path, reason);
   });
 }
 
@@ -98,4 +137,41 @@ export function renderPathWithOfflineAudio({
     { route: '/learning-paths' },
   );
   return { ...rendered, cache, service };
+}
+
+/**
+ * Mở `path` qua đúng bảng route của app (cùng cấu trúc Root trong App.tsx) với một
+ * `OfflineAudioService` riêng của test, sống ngoài mọi màn: đổi màn không tạo service mới.
+ */
+export function renderAppRoutesWithOfflineAudio(
+  path: string,
+  { cached = [], index = HSK_INDEX }: RenderPathOptions = {},
+) {
+  const cache = new FakeAudioCache(cached);
+  const service = new OfflineAudioService(
+    cache,
+    fakeContentSourceWithIndex(index),
+  );
+  const router = createMemoryRouter(
+    [
+      {
+        path: '/',
+        element: (
+          <Suspense fallback={null}>
+            <Outlet />
+          </Suspense>
+        ),
+        children: renderChildren(pageRoutes),
+      },
+    ],
+    { initialEntries: [path] },
+  );
+  const rendered = render(
+    <I18nextProvider i18n={testI18n}>
+      <OfflineAudioServiceContext value={service}>
+        <RouterProvider router={router} />
+      </OfflineAudioServiceContext>
+    </I18nextProvider>,
+  );
+  return { ...rendered, user: userEvent.setup(), router, cache, service };
 }

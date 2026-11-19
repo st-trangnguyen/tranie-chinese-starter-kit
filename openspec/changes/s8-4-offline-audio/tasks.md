@@ -191,8 +191,8 @@ container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fake
 - [x] 8.22 GREEN: sửa đến khi pass; kiểm: test 8.21 pass
 - [x] 8.23 RED: S8.4-AC1 "Thông báo của mỗi chủ đề độc lập" (container) — A "Cần có mạng…", xóa B → `within(khối A)` vẫn câu đó, `within(khối B)` "Đã xóa audio của chủ đề <B>.", câu không nằm sai khối; kiểm: fail (nút xóa chưa nối `remove`)
 - [x] 8.24 GREEN: `remove` của hook, nút "Xóa audio" gọi `onRemove`; kiểm: test 8.23 pass
-- [ ] 8.25 RED: S8.4-AC1 "Rời màn khi đang tải" (container, route thật `/learning-paths` ↔ `/lessons/:id` qua `MemoryRouter`) — bấm tải, đi sang bài (khối unmount), thả hết file, quay lại → "Đã tải audio (2,4 MB)"; kiểm: chạy, nếu pass ngay thì tạm giữ state tải trong hook để thấy fail rồi trả lại
-- [ ] 8.26 GREEN: sửa đến khi pass; kiểm: test 8.25 pass
+- [x] 8.25 RED: S8.4-AC1 "Rời màn khi đang tải" (container, route thật `/learning-paths` ↔ `/lessons/:id` qua `MemoryRouter`) — bấm tải, đi sang bài (khối unmount), thả hết file, quay lại → "Đã tải audio (2,4 MB)"; kiểm: chạy, nếu pass ngay thì tạm giữ state tải trong hook để thấy fail rồi trả lại
+- [x] 8.26 GREEN: sửa đến khi pass; kiểm: test 8.25 pass
 - [ ] 8.27 RED: S8.4-AC1 "Quay lại màn khi việc tải còn đang chạy" (container) — như 8.25 nhưng quay lại khi xong 2/4 → "Đang tải 50%", không nút tải; thả nốt → "Đã tải audio (2,4 MB)"; kiểm: như 8.25
 - [ ] 8.28 GREEN: sửa đến khi pass; kiểm: test 8.27 pass
 - [ ] 8.29 RED: S8.4-AC2 "Xóa audio đã tải" (container) — bấm "Xóa audio" (không hộp xác nhận) → "Đã xóa audio của chủ đề Chào hỏi." + nút "Tải audio (2,4 MB)"; kiểm: chạy, nếu pass ngay nhờ 8.24 thì tạm bỏ `message` nhánh `removed` để thấy fail rồi trả lại
