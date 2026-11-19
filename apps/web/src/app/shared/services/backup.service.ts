@@ -1,3 +1,5 @@
+import { progressBackupEnvelopeSchema } from '@csk/shared';
+
 import type { BackupCheck } from '@shared/models/progress-backup.model';
 
 export class BackupService {
@@ -14,6 +16,9 @@ export class BackupService {
     try {
       parsed = JSON.parse(text);
     } catch {
+      return { status: 'rejected', reason: 'not-backup' };
+    }
+    if (!progressBackupEnvelopeSchema.safeParse(parsed).success) {
       return { status: 'rejected', reason: 'not-backup' };
     }
     return { status: 'valid', file: parsed };
