@@ -197,9 +197,9 @@ container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fake
 - [x] 8.28 GREEN: sửa đến khi pass; kiểm: test 8.27 pass
 - [x] 8.29 RED: S8.4-AC2 "Xóa audio đã tải" (container) — bấm "Xóa audio" (không hộp xác nhận) → "Đã xóa audio của chủ đề Chào hỏi." + nút "Tải audio (2,4 MB)"; kiểm: chạy, nếu pass ngay nhờ 8.24 thì tạm bỏ `message` nhánh `removed` để thấy fail rồi trả lại
 - [x] 8.30 GREEN: sửa đến khi pass; kiểm: test 8.29 pass
-- [ ] 8.31 RED: S8.4-AC1 "Nút tải có tên kèm chủ đề" (`.offlineAudioA11y`) — `getByRole('button', { name: 'Tải audio (2,4 MB), chủ đề Chào hỏi' })`, tên bắt đầu bằng `textContent` của nút; kiểm: fail vì chưa có `aria-label`
+- [x] 8.31 RED: S8.4-AC1 "Nút tải có tên kèm chủ đề" (`.offlineAudioA11y`) — `getByRole('button', { name: 'Tải audio (2,4 MB), chủ đề Chào hỏi' })`, tên bắt đầu bằng `textContent` của nút; kiểm: fail vì chưa có `aria-label`
 - [ ] 8.32 GREEN: `aria-label` `downloadLabel`; kiểm: test 8.31 pass
-- [ ] 8.33 RED: S8.4-AC2 "Nút xóa có tên kèm chủ đề" — `getByRole('button', { name: 'Xóa audio, chủ đề Chào hỏi' })`; kiểm: fail
+- [x] 8.33 RED: S8.4-AC2 "Nút xóa có tên kèm chủ đề" — `getByRole('button', { name: 'Xóa audio, chủ đề Chào hỏi' })`; kiểm: fail
 - [ ] 8.34 GREEN: `aria-label` `removeLabel`; kiểm: test 8.33 pass
 - [ ] 8.35 RED: S8.4-AC1 "Tải bằng bàn phím và nghe được kết quả" — `user.tab()` tới nút tải, `{Enter}`; vùng `getByRole('status', { name: 'Thông báo audio offline' })` có "Đang tải audio chủ đề Chào hỏi.", thả hết → có "Đã tải xong audio chủ đề Chào hỏi."; ghi `textContent` của vùng sau mỗi lần thả: không lần nào chứa "Đang tải 25%"/"50%"/"75%"; kiểm: fail vì chưa có vùng
 - [ ] 8.36 GREEN: `OfflineAudioAnnouncer` (D10) trong `LearningPathContainer`, i18n `announce.*`; kiểm: test 8.35 pass
