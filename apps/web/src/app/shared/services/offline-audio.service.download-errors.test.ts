@@ -10,11 +10,15 @@ import {
   AUDIO_B,
   AUDIO_C,
   AUDIO_D,
+  AUDIO_E,
   HSK_STAGE_ID,
+  HSK_TWO_UNITS_INDEX,
+  HSK_UNIT_2_ID,
   HSK_UNIT_ID,
 } from '@test/offline-audio.fixtures';
 
 const CHAO_HOI: OfflineAudioUnit = { id: HSK_UNIT_ID, title: 'Chào hỏi' };
+const GIA_DINH: OfflineAudioUnit = { id: HSK_UNIT_2_ID, title: 'Gia đình' };
 
 describe('OfflineAudioService.startDownload khi không tải được', () => {
   it('S8.4-AC1 Bấm tải khi không có mạng: không tải file nào, chủ đề có thông báo và câu đọc cần có mạng, vẫn chưa tải', async () => {
@@ -187,5 +191,39 @@ describe('OfflineAudioService.startDownload khi không tải được', () => {
     await cache.release(AUDIO_C);
     await cache.release(AUDIO_D);
     await retry;
+  });
+
+  it('S8.4-AC1 Thông báo mất khi trạng thái đổi mà không bấm gì: A tải chưa xong vì thiếu audio dùng chung với B, tải xong B thì A đã tải và không còn thông báo của A', async () => {
+    const { service, cache } = setupOfflineAudioService(
+      [AUDIO_A, AUDIO_B, AUDIO_D],
+      HSK_TWO_UNITS_INDEX,
+    );
+    await service.refresh();
+
+    const firstTry = service.startDownload(CHAO_HOI, true);
+    await flushAsync();
+    await cache.fail(AUDIO_C, 'network');
+    await firstTry;
+    expect(service.getSnapshot().messages.get(HSK_UNIT_ID)).toEqual({
+      kind: 'download-incomplete',
+      shownWith: 'not-downloaded',
+    });
+
+    const downloadB = service.startDownload(GIA_DINH, true);
+    await flushAsync();
+    await cache.release(AUDIO_C);
+    await cache.release(AUDIO_E);
+    await downloadB;
+
+    const snapshot = service.getSnapshot();
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_2_ID, snapshot),
+    ).toMatchObject({ status: 'downloaded' });
+    expect(service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, snapshot)).toEqual({
+      status: 'downloaded',
+      bytes: 2_516_582,
+      canRemove: true,
+    });
+    expect(snapshot.messages.has(HSK_UNIT_ID)).toBe(false);
   });
 });
