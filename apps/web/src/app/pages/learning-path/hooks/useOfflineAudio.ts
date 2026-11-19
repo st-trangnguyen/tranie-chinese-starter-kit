@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import type { Stage } from '@csk/shared';
 
 import type {
@@ -5,6 +6,7 @@ import type {
   OfflineAudioTopicView,
   OfflineAudioUnit,
 } from '@shared/models/offline-audio.model';
+import { useOfflineAudioService } from '@shared/contexts/useOfflineAudioService';
 
 export interface OfflineAudioState {
   /** Khối audio theo id chủ đề; chủ đề không có audio thì không có mục. */
@@ -14,17 +16,35 @@ export interface OfflineAudioState {
   remove: (unit: OfflineAudioUnit) => void;
 }
 
-const EMPTY_STATE: OfflineAudioState = {
-  topics: new Map(),
-  announcements: [],
-  download: () => undefined,
-  remove: () => undefined,
-};
+const EMPTY_TOPICS: ReadonlyMap<string, OfflineAudioTopicView> = new Map();
+
+const noop = (): void => undefined;
 
 /**
- * Trạng thái audio offline của các chủ đề trên bản đồ (S8.4, design D8).
- * RED 8.1: skeleton chưa có hành vi (trả map rỗng), GREEN 8.2 cài đặt.
+ * Trạng thái audio offline của các chủ đề trên bản đồ (S8.4, design D8). Trạng thái tải nằm trong
+ * service (singleton), hook chỉ đọc snapshot và nạp lại tập file trên máy mỗi lần mở bản đồ.
  */
-export const useOfflineAudio: (
+export const useOfflineAudio = (
   stages: readonly Stage[] | undefined,
-) => OfflineAudioState = () => EMPTY_STATE;
+): OfflineAudioState => {
+  const service = useOfflineAudioService();
+  const snapshot = useSyncExternalStore(service.subscribe, service.getSnapshot);
+
+  useEffect(() => {
+    service.refresh().catch(() => {
+      // Không nạp được danh sách audio: bản đồ không có khối audio.
+    });
+  }, [service]);
+
+  const topics = useMemo(
+    () => (stages ? service.deriveTopics(stages, snapshot) : EMPTY_TOPICS),
+    [service, stages, snapshot],
+  );
+
+  return {
+    topics,
+    announcements: snapshot.announcements,
+    download: noop,
+    remove: noop,
+  };
+};

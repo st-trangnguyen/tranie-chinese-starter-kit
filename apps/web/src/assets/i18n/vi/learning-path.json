@@ -7,5 +7,25 @@
     "locked": "Đã khóa"
   },
   "placementTest": "Kiểm tra vượt cấp",
-  "loadError": "Chưa tải được lộ trình. Kiểm tra kết nối rồi mở lại app."
+  "loadError": "Chưa tải được lộ trình. Kiểm tra kết nối rồi mở lại app.",
+  "offlineAudio": {
+    "available": "Audio có sẵn offline",
+    "download": "Tải audio ({{size}})",
+    "downloadLabel": "Tải audio ({{size}}), chủ đề {{topic}}",
+    "downloading": "Đang tải {{percent}}%",
+    "downloaded": "Đã tải audio ({{size}})",
+    "remove": "Xóa audio",
+    "removeLabel": "Xóa audio, chủ đề {{topic}}",
+    "message": {
+      "needs-network": "Cần có mạng để tải audio.",
+      "download-incomplete": "Tải chưa xong. Hãy kiểm tra mạng rồi thử lại.",
+      "storage-full": "Không đủ bộ nhớ để tải audio. Hãy xóa audio của chủ đề khác rồi thử lại.",
+      "removed": "Đã xóa audio của chủ đề {{topic}}."
+    },
+    "announce": {
+      "download-started": "Đang tải audio chủ đề {{topic}}.",
+      "download-finished": "Đã tải xong audio chủ đề {{topic}}."
+    },
+    "announcerLabel": "Thông báo audio offline"
+  }
 }
