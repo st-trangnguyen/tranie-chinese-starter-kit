@@ -99,7 +99,7 @@ Test S8.2 cũ (`SettingsContainer*.test.tsx`) phải vẫn pass sau mỗi GREEN.
 
 - [x] 7.1 RED: S8.5-AC1 "Màn Cài đặt có mục Sao lưu tiến độ" — mở `/settings` → `heading` "Sao lưu tiến độ", `button` "Xuất tiến độ", `button` "Nhập tiến độ"; kiểm: fail vì chưa có mục
 - [x] 7.2 GREEN: `ProgressBackupSection` (`section` region + tiêu đề + hai nút, chưa nối hành vi), `useProgressBackup` skeleton, type view ở `shared/models/progress-backup.model.ts`, nhóm `backup.*` trong `settings.json`, render cuối `<main>` của `SettingsContainer` ngoài nhánh `preferences === null`, `_progress-backup.css` + import `main.css` cạnh `_settings.css`; kiểm: test 7.1 pass
-- [ ] 7.3 RED: S8.5-AC1 "Hai nút dùng được bằng bàn phím" — `userEvent.tab()` tới "Xuất tiến độ" (`toHaveFocus`), `keyboard('{Enter}')` → `fileSaver.save` được gọi với tên `tranie-tien-do-<hôm nay>.json`; `tab()` tiếp → "Nhập tiến độ" có focus; kiểm: fail vì nút chưa nối `exportProgress`
+- [x] 7.3 RED: S8.5-AC1 "Hai nút dùng được bằng bàn phím" — `userEvent.tab()` tới "Xuất tiến độ" (`toHaveFocus`), `keyboard('{Enter}')` → `fileSaver.save` được gọi với tên `tranie-tien-do-<hôm nay>.json`; `tab()` tiếp → "Nhập tiến độ" có focus; kiểm: fail vì nút chưa nối `exportProgress`
 - [ ] 7.4 GREEN: `useProgressBackup.exportProgress` (pha `exporting`, bỏ qua bấm lặp), nút gọi handler; kiểm: test 7.3 pass
 - [ ] 7.5 RED: S8.5-AC1 "Thông báo xuất được đọc cho trình đọc màn hình" — trước khi bấm đã có `role="status"` rỗng; bấm "Xuất tiến độ" → `getByRole('status')` có chữ "Đã xuất tiến độ."; `fileSaver.save` throw → `getByRole('alert')` "Không xuất được tiến độ. Hãy thử lại."; kiểm: fail
 - [ ] 7.6 GREEN: hai vùng thông báo luôn render, `message` `exported`/`exportFailed`; kiểm: test 7.5 pass

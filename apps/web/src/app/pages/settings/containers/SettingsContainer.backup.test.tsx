@@ -1,4 +1,5 @@
 import { createDatabase } from '@core/helpers/db.helper';
+import { fileSaver } from '@core/services/file-saver.service';
 import { renderWithProviders, screen, within } from '@test/render';
 
 import SettingsContainer from './SettingsContainer';
@@ -12,9 +13,24 @@ const clearDatabase = async (): Promise<void> => {
   db.close();
 };
 
+/** Ngày trên máy theo dạng `YYYY-MM-DD` (giờ địa phương), dùng cho tên file xuất. */
+const todayKey = (): string => {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${day}`;
+};
+
+/** Số lần Tab tối đa để đi qua các điều khiển phía trên mục Sao lưu. */
+const MAX_TABS = 30;
+
 describe('SettingsContainer — mục Sao lưu tiến độ', () => {
   beforeEach(async () => {
     await clearDatabase();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('S8.5-AC1 Màn Cài đặt có mục Sao lưu tiến độ: tiêu đề, nút "Xuất tiến độ" và "Nhập tiến độ"', async () => {
@@ -32,5 +48,44 @@ describe('SettingsContainer — mục Sao lưu tiến độ', () => {
     expect(
       within(section).getByRole('button', { name: 'Nhập tiến độ' }),
     ).toBeEnabled();
+  });
+
+  it('S8.5-AC1 Hai nút dùng được bằng bàn phím: Tab tới "Xuất tiến độ", Enter lưu file, Tab tiếp tới "Nhập tiến độ"', async () => {
+    const save = vi
+      .spyOn(fileSaver, 'save')
+      .mockImplementation(() => undefined);
+    const { user } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const section = await screen.findByRole('region', {
+      name: 'Sao lưu tiến độ',
+    });
+    const exportButton = within(section).getByRole('button', {
+      name: 'Xuất tiến độ',
+    });
+    const importButton = within(section).getByRole('button', {
+      name: 'Nhập tiến độ',
+    });
+
+    // Chỉ dùng Tab: đi qua các điều khiển phía trên cho tới nút "Xuất tiến độ".
+    for (
+      let i = 0;
+      i < MAX_TABS && document.activeElement !== exportButton;
+      i += 1
+    ) {
+      await user.tab();
+    }
+    expect(exportButton).toHaveFocus();
+
+    await user.keyboard('{Enter}');
+
+    await vi.waitFor(() => {
+      expect(save).toHaveBeenCalledTimes(1);
+    });
+    expect(save.mock.calls[0]?.[0]).toBe(`tranie-tien-do-${todayKey()}.json`);
+
+    await user.tab();
+    expect(importButton).toHaveFocus();
   });
 });
