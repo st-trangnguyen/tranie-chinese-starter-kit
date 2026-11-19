@@ -7,6 +7,9 @@ export class BackupService {
 
   /** Rule: chỉ file JSON do app xuất, đúng định dạng và phiên bản, mới được nhập. */
   public checkBackupText(text: string): BackupCheck {
+    if (text.trim() === '') {
+      return { status: 'rejected', reason: 'not-backup' };
+    }
     let parsed: unknown;
     try {
       parsed = JSON.parse(text);
