@@ -130,7 +130,7 @@ Test: `apps/web/src/app/shared/services/offline-audio.service.download.test.ts`,
 - [x] 6.15 RED: S8.4-AC1 "Thông báo mất khi bấm nút kế tiếp" (Phần 3) — A có `download-incomplete`, `startDownload(A, true)` → snapshot ngay sau đó không còn thông báo của A, A `downloading`; kiểm: fail
 - [x] 6.16 GREEN: bước 2; kiểm: test 6.15 pass
 - [x] 6.17 RED: S8.4-AC1 "Thông báo của mỗi chủ đề độc lập" (Phần 3) — A `needs-network`, `removeAudio(B)` → thông báo A còn, B có `removed` (skeleton `removeAudio` no-op); kiểm: fail ở B
-- [ ] 6.18 GREEN: `removeAudio` (Phần 1 `removeFiles`, thông báo + câu đọc `removed`); kiểm: test 6.17 pass
+- [x] 6.18 GREEN: `removeAudio` (Phần 1 `removeFiles`, thông báo + câu đọc `removed`); kiểm: test 6.17 pass
 - [ ] 6.19 RED: S8.4-AC1 "Thông báo mất khi trạng thái đổi mà không bấm gì" (Phần 3) — A lỗi khi còn thiếu file s (s cũng thuộc B), tải B xong → A `downloaded`, không còn thông báo của A; kiểm: chạy, nếu pass ngay thì tạm bỏ gọi `pruneStaleMessages` sau ghi để thấy fail rồi trả lại
 - [ ] 6.20 GREEN: gọi `pruneStaleMessages` sau mỗi lần ghi; kiểm: test 6.19 pass
 - [ ] 6.21 RED: S8.4-AC2 "Xóa audio đã tải" (Phần 3) — chủ đề đã tải, `removeAudio` → `FakeAudioCache.remove` nhận đúng tập xóa được, chủ đề `not-downloaded`, thông báo + câu đọc `removed`; kiểm: chạy, nếu pass ngay thì tạm xóa cả audio Nhập môn để thấy fail ở 6.25 rồi trả lại

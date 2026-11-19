@@ -78,6 +78,10 @@ export class OfflineAudioService {
     return download;
   }
 
+  private removeFiles(paths: readonly string[]): Promise<void> {
+    return this.cache.remove(paths);
+  }
+
   private readSnapshot(): OfflineAudioSnapshot {
     return this.snapshot;
   }
@@ -344,11 +348,36 @@ export class OfflineAudioService {
     }
   }
 
-  /** Xóa audio đã tải của chủ đề (skeleton RED 6.17, chưa có hành vi). */
-  removeAudio = (unit: OfflineAudioUnit): Promise<void> => {
-    void unit;
-    return Promise.resolve();
-  };
+  /**
+   * Xóa audio xóa được của chủ đề (bảng xóa), bỏ khỏi `cachedPaths`, gắn thông báo `removed`
+   * (chủ đề chưa tải) kèm câu đọc cùng chữ. Thông báo của chủ đề khác giữ nguyên.
+   */
+  async removeAudio(unit: OfflineAudioUnit): Promise<void> {
+    const started = this.readSnapshot();
+    const removable = started.index
+      ? this.selectRemovableAudio(
+          unit.id,
+          started.index,
+          started.downloadingUnitIds,
+        )
+      : [];
+    await this.removeFiles(removable);
+    const current = this.readSnapshot();
+    const cachedPaths = new Set(current.cachedPaths);
+    removable.forEach((path) => cachedPaths.delete(path));
+    this.writeSnapshot({
+      ...current,
+      cachedPaths,
+      messages: new Map(current.messages).set(unit.id, {
+        kind: 'removed',
+        shownWith: 'not-downloaded',
+      }),
+      announcements: this.appendAnnouncement(current.announcements, {
+        kind: 'removed',
+        unitTitle: unit.title,
+      }),
+    });
+  }
 
   /**
    * Bước 5–6: tải lần lượt từng file thiếu; file đã có trên máy (chủ đề khác vừa tải) thì không
