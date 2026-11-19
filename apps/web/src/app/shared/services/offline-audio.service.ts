@@ -40,6 +40,7 @@ export class OfflineAudioService {
   private snapshot: OfflineAudioSnapshot = INITIAL_SNAPSHOT;
   private readonly listeners = new Set<() => void>();
   private audioIndex: Promise<AudioIndex> | null = null;
+  private readonly inFlight = new Map<string, Promise<void>>();
 
   /** Nạp audio index một lần, giữ promise. */
   private readAudioIndex(): Promise<AudioIndex> {
@@ -53,8 +54,17 @@ export class OfflineAudioService {
     return this.cache.listCachedPaths(paths);
   }
 
+  /** Tải một file; hai chủ đề cần cùng file đang tải thì chờ chung một lượt. */
   private downloadFile(path: string): Promise<void> {
-    return this.cache.download(path);
+    const existing = this.inFlight.get(path);
+    if (existing) {
+      return existing;
+    }
+    const download = this.cache.download(path).finally(() => {
+      this.inFlight.delete(path);
+    });
+    this.inFlight.set(path, download);
+    return download;
   }
 
   private readSnapshot(): OfflineAudioSnapshot {
@@ -272,7 +282,8 @@ export class OfflineAudioService {
 
   /**
    * Tải tuần tự (theo thứ tự trong index) các audio còn thiếu của chủ đề. File cuối và việc
-   * bỏ "đang tải" + câu `download-finished` nằm trong cùng một lần ghi snapshot.
+   * bỏ "đang tải" + câu `download-finished` nằm trong cùng một lần ghi snapshot. Chủ đề đang tải
+   * thì bỏ qua; file đã có trên máy (chủ đề khác vừa tải) thì không tải lại.
    */
   async startDownload(
     unit: OfflineAudioUnit,
@@ -280,6 +291,9 @@ export class OfflineAudioService {
   ): Promise<void> {
     void isOnline;
     const started = this.readSnapshot();
+    if (started.downloadingUnitIds.has(unit.id)) {
+      return;
+    }
     const messages = new Map(started.messages);
     messages.delete(unit.id);
     this.writeSnapshot({
@@ -296,13 +310,19 @@ export class OfflineAudioService {
       started.cachedPaths,
     );
     for (const [position, path] of missingAudio.entries()) {
-      await this.downloadFile(path);
+      const isLast = position === missingAudio.length - 1;
+      const isCached = this.readSnapshot().cachedPaths.has(path);
+      if (isCached && !isLast) {
+        continue;
+      }
+      if (!isCached) {
+        await this.downloadFile(path);
+      }
       const current = this.readSnapshot();
       const next = {
         ...current,
         cachedPaths: new Set(current.cachedPaths).add(path),
       };
-      const isLast = position === missingAudio.length - 1;
       this.writeSnapshot(isLast ? this.finishDownload(next, unit) : next);
     }
     if (missingAudio.length === 0) {
