@@ -236,4 +236,32 @@ describe('LearningPathContainer — audio offline: tên nút cho trình đọc m
     expect(document.activeElement).toBe(document.body);
     unmount();
   });
+
+  it('S8.4-AC2 Focus và thông báo khi xóa bằng bàn phím: should move focus to "Tải audio (2,4 MB), chủ đề Chào hỏi" and announce "Đã xóa audio của chủ đề Chào hỏi." when the learner presses Enter on "Xóa audio"', async () => {
+    const { user, unmount } = renderPathWithOfflineAudio({
+      cached: [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D],
+    });
+
+    const unit = await findUnitSection('Chào hỏi');
+    const removeButton = await findButtonByVisibleText(unit, 'Xóa audio');
+
+    for (
+      let step = 0;
+      step < MAX_TAB_STEPS && document.activeElement !== removeButton;
+      step += 1
+    ) {
+      await user.tab();
+    }
+    expect(removeButton).toHaveFocus();
+
+    await user.keyboard('{Enter}');
+
+    const downloadButton = await within(unit).findByRole('button', {
+      name: DOWNLOAD_NAME,
+    });
+    expect(downloadButton).toHaveFocus();
+    const announcer = screen.getByRole('status', { name: ANNOUNCER_NAME });
+    expect(announcer).toHaveTextContent('Đã xóa audio của chủ đề Chào hỏi.');
+    unmount();
+  });
 });
