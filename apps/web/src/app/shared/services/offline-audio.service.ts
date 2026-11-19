@@ -40,6 +40,14 @@ const INITIAL_SNAPSHOT: OfflineAudioSnapshot = {
   announcements: [],
 };
 
+/** Bản sao `map` không có `key` (không mutate `map`). */
+function withoutKey<V>(
+  map: ReadonlyMap<string, V>,
+  key: string,
+): ReadonlyMap<string, V> {
+  return new Map([...map].filter(([mapKey]) => mapKey !== key));
+}
+
 export class OfflineAudioService {
   constructor(
     private readonly cache: AudioCache = audioCache,
@@ -59,10 +67,11 @@ export class OfflineAudioService {
     return this.audioIndex;
   }
 
-  private readCachedPaths(
-    paths: readonly string[],
-  ): Promise<ReadonlySet<string>> {
-    return this.cache.listCachedPaths(paths);
+  /** Đọc tập file đang có trên máy trong mọi audio của index. */
+  private readCachedPaths(index: AudioIndex): Promise<ReadonlySet<string>> {
+    return this.cache.listCachedPaths([
+      ...new Set(Object.values(index.units).flat()),
+    ]);
   }
 
   /** Tải một file; hai chủ đề cần cùng file đang tải thì chờ chung một lượt. */
@@ -101,18 +110,26 @@ export class OfflineAudioService {
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
   /**
-   * Rule: trạng thái audio offline của chủ đề theo bảng trạng thái (S8.4 AC1).
-   * Chủ đề không có audio (`[]` hoặc không có trong audio index) → không có khối (`null`),
-   * xét đầu tiên, trước cả có sẵn offline.
-   * Có sẵn offline xét trước các trạng thái còn lại.
-   * Chủ đề đang tải và còn file thiếu → `downloading` kèm phần trăm số file đã có trên máy,
-   * xét trước chưa tải/đã tải. Đang tải mà đủ mọi file trên máy → rơi xuống `downloaded`.
-   * Chủ đề chưa đủ audio trên máy → `not-downloaded` kèm dung lượng cần tải.
-   * Đủ mọi file → `downloaded` kèm dung lượng; `canRemove` khi có ít nhất một file xóa được.
+   * Rule: trạng thái audio offline của chủ đề thuộc giai đoạn `stageId` (S8.4 AC1), xem
+   * `deriveUnitTopic`.
    */
   deriveTopic(
     stageId: string,
     unitId: string,
+    snapshot: OfflineAudioSnapshot,
+  ): OfflineAudioTopic | null {
+    return this.deriveUnitTopic(unitId, stageId === INTRO_STAGE_ID, snapshot);
+  }
+
+  /**
+   * Rule: bảng trạng thái (S8.4 AC1), dòng đầu khớp thì dừng: không có audio (`[]` hoặc không
+   * có trong index) → `null`; có sẵn offline; đang tải và còn file thiếu → `downloading` (đủ file
+   * thì rơi xuống `downloaded`); thiếu file → `not-downloaded`; còn lại `downloaded`, `canRemove`
+   * khi có ít nhất một file xóa được.
+   */
+  deriveUnitTopic(
+    unitId: string,
+    isIntroStage: boolean,
     snapshot: OfflineAudioSnapshot,
   ): OfflineAudioTopic | null {
     const unitAudio = snapshot.index?.units[unitId] ?? [];
@@ -121,7 +138,7 @@ export class OfflineAudioService {
     }
     if (
       this.isAvailableOffline(
-        stageId,
+        isIntroStage,
         unitAudio,
         snapshot.index?.precached ?? [],
       )
@@ -162,11 +179,11 @@ export class OfflineAudioService {
    * hoặc khi mọi audio của chủ đề là audio Nhập môn (nằm trong `precached`).
    */
   isAvailableOffline(
-    stageId: string,
+    isIntroStage: boolean,
     unitAudio: readonly string[],
     precached: readonly string[],
   ): boolean {
-    if (stageId === INTRO_STAGE_ID) {
+    if (isIntroStage) {
       return true;
     }
     const precachedPaths = new Set(precached);
@@ -244,14 +261,15 @@ export class OfflineAudioService {
 
   /**
    * Rule: trạng thái hiện tại của mọi chủ đề có trong audio index (S8.4 AC1), dùng để bỏ thông báo
-   * hết hiệu lực khi service không có danh sách giai đoạn. Chủ đề Nhập môn nhận ra qua `precached`.
+   * hết hiệu lực. Service không có danh sách giai đoạn nên không biết chủ đề thuộc Nhập môn: chủ đề
+   * Nhập môn nhận ra qua `precached` (mọi audio của nó là audio Nhập môn).
    */
   deriveIndexedTopics(
     snapshot: OfflineAudioSnapshot,
   ): ReadonlyMap<string, OfflineAudioTopic> {
     const topics = new Map<string, OfflineAudioTopic>();
     Object.keys(snapshot.index?.units ?? {}).forEach((unitId) => {
-      const topic = this.deriveTopic('', unitId, snapshot);
+      const topic = this.deriveUnitTopic(unitId, false, snapshot);
       if (topic) {
         topics.set(unitId, topic);
       }
@@ -337,9 +355,7 @@ export class OfflineAudioService {
   async refresh(): Promise<void> {
     const index = await this.readAudioIndex();
     const before = this.readSnapshot().cachedPaths;
-    const readPaths = await this.readCachedPaths([
-      ...new Set(Object.values(index.units).flat()),
-    ]);
+    const readPaths = await this.readCachedPaths(index);
     const current = this.readSnapshot();
     this.writeSnapshot({
       ...current,
@@ -366,11 +382,10 @@ export class OfflineAudioService {
     if (started.downloadingUnitIds.has(unit.id)) {
       return;
     }
-    const messages = new Map(started.messages);
-    messages.delete(unit.id);
+    const messages = withoutKey(started.messages, unit.id);
     if (!isOnline) {
       this.writeSnapshot(
-        this.stopWithMessage({ ...started, messages }, unit, 'needs-network'),
+        this.withMessage({ ...started, messages }, unit, 'needs-network'),
       );
       return;
     }
@@ -396,8 +411,8 @@ export class OfflineAudioService {
         throw error;
       }
       this.writeSnapshot(
-        this.stopWithMessage(
-          this.readSnapshot(),
+        this.withMessage(
+          this.withoutDownloading(this.readSnapshot(), unit.id),
           unit,
           DOWNLOAD_FAILURE_MESSAGES[error.reason],
         ),
@@ -406,8 +421,9 @@ export class OfflineAudioService {
   }
 
   /**
-   * Xóa audio xóa được của chủ đề (bảng xóa), bỏ khỏi `cachedPaths`, gắn thông báo `removed`
-   * (chủ đề chưa tải) kèm câu đọc cùng chữ. Thông báo của chủ đề khác giữ nguyên.
+   * Xóa audio xóa được của chủ đề (bảng xóa), bỏ khỏi `cachedPaths`, gắn thông báo `removed` kèm
+   * câu đọc cùng chữ. Thông báo của chủ đề khác giữ nguyên. Bộ nhớ báo lỗi khi xóa (D6): đọc lại
+   * tập file trên máy, bỏ thông báo của chủ đề, không thêm thông báo hay câu đọc, không reject.
    */
   async removeAudio(unit: OfflineAudioUnit): Promise<void> {
     const started = this.readSnapshot();
@@ -418,22 +434,28 @@ export class OfflineAudioService {
           started.downloadingUnitIds,
         )
       : [];
-    await this.removeFiles(removable);
+    try {
+      await this.removeFiles(removable);
+    } catch {
+      const cachedPaths = started.index
+        ? await this.readCachedPaths(started.index)
+        : new Set<string>();
+      const current = this.readSnapshot();
+      this.writeSnapshot({
+        ...current,
+        cachedPaths,
+        messages: withoutKey(current.messages, unit.id),
+      });
+      return;
+    }
     const current = this.readSnapshot();
-    const cachedPaths = new Set(current.cachedPaths);
-    removable.forEach((path) => cachedPaths.delete(path));
-    this.writeSnapshot({
-      ...current,
-      cachedPaths,
-      messages: new Map(current.messages).set(unit.id, {
-        kind: 'removed',
-        shownWith: 'not-downloaded',
-      }),
-      announcements: this.appendAnnouncement(current.announcements, {
-        kind: 'removed',
-        unitTitle: unit.title,
-      }),
-    });
+    const removedPaths = new Set(removable);
+    const cachedPaths = new Set(
+      [...current.cachedPaths].filter((path) => !removedPaths.has(path)),
+    );
+    this.writeSnapshot(
+      this.withMessage({ ...current, cachedPaths }, unit, 'removed'),
+    );
   }
 
   /**
@@ -465,17 +487,14 @@ export class OfflineAudioService {
     }
   }
 
-  /** Bỏ chủ đề khỏi "đang tải", gắn thông báo (chủ đề chưa tải) kèm câu đọc cùng chữ (bước 3, 7). */
-  private stopWithMessage(
+  /** Gắn thông báo (hiện khi chủ đề chưa tải) kèm câu đọc cùng chữ (bước 3, 7, xóa). */
+  private withMessage(
     snapshot: OfflineAudioSnapshot,
     unit: OfflineAudioUnit,
     kind: OfflineAudioMessageKind,
   ): OfflineAudioSnapshot {
-    const downloadingUnitIds = new Set(snapshot.downloadingUnitIds);
-    downloadingUnitIds.delete(unit.id);
     return {
       ...snapshot,
-      downloadingUnitIds,
       messages: new Map(snapshot.messages).set(unit.id, {
         kind,
         shownWith: 'not-downloaded',
@@ -492,15 +511,25 @@ export class OfflineAudioService {
     snapshot: OfflineAudioSnapshot,
     unit: OfflineAudioUnit,
   ): OfflineAudioSnapshot {
-    const downloadingUnitIds = new Set(snapshot.downloadingUnitIds);
-    downloadingUnitIds.delete(unit.id);
     return {
-      ...snapshot,
-      downloadingUnitIds,
+      ...this.withoutDownloading(snapshot, unit.id),
       announcements: this.appendAnnouncement(snapshot.announcements, {
         kind: 'download-finished',
         unitTitle: unit.title,
       }),
+    };
+  }
+
+  /** Bỏ chủ đề khỏi "đang tải". */
+  private withoutDownloading(
+    snapshot: OfflineAudioSnapshot,
+    unitId: string,
+  ): OfflineAudioSnapshot {
+    return {
+      ...snapshot,
+      downloadingUnitIds: new Set(
+        [...snapshot.downloadingUnitIds].filter((id) => id !== unitId),
+      ),
     };
   }
 }
