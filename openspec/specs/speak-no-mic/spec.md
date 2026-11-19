@@ -49,7 +49,8 @@ Hệ thống SHALL hiện hướng dẫn khi người học không ghi âm đư�
 ### Requirement: Không ghi âm được thì chuyển sang "đọc to rồi tự chấm"
 Hệ thống SHALL chuyển câu "nói" sang chế độ "đọc to rồi tự chấm" khi không ghi âm được: người học đọc to chữ hiện trên màn rồi tự
 chọn mức. Hệ thống MUST ẩn nút "Ghi âm", "Nghe bản ghi" và khu "Chấm tự động", MUST giữ "Nghe mẫu" và 3 nút tự đánh giá, và MUST tính điểm
-như chế độ bình thường. Chế độ này MUST NOT chặn người học làm tiếp bài.
+như chế độ bình thường. Chế độ này MUST NOT chặn người học làm tiếp bài. Pinyin của nội dung cần đọc MUST hiện theo tùy chọn "Hiện pinyin"
+trong Cài đặt, như ở chế độ bình thường.
 
 #### Scenario: S5.4-AC2 Chuyển chế độ khi không ghi âm được
 - **WHEN** người học bấm "Ghi âm" nhưng không ghi âm được
@@ -57,9 +58,14 @@ như chế độ bình thường. Chế độ này MUST NOT chặn người họ
 - **AND** không còn nút "Ghi âm", "Nghe bản ghi" và khu "Chấm tự động"
 
 #### Scenario: S5.4-AC2 Vẫn nghe mẫu và thấy chữ để đọc
-- **WHEN** câu "nói" đang ở chế độ "đọc to rồi tự chấm"
+- **WHEN** "Hiện pinyin" trong Cài đặt đang bật và câu "nói" đang ở chế độ "đọc to rồi tự chấm"
 - **THEN** có nút "Nghe mẫu" bấm được
 - **AND** màn hiện chữ Hán, pinyin và nghĩa của từ (hoặc câu)
+
+#### Scenario: S8.2-AC3 Đọc to rồi tự chấm khi tắt pinyin
+- **WHEN** "Hiện pinyin" trong Cài đặt đang tắt và câu "nói" đang ở chế độ "đọc to rồi tự chấm"
+- **THEN** màn hiện chữ Hán và nghĩa của từ (hoặc câu), không hiện pinyin
+- **AND** có nút "Nghe mẫu" bấm được
 
 #### Scenario: S5.4-AC2 Vẫn tự đánh giá và tính điểm
 - **WHEN** câu "nói" đang ở chế độ "đọc to rồi tự chấm" và người học chọn "Đúng"
