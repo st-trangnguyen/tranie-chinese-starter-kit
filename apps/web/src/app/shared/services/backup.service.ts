@@ -66,14 +66,19 @@ export class BackupService {
     return { status: 'valid', file: file.data };
   }
 
-  // TODO(S8.5 task 4.4): skeleton RED, chưa có hành vi.
+  /**
+   * Rule: số bài đã xong là số dòng `completed` của bài có trong nội dung app, kể cả bài qua bằng
+   * kiểm tra vượt cấp (cũng lưu `completed`); bài không còn trong app không được đếm.
+   */
   public countCompletedLessons(
     lessonProgress: readonly LessonProgress[],
     knownLessonIds: ReadonlySet<string>,
   ): number {
-    void lessonProgress;
-    void knownLessonIds;
-    return 0;
+    return lessonProgress.filter(
+      (progress) =>
+        progress.status === 'completed' &&
+        knownLessonIds.has(progress.lessonId),
+    ).length;
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────

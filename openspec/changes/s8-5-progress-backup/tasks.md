@@ -51,7 +51,7 @@ Test: `apps/web/src/app/shared/services/backup.service.test.ts` (pure).
 - [x] 4.1 RED: S8.5-AC1 "Bấm Xuất tiến độ thì lưu được file" (Phần 2) — `buildBackupFileName(new Date(2026, 10, 17, 23, 59).getTime())` = `'tranie-tien-do-2026-11-17.json'`, 00:01 ngày 18 → `…-2026-11-18.json`; `serializeBackupFile(buildBackupFile(snapshot, now))` là JSON đọc được, có `format`, `formatVersion: 1`, `exportedOn: '2026-11-17'`, và `checkBackupText` của nó → `valid` với snapshot bằng đầu vào; kiểm: fail vì skeleton
 - [x] 4.2 GREEN: `buildBackupFileName`, `buildBackupFile`, `serializeBackupFile` (kèm `Rule:`); kiểm: test 4.1 pass
 - [x] 4.3 RED: S8.5-AC3 "Số bài đã xong gồm bài qua bằng kiểm tra vượt cấp" (Phần 2) — lộ trình 4 chủ đề (D10), `lessonProgress` = `intro-01`, `intro-05`, `intro-06` completed + `intro-02` in-progress → `countCompletedLessons` = 3 (1 + N, N = 2); kiểm: fail vì skeleton trả 0
-- [ ] 4.4 GREEN: `countCompletedLessons` (chỉ `completed` có trong `knownLessonIds`, `Rule:`); kiểm: test 4.3 pass
+- [x] 4.4 GREEN: `countCompletedLessons` (chỉ `completed` có trong `knownLessonIds`, `Rule:`); kiểm: test 4.3 pass
 - [ ] 4.5 RED: S8.5-AC3 "Bài không có trong app không ảnh hưởng lộ trình" (Phần 2) — `intro-01` + `khong-co-bai-nay` completed → `countCompletedLessons` = 1; `ProgressService.deriveLessonStatuses(stages, {intro-01, khong-co-bai-nay})` → `intro-01` completed, `intro-02` open, còn lại locked, không có khóa `khong-co-bai-nay`; kiểm: chạy, nếu pass ngay thì tạm bỏ điều kiện `knownLessonIds` để thấy fail rồi trả lại
 - [ ] 4.6 GREEN: sửa đến khi pass; kiểm: test 4.5 pass, mọi method Phần 2 có `Rule:`
 
