@@ -1,0 +1,37 @@
+/*
+ * Khối audio offline của một chủ đề trên bản đồ lộ trình — S8.4 (design D11).
+ * Khối không chuyển động: không transition/animation, kể cả transition-colors kế thừa từ .btn.
+ */
+
+@layer components {
+  .offline-audio {
+    @apply text-body-sm text-fg;
+  }
+
+  /* Dòng "Đang tải …%" / "Đã tải audio": nhận focus bằng code (tabIndex -1) khi nút vừa bị gỡ (D9). */
+  .offline-audio-status {
+    @apply self-start rounded-sm text-body-sm text-fg;
+  }
+
+  /* Viền focus accent: ≥ 4.5:1 trên bg và surface ở cả hai theme (tokens.test.ts), vượt ngưỡng 3:1. */
+  .offline-audio-status:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .offline-audio-message {
+    @apply text-body-sm text-fg-muted;
+  }
+
+  /* Vùng chạm ≥ 44×44 px; tên chủ đề dài thì chữ xuống dòng thay vì tràn khung. */
+  .offline-audio-button {
+    @apply h-auto min-h-11 min-w-11 self-start py-sm text-center whitespace-normal transition-none;
+  }
+
+  .offline-audio-button:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .offline-audio-announcer {
+    @apply sr-only;
+  }
+}

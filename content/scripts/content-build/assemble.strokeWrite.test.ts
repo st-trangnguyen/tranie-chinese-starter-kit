@@ -54,6 +54,7 @@ const inputsWithStrokeWrite = (wordIdYaml: string): BuildInputs => ({
     parseYamlFile(LESSON_FILE, lessonYaml(strokeWriteLine(wordIdYaml))),
   ],
   strokeData,
+  audioBytes: () => undefined,
 });
 
 describe('assembleContent — luật câu viết (stroke-write)', () => {

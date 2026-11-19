@@ -1,10 +1,12 @@
 import {
+  audioIndexSchema,
   contentRootSchema,
   lessonSchema,
   sentenceSchema,
   strokeDataSchema,
   strokeIndexSchema,
   wordSchema,
+  type AudioIndex,
   type ContentRoot,
   type Lesson,
   type Sentence,
@@ -24,6 +26,7 @@ export interface ContentSource {
   getSentences(): Promise<Sentence[]>;
   getStrokeIndex(): Promise<StrokeIndex>;
   getStrokeData(character: string): Promise<StrokeData>;
+  getAudioIndex(): Promise<AudioIndex>;
 }
 
 const CONTENT_BASE_PATH = '/content';
@@ -69,6 +72,10 @@ export class FetchContentSource implements ContentSource {
       `${CONTENT_BASE_PATH}/strokes/${encodeURIComponent(character)}.json`,
       strokeDataSchema,
     );
+  }
+
+  getAudioIndex(): Promise<AudioIndex> {
+    return this.load(`${CONTENT_BASE_PATH}/audio-index.json`, audioIndexSchema);
   }
 
   private async load<T>(url: string, schema: Schema<T>): Promise<T> {

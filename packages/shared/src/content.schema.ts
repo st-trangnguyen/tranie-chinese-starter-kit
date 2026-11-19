@@ -8,7 +8,7 @@ import { isToneMarkedPinyin } from './pinyin.utils';
  * Bài tập tham chiếu từ/câu bằng ID qua field `wordId`, `wordIds`, `sentenceId`.
  */
 
-const idSchema = z.string().trim().min(1);
+export const idSchema = z.string().trim().min(1);
 const hanziSchema = z
   .string()
   .regex(/\p{Script=Han}/u, 'Phải có ít nhất một chữ Hán');
@@ -19,7 +19,7 @@ const pinyinSchema = z
     'Pinyin phải viết bằng dấu thanh, không số, ký tự hợp lệ',
   );
 /** Đường dẫn tương đối tới mp3 trong `assets/`, ví dụ `audio/3f2a9c0d1b2e4f56.mp3`. */
-const audioPathSchema = z.string().regex(/^audio\/[0-9a-f]{16}\.mp3$/);
+export const audioPathSchema = z.string().regex(/^audio\/[0-9a-f]{16}\.mp3$/);
 
 export const VOICES = ['female', 'male'] as const;
 export const voiceSchema = z.enum(VOICES);
