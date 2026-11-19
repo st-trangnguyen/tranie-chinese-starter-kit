@@ -128,7 +128,7 @@ Helper `apps/web/e2e/E8/backup.helpers.ts`: `backupSection`, `exportProgress` (c
 `openSettingsFromPath`, `goalRadio`, `pinyinSwitch`, `breakSettingsReads` (`settings.helpers.ts`), `expectStreak`, `dayKey`,
 `reachedDay` (`streak.helpers.ts`). Mỗi file < 300 dòng.
 
-- [ ] 8.1 RED: S8.5-AC1 "Xuất khi không có mạng" — `s8.5-backup-offline.spec.ts`: `openOnceWithServiceWorker` (mẫu `e2e/E1/s1.2-offline.spec.ts`), onboarding, `setOffline(true)`, `openSettingsFromPath`, bấm "Xuất tiến độ" → có `download` tên đúng, `status` "Đã xuất tiến độ." (TC-S8.5-AC1-12); kiểm: chạy, nếu pass ngay (không có nhánh mạng) thì tạm cho `exportProgress` gọi `fetch` một URL nội bộ trước khi xuất để thấy test bắt được phụ thuộc mạng, rồi trả lại
+- [x] 8.1 RED: S8.5-AC1 "Xuất khi không có mạng" — `s8.5-backup-offline.spec.ts`: `openOnceWithServiceWorker` (mẫu `e2e/E1/s1.2-offline.spec.ts`), onboarding, `setOffline(true)`, `openSettingsFromPath`, bấm "Xuất tiến độ" → có `download` tên đúng, `status` "Đã xuất tiến độ." (TC-S8.5-AC1-12); kiểm: chạy, nếu pass ngay (không có nhánh mạng) thì tạm cho `exportProgress` gọi `fetch` một URL nội bộ trước khi xuất để thấy test bắt được phụ thuộc mạng, rồi trả lại
 - [ ] 8.2 GREEN: sửa đến khi pass (chunk `/settings` và chuỗi i18n có trong precache); kiểm: test 8.1 pass
 - [ ] 8.3 RED: S8.5-AC2 "Nhập file lỗi khi không có mạng" — cùng file; offline, `intro-01` completed, nhập `trang-thai-sai.json` → `alert` "File tiến độ bị hỏng, không nhập được.", không `dialog`, Lộ trình vẫn `intro-01` "Đã xong" (TC-S8.5-AC2-8); kiểm: như 8.1 (tạm `fetch` trong `inspectImportFile`)
 - [ ] 8.4 GREEN: sửa đến khi pass; kiểm: test 8.3 pass
