@@ -265,3 +265,24 @@ describe('BackupService.countCompletedLessons — bài qua bằng kiểm tra vư
     expect(passedTopicLessonCount).toBe(2);
   });
 });
+
+describe('BackupService.countCompletedLessons — bài không có trong app', () => {
+  const knownLessonIds: ReadonlySet<string> = new Set([
+    'intro-01',
+    'intro-02',
+    'intro-03',
+    'intro-04',
+  ]);
+
+  it('S8.5-AC3 Bài không có trong app không ảnh hưởng lộ trình: bài 1 + bài lạ đã xong → 1', () => {
+    const service = new BackupService();
+    const lessonProgress: LessonProgress[] = [
+      { lessonId: 'intro-01', status: 'completed' },
+      { lessonId: 'khong-co-bai-nay', status: 'completed' },
+    ];
+
+    expect(service.countCompletedLessons(lessonProgress, knownLessonIds)).toBe(
+      1,
+    );
+  });
+});
