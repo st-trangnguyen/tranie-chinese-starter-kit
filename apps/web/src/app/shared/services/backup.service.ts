@@ -78,6 +78,12 @@ export class BackupService {
     return JSON.stringify(file, null, 2);
   }
 
+  // TODO(S8.5 task 6.16): skeleton RED, chưa có hành vi.
+  public isBackupFileTooLarge(bytes: number): boolean {
+    void bytes;
+    return false;
+  }
+
   /** Rule: chỉ file JSON do app xuất, đúng định dạng và phiên bản, mới được nhập. */
   public checkBackupText(text: string): BackupCheck {
     if (text.trim() === '') {

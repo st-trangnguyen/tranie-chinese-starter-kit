@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   createMachine,
@@ -181,6 +181,45 @@ describe('BackupService.inspectImportFile + importProgress', () => {
     expect(await progressB.getStudyStreak(NOW)).toBe(1);
     expect((await progressB.getLearningPreferences()).dailyGoalMinutes).toBe(
       30,
+    );
+  });
+});
+
+describe('BackupService — file lớn hơn 20 MB', () => {
+  it.each([
+    ['20 000 001 byte → quá lớn', 20_000_001, true],
+    ['đúng 20 000 000 byte → vẫn đọc', 20_000_000, false],
+    ['0 byte → vẫn đọc', 0, false],
+  ])(
+    'S8.5-AC2 File lớn hơn 20 MB bị từ chối: %s',
+    (_label, bytes, isTooLarge) => {
+      const { backup } = createMachine();
+      expect(backup.isBackupFileTooLarge(bytes)).toBe(isTooLarge);
+    },
+  );
+
+  it('S8.5-AC2 File lớn hơn 20 MB bị từ chối: không đọc nội dung file, báo not-backup, máy vẫn có bài 1 đã xong', async () => {
+    const machine = createMachine();
+    const progress = new ProgressService(machine.store);
+    await progress.completeOnboarding(15);
+    await machine.store.saveLessonProgress({
+      lessonId: 'intro-01',
+      status: 'completed',
+    });
+    // Nội dung là file sao lưu hợp lệ: chỉ kích thước mới làm file bị từ chối.
+    await machine.backup.exportProgress(NOW);
+    const exported = machine.savedFiles[0]?.content ?? '';
+    const text = vi.fn(async () => exported);
+
+    const inspection = await machine.backup.inspectImportFile({
+      size: 20_000_001,
+      text,
+    });
+
+    expect(inspection).toEqual({ status: 'rejected', reason: 'not-backup' });
+    expect(text).not.toHaveBeenCalled();
+    expect(await progress.getCompletedLessonIds()).toEqual(
+      new Set(['intro-01']),
     );
   });
 });
