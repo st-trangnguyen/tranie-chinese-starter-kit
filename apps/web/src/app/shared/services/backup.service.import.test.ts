@@ -5,6 +5,7 @@ import {
   NOW,
   toBackupFileSource,
 } from '@test/backup-machine.helpers';
+import { toLocalDateKey } from '@shared/utils/date.utils';
 
 import { ProgressService } from './progress.service';
 
@@ -84,5 +85,32 @@ describe('BackupService.inspectImportFile + importProgress', () => {
     expect((await progressB.getLearningPreferences()).isPinyinVisible).toBe(
       false,
     );
+  });
+
+  it('S8.5-AC1 File có số phút đã học từng ngày: máy A học 12 phút hôm nay với mục tiêu 15, nhập ở máy B cùng ngày thì hiện 12 / 15 phút', async () => {
+    const machineA = createMachine();
+    const progressA = new ProgressService(machineA.store);
+    await progressA.completeOnboarding(15);
+    await machineA.store.addStudySeconds(toLocalDateKey(NOW), 720);
+    await machineA.backup.exportProgress(NOW);
+    const exported = machineA.savedFiles[0]?.content ?? '';
+
+    const machineB = createMachine();
+    const progressB = new ProgressService(machineB.store);
+    await progressB.completeOnboarding(30);
+
+    const inspection = await machineB.backup.inspectImportFile(
+      toBackupFileSource(exported),
+    );
+    expect(inspection.status).toBe('valid');
+    if (inspection.status !== 'valid') {
+      return;
+    }
+    await machineB.backup.importProgress(inspection.snapshot);
+
+    expect(await progressB.getTodayStudy(NOW)).toMatchObject({
+      minutes: 12,
+      goalMinutes: 15,
+    });
   });
 });
