@@ -28,6 +28,10 @@ export function OfflineAudioBlock({
         <button
           type="button"
           className="btn btn-secondary offline-audio-button"
+          aria-label={t('offlineAudio.downloadLabel', {
+            size: formatAudioSize(topic.bytes),
+            topic: unitTitle,
+          })}
           onClick={onDownload}
         >
           {t('offlineAudio.download', { size: formatAudioSize(topic.bytes) })}
@@ -49,6 +53,7 @@ export function OfflineAudioBlock({
             <button
               type="button"
               className="btn btn-secondary offline-audio-button"
+              aria-label={t('offlineAudio.removeLabel', { topic: unitTitle })}
               onClick={onRemove}
             >
               {t('offlineAudio.remove')}
