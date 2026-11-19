@@ -108,7 +108,12 @@ export class BackupService {
 
   /** Xuất toàn bộ tiến độ thành một file JSON tên theo ngày, đưa cho trình duyệt lưu xuống máy. */
   public async exportProgress(now: number = Date.now()): Promise<void> {
-    const snapshot = await this.readSnapshot();
+    let snapshot: ProgressSnapshot;
+    try {
+      snapshot = await this.readSnapshot();
+    } catch (error) {
+      throw new Error('Không đọc được tiến độ để xuất.', { cause: error });
+    }
     const text = this.serializeBackupFile(this.buildBackupFile(snapshot, now));
     this.saveFile(this.buildBackupFileName(now), text);
   }
