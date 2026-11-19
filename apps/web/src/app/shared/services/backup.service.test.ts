@@ -145,3 +145,27 @@ describe('BackupService.checkBackupText — file có một phần dữ liệu sa
     });
   });
 });
+
+describe('BackupService.checkBackupText — file có mục tiêu phút không hợp lệ', () => {
+  it('S8.5-AC2 File có mục tiêu phút không hợp lệ bị từ chối: mục tiêu 45 phút → corrupted', () => {
+    const service = new BackupService();
+    const text = JSON.stringify({
+      format: PROGRESS_BACKUP_FORMAT,
+      formatVersion: PROGRESS_BACKUP_FORMAT_VERSION,
+      exportedOn: '2026-11-17',
+      settings: {
+        dailyGoalMinutes: 45,
+        hasCompletedOnboarding: true,
+        defaultAudioSpeed: 'normal',
+        isPinyinVisible: true,
+      },
+      lessonProgress: [{ lessonId: 'intro-02', status: 'completed' }],
+      dailyStats: [],
+    });
+
+    expect(service.checkBackupText(text)).toEqual({
+      status: 'rejected',
+      reason: 'corrupted',
+    });
+  });
+});

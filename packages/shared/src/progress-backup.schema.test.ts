@@ -6,6 +6,7 @@ import {
   progressBackupEnvelopeSchema,
   progressBackupV1Schema,
 } from './progress-backup.schema';
+import { parseSettings } from './progress.schema';
 
 describe('progressBackupEnvelopeSchema', () => {
   it.each<[string, unknown]>([
@@ -174,6 +175,38 @@ describe('progressBackupV1Schema', () => {
       };
 
       expect(progressBackupV1Schema.safeParse(file).success).toBe(true);
+    },
+  );
+});
+
+describe('progressBackupV1Schema — mục tiêu phút trong cài đặt', () => {
+  it.each<[string, unknown]>([
+    ['45 phút', 45],
+    ['0 phút', 0],
+    ['chữ "30"', '30'],
+  ])(
+    'S8.5-AC2 File có mục tiêu phút không hợp lệ bị từ chối: settings.dailyGoalMinutes %s',
+    (_label, dailyGoalMinutes) => {
+      const file = buildValidV1File();
+      const result = progressBackupV1Schema.safeParse({
+        ...file,
+        settings: {
+          dailyGoalMinutes,
+          hasCompletedOnboarding: true,
+          defaultAudioSpeed: 'slow',
+          isPinyinVisible: false,
+        },
+      });
+
+      expect(result.success).toBe(false);
+    },
+  );
+
+  it(
+    'S8.5-AC2 File có mục tiêu phút không hợp lệ bị từ chối: ' +
+      'đọc cài đặt từ DB vẫn khoan dung, 45 thành 15',
+    () => {
+      expect(parseSettings({ dailyGoalMinutes: 45 }).dailyGoalMinutes).toBe(15);
     },
   );
 });
