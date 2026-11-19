@@ -23,6 +23,8 @@ const SCENARIO_OVERWRITE_STUDY_TIME =
   'S8.5-AC3 Ghi đè xóa số phút học mà file không có';
 const SCENARIO_WRITE_FAILS =
   'S8.5-AC3 Ghi lỗi giữa chừng thì giữ nguyên tiến độ cũ';
+const SCENARIO_EXPORT_KEEPS_PROGRESS = 'S8.5-AC1 Xuất không làm đổi tiến độ';
+const YESTERDAY = '2026-11-17';
 
 describe('DexieProgressStore — sao lưu tiến độ (S8.5)', () => {
   it(`${SCENARIO_OVERWRITE_STUDY_TIME}: ghi đè thay toàn bộ ba bảng, ngày không có trong file bị xóa`, async () => {
@@ -114,5 +116,55 @@ describe('DexieProgressStore — sao lưu tiến độ (S8.5)', () => {
       completed('intro-01'),
     ]);
     await expect(store.getAllDailyStats()).resolves.toEqual([oldDailyStat]);
+  });
+
+  it(`${SCENARIO_EXPORT_KEEPS_PROGRESS}: trả đúng tiến độ hợp lệ và không đổi dữ liệu trong DB`, async () => {
+    const { db, store } = openStore();
+    const settings = {
+      dailyGoalMinutes: 15,
+      hasCompletedOnboarding: true,
+      defaultAudioSpeed: 'slow',
+      isPinyinVisible: false,
+    } as const;
+    await store.saveSettings(settings);
+    const lesson1: LessonProgress = completed('intro-01');
+    const lesson2: LessonProgress = {
+      lessonId: 'intro-02',
+      status: 'in-progress',
+      cursor: 2,
+    };
+    await store.saveLessonProgressBatch([lesson1, lesson2]);
+    await db.lessonProgress.put({ lessonId: 'intro-03', status: 'done' });
+    const todayStat = { date: TODAY, studySeconds: 600, goalMinutes: 15 };
+    const yesterdayStat = { date: YESTERDAY, studySeconds: 300 };
+    await db.dailyStats.bulkPut([todayStat, yesterdayStat]);
+
+    const readRaw = async () => ({
+      settings: await db.settings.toArray(),
+      lessonProgress: await db.lessonProgress.toArray(),
+      dailyStats: await db.dailyStats.toArray(),
+    });
+    const rawBefore = await readRaw();
+
+    const snapshot = await store.exportAll();
+
+    expect(snapshot.settings).toEqual(settings);
+    expect(snapshot.lessonProgress).toHaveLength(2);
+    expect(snapshot.lessonProgress).toEqual(
+      expect.arrayContaining([lesson1, lesson2]),
+    );
+    expect(snapshot.dailyStats).toHaveLength(2);
+    expect(snapshot.dailyStats).toEqual(
+      expect.arrayContaining([todayStat, yesterdayStat]),
+    );
+    const exportedYesterday = snapshot.dailyStats.find(
+      (stat) => stat.date === YESTERDAY,
+    );
+    expect(exportedYesterday).toBeDefined();
+    expect(exportedYesterday?.goalMinutes).toBeUndefined();
+
+    const rawAfter = await readRaw();
+    expect(rawAfter).toEqual(rawBefore);
+    expect(rawAfter.lessonProgress).toHaveLength(3);
   });
 });
