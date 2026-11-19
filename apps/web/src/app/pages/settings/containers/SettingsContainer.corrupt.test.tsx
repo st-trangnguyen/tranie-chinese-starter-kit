@@ -1,6 +1,10 @@
 import { createDatabase } from '@core/helpers/db.helper';
 import { progressStore } from '@core/services/progress-store.service';
 import { renderWithProviders, screen, within } from '@test/render';
+import {
+  findSettingsAlert,
+  querySettingsAlert,
+} from '@test/settings-alert.helpers';
 
 import SettingsContainer from './SettingsContainer';
 
@@ -58,7 +62,7 @@ describe('SettingsContainer — dữ liệu lưu bị hỏng', () => {
       within(pinyinGroup).getByRole('switch', { name: 'Hiện pinyin' }),
     ).not.toBeChecked();
 
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(querySettingsAlert()).not.toBeInTheDocument();
   });
 
   it('S8.2-AC1 Mục tiêu đã lưu bị hỏng thì về 15 phút: mục tiêu "abc" → "15 phút", tốc độ "slow" giữ "Chậm (0.75x)"', async () => {
@@ -86,7 +90,7 @@ describe('SettingsContainer — dữ liệu lưu bị hỏng', () => {
       within(speedGroup).getByRole('radio', { name: 'Bình thường (1x)' }),
     ).not.toBeChecked();
 
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(querySettingsAlert()).not.toBeInTheDocument();
   });
   it('S8.2-AC3 Tùy chọn pinyin đã lưu bị hỏng thì về bật: pinyin "yes" → công tắc bật, mục tiêu 30 giữ "30 phút"', async () => {
     await writeRawSettings([
@@ -111,7 +115,7 @@ describe('SettingsContainer — dữ liệu lưu bị hỏng', () => {
       within(goalGroup).getByRole('radio', { name: '15 phút' }),
     ).not.toBeChecked();
 
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(querySettingsAlert()).not.toBeInTheDocument();
   });
 });
 
@@ -163,7 +167,7 @@ describe('SettingsContainer — không đọc được cài đặt', () => {
       within(pinyinGroup).getByRole('switch', { name: 'Hiện pinyin' }),
     ).toBeChecked();
 
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(querySettingsAlert()).not.toBeInTheDocument();
 
     vi.spyOn(progressStore, 'saveSettings').mockRejectedValue(
       new Error('write failed'),
@@ -171,7 +175,7 @@ describe('SettingsContainer — không đọc được cài đặt', () => {
 
     await user.click(within(goalGroup).getByRole('radio', { name: '30 phút' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
+    expect(await findSettingsAlert()).toHaveTextContent(
       'Không lưu được cài đặt. Hãy thử lại.',
     );
     expect(

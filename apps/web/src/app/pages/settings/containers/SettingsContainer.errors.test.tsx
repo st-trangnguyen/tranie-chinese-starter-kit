@@ -2,6 +2,12 @@ import { createDatabase } from '@core/helpers/db.helper';
 import { progressStore } from '@core/services/progress-store.service';
 import { ProgressService } from '@shared/services/progress.service';
 import { renderWithProviders, screen, waitFor, within } from '@test/render';
+import {
+  findSettingsAlert,
+  getSettingsAlert,
+  queryAllSettingsAlerts,
+  querySettingsAlert,
+} from '@test/settings-alert.helpers';
 
 import SettingsContainer from './SettingsContainer';
 
@@ -57,7 +63,7 @@ describe('SettingsContainer — lỗi lưu', () => {
 
     await user.click(within(group).getByRole('radio', { name: '30 phút' }));
 
-    const alert = await screen.findByRole('alert');
+    const alert = await findSettingsAlert();
     expect(alert).toHaveTextContent(SAVE_ERROR_MESSAGE);
     expect(within(group).getByRole('radio', { name: '15 phút' })).toBeChecked();
     expect(
@@ -87,7 +93,7 @@ describe('SettingsContainer — lỗi lưu', () => {
       within(group).getByRole('radio', { name: 'Chậm (0.75x)' }),
     );
 
-    const alert = await screen.findByRole('alert');
+    const alert = await findSettingsAlert();
     expect(alert).toHaveTextContent(SAVE_ERROR_MESSAGE);
     expect(
       within(group).getByRole('radio', { name: 'Bình thường (1x)' }),
@@ -116,7 +122,7 @@ describe('SettingsContainer — lỗi lưu', () => {
 
     await user.click(pinyinSwitch);
 
-    const alert = await screen.findByRole('alert');
+    const alert = await findSettingsAlert();
     expect(alert).toHaveTextContent(SAVE_ERROR_MESSAGE);
     expect(
       within(group).getByRole('switch', { name: 'Hiện pinyin' }),
@@ -140,14 +146,12 @@ describe('SettingsContainer — lỗi lưu', () => {
     );
 
     await user.click(within(group).getByRole('radio', { name: '30 phút' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      SAVE_ERROR_MESSAGE,
-    );
+    expect(await findSettingsAlert()).toHaveTextContent(SAVE_ERROR_MESSAGE);
 
     await user.click(within(group).getByRole('radio', { name: '30 phút' }));
 
     await waitFor(() => {
-      expect(screen.queryByRole('alert')).toBeNull();
+      expect(querySettingsAlert()).toBeNull();
     });
     expect(within(group).getByRole('radio', { name: '30 phút' })).toBeChecked();
     expect(
@@ -174,16 +178,14 @@ describe('SettingsContainer — lỗi lưu', () => {
     );
 
     await user.click(within(goalGroup).getByRole('radio', { name: '30 phút' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      SAVE_ERROR_MESSAGE,
-    );
+    expect(await findSettingsAlert()).toHaveTextContent(SAVE_ERROR_MESSAGE);
 
     await user.click(
       within(speedGroup).getByRole('radio', { name: 'Chậm (0.75x)' }),
     );
 
     await waitFor(() => {
-      expect(screen.queryByRole('alert')).toBeNull();
+      expect(querySettingsAlert()).toBeNull();
     });
     expect(
       within(goalGroup).getByRole('radio', { name: '15 phút' }),
@@ -209,15 +211,15 @@ describe('SettingsContainer — lỗi lưu', () => {
       .mockRejectedValueOnce(new Error('quota'));
 
     await user.click(within(group).getByRole('radio', { name: '30 phút' }));
-    const firstAlert = await screen.findByRole('alert');
+    const firstAlert = await findSettingsAlert();
     expect(firstAlert).toHaveTextContent(SAVE_ERROR_MESSAGE);
 
     await user.click(within(group).getByRole('radio', { name: '60 phút' }));
 
     await waitFor(() => {
-      expect(screen.getByRole('alert')).not.toBe(firstAlert);
+      expect(getSettingsAlert()).not.toBe(firstAlert);
     });
-    const alerts = screen.getAllByRole('alert');
+    const alerts = queryAllSettingsAlerts();
     expect(alerts).toHaveLength(1);
     expect(alerts[0]).toHaveTextContent(SAVE_ERROR_MESSAGE);
     expect(within(group).getByRole('radio', { name: '15 phút' })).toBeChecked();
@@ -255,9 +257,7 @@ describe('SettingsContainer — lỗi lưu', () => {
     // Lần đổi cũ (60) lỗi trong khi lần mới nhất (30) đã gửi, chưa xong.
     firstSave.reject(new Error('quota'));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      SAVE_ERROR_MESSAGE,
-    );
+    expect(await findSettingsAlert()).toHaveTextContent(SAVE_ERROR_MESSAGE);
     expect(within(group).getByRole('radio', { name: '30 phút' })).toBeChecked();
     expect(
       within(group).getByRole('radio', { name: '15 phút' }),
