@@ -1,4 +1,4 @@
-import { useId, useRef, type ChangeEvent } from 'react';
+import { useEffect, useId, useRef, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { ProgressBackupView } from '@shared/models/progress-backup.model';
@@ -14,7 +14,18 @@ export function ProgressBackupSection({ backup }: ProgressBackupSectionProps) {
   const { t } = useTranslation('settings');
   const titleId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const importButtonRef = useRef<HTMLButtonElement>(null);
+  const wasDialogOpenRef = useRef(false);
   const { message, phase, preview } = backup;
+  const isDialogOpen = phase === 'confirming' && preview !== null;
+
+  // Hộp xác nhận đóng (Hủy, Esc, Ghi đè) thì trả focus về nút "Nhập tiến độ" (design D7).
+  useEffect(() => {
+    if (wasDialogOpenRef.current && !isDialogOpen) {
+      importButtonRef.current?.focus();
+    }
+    wasDialogOpenRef.current = isDialogOpen;
+  }, [isDialogOpen]);
   const successText =
     message?.tone === 'success' ? t(`backup.messages.${message.key}`) : '';
   const errorText =
@@ -51,6 +62,7 @@ export function ProgressBackupSection({ backup }: ProgressBackupSectionProps) {
           {t('backup.export')}
         </button>
         <button
+          ref={importButtonRef}
           type="button"
           className="btn btn-ghost"
           onClick={handleImportClick}
@@ -70,7 +82,7 @@ export function ProgressBackupSection({ backup }: ProgressBackupSectionProps) {
       <p role="alert" className="backup-message has-error">
         {errorText}
       </p>
-      {phase === 'confirming' && preview !== null && (
+      {isDialogOpen && preview !== null && (
         <ImportConfirmDialog
           preview={preview}
           onConfirm={backup.confirmImport}

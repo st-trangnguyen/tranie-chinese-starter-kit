@@ -1,4 +1,4 @@
-import { useId, type KeyboardEvent } from 'react';
+import { useEffect, useId, useRef, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { ImportPreview } from '@shared/models/progress-backup.model';
@@ -19,10 +19,30 @@ export function ImportConfirmDialog({
   const { t } = useTranslation('settings');
   const titleId = useId();
   const descriptionId = useId();
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+  const overwriteButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Mở hộp thì focus "Hủy" để Enter vô tình không ghi đè tiến độ.
+  useEffect(() => {
+    cancelButtonRef.current?.focus();
+  }, []);
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key === 'Escape') {
       onCancel();
+      return;
+    }
+    if (event.key !== 'Tab') {
+      return;
+    }
+    // Giữ focus trong hộp: chỉ vòng giữa "Hủy" (đầu) và "Ghi đè" (cuối).
+    const first = cancelButtonRef.current;
+    const last = overwriteButtonRef.current;
+    const edge = event.shiftKey ? first : last;
+    const wrapTo = event.shiftKey ? last : first;
+    if (document.activeElement === edge && wrapTo !== null) {
+      event.preventDefault();
+      wrapTo.focus();
     }
   }
 
@@ -51,10 +71,20 @@ export function ImportConfirmDialog({
           </p>
         </div>
         <div className="confirm-dialog-actions flex flex-wrap justify-end gap-md">
-          <button type="button" className="btn btn-ghost" onClick={onCancel}>
+          <button
+            ref={cancelButtonRef}
+            type="button"
+            className="btn btn-ghost"
+            onClick={onCancel}
+          >
             {t('backup.confirm.cancel')}
           </button>
-          <button type="button" className="btn btn-primary" onClick={onConfirm}>
+          <button
+            ref={overwriteButtonRef}
+            type="button"
+            className="btn btn-primary"
+            onClick={onConfirm}
+          >
             {t('backup.confirm.overwrite')}
           </button>
         </div>
