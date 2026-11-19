@@ -60,7 +60,7 @@ Test: `apps/web/src/app/shared/services/backup.service.test.ts` (pure).
 Test: `apps/web/src/app/core/services/file-saver.service.test.ts` (stub `URL.createObjectURL`/`revokeObjectURL`, spy `HTMLAnchorElement.prototype.click`).
 
 - [x] 5.1 RED: S8.5-AC1 "Báo đã xuất ngay khi trình duyệt nhận file" (core) — `fileSaver.save('tranie-tien-do-2026-11-17.json', '{}', 'application/json')` trả về đồng bộ (không phải Promise); anchor được click đúng một lần với `download` = tên file, `href` = URL blob; anchor đã gỡ khỏi `document.body` sau khi trả về; `revokeObjectURL` gọi sau khi chạy timer (`vi.useFakeTimers`). Skeleton: interface `FileSaver`, `AnchorFileSaver.save` no-op, singleton; kiểm: fail
-- [ ] 5.2 GREEN: `AnchorFileSaver` (D5); kiểm: test 5.1 pass
+- [x] 5.2 GREEN: `AnchorFileSaver` (D5); kiểm: test 5.1 pass
 
 ## 6. Use case xuất/nhập — `BackupService` Phần 1 + 3 (design D4)
 
