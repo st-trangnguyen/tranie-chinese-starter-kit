@@ -1,7 +1,10 @@
 import {
+  PROGRESS_BACKUP_FORMAT,
   PROGRESS_BACKUP_FORMAT_VERSION,
   progressBackupEnvelopeSchema,
   progressBackupV1Schema,
+  type ProgressBackupFile,
+  type ProgressSnapshot,
 } from '@csk/shared';
 
 import type { BackupCheck } from '@shared/models/progress-backup.model';
@@ -10,6 +13,32 @@ export class BackupService {
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
+
+  // TODO(S8.5 task 4.2): skeleton RED, chưa có hành vi.
+  public buildBackupFileName(now: number): string {
+    void now;
+    return '';
+  }
+
+  // TODO(S8.5 task 4.2): skeleton RED, chưa có hành vi.
+  public buildBackupFile(
+    snapshot: ProgressSnapshot,
+    now: number,
+  ): ProgressBackupFile {
+    void now;
+    return {
+      ...snapshot,
+      format: PROGRESS_BACKUP_FORMAT,
+      formatVersion: PROGRESS_BACKUP_FORMAT_VERSION,
+      exportedOn: '',
+    };
+  }
+
+  // TODO(S8.5 task 4.2): skeleton RED, chưa có hành vi.
+  public serializeBackupFile(file: ProgressBackupFile): string {
+    void file;
+    return '';
+  }
 
   /** Rule: chỉ file JSON do app xuất, đúng định dạng và phiên bản, mới được nhập. */
   public checkBackupText(text: string): BackupCheck {

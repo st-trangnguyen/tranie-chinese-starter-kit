@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   PROGRESS_BACKUP_FORMAT,
   PROGRESS_BACKUP_FORMAT_VERSION,
+  type ProgressSnapshot,
 } from '@csk/shared';
 
 import { BackupService } from './backup.service';
@@ -166,6 +167,70 @@ describe('BackupService.checkBackupText — file có mục tiêu phút không h�
     expect(service.checkBackupText(text)).toEqual({
       status: 'rejected',
       reason: 'corrupted',
+    });
+  });
+});
+
+describe('BackupService — xuất file sao lưu', () => {
+  const snapshot: ProgressSnapshot = {
+    settings: {
+      dailyGoalMinutes: 30,
+      hasCompletedOnboarding: true,
+      defaultAudioSpeed: 'slow',
+      isPinyinVisible: false,
+    },
+    lessonProgress: [
+      { lessonId: 'intro-01', status: 'completed' },
+      { lessonId: 'intro-02', status: 'in-progress', cursor: 3 },
+    ],
+    dailyStats: [{ date: '2026-11-17', studySeconds: 720, goalMinutes: 15 }],
+  };
+
+  it.each([
+    [
+      '23:59 ngày 17/11/2026',
+      new Date(2026, 10, 17, 23, 59),
+      'tranie-tien-do-2026-11-17.json',
+    ],
+    [
+      '00:01 ngày 18/11/2026',
+      new Date(2026, 10, 18, 0, 1),
+      'tranie-tien-do-2026-11-18.json',
+    ],
+  ])(
+    'S8.5-AC1 Bấm Xuất tiến độ thì lưu được file: tên file theo ngày giờ máy lúc %s',
+    (_label, date, expectedName) => {
+      const service = new BackupService();
+
+      expect(service.buildBackupFileName(date.getTime())).toBe(expectedName);
+    },
+  );
+
+  it('S8.5-AC1 Bấm Xuất tiến độ thì lưu được file: nội dung là JSON đọc được và nhập lại được', () => {
+    const service = new BackupService();
+    const now = new Date(2026, 10, 17, 23, 59).getTime();
+
+    const text = service.serializeBackupFile(
+      service.buildBackupFile(snapshot, now),
+    );
+
+    let parsed: unknown;
+    expect(() => {
+      parsed = JSON.parse(text);
+    }).not.toThrow();
+    expect(parsed).toMatchObject({
+      format: PROGRESS_BACKUP_FORMAT,
+      formatVersion: 1,
+      exportedOn: '2026-11-17',
+    });
+    expect(service.checkBackupText(text)).toEqual({
+      status: 'valid',
+      file: {
+        ...snapshot,
+        format: PROGRESS_BACKUP_FORMAT,
+        formatVersion: 1,
+        exportedOn: '2026-11-17',
+      },
     });
   });
 });
