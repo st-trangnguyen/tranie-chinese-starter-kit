@@ -1,6 +1,7 @@
 import {
   PROGRESS_BACKUP_FORMAT_VERSION,
   progressBackupEnvelopeSchema,
+  progressBackupV1Schema,
 } from '@csk/shared';
 
 import type { BackupCheck } from '@shared/models/progress-backup.model';
@@ -28,7 +29,11 @@ export class BackupService {
     if (envelope.data.formatVersion > PROGRESS_BACKUP_FORMAT_VERSION) {
       return { status: 'rejected', reason: 'newer-version' };
     }
-    return { status: 'valid', file: parsed };
+    const file = progressBackupV1Schema.safeParse(parsed);
+    if (!file.success) {
+      return { status: 'rejected', reason: 'corrupted' };
+    }
+    return { status: 'valid', file: file.data };
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────

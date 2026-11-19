@@ -8,10 +8,14 @@ export {
   audioSpeedSchema,
   dailyGoalMinutesSchema,
   dailyStatSchema,
+  dailyStatStrictSchema,
   lessonProgressSchema,
+  lessonProgressStrictSchema,
   localDateKeySchema,
   parseSettings,
+  settingsFieldSchemas,
   settingsSchema,
+  settingsStrictSchema,
 } from './progress.schema';
 export type {
   AudioSpeed,
@@ -26,6 +30,10 @@ export {
   PROGRESS_BACKUP_FORMAT_VERSION,
   progressBackupEnvelopeSchema,
   progressBackupV1Schema,
+} from './progress-backup.schema';
+export type {
+  ProgressBackupFile,
+  ProgressSnapshot,
 } from './progress-backup.schema';
 export { comparePinyin, parsePinyin } from './pinyin.compare';
 export type {

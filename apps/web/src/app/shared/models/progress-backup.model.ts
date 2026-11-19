@@ -1,12 +1,11 @@
+import type { ProgressBackupFile, ProgressSnapshot } from '@csk/shared';
+
 /** Lý do từ chối file người học chọn để nhập tiến độ (S8.5 AC2). */
 export type BackupRejectReason = 'not-backup' | 'corrupted' | 'newer-version';
 
-/**
- * Kết quả kiểm tra nội dung file sao lưu (`BackupService.checkBackupText`).
- * `file` sẽ là `ProgressBackupFile` của `@csk/shared` khi schema file có (design D2).
- */
+/** Kết quả kiểm tra nội dung file sao lưu (`BackupService.checkBackupText`). */
 export type BackupCheck =
-  | { status: 'valid'; file: unknown }
+  | { status: 'valid'; file: ProgressBackupFile }
   | { status: 'rejected'; reason: BackupRejectReason };
 
 /** Tóm tắt file hiện trong hộp xác nhận (S8.5 AC3). */
@@ -15,10 +14,7 @@ export interface ImportPreview {
   completedLessonCount: number;
 }
 
-/**
- * Kết quả xem trước file nhập (`BackupService.inspectImportFile`).
- * `snapshot` sẽ là `ProgressSnapshot` của `@csk/shared` khi schema file có (design D2).
- */
+/** Kết quả xem trước file nhập (`BackupService.inspectImportFile`). */
 export type ImportInspection =
-  | { status: 'valid'; snapshot: unknown; preview: ImportPreview }
+  | { status: 'valid'; snapshot: ProgressSnapshot; preview: ImportPreview }
   | { status: 'rejected'; reason: BackupRejectReason };
