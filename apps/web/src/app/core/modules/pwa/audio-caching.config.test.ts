@@ -1,8 +1,10 @@
 import { matchesGlob } from 'node:path';
+import { runInNewContext } from 'node:vm';
 
 import {
   listPrecachedAudioPatterns,
   PRECACHE_BASE_PATTERNS,
+  stripRangeRequest,
 } from './audio-caching.config';
 
 const INTRO_AUDIO = 'audio/00000000000000aa.mp3';
@@ -78,5 +80,49 @@ describe('audio-caching.config', () => {
         precached: ['audio/missing0000000.mp3'],
       }),
     ).toThrow();
+  });
+});
+
+type StripRangeRequest = typeof stripRangeRequest;
+
+const isStripRangeRequest = (value: unknown): value is StripRangeRequest =>
+  typeof value === 'function';
+
+/**
+ * Dựng lại hàm từ mã nguồn như workbox-build làm khi chép plugin vào `sw.js`: chỉ còn global
+ * (`Request`), không còn biến hay import của module.
+ */
+const rebuildFromSource = (fn: StripRangeRequest): StripRangeRequest => {
+  const rebuilt: unknown = runInNewContext(`(${fn.toString()})`, { Request });
+  if (!isStripRangeRequest(rebuilt)) {
+    throw new Error('Không dựng lại được hàm từ toString()');
+  }
+  return rebuilt;
+};
+
+describe('audio-caching.config stripRangeRequest', () => {
+  const SCENARIO = 'S8.4-AC1 Đã nghe hết audio thì là đã tải';
+  const AUDIO_URL = `https://app.example/${HSK_AUDIO}`;
+
+  const rangeRequest = (): Request =>
+    new Request(AUDIO_URL, { headers: { Range: 'bytes=0-' } });
+
+  it(`${SCENARIO}: request có Range: bytes=0- thành request cùng URL, không Range`, async () => {
+    const request = rangeRequest();
+
+    const result = await stripRangeRequest({ request });
+
+    expect(result.url).toBe(AUDIO_URL);
+    expect(result.headers.has('Range')).toBe(false);
+    expect(request.headers.get('Range')).toBe('bytes=0-');
+  });
+
+  it(`${SCENARIO}: bản dựng lại từ toString() cho cùng kết quả (hàm tự chứa)`, async () => {
+    const rebuilt = rebuildFromSource(stripRangeRequest);
+
+    const result = await rebuilt({ request: rangeRequest() });
+
+    expect(result.url).toBe(AUDIO_URL);
+    expect(result.headers.has('Range')).toBe(false);
   });
 });

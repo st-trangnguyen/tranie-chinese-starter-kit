@@ -23,3 +23,13 @@ export const listPrecachedAudioPatterns = (indexJson: unknown): string[] => {
   }
   return [...result.data.precached];
 };
+
+/**
+ * Plugin `requestWillFetch` của route audio: bỏ header `Range` để mạng trả 200 đầy đủ, cache được
+ * (206 không cache được). Hàm tự chứa: workbox-build chép `toString()` của nó vào `sw.js`.
+ */
+export const stripRangeRequest = async ({
+  request,
+}: {
+  request: Request;
+}): Promise<Request> => request;
