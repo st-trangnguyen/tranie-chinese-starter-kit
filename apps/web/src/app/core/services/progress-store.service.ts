@@ -1,5 +1,4 @@
 import {
-  DEFAULT_SETTINGS,
   dailyStatSchema,
   lessonProgressSchema,
   parseSettings,
@@ -140,9 +139,31 @@ export class DexieProgressStore implements ProgressStore {
     );
   }
 
-  // Skeleton S8.5 (tasks 3.5): chưa có hành vi, GREEN ở tasks 3.6.
   async exportAll(): Promise<ProgressSnapshot> {
-    return { settings: DEFAULT_SETTINGS, lessonProgress: [], dailyStats: [] };
+    await this.studyTimeWrites;
+    // Đọc ba bảng trong một transaction `r`: ảnh chụp nhất quán, không ghi gì.
+    return this.db.transaction(
+      'r',
+      this.db.settings,
+      this.db.lessonProgress,
+      this.db.dailyStats,
+      async () => {
+        const settings = await this.getSettings();
+        const lessonRows = await this.db.lessonProgress.toArray();
+        const dailyRows = await this.db.dailyStats.toArray();
+        return {
+          settings,
+          lessonProgress: lessonRows.flatMap((row) => {
+            const result = lessonProgressSchema.safeParse(row);
+            return result.success ? [result.data] : [];
+          }),
+          dailyStats: dailyRows.flatMap((row) => {
+            const result = dailyStatSchema.safeParse(row);
+            return result.success ? [result.data] : [];
+          }),
+        };
+      },
+    );
   }
 
   importAll(snapshot: ProgressSnapshot): Promise<void> {
