@@ -74,3 +74,46 @@ describe('BackupService.checkBackupText — file JSON của nơi khác', () => {
     },
   );
 });
+
+describe('BackupService.checkBackupText — file từ phiên bản app mới hơn', () => {
+  it.each([
+    [
+      'phiên bản kế tiếp, thân không đọc được',
+      PROGRESS_BACKUP_FORMAT_VERSION + 1,
+    ],
+    ['phiên bản lẻ lớn hơn 1', 1.5],
+  ])(
+    'S8.5-AC2 File từ phiên bản app mới hơn bị từ chối: %s → newer-version',
+    (_label, formatVersion) => {
+      const service = new BackupService();
+      const text = JSON.stringify({
+        format: PROGRESS_BACKUP_FORMAT,
+        formatVersion,
+        settings: 'rác',
+      });
+
+      expect(service.checkBackupText(text)).toEqual({
+        status: 'rejected',
+        reason: 'newer-version',
+      });
+    },
+  );
+
+  it(
+    'S8.5-AC2 File từ phiên bản app mới hơn bị từ chối: ' +
+      'phiên bản hiện tại thân rác → không phải newer-version',
+    () => {
+      const service = new BackupService();
+      const text = JSON.stringify({
+        format: PROGRESS_BACKUP_FORMAT,
+        formatVersion: PROGRESS_BACKUP_FORMAT_VERSION,
+        settings: 'rác',
+      });
+
+      expect(service.checkBackupText(text)).not.toEqual({
+        status: 'rejected',
+        reason: 'newer-version',
+      });
+    },
+  );
+});
