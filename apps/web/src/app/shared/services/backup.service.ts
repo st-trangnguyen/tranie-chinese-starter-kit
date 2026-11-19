@@ -29,6 +29,14 @@ export class BackupService {
 
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
 
+  private readSnapshot(): Promise<ProgressSnapshot> {
+    return this.store.exportAll();
+  }
+
+  private saveFile(fileName: string, text: string): void {
+    this.saver.save(fileName, text, 'application/json');
+  }
+
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
   /** Rule: tên file sao lưu mang ngày xuất theo giờ máy, để người học nhận ra bản nào mới hơn. */
@@ -98,8 +106,10 @@ export class BackupService {
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
-  /** Skeleton RED (tasks 6.1): chưa có hành vi, GREEN 6.2 cài đặt. */
+  /** Xuất toàn bộ tiến độ thành một file JSON tên theo ngày, đưa cho trình duyệt lưu xuống máy. */
   public async exportProgress(now: number = Date.now()): Promise<void> {
-    void now;
+    const snapshot = await this.readSnapshot();
+    const text = this.serializeBackupFile(this.buildBackupFile(snapshot, now));
+    this.saveFile(this.buildBackupFileName(now), text);
   }
 }
