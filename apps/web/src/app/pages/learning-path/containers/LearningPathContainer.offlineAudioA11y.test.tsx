@@ -1,6 +1,7 @@
 import { screen, within } from '@test/render';
 import {
   mockPathContent,
+  releaseInAct,
   renderPathWithOfflineAudio,
 } from '@test/offline-audio.render';
 import {
@@ -12,6 +13,8 @@ import {
 
 const DOWNLOAD_NAME = 'Tải audio (2,4 MB), chủ đề Chào hỏi';
 const REMOVE_NAME = 'Xóa audio, chủ đề Chào hỏi';
+const ANNOUNCER_NAME = 'Thông báo audio offline';
+const MAX_TAB_STEPS = 30;
 
 const findUnitSection = async (title: string): Promise<HTMLElement> => {
   const heading = await screen.findByRole('heading', { level: 3, name: title });
@@ -72,5 +75,43 @@ describe('LearningPathContainer — audio offline: tên nút cho trình đọc m
     );
     const visibleText = button.textContent ?? '';
     expect(REMOVE_NAME.startsWith(visibleText)).toBe(true);
+  });
+
+  it('S8.4-AC1 Tải bằng bàn phím và nghe được kết quả: should announce "Đang tải audio chủ đề Chào hỏi." then "Đã tải xong audio chủ đề Chào hỏi." and never the percent progress', async () => {
+    const { user, cache, unmount } = renderPathWithOfflineAudio();
+
+    const unit = await findUnitSection('Chào hỏi');
+    const downloadButton = await findButtonByVisibleText(
+      unit,
+      'Tải audio (2,4 MB)',
+    );
+
+    for (
+      let step = 0;
+      step < MAX_TAB_STEPS && document.activeElement !== downloadButton;
+      step += 1
+    ) {
+      await user.tab();
+    }
+    expect(downloadButton).toHaveFocus();
+
+    await user.keyboard('{Enter}');
+
+    const announcer = screen.getByRole('status', { name: ANNOUNCER_NAME });
+    expect(announcer).toHaveTextContent('Đang tải audio chủ đề Chào hỏi.');
+
+    const snapshots: string[] = [];
+    for (const path of [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D]) {
+      await releaseInAct(cache, path);
+      snapshots.push(announcer.textContent ?? '');
+    }
+
+    expect(announcer).toHaveTextContent('Đã tải xong audio chủ đề Chào hỏi.');
+    snapshots.forEach((text) => {
+      expect(text).not.toContain('Đang tải 25%');
+      expect(text).not.toContain('Đang tải 50%');
+      expect(text).not.toContain('Đang tải 75%');
+    });
+    unmount();
   });
 });

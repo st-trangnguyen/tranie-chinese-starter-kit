@@ -201,7 +201,7 @@ container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fake
 - [x] 8.32 GREEN: `aria-label` `downloadLabel`; kiểm: test 8.31 pass
 - [x] 8.33 RED: S8.4-AC2 "Nút xóa có tên kèm chủ đề" — `getByRole('button', { name: 'Xóa audio, chủ đề Chào hỏi' })`; kiểm: fail
 - [x] 8.34 GREEN: `aria-label` `removeLabel`; kiểm: test 8.33 pass
-- [ ] 8.35 RED: S8.4-AC1 "Tải bằng bàn phím và nghe được kết quả" — `user.tab()` tới nút tải, `{Enter}`; vùng `getByRole('status', { name: 'Thông báo audio offline' })` có "Đang tải audio chủ đề Chào hỏi.", thả hết → có "Đã tải xong audio chủ đề Chào hỏi."; ghi `textContent` của vùng sau mỗi lần thả: không lần nào chứa "Đang tải 25%"/"50%"/"75%"; kiểm: fail vì chưa có vùng
+- [x] 8.35 RED: S8.4-AC1 "Tải bằng bàn phím và nghe được kết quả" — `user.tab()` tới nút tải, `{Enter}`; vùng `getByRole('status', { name: 'Thông báo audio offline' })` có "Đang tải audio chủ đề Chào hỏi.", thả hết → có "Đã tải xong audio chủ đề Chào hỏi."; ghi `textContent` của vùng sau mỗi lần thả: không lần nào chứa "Đang tải 25%"/"50%"/"75%"; kiểm: fail vì chưa có vùng
 - [ ] 8.36 GREEN: `OfflineAudioAnnouncer` (D10) trong `LearningPathContainer`, i18n `announce.*`; kiểm: test 8.35 pass
 - [ ] 8.37 RED: S8.4-AC1 "Hai chủ đề báo cùng lúc thì đọc đủ cả hai" — "Chào hỏi" và "Gia đình" tải, thả file cuối của hai chủ đề liên tiếp → vùng chứa cả hai câu "Đã tải xong…", câu thứ nhất vẫn còn khi câu thứ hai xuất hiện (hai phần tử `<p>`); kiểm: chạy, nếu pass ngay thì tạm render chỉ câu mới nhất để thấy fail rồi trả lại
 - [ ] 8.38 GREEN: sửa đến khi pass; kiểm: test 8.37 pass
