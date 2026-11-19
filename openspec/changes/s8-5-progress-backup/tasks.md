@@ -147,7 +147,7 @@ Helper `apps/web/e2e/E8/backup.helpers.ts`: `backupSection`, `exportProgress` (c
 ## 9. Tài liệu (docs thuần, miễn test-first)
 
 - [x] 9.1 `docs/03-architecture.md`: §4 `backup.service` (Phần 2/3 chính), §6.3 `exportAll`/`importAll` + `ProgressSnapshot` + `FileSaver`, §8 "File import lỗi" dùng `format` + `formatVersion` (thay `schemaVersion`), ghi hợp đồng bảng mới phải vào sao lưu; kiểm: đọc lại khớp code (tên hàm, file)
-- [ ] 9.2 Mô tả PR code: đường dẫn file mẫu (`apps/web/e2e/E8/fixtures/progress-backup/`), cách tạo trạng thái vượt cấp tay, giới hạn 20 000 000 byte, case chạy tay (cột "không" trong `test-cases.md`); screenshot màn Cài đặt có mục và hộp xác nhận ở 375×812 và 1280×800, sáng/tối (`CLAUDE.md` §8 Pull request); kiểm: PR có đủ mục theo template
+- [x] 9.2 Mô tả PR code: đường dẫn file mẫu (`apps/web/e2e/E8/fixtures/progress-backup/`), cách tạo trạng thái vượt cấp tay, giới hạn 20 000 000 byte, case chạy tay (cột "không" trong `test-cases.md`); screenshot màn Cài đặt có mục và hộp xác nhận ở 375×812 và 1280×800, sáng/tối (`CLAUDE.md` §8 Pull request); kiểm: PR có đủ mục theo template
 
 ## 10. Kiểm tra cuối
 
