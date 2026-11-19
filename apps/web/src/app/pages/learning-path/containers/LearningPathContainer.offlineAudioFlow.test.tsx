@@ -8,6 +8,8 @@ import {
   AUDIO_B,
   AUDIO_C,
   AUDIO_D,
+  AUDIO_E,
+  HSK_TWO_UNITS_INDEX,
 } from '@test/offline-audio.fixtures';
 
 const findUnitSection = async (title: string): Promise<HTMLElement> => {
@@ -166,6 +168,55 @@ describe('LearningPathContainer — audio offline: tải, xóa, thông báo', ()
     ).toBeInTheDocument();
     expect(within(unit).getByText('Tải audio (2,4 MB)')).toBeInTheDocument();
     expect(within(unit).queryByText(/Đang tải/)).not.toBeInTheDocument();
+    unmount();
+  });
+  it('S8.4-AC1 Thông báo của mỗi chủ đề độc lập: should keep "Cần có mạng để tải audio." under "Chào hỏi" and show "Đã xóa audio của chủ đề Gia đình." only under "Gia đình" after removing its audio', async () => {
+    // "Gia đình" (C, E) đã tải sẵn; "Chào hỏi" (A, B, C, D) chưa tải.
+    const { user, unmount } = renderPathWithOfflineAudio({
+      cached: [AUDIO_C, AUDIO_E],
+      index: HSK_TWO_UNITS_INDEX,
+    });
+
+    const unitA = await findUnitSection('Chào hỏi');
+    const unitB = await findUnitSection('Gia đình');
+    const downloadLabel = await within(unitA).findByText(/^Tải audio \(/);
+    const downloadButton = downloadLabel.closest('button');
+    if (!downloadButton) {
+      throw new Error('Không tìm thấy nút tải audio của "Chào hỏi"');
+    }
+    const removeLabel = await within(unitB).findByText('Xóa audio');
+    const removeButton = removeLabel.closest('button');
+    if (!removeButton) {
+      throw new Error('Không tìm thấy nút "Xóa audio" của "Gia đình"');
+    }
+
+    // Mất mạng: getter trả false và phát sự kiện `offline` để màn hình biết.
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    act(() => {
+      window.dispatchEvent(new Event('offline'));
+    });
+
+    await user.click(downloadButton);
+    expect(
+      await within(unitA).findByText('Cần có mạng để tải audio.'),
+    ).toBeInTheDocument();
+
+    // Xóa không cần mạng.
+    await user.click(removeButton);
+
+    expect(
+      await within(unitB).findByText('Đã xóa audio của chủ đề Gia đình.'),
+    ).toBeInTheDocument();
+    expect(
+      within(unitA).getByText('Cần có mạng để tải audio.'),
+    ).toBeInTheDocument();
+    expect(
+      within(unitA).queryByText(/Đã xóa audio của chủ đề/),
+    ).not.toBeInTheDocument();
+    expect(
+      within(unitB).queryByText('Cần có mạng để tải audio.'),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/\{\{topic\}\}/)).not.toBeInTheDocument();
     unmount();
   });
 });

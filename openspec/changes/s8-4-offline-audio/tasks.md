@@ -189,7 +189,7 @@ container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fake
 - [x] 8.20 GREEN: sửa đến khi pass; kiểm: test 8.19 pass
 - [x] 8.21 RED: S8.4-AC1 "Không đủ bộ nhớ" (container) — lỗi `storage-full` → khối có câu hết bộ nhớ + nút tải; kiểm: như 8.19
 - [x] 8.22 GREEN: sửa đến khi pass; kiểm: test 8.21 pass
-- [ ] 8.23 RED: S8.4-AC1 "Thông báo của mỗi chủ đề độc lập" (container) — A "Cần có mạng…", xóa B → `within(khối A)` vẫn câu đó, `within(khối B)` "Đã xóa audio của chủ đề <B>.", câu không nằm sai khối; kiểm: fail (nút xóa chưa nối `remove`)
+- [x] 8.23 RED: S8.4-AC1 "Thông báo của mỗi chủ đề độc lập" (container) — A "Cần có mạng…", xóa B → `within(khối A)` vẫn câu đó, `within(khối B)` "Đã xóa audio của chủ đề <B>.", câu không nằm sai khối; kiểm: fail (nút xóa chưa nối `remove`)
 - [ ] 8.24 GREEN: `remove` của hook, nút "Xóa audio" gọi `onRemove`; kiểm: test 8.23 pass
 - [ ] 8.25 RED: S8.4-AC1 "Rời màn khi đang tải" (container, route thật `/learning-paths` ↔ `/lessons/:id` qua `MemoryRouter`) — bấm tải, đi sang bài (khối unmount), thả hết file, quay lại → "Đã tải audio (2,4 MB)"; kiểm: chạy, nếu pass ngay thì tạm giữ state tải trong hook để thấy fail rồi trả lại
 - [ ] 8.26 GREEN: sửa đến khi pass; kiểm: test 8.25 pass
