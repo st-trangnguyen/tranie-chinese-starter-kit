@@ -12,6 +12,7 @@ import {
   OFFLINE_FIXTURE_PATHS,
   offlineFixturesPlugin,
 } from './e2e/fixtures/offlineFixturesPlugin';
+import { offlineAudioNetworkPlugin } from './e2e/fixtures/offlineAudioNetworkPlugin';
 import type * as AudioCachingConfig from './src/app/core/modules/pwa/audio-caching.config';
 
 // Màu `bg` sáng của design system: nền splash và thanh trạng thái khi cài PWA.
@@ -62,6 +63,8 @@ export default defineConfig(async ({ mode }) => {
       react(),
       // Chỉ bản build cho Playwright (`--mode e2e`): thêm nội dung + audio mẫu để kiểm offline.
       mode === 'e2e' && offlineFixturesPlugin(),
+      // S8.4 (`vite preview --mode e2e`): nội dung gộp mẫu theo cookie và điều khiển mạng audio.
+      mode === 'e2e' && offlineAudioNetworkPlugin(),
       tailwindcss(),
       svgr(),
       createHtmlPlugin({
