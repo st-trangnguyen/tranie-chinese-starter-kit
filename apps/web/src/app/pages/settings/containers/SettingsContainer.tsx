@@ -7,6 +7,7 @@ import { AudioSpeedSetting } from '../components/AudioSpeedSetting';
 import { DailyGoalSetting } from '../components/DailyGoalSetting';
 import { PinyinVisibilitySetting } from '../components/PinyinVisibilitySetting';
 import { ProgressBackupSection } from '../components/ProgressBackupSection';
+import { useProgressBackup } from '../hooks/useProgressBackup';
 import { useSettings } from '../hooks/useSettings';
 
 /**
@@ -22,6 +23,7 @@ const SettingsContainer = () => {
     changeDefaultAudioSpeed,
     changePinyinVisibility,
   } = useSettings();
+  const backup = useProgressBackup();
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-xl p-xl">
@@ -55,7 +57,7 @@ const SettingsContainer = () => {
           />
         </>
       )}
-      <ProgressBackupSection />
+      <ProgressBackupSection backup={backup} />
     </main>
   );
 };

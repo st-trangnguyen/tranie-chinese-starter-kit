@@ -1,8 +1,14 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import type { ProgressBackupView } from '@shared/models/progress-backup.model';
+
+interface ProgressBackupSectionProps {
+  backup: ProgressBackupView;
+}
+
 /** Mục "Sao lưu tiến độ" trong màn Cài đặt (S8.5, design D7). */
-export function ProgressBackupSection() {
+export function ProgressBackupSection({ backup }: ProgressBackupSectionProps) {
   const { t } = useTranslation('settings');
   const titleId = useId();
 
@@ -15,7 +21,11 @@ export function ProgressBackupSection() {
         {t('backup.title')}
       </h2>
       <div className="flex flex-wrap gap-md">
-        <button type="button" className="btn btn-primary">
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={backup.exportProgress}
+        >
           {t('backup.export')}
         </button>
         <button type="button" className="btn btn-ghost">
