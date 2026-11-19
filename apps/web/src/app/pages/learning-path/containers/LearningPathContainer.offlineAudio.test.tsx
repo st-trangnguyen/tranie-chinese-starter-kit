@@ -106,4 +106,25 @@ describe('LearningPathContainer — audio offline: nhãn và trạng thái', () 
     await user.tab();
     expect(placementLink).toHaveFocus();
   });
+  it('S8.4-AC1 Chủ đề Nhập môn có sẵn offline: should show "Audio có sẵn offline" under the "Phát âm" heading without download or remove buttons', async () => {
+    renderPathWithOfflineAudio();
+
+    const unit = await findUnitSection('Phát âm');
+    const heading = within(unit).getByRole('heading', {
+      level: 3,
+      name: 'Phát âm',
+    });
+
+    const label = await within(unit).findByText('Audio có sẵn offline');
+    expect(within(unit).getAllByText('Audio có sẵn offline')).toHaveLength(1);
+    expect(
+      heading.compareDocumentPosition(label) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    expect(within(unit).queryByText(/Tải audio/)).not.toBeInTheDocument();
+    expect(within(unit).queryByText('Xóa audio')).not.toBeInTheDocument();
+    expect(
+      within(unit).queryByRole('button', { name: /audio/i }),
+    ).not.toBeInTheDocument();
+  });
 });
