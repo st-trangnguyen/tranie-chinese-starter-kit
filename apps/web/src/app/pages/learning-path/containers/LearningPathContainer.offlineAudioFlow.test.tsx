@@ -221,4 +221,42 @@ describe('LearningPathContainer — audio offline: tải, xóa, thông báo', ()
     expect(screen.queryByText(/\{\{topic\}\}/)).not.toBeInTheDocument();
     unmount();
   });
+  it('S8.4-AC2 Xóa audio đã tải: should remove audio of "Chào hỏi" without a confirm dialog, show "Đã xóa audio của chủ đề Chào hỏi." and bring back "Tải audio (2,4 MB)"', async () => {
+    // "Chào hỏi" (A, B, C, D) đã tải sẵn.
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const { user, cache, unmount } = renderPathWithOfflineAudio({
+      cached: [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D],
+    });
+
+    const unit = await findUnitSection('Chào hỏi');
+    expect(
+      await within(unit).findByText('Đã tải audio (2,4 MB)'),
+    ).toBeInTheDocument();
+    const removeLabel = await within(unit).findByText('Xóa audio');
+    const removeButton = removeLabel.closest('button');
+    if (!removeButton) {
+      throw new Error('Không tìm thấy nút "Xóa audio" của "Chào hỏi"');
+    }
+
+    await user.click(removeButton);
+
+    expect(
+      await within(unit).findByText('Đã xóa audio của chủ đề Chào hỏi.'),
+    ).toBeInTheDocument();
+    expect(within(unit).getByText('Tải audio (2,4 MB)')).toBeInTheDocument();
+    expect(within(unit).queryByText('Xóa audio')).not.toBeInTheDocument();
+    expect(
+      within(unit).queryByText('Đã tải audio (2,4 MB)'),
+    ).not.toBeInTheDocument();
+    // Không hộp xác nhận: không dialog nào mở, không gọi `window.confirm`.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(confirmSpy).not.toHaveBeenCalled();
+    // Đúng một lượt xóa, gồm cả 4 file của chủ đề.
+    expect(cache.removeCalls).toHaveLength(1);
+    expect([...(cache.removeCalls[0] ?? [])].sort()).toEqual(
+      [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D].sort(),
+    );
+    unmount();
+  });
 });
