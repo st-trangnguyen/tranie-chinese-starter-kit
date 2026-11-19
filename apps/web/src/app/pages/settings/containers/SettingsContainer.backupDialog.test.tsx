@@ -149,4 +149,42 @@ describe('SettingsContainer — hộp xác nhận nhập tiến độ', () => {
     expect(within(section).getByRole('alert')).toBeEmptyDOMElement();
     expect(await readLessonIds()).toEqual(['intro-01']);
   });
+  it('S8.5-AC3 Hộp xác nhận dùng được bằng bàn phím: mở thì focus ở "Hủy", Tab chỉ đi giữa hai nút trong hộp, đóng thì focus về "Nhập tiến độ"', async () => {
+    const { user, section } = await renderBackupSection();
+
+    await user.upload(getFileInput(section), fixtureFile('hop-le-5-bai.json'));
+    const dialog = await screen.findByRole('dialog', {
+      name: 'Nhập tiến độ từ file?',
+    });
+    const cancelButton = within(dialog).getByRole('button', { name: 'Hủy' });
+    const overwriteButton = within(dialog).getByRole('button', {
+      name: 'Ghi đè',
+    });
+
+    // Vừa mở: focus ở "Hủy" (tránh ghi đè nhầm).
+    await waitFor(() => {
+      expect(cancelButton).toHaveFocus();
+    });
+
+    // Tab chỉ vòng giữa hai nút trong hộp, không ra nền.
+    await user.tab();
+    expect(overwriteButton).toHaveFocus();
+    await user.tab();
+    expect(cancelButton).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(overwriteButton).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(cancelButton).toHaveFocus();
+
+    // Enter ở "Hủy": hộp đóng, focus về nút "Nhập tiến độ".
+    await user.keyboard('{Enter}');
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    expect(
+      within(section).getByRole('button', { name: 'Nhập tiến độ' }),
+    ).toHaveFocus();
+    expect(await readLessonIds()).toEqual(['intro-01']);
+  });
 });
