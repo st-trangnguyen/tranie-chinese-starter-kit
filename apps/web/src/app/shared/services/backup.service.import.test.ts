@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createMachine,
   NOW,
+  ROOT,
   toBackupFileSource,
 } from '@test/backup-machine.helpers';
 import { toLocalDateKey } from '@shared/utils/date.utils';
@@ -111,6 +112,45 @@ describe('BackupService.inspectImportFile + importProgress', () => {
     expect(await progressB.getTodayStudy(NOW)).toMatchObject({
       minutes: 12,
       goalMinutes: 15,
+    });
+  });
+
+  it('S8.5-AC1 File có chủ đề đã qua bằng kiểm tra vượt cấp: máy A xong bài 1 và đạt kiểm tra vượt cấp chủ đề C, nhập ở máy B thì chủ đề C đã xong, chủ đề D mở, chủ đề B vẫn khóa', async () => {
+    const machineA = createMachine();
+    const progressA = new ProgressService(machineA.store);
+    await progressA.completeOnboarding(15);
+    await Promise.all(
+      ['intro-01', 'intro-05', 'intro-06'].map((lessonId) =>
+        machineA.store.saveLessonProgress({ lessonId, status: 'completed' }),
+      ),
+    );
+    await machineA.backup.exportProgress(NOW);
+    const exported = machineA.savedFiles[0]?.content ?? '';
+
+    const machineB = createMachine();
+    const progressB = new ProgressService(machineB.store);
+    await progressB.completeOnboarding(15);
+
+    const inspection = await machineB.backup.inspectImportFile(
+      toBackupFileSource(exported),
+    );
+    expect(inspection.status).toBe('valid');
+    if (inspection.status !== 'valid') {
+      return;
+    }
+    await machineB.backup.importProgress(inspection.snapshot);
+
+    const statuses = progressB.deriveLessonStatuses(
+      ROOT.stages,
+      await progressB.getCompletedLessonIds(),
+    );
+    expect(Object.fromEntries(statuses)).toMatchObject({
+      'intro-01': 'completed',
+      'intro-03': 'locked',
+      'intro-04': 'locked',
+      'intro-05': 'completed',
+      'intro-06': 'completed',
+      'intro-07': 'open',
     });
   });
 });
