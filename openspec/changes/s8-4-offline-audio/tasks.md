@@ -216,7 +216,7 @@ container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fake
 - [x] 8.47 RED: S8.4-AC2 "Focus và thông báo khi xóa bằng bàn phím" (`.offlineAudioA11y`) — Tab tới "Xóa audio", `{Enter}` → focus nút "Tải audio (2,4 MB)" của "Chào hỏi", vùng đọc có "Đã xóa audio của chủ đề Chào hỏi."; kiểm: chạy, nếu pass ngay thì tạm bỏ câu `removed` khỏi vùng đọc để thấy fail rồi trả lại
 - [x] 8.48 GREEN: sửa đến khi pass; kiểm: test 8.47 pass
 - [x] 8.49 RED: S8.4-AC1 "Nút tải đang focus biến mất vì chủ đề tự thành đã tải" (`.offlineAudioA11y`) — C chỉ thiếu file s của "Gia đình"; Enter ở "Gia đình", Tab (hoặc Shift+Tab) tới nút tải của C (không Enter); thả hết file "Gia đình", s về cuối (không ai khác tải) → C "Đã tải audio (…)" + "Xóa audio", focus ở nút "Xóa audio" của C. Chạy **hai thứ tự khối** bằng `it.each`: C đứng trước "Gia đình" và "Gia đình" đứng trước C trên bản đồ (hai fixture lộ trình), cùng kỳ vọng; kiểm: chạy, nếu pass ngay nhờ 8.46 thì tạm bỏ `onBlur` xóa ref để thấy fail ở thứ tự "Gia đình" trước C (focus bị kéo về "Xóa audio" của "Gia đình") rồi trả lại
-- [ ] 8.50 GREEN: sửa đến khi pass; kiểm: test 8.49 pass ở cả hai thứ tự, mọi file < 300 dòng, component < 5 props, effect có cleanup
+- [x] 8.50 GREEN: sửa đến khi pass; kiểm: test 8.49 pass ở cả hai thứ tự, mọi file < 300 dòng, component < 5 props, effect có cleanup
 
 ## 9. Style — `styles/tailwind/` (design D11)
 
