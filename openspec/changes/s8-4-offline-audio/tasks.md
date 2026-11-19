@@ -207,10 +207,10 @@ container bọc `<OfflineAudioServiceContext value={new OfflineAudioService(fake
 - [x] 8.38 GREEN: sửa đến khi pass; kiểm: test 8.37 pass
 - [x] 8.39 RED: S8.4-AC1 "Focus khi bắt đầu và khi tải xong" (`OfflineAudioBlock.test.tsx`, rerender theo topic) — focus nút tải, đổi topic sang `downloading` (nút bị gỡ) → `document.activeElement` là dòng "Đang tải …%"; sang `downloaded` có `canRemove` → nút "Xóa audio"; kiểm: fail (focus rơi về `body`)
 - [x] 8.40 GREEN: `ownedFocusRef` + `onFocus`, `useLayoutEffect` (ref khác `null`, đã gỡ, `activeElement` là `body`; reset ref sau khi chuyển), `resolveFocusTarget`, `tabIndex={-1}` cho hai dòng chữ (design D9); kiểm: test 8.39 pass
-- [ ] 8.41 RED: S8.4-AC1 "Tải xong mà không có nút xóa thì focus tới dòng đã tải" — focus ở dòng tiến độ, sang `downloaded` `canRemove: false` → dòng "Đã tải audio (…)"; kiểm: chạy, nếu pass ngay thì tạm luôn nhắm nút xóa để thấy fail rồi trả lại
-- [ ] 8.42 GREEN: sửa đến khi pass; kiểm: test 8.41 pass
-- [ ] 8.43 RED: S8.4-AC1 "Focus khi tải lỗi" — focus dòng tiến độ, sang `not-downloaded` + `message: 'download-incomplete'` → nút "Tải audio"; (mức màn trong `.offlineAudioA11y`: vùng đọc có câu lỗi); kiểm: chạy, nếu pass ngay thì tạm bỏ nhánh `not-downloaded` của `resolveFocusTarget` để thấy fail rồi trả lại
-- [ ] 8.44 GREEN: sửa đến khi pass; kiểm: test 8.43 pass
+- [x] 8.41 RED: S8.4-AC1 "Tải xong mà không có nút xóa thì focus tới dòng đã tải" — focus ở dòng tiến độ, sang `downloaded` `canRemove: false` → dòng "Đã tải audio (…)"; kiểm: chạy, nếu pass ngay thì tạm luôn nhắm nút xóa để thấy fail rồi trả lại
+- [x] 8.42 GREEN: sửa đến khi pass; kiểm: test 8.41 pass
+- [x] 8.43 RED: S8.4-AC1 "Focus khi tải lỗi" — focus dòng tiến độ, sang `not-downloaded` + `message: 'download-incomplete'` → nút "Tải audio"; (mức màn trong `.offlineAudioA11y`: vùng đọc có câu lỗi); kiểm: chạy, nếu pass ngay thì tạm bỏ nhánh `not-downloaded` của `resolveFocusTarget` để thấy fail rồi trả lại
+- [x] 8.44 GREEN: sửa đến khi pass; kiểm: test 8.43 pass
 - [ ] 8.45 RED: S8.4-AC1 "Không kéo focus khi người học đã đi chỗ khác" (`.offlineAudioA11y`) — (a) bấm tải, focus một link bài khác trên bản đồ, thả hết file → focus vẫn ở link bài; (b) bấm tải, rồi bấm chuột (`user.click`) vào vùng chữ không focus được ngoài khối (focus về `body`), thả hết file → focus vẫn ở `body`, không bị kéo về khối "Chào hỏi"; kiểm: fail ở (b) vì ref chưa bị xóa khi focus rời khối
 - [ ] 8.46 GREEN: `onBlur` trên khối xóa `ownedFocusRef` khi `relatedTarget` không nằm trong khối và `event.target` còn trong DOM (design D9); kiểm: test 8.45 pass, 8.39–8.44 vẫn pass
 - [ ] 8.47 RED: S8.4-AC2 "Focus và thông báo khi xóa bằng bàn phím" (`.offlineAudioA11y`) — Tab tới "Xóa audio", `{Enter}` → focus nút "Tải audio (2,4 MB)" của "Chào hỏi", vùng đọc có "Đã xóa audio của chủ đề Chào hỏi."; kiểm: chạy, nếu pass ngay thì tạm bỏ câu `removed` khỏi vùng đọc để thấy fail rồi trả lại

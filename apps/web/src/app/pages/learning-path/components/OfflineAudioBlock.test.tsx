@@ -22,6 +22,17 @@ const DOWNLOADED: OfflineAudioTopicView = {
   canRemove: true,
   message: null,
 };
+const DOWNLOADED_NOT_REMOVABLE: OfflineAudioTopicView = {
+  status: 'downloaded',
+  bytes: TOPIC_BYTES,
+  canRemove: false,
+  message: null,
+};
+const DOWNLOAD_INCOMPLETE: OfflineAudioTopicView = {
+  status: 'not-downloaded',
+  bytes: TOPIC_BYTES,
+  message: 'download-incomplete',
+};
 
 const renderBlock = (topic: OfflineAudioTopicView) => {
   const onDownload = vi.fn();
@@ -63,6 +74,40 @@ describe('OfflineAudioBlock', () => {
     rerenderWith(DOWNLOADED);
     expect(
       screen.getByRole('button', { name: 'Xóa audio, chủ đề Chào hỏi' }),
+    ).toHaveFocus();
+  });
+
+  it('S8.4-AC1: Tải xong mà không có nút xóa thì focus tới dòng đã tải — focus dòng "Đã tải audio (2,4 MB)"', async () => {
+    const { user, rerenderWith } = renderBlock(NOT_DOWNLOADED);
+
+    await user.tab();
+    rerenderWith(DOWNLOADING);
+    expect(screen.getByText('Đang tải 25%')).toHaveFocus();
+
+    rerenderWith(DOWNLOADED_NOT_REMOVABLE);
+
+    expect(
+      screen.queryByRole('button', { name: 'Xóa audio, chủ đề Chào hỏi' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('Đã tải audio (2,4 MB)')).toHaveFocus();
+  });
+
+  it('S8.4-AC1: Focus khi tải lỗi — focus từ dòng tiến độ về nút "Tải audio"', async () => {
+    const { user, rerenderWith } = renderBlock(NOT_DOWNLOADED);
+
+    await user.tab();
+    rerenderWith(DOWNLOADING);
+    expect(screen.getByText('Đang tải 25%')).toHaveFocus();
+
+    rerenderWith(DOWNLOAD_INCOMPLETE);
+
+    expect(
+      screen.getByText('Tải chưa xong. Hãy kiểm tra mạng rồi thử lại.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {
+        name: 'Tải audio (2,4 MB), chủ đề Chào hỏi',
+      }),
     ).toHaveFocus();
   });
 });

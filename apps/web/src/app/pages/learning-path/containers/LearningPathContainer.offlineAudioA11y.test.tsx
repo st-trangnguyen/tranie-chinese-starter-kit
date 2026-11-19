@@ -1,5 +1,6 @@
 import { screen, within } from '@test/render';
 import {
+  failInAct,
   mockPathContent,
   releaseInAct,
   renderPathWithOfflineAudio,
@@ -18,6 +19,7 @@ const REMOVE_NAME = 'Xóa audio, chủ đề Chào hỏi';
 const ANNOUNCER_NAME = 'Thông báo audio offline';
 const FINISHED_GREETINGS = 'Đã tải xong audio chủ đề Chào hỏi.';
 const FINISHED_FAMILY = 'Đã tải xong audio chủ đề Gia đình.';
+const DOWNLOAD_INCOMPLETE = 'Tải chưa xong. Hãy kiểm tra mạng rồi thử lại.';
 const MAX_TAB_STEPS = 30;
 
 const findUnitSection = async (title: string): Promise<HTMLElement> => {
@@ -153,6 +155,36 @@ describe('LearningPathContainer — audio offline: tên nút cho trình đọc m
     expect(sentences.indexOf(FINISHED_GREETINGS)).toBeLessThan(
       sentences.indexOf(FINISHED_FAMILY),
     );
+    unmount();
+  });
+
+  it('S8.4-AC1 Focus khi tải lỗi: should move focus back to "Tải audio (2,4 MB), chủ đề Chào hỏi" and announce "Tải chưa xong. Hãy kiểm tra mạng rồi thử lại." when the 3rd file fails on network', async () => {
+    const { user, cache, unmount } = renderPathWithOfflineAudio();
+
+    const unit = await findUnitSection('Chào hỏi');
+    const downloadButton = await findButtonByVisibleText(
+      unit,
+      'Tải audio (2,4 MB)',
+    );
+
+    for (
+      let step = 0;
+      step < MAX_TAB_STEPS && document.activeElement !== downloadButton;
+      step += 1
+    ) {
+      await user.tab();
+    }
+    expect(downloadButton).toHaveFocus();
+
+    await user.keyboard('{Enter}');
+    await releaseInAct(cache, AUDIO_A, AUDIO_B);
+    await failInAct(cache, AUDIO_C, 'network');
+
+    expect(
+      within(unit).getByRole('button', { name: DOWNLOAD_NAME }),
+    ).toHaveFocus();
+    const announcer = screen.getByRole('status', { name: ANNOUNCER_NAME });
+    expect(announcer).toHaveTextContent(DOWNLOAD_INCOMPLETE);
     unmount();
   });
 });
