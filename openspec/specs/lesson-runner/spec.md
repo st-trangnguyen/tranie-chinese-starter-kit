@@ -279,3 +279,19 @@ các câu của bài. Biện pháp này không thuộc AC của story S3.5; xem 
 #### Scenario: S3.5-X1 Mở lại bài kiểm tra đang làm dở
 - **WHEN** người học đã sang câu 3 của một bài kiểm tra, thoát rồi mở lại bài đó
 - **THEN** màn hiện câu thứ nhất và thanh tiến độ cho biết "Câu 1 / n"
+
+### Requirement: Màn tổng kết có đường về Trang chủ
+Hệ thống SHALL có liên kết "Trang chủ" đưa người học về màn Trang chủ (S8.1) trên màn tổng kết cuối bài, theo bảng:
+
+| Màn | Có liên kết "Trang chủ"? |
+|---|---|
+| Màn tổng kết cuối bài (bài thường, bài kiểm tra cuối chủ đề, bài kiểm tra vượt cấp) | Có |
+| Màn bài khi đang làm câu | Không (bản này) |
+
+#### Scenario: S8.1-AC1 Từ màn tổng kết về Trang chủ
+- **WHEN** người học làm xong một bài, đang ở màn tổng kết và bấm "Trang chủ"
+- **THEN** người học thấy màn Trang chủ
+
+#### Scenario: S8.1-AC1 Màn bài khi đang làm câu không có liên kết Trang chủ
+- **WHEN** người học đang làm câu thứ nhất của một bài
+- **THEN** màn bài không có liên kết "Trang chủ"

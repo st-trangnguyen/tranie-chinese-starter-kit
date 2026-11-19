@@ -7,9 +7,11 @@ import {
   type ExerciseRegistry,
 } from '@shared/components/exercises/exercise.registry';
 import { AudioSpeedProvider } from '@shared/contexts/AudioSpeedContext';
+import { PinyinVisibilityProvider } from '@shared/contexts/PinyinVisibilityContext';
 import { RecordingModeProvider } from '@shared/contexts/RecordingModeContext';
 import { LessonRunner } from '../components/LessonRunner';
 import { LessonSummary } from '../components/LessonSummary';
+import { useLessonPreferences } from '../hooks/useLessonPreferences';
 import { useLessonRunner } from '../hooks/useLessonRunner';
 import { useLessonStrokeWrite } from '../hooks/useLessonStrokeWrite';
 import { useStudyTimeRecorder } from '../hooks/useStudyTimeRecorder';
@@ -46,6 +48,7 @@ const LessonRunnerContainer = ({
     skipExercise,
     restart,
   } = useLessonRunner(lessonId, { placementUnitId });
+  const preferences = useLessonPreferences(lessonId);
   const [restartedLessonId, setRestartedLessonId] = useState<string | null>(
     null,
   );
@@ -54,6 +57,7 @@ const LessonRunnerContainer = ({
     setRestartedLessonId(lessonId);
     restart();
   };
+  const isRunning = session !== null && session.phase !== 'finished';
   const exercise = lesson?.exercises[session?.currentIndex ?? 0];
   const content = exercise ? contents.get(exercise.id) : undefined;
   const strokeWriteWord =
@@ -72,7 +76,9 @@ const LessonRunnerContainer = ({
           {t('loadError')}
         </p>
       )}
-      {!lesson && !hasError && <p role="status">{t('loading')}</p>}
+      {!hasError && (!lesson || (isRunning && preferences === null)) && (
+        <p role="status">{t('loading')}</p>
+      )}
       {summary && (
         <LessonSummary
           summary={summary}
@@ -80,27 +86,32 @@ const LessonRunnerContainer = ({
           onRestart={handleRestart}
         />
       )}
-      {session && session.phase !== 'finished' && exercise && content && (
-        <AudioSpeedProvider key={lessonId}>
-          <RecordingModeProvider key={lessonId}>
-            <LessonRunner
-              view={{
-                exercise,
-                content,
-                current: session.currentIndex + 1,
-                total: session.exerciseIds.length,
-                feedback,
-                strokeWrite,
-              }}
-              registry={registry}
-              shouldFocusProgress={isRestarted}
-              handlers={{
-                onResult: submitResult,
-                onContinue: continueLesson,
-                onSkip: skipExercise,
-              }}
-            />
-          </RecordingModeProvider>
+      {isRunning && exercise && content && preferences && (
+        <AudioSpeedProvider
+          key={lessonId}
+          initialIsSlow={preferences.isSlowAudio}
+        >
+          <PinyinVisibilityProvider isVisible={preferences.isPinyinVisible}>
+            <RecordingModeProvider key={lessonId}>
+              <LessonRunner
+                view={{
+                  exercise,
+                  content,
+                  current: session.currentIndex + 1,
+                  total: session.exerciseIds.length,
+                  feedback,
+                  strokeWrite,
+                }}
+                registry={registry}
+                shouldFocusProgress={isRestarted}
+                handlers={{
+                  onResult: submitResult,
+                  onContinue: continueLesson,
+                  onSkip: skipExercise,
+                }}
+              />
+            </RecordingModeProvider>
+          </PinyinVisibilityProvider>
         </AudioSpeedProvider>
       )}
     </main>

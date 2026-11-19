@@ -16,7 +16,8 @@ import { createDatabase, type AppDatabase } from '@core/helpers/db.helper';
  */
 export interface ProgressStore {
   getSettings(): Promise<Settings>;
-  saveSettings(settings: Settings): Promise<void>;
+  /** Chỉ ghi các khóa có trong `patch` với giá trị khác `undefined`; khóa khác giữ nguyên. */
+  saveSettings(patch: Partial<Settings>): Promise<void>;
   /** Mọi tiến độ bài hợp lệ; dòng hỏng bị bỏ qua (S3.1 AC2). */
   getAllLessonProgress(): Promise<LessonProgress[]>;
   /** Tiến độ một bài; không có dòng hoặc dòng hỏng thì `undefined` (S3.3). */
@@ -31,12 +32,16 @@ export interface ProgressStore {
    * Cộng dồn số giây đã học vào ngày `date` (S8.1) và chụp mục tiêu đang chọn
    * (`settings.dailyGoalMinutes`) vào `goalMinutes` của dòng (S8.3, design D2).
    * Store chỉ chụp giá trị mục tiêu đang chọn vào dòng: không rẽ nhánh theo mục tiêu, không so
-   * phút với mục tiêu, không quy tắc nghiệp vụ (quy tắc nằm ở `ProgressService` Phần 2).
+   * phút với mục tiêu, không quy tắc nghiệp vụ (quy tắc nằm ở `StudyTimeService` Phần 2).
    */
   addStudySeconds(date: string, seconds: number): Promise<void>;
   /** Mọi thống kê ngày hợp lệ; dòng hỏng bị bỏ qua (S8.3). */
   getAllDailyStats(): Promise<DailyStat[]>;
-  /** Đổi mục tiêu đang chọn và mục tiêu của ngày `date` cùng lúc (S8.3). */
+  /**
+   * Đổi mục tiêu của ngày `date` rồi mục tiêu đang chọn (qua `saveSettings`) (S8.3).
+   * Ghi dòng ngày lỗi thì settings không đổi. Ghi settings lỗi thì settings giữ giá trị cũ
+   * (dòng ngày có thể đã mang mục tiêu mới; lần ghi phút kế tiếp chụp lại mục tiêu đang chọn).
+   */
   saveDailyGoal(date: string, goalMinutes: DailyGoalMinutes): Promise<void>;
 }
 
@@ -57,11 +62,13 @@ export class DexieProgressStore implements ProgressStore {
     return parseSettings(record);
   }
 
-  async saveSettings(settings: Settings): Promise<void> {
-    const rows = Object.entries(settings).map(([key, value]) => ({
-      key,
-      value,
-    }));
+  async saveSettings(patch: Partial<Settings>): Promise<void> {
+    const rows = Object.entries(patch)
+      .filter(([, value]) => value !== undefined)
+      .map(([key, value]) => ({ key, value }));
+    if (rows.length === 0) {
+      return;
+    }
     await this.db.settings.bulkPut(rows);
   }
 
@@ -131,25 +138,19 @@ export class DexieProgressStore implements ProgressStore {
     date: string,
     goalMinutes: DailyGoalMinutes,
   ): Promise<void> {
-    // Settings và mục tiêu của ngày `date` đổi cùng lúc hoặc không đổi gì.
+    // Dòng ngày ghi trước: lỗi thì settings không đổi.
     // Không có dòng hoặc dòng hỏng thì không tạo/không sửa: lần ghi phút sau sẽ chụp mục tiêu mới.
-    await this.db.transaction(
-      'rw',
-      this.db.settings,
-      this.db.dailyStats,
-      async () => {
-        await this.db.settings.put({
-          key: 'dailyGoalMinutes',
-          value: goalMinutes,
-        });
-        const result = dailyStatSchema.safeParse(
-          await this.db.dailyStats.get(date),
-        );
-        if (result.success) {
-          await this.db.dailyStats.put({ ...result.data, goalMinutes });
-        }
-      },
-    );
+    await this.db.transaction('rw', this.db.dailyStats, async () => {
+      const result = dailyStatSchema.safeParse(
+        await this.db.dailyStats.get(date),
+      );
+      if (result.success) {
+        await this.db.dailyStats.put({ ...result.data, goalMinutes });
+      }
+    });
+    // Settings ghi sau qua `saveSettings` (một cửa ghi settings, S8.2); lỗi thì settings giữ cũ,
+    // dòng ngày có thể đã mang mục tiêu mới và lần ghi phút kế tiếp chụp lại mục tiêu đang chọn.
+    await this.saveSettings({ dailyGoalMinutes: goalMinutes });
   }
 
   private async writeStudySeconds(

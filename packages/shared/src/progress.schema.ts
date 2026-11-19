@@ -11,14 +11,25 @@ export const dailyGoalMinutesSchema = z.union([
 
 export type DailyGoalMinutes = z.infer<typeof dailyGoalMinutesSchema>;
 
+/** Tốc độ phát audio mặc định người học chọn trong Cài đặt (S8.2). */
+export const AUDIO_SPEED_OPTIONS = ['normal', 'slow'] as const;
+
+export const audioSpeedSchema = z.enum(AUDIO_SPEED_OPTIONS);
+
+export type AudioSpeed = z.infer<typeof audioSpeedSchema>;
+
 export interface Settings {
   dailyGoalMinutes: DailyGoalMinutes;
   hasCompletedOnboarding: boolean;
+  defaultAudioSpeed: AudioSpeed;
+  isPinyinVisible: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   dailyGoalMinutes: 15,
   hasCompletedOnboarding: false,
+  defaultAudioSpeed: 'normal',
+  isPinyinVisible: true,
 };
 
 /**
@@ -32,6 +43,8 @@ export const settingsSchema = z.object({
   hasCompletedOnboarding: z
     .boolean()
     .catch(DEFAULT_SETTINGS.hasCompletedOnboarding),
+  defaultAudioSpeed: audioSpeedSchema.catch(DEFAULT_SETTINGS.defaultAudioSpeed),
+  isPinyinVisible: z.boolean().catch(DEFAULT_SETTINGS.isPinyinVisible),
 });
 
 export const LESSON_PROGRESS_STATUSES = ['in-progress', 'completed'] as const;

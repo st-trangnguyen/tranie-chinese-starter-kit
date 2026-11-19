@@ -4,6 +4,7 @@ import homeRoutes from './home/home.routes';
 import learningPathRoutes from './learning-path/learning-path.routes';
 import lessonRoutes from './lesson/lesson.routes';
 import onboardingRoutes from './onboarding/onboarding.routes';
+import settingsRoutes from './settings/settings.routes';
 import strokeOrderRoutes from './stroke-order/stroke-order.routes';
 import writingPracticeRoutes from './writing-practice/writing-practice.routes';
 
@@ -11,6 +12,7 @@ const pageRoutes: PageRoute[] = [
   ...onboardingRoutes,
   ...homeRoutes,
   ...learningPathRoutes,
+  ...settingsRoutes,
   ...lessonRoutes,
   ...strokeOrderRoutes,
   ...writingPracticeRoutes,

@@ -6,6 +6,7 @@ import home from '@assets/i18n/vi/home.json';
 import learningPath from '@assets/i18n/vi/learning-path.json';
 import lesson from '@assets/i18n/vi/lesson.json';
 import onboarding from '@assets/i18n/vi/onboarding.json';
+import settings from '@assets/i18n/vi/settings.json';
 import strokeOrder from '@assets/i18n/vi/stroke-order.json';
 import writingPractice from '@assets/i18n/vi/writing-practice.json';
 
@@ -26,6 +27,7 @@ testI18n.use(initReactI18next).init({
     'stroke-order',
     'writing-practice',
     'home',
+    'settings',
   ],
   defaultNS: 'common',
   resources: {
@@ -37,6 +39,7 @@ testI18n.use(initReactI18next).init({
       'stroke-order': strokeOrder,
       'writing-practice': writingPractice,
       home,
+      settings,
     },
   },
   interpolation: { escapeValue: false },

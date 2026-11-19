@@ -30,6 +30,11 @@ Quan sát được trong repo (`main` sau khi merge PR code S8.1 #134 và PR spe
   (học thật qua màn bài rồi về Trang chủ), `progress-store.daily-stats.test.ts` (DB tên ngẫu nhiên). E2E:
   `e2e/E8/home.helpers.ts` (`seedProgress` ghi dòng thô bất kỳ field, `runClockUntil`, `setPageVisibility`,
   `completeOnboarding`, `finishLesson`, `TIMEZONE`), mẫu offline `e2e/E8/s8.1-home-offline.spec.ts`.
+- Sau khi merge `main` có code S8.2 (`openspec/changes/s8-2-settings`, màn Cài đặt) vào nhánh: `ProgressStore.saveSettings(patch:
+  Partial<Settings>)` chỉ ghi các khóa trong `patch` (`bulkPut`); `ProgressService` có `changeDefaultAudioSpeed`,
+  `changePinyinVisibility` và màn Cài đặt (`pages/settings/hooks/useSettings.ts`) gọi `changeDailyGoal`. Test S8.2
+  (`progress.service.settings.test.ts`, `SettingsContainer.errors.test.tsx`, `SettingsContainer.corrupt.test.tsx`) spy/mock
+  `saveSettings` khi đổi mục tiêu, có test hoãn lần ghi bằng deferred. Các điều chỉnh do merge này: D2, D4 (mục "Sau merge S8.2").
 - Test S8.1 so dòng `dailyStats` bằng `toEqual({ date, studySeconds })` (6 chỗ trong `progress-store.daily-stats.test.ts`);
   object `ProgressStore` viết tay ở `progress.service.test.ts` (`makeStore`), `progress.service.study-time.test.ts`
   (`unavailableStore`), `lesson.service.test.ts` (`unreadable`, `unwritable`).
@@ -38,15 +43,17 @@ Quan sát được trong repo (`main` sau khi merge PR code S8.1 #134 và PR spe
 
 **Goals:**
 
-- Quy tắc streak (ngày đạt, mục tiêu dùng để so, mục tiêu thay thế, đếm lùi, bỏ ngày sau hôm nay) là hàm thuần ở
-  `ProgressService` Phần 2, test bằng bảng dữ liệu không cần IndexedDB.
+- Quy tắc streak (ngày đạt, mục tiêu dùng để so, mục tiêu thay thế, đếm lùi, bỏ ngày sau hôm nay) là hàm thuần ở Phần 2 của
+  service tiến độ (sau merge S8.2: `StudyTimeService`, `ProgressService` ủy quyền, D4), test bằng bảng dữ liệu không cần
+  IndexedDB.
 - Mục tiêu của từng ngày được ghi đúng lúc (mỗi lần ghi phút, mỗi lần đổi mục tiêu) mà không phá thứ tự ghi trước đọc và
   tính nguyên tử giữa hai tab mà S8.1 đã có.
 - Trang chủ tính lại streak đúng các lúc spec liệt kê, cùng nhịp với dòng phút hôm nay.
 
 **Non-Goals:**
 
-- Không làm màn đổi mục tiêu (S8.2); chỉ cung cấp use case `changeDailyGoal` để S8.2 gọi.
+- Không làm màn đổi mục tiêu (S8.2); chỉ cung cấp use case `changeDailyGoal` để S8.2 gọi (sau merge, màn Cài đặt S8.2 gọi
+  đúng use case này).
 - Không điền mục tiêu cho các ngày ghi trước bản S8.3 (spec: các ngày đó so với mục tiêu hôm nay).
 - Không thêm dependency, không thêm Dexie version (D1).
 
@@ -88,10 +95,37 @@ Quan sát được trong repo (`main` sau khi merge PR code S8.1 #134 và PR spe
   - Thay thế: store nhận callback cập nhật từ service (`updateDailyStat(date, updater)`) → rule ở service nhưng API store
     phức tạp hơn và vẫn phải đọc `settings` trong store; truyền `Promise<goal>` vào store → khó đọc, khó test.
 - `saveDailyGoal(date: string, goalMinutes: DailyGoalMinutes): Promise<void>` (mới): nối vào chuỗi `studyTimeWrites` như
-  `addStudySeconds`; một transaction `rw` trên `settings` + `dailyStats`: `put({ key: 'dailyGoalMinutes', value })`, rồi nếu
-  dòng `date` parse được thì `put({ ...dòng, goalMinutes })`; không có dòng hoặc dòng hỏng thì không tạo/không sửa dòng (lần ghi
-  phút sau sẽ chụp mục tiêu mới; ngày không có phút nào thì chưa đạt dù mục tiêu nào). Settings và mục tiêu hôm nay đổi cùng
-  lúc hoặc không đổi gì.
+  `addStudySeconds`; đổi settings `dailyGoalMinutes` và, nếu dòng `date` parse được, `put({ ...dòng, goalMinutes })` (thứ tự hiện
+  tại: mục "Sau merge S8.2" bên dưới); không có dòng hoặc dòng hỏng thì không tạo/không sửa dòng (lần ghi phút sau sẽ chụp
+  mục tiêu mới; ngày không có phút nào thì chưa đạt dù mục tiêu nào).
+  - Bản kế hoạch ban đầu: **một** transaction `rw` trên `settings` + `dailyStats` (settings và mục tiêu hôm nay đổi cùng lúc
+    hoặc không đổi gì).
+  - **Sau merge S8.2:** hai bước, không còn một transaction chung. Thứ tự (đảo sau duyệt lại plan, tasks 6.8/6.9; bản
+    6.7 ghi settings trước):
+    (1) Một transaction `rw` **chỉ** trên `dailyStats`: `get(date)` + `dailyStatSchema.safeParse`, parse được thì `put({
+    ...dòng, goalMinutes })`; không có dòng hoặc dòng hỏng thì không tạo/không sửa.
+    (2) `await this.saveSettings({ dailyGoalMinutes: goalMinutes })` — một cửa ghi settings của S8.2.
+    Bước (1) lỗi thì reject và **không** gọi (2). Không nuốt lỗi ở bước nào. Cả hai bước nằm trong cùng một mục của chuỗi
+    `studyTimeWrites`, nên thứ tự với `addStudySeconds` và các lần đọc `getDailyStat`/`getAllDailyStats` trong tab không đổi.
+  - Lý do hai bước: test S8.2 spy/mock `saveSettings` khi đổi mục tiêu (lỗi ghi, dữ liệu hỏng, hoãn ghi bằng deferred); ghi
+    settings bằng `put` riêng trong transaction thì các test đó không thấy lần ghi. Gọi `saveSettings` (một `await` không thuộc
+    Dexie) bên trong transaction thì transaction tự commit sớm (IndexedDB đóng transaction khi không còn request chờ), nên
+    không gộp được hai việc vào một transaction mà vẫn đi qua `saveSettings`.
+  - Lý do thứ tự dòng ngày trước, settings sau: màn Cài đặt S8.2 (`pages/settings/hooks/useSettings.ts`, `applyChange`) khi
+    `changeDailyGoal` reject thì đưa lựa chọn về giá trị cũ và báo "Không lưu được cài đặt" (Requirement lỗi lưu của S8.2:
+    "MUST đưa lựa chọn đó về giá trị trước khi đổi"). Mục tiêu đang chọn là `settings.dailyGoalMinutes`, nên settings phải là
+    bước ghi **cuối**: promise reject ⇔ settings giữ giá trị cũ ⇔ màn đúng khi về giá trị cũ. Thứ tự cũ (settings trước) để
+    lọt trường hợp settings đã đổi mà (2) lỗi → màn về cũ nhưng DB giữ mục tiêu mới, lần mở lại Cài đặt hiện mục tiêu mới.
+  - Phân tích lỗi theo thứ tự mới:
+    - (1) lỗi: reject trước khi đụng settings. Settings và dòng ngày không đổi (transaction rollback). Màn Cài đặt về cũ, khớp
+      DB. Streak không đổi.
+    - (2) lỗi: reject, settings giữ cũ, màn về cũ, khớp. Dòng hôm nay đã mang mục tiêu mới (không được lưu). Không ảnh hưởng
+      khi còn là hôm nay: hôm nay luôn so với mục tiêu đang chọn (D3), và lần ghi phút kế tiếp (≤ 15 giây khi đang học) chụp lại
+      mục tiêu cũ. Rủi ro còn lại: qua 0:00 trước lần ghi phút kế tiếp thì ngày đó thành ngày đã qua mang mục tiêu không được
+      lưu (lệch tối đa một ngày, chỉ khi ghi settings lỗi). Ghi ở Risks.
+    - Hai tab: lần ghi phút ở tab khác xen giữa (1) và (2) đọc settings cũ nên chụp lại mục tiêu cũ vào dòng hôm nay; sau (2)
+      settings mới. Hôm nay vẫn so với mục tiêu đang chọn (D3), lần ghi phút kế tiếp chụp mục tiêu mới; lệch chỉ khi qua 0:00
+      trong cửa sổ đó (cùng loại với rủi ro 0:00 ở Risks).
 - `getAllDailyStats(): Promise<DailyStat[]>` (mới): chờ chuỗi `studyTimeWrites` (như `getDailyStat`, để học xong về Trang chủ
   thấy streak mới), `toArray()`, `safeParse` từng dòng, dòng hỏng bị bỏ (= ngày không có phút dùng được → chưa đạt). Số dòng
   tăng một mỗi ngày học (vài trăm dòng mỗi năm), đọc cả bảng là đủ; thay thế: đọc theo khoảng `where('date').below(...)`
@@ -99,7 +133,9 @@ Quan sát được trong repo (`main` sau khi merge PR code S8.1 #134 và PR spe
 - Interface `ProgressStore` thêm hai method; các object `ProgressStore` viết tay trong test cũ cần stub (tasks 1.1).
 - `progress-store.service.ts` dự kiến ~160 dòng (< 300).
 
-### D3. Quy tắc: `ProgressService` Phần 2 (thuần, mỗi method một `Rule:`)
+### D3. Quy tắc: Phần 2 của service tiến độ (thuần, mỗi method một `Rule:`)
+
+Sau merge S8.2 các rule dưới đây nằm ở `StudyTimeService` Phần 2 (D4); chữ ký và nội dung không đổi.
 
 - `shared/utils/date.utils.ts`: `previousLocalDateKey(dateKey: string): string` — tách `YYYY-MM-DD`, `new Date(y, m - 1,
   d - 1)` rồi `toLocalDateKey` (đúng qua đầu tháng, đầu năm, ngày đổi giờ). Leaf, không import gì.
@@ -117,7 +153,7 @@ Quan sát được trong repo (`main` sau khi merge PR code S8.1 #134 và PR spe
 - Chữ ký trên là trạng thái cuối. Theo TDD, `resolveDayGoal` được dựng dần qua các cặp RED/GREEN của tasks 2.21–2.26 (mục
   tiêu của ngày đã qua → bỏ so với mục tiêu hôm nay → nhánh thiếu/hỏng), để mỗi RED fail thật.
 
-### D4. Use case: `ProgressService` Phần 1 + 3
+### D4. Use case: `ProgressService` Phần 1 + 3 (sau merge S8.2: tách `StudyTimeService`, xem cuối mục)
 
 - Phần 1 thêm `private readAllDailyStats()`, `private writeDailyGoal(date, goalMinutes)` (ủy quyền store).
 - `getStudyStreak(now: number = Date.now()): Promise<number>` — đọc settings (`.catch` → `DEFAULT_SETTINGS`) và
@@ -125,9 +161,10 @@ Quan sát được trong repo (`main` sau khi merge PR code S8.1 #134 và PR spe
   Không throw (cùng hợp đồng với `getTodayStudy`): IndexedDB không mở được thì streak 0, Trang chủ vẫn hiện.
 - `changeDailyGoal(minutes: number, now: number = Date.now()): Promise<void>` — `isValidDailyGoal` sai thì throw
   `'Mục tiêu mỗi ngày phải là 15, 30 hoặc 60 phút.'` (cùng câu với `completeOnboarding`); hợp lệ thì
-  `writeDailyGoal(toLocalDateKey(now), minutes)`. Đây là use case "đổi mục tiêu" mà proposal yêu cầu; S8.2 gọi lại khi có màn
-  Cài đặt (không viết use case đổi mục tiêu thứ hai). Hiện chưa có caller production; được giữ vì Scenario "Đổi mục tiêu sau khi
-  đã học, qua 0:00 streak không đổi" và "Tăng mục tiêu không đổi các ngày đã qua" kiểm nó ở tầng service.
+  `writeDailyGoal(toLocalDateKey(now), minutes)`. Đây là use case "đổi mục tiêu" mà proposal yêu cầu, cũng là use case duy nhất
+  màn Cài đặt S8.2 gọi (`useSettings.changeDailyGoal` → `service.changeDailyGoal(minutes)`); sau merge chỉ còn một
+  `changeDailyGoal` (bản này) trong `ProgressService`. Scenario "Đổi mục tiêu sau khi đã học, qua 0:00 streak không đổi" và
+  "Tăng mục tiêu không đổi các ngày đã qua" kiểm nó ở tầng service.
 - `completeOnboarding` giữ nguyên: onboarding chạy trước mọi màn bài nên chưa có dòng `dailyStats` nào để cập nhật; lần ghi phút
   đầu tiên sẽ chụp mục tiêu vừa chọn (TC-S8.3-AC1-19).
 - `recordStudyTime` không đổi code (mục tiêu được chụp trong store, D2).
@@ -136,8 +173,25 @@ Quan sát được trong repo (`main` sau khi merge PR code S8.1 #134 và PR spe
   (rà `shared/services/` lúc đó, ghi pattern đã theo vào mô tả PR). Ba rule streak vẫn là method public riêng ở Phần 2, mỗi
   method một `Rule:` (CLAUDE.md §3); **không** gom thành helper private trong Phần 2, **không** dời rule sang `shared/utils`
   (rule nghiệp vụ thuộc service).
-- Thay thế: service mới `streak.service.ts` → phải đọc settings và `dailyStats` lần nữa và dùng lại `toStudyMinutes`/
-  `isDailyGoalReached` của `ProgressService` (gọi chéo service); proposal chốt "service tiến độ hiện có".
+- Thay thế (bản kế hoạch ban đầu loại): service mới `streak.service.ts` chỉ cho streak → phải đọc settings và `dailyStats`
+  lần nữa và dùng lại `toStudyMinutes`/`isDailyGoalReached` của `ProgressService` (gọi chéo service); proposal chốt "service
+  tiến độ hiện có".
+- **Sau merge S8.2 (trạng thái hiện tại của code):** `progress.service.ts` vượt 300 dòng (S8.2 thêm tùy chọn audio/pinyin +
+  S8.3), bước (2) ở trên được áp dụng: tách `shared/services/study-time.service.ts` — `StudyTimeService`, 3 phần, nhận
+  `ProgressStore` qua constructor (mặc định `progressStore`).
+  - Phần 1: `readSettings`, `readDailyStat`, `readAllDailyStats`, `addStudySeconds` (private, ủy quyền store).
+  - Phần 2: toàn bộ rule phút học S8.1 + streak S8.3: `splitStudyTimeByDay`, `toStudyMinutes`, `isDailyGoalReached`,
+    `resolveDayGoal`, `isStreakDayReached`, `countStudyStreak` (mỗi method một `Rule:`).
+  - Phần 3: `recordStudyTime`, `getTodayStudy`, `getStudyStreak` (hợp đồng không đổi: không throw, xếp lần ghi đồng bộ).
+  - `ProgressService` tạo `new StudyTimeService(store)` trong constructor (cùng instance store, nên chuỗi `studyTimeWrites`
+    vẫn là một) và ủy quyền các method mà hook/test gọi: `splitStudyTimeByDay`, `toStudyMinutes`, `isDailyGoalReached`,
+    `countStudyStreak`, `recordStudyTime`, `getTodayStudy`, `getStudyStreak`. API công khai `ProgressService` với `useHome`,
+    `useLessonRunner`… không đổi. `changeDailyGoal`, `isValidDailyGoal`, `writeDailyGoal` ở lại `ProgressService` (chung luồng
+    cài đặt/onboarding với S8.2).
+  - Pattern theo repo: `WritingPracticeService` ủy quyền `StrokeOrderService` (`writing-practice.service.ts`).
+  - Vì sao khác lựa chọn bị loại ở trên: gom **cả** phút học S8.1 lẫn streak S8.3 vào một service, nên streak dùng
+    `toStudyMinutes`/`isDailyGoalReached` ngay trong cùng class (không gọi chéo) và `getStudyStreak` vẫn đọc settings +
+    `dailyStats` một lần. `StudyTimeService` không import `ProgressService` (một chiều).
 
 ### D5. Trang chủ: `useHome` + `StudyStreakStatus`
 
@@ -166,7 +220,8 @@ Quan sát được trong repo (`main` sau khi merge PR code S8.1 #134 và PR spe
 |---|---|---|
 | `HomeContainer`, `StudyStreakStatus` | `useHome`, react-i18next | ✅ không chạm `shared/services` |
 | `useHome` | `ProgressService`, `ContentService`, `usePageVisibility` | ✅ hooks → shared/services, core/hooks |
-| `ProgressService` | `ProgressStore`, `@csk/shared`, `date.utils`, `learning-path.utils` | ✅ không React, không Dexie |
+| `ProgressService` | `ProgressStore`, `StudyTimeService`, `@csk/shared`, `date.utils`, `learning-path.utils` | ✅ không React, không Dexie; shared/services → shared/services cùng tầng, một chiều |
+| `StudyTimeService` | `ProgressStore`, `@csk/shared`, `date.utils`, `home.model` (type) | ✅ không React, không Dexie, không import `ProgressService` |
 | `DexieProgressStore` | `dailyStatSchema`, `parseSettings`, `DailyGoalMinutes` (`@csk/shared`), `db.helper` | ✅ core/services → `@csk/shared` |
 | `date.utils` | không gì | ✅ leaf |
 
@@ -184,7 +239,7 @@ Quan sát được trong repo (`main` sau khi merge PR code S8.1 #134 và PR spe
 | Schema `goalMinutes` | `packages/shared` | `packages/shared/src/progress.schema.test.ts` |
 | Lùi một ngày theo khóa | `shared/utils` | `apps/web/src/app/shared/utils/date.utils.test.ts` |
 | Chụp mục tiêu khi ghi phút, đổi mục tiêu, đọc mọi ngày | `core/services` | `apps/web/src/app/core/services/progress-store.daily-goal.test.ts` (mới, DB tên ngẫu nhiên) |
-| Quy tắc streak (Phần 2) | `shared/services` | `apps/web/src/app/shared/services/progress.service.streak.test.ts` (mới, hàm thuần) |
+| Quy tắc streak (Phần 2) | `shared/services` | `apps/web/src/app/shared/services/progress.service.streak.test.ts` (mới, hàm thuần) ; sau merge S8.2 gọi qua `ProgressService` ủy quyền sang `StudyTimeService`, file test giữ nguyên) |
 | Use case streak, đổi mục tiêu (Phần 3) | `shared/services` + fake-indexeddb | `apps/web/src/app/shared/services/progress.service.streak-flow.test.ts` (mới) |
 | Trang chủ hiện streak, tính lại | route thật | `apps/web/src/app/pages/home/containers/HomeContainer.streak.test.tsx`, `HomeContainer.streakRefresh.test.tsx` (mới) |
 | Luồng thật trên bản build | e2e | `apps/web/e2e/E8/s8.3-streak.spec.ts`, `s8.3-streak-clock.spec.ts`, `s8.3-streak-offline.spec.ts` + helper `e2e/E8/streak.helpers.ts` |
@@ -211,7 +266,13 @@ Quan sát được trong repo (`main` sau khi merge PR code S8.1 #134 và PR spe
   chọn (spec), dòng hôm nay chỉ dùng khi nó đã thành ngày đã qua; lần ghi phút kế tiếp chụp lại.
 - [Đồng hồ máy chỉnh lùi để lại ngày sau hôm nay] → bỏ qua trong `countStudyStreak`; dòng đó vẫn nằm trong DB và sẽ được tính
   khi đồng hồ tới ngày đó (đúng: lúc ấy nó là hôm nay/ngày đã qua).
-- [`progress.service.ts` gần 300 dòng] → ước lượng ~265; theo dõi ở REFACTOR (tasks 6.2).
+- [`progress.service.ts` gần 300 dòng] → ước lượng ~265; theo dõi ở REFACTOR (tasks 6.2). Sau merge S8.2 đã vượt và đã tách
+  `StudyTimeService` (D4, tasks 6.7); hiện `progress.service.ts` ~260 dòng, `study-time.service.ts` ~160 dòng.
+- [Sau merge S8.2, `saveDailyGoal` không còn một transaction chung settings + `dailyStats`] → thứ tự: dòng ngày trước,
+  `saveSettings` sau (D2). Màn Cài đặt S8.2: promise reject ⇔ settings giữ cũ, nên lựa chọn về giá trị cũ luôn khớp DB
+  (Requirement lỗi lưu S8.2). Streak: dòng ngày lỗi thì không gì đổi; settings lỗi thì dòng hôm nay đã mang mục tiêu không được
+  lưu, chỉ ảnh hưởng streak khi qua 0:00 trước lần ghi phút kế tiếp (lệch tối đa một ngày). Chấp nhận để giữ một cửa ghi settings
+  (`saveSettings`) mà test S8.2 dựa vào. Test: tasks 6.8/6.9.
 - [Test S8.1 so cả dòng bằng `toEqual`] → đổi sang `toMatchObject` ở commit RED đầu tiên (tasks 1.1); hành vi S8.1 không đổi.
 - [S8.5 sao lưu] → `goalMinutes` là field mới của `dailyStats`; S8.5 sao lưu cả dòng nên tự có. Ghi ở docs §6.2.
 

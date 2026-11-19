@@ -11,6 +11,7 @@ export const I18N_NAMESPACES = [
   'lesson',
   'stroke-order',
   'writing-practice',
+  'settings',
 ] as const;
 
 i18n

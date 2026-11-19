@@ -201,6 +201,71 @@ describe('DexieProgressStore — mục tiêu của ngày (S8.3)', () => {
     });
   });
 
+  it(`${SCENARIO_CHANGE_GOAL}: ghi dòng ngày trước rồi mới ghi settings; ghi settings lỗi thì lần đổi báo lỗi, settings giữ mục tiêu cũ`, async () => {
+    const db = createDatabase(`test-${crypto.randomUUID()}`);
+    const store = new DexieProgressStore(db);
+    await store.saveSettings({
+      dailyGoalMinutes: 15,
+      hasCompletedOnboarding: true,
+    });
+    await db.dailyStats.put({
+      date: TODAY,
+      studySeconds: 1200,
+      goalMinutes: 15,
+    });
+    const saveSettings = vi
+      .spyOn(store, 'saveSettings')
+      .mockRejectedValueOnce(new Error('settings write failed'));
+
+    await expect(store.saveDailyGoal(TODAY, 30)).rejects.toThrow(
+      'settings write failed',
+    );
+
+    expect(saveSettings).toHaveBeenCalledOnce();
+    expect(saveSettings).toHaveBeenCalledWith({ dailyGoalMinutes: 30 });
+    await expect(store.getSettings()).resolves.toMatchObject({
+      dailyGoalMinutes: 15,
+    });
+    // Dòng ngày đã ghi trước bước settings nên mang mục tiêu mới.
+    await expect(db.dailyStats.get(TODAY)).resolves.toEqual({
+      date: TODAY,
+      studySeconds: 1200,
+      goalMinutes: 30,
+    });
+  });
+
+  it(`${SCENARIO_CHANGE_GOAL}: ghi dòng ngày lỗi thì lần đổi báo lỗi, không ghi settings`, async () => {
+    const db = createDatabase(`test-${crypto.randomUUID()}`);
+    const store = new DexieProgressStore(db);
+    await store.saveSettings({
+      dailyGoalMinutes: 15,
+      hasCompletedOnboarding: true,
+    });
+    await db.dailyStats.put({
+      date: TODAY,
+      studySeconds: 1200,
+      goalMinutes: 15,
+    });
+    vi.spyOn(db.dailyStats, 'put').mockRejectedValueOnce(
+      new Error('daily stat write failed'),
+    );
+    const saveSettingsSpy = vi.spyOn(store, 'saveSettings');
+
+    await expect(store.saveDailyGoal(TODAY, 30)).rejects.toThrow(
+      'daily stat write failed',
+    );
+
+    expect(saveSettingsSpy).not.toHaveBeenCalled();
+    await expect(store.getSettings()).resolves.toMatchObject({
+      dailyGoalMinutes: 15,
+    });
+    await expect(db.dailyStats.get(TODAY)).resolves.toEqual({
+      date: TODAY,
+      studySeconds: 1200,
+      goalMinutes: 15,
+    });
+  });
+
   it(`${SCENARIO_CHANGE_GOAL}: đổi mục tiêu ngay sau lần ghi phút chưa xong thì dòng cuối có cả phút và mục tiêu mới`, async () => {
     const { db, store } = openGoalStore();
     await store.saveSettings({
