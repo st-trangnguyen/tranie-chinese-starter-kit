@@ -99,6 +99,17 @@ export const useProgressBackup = (): ProgressBackupView => {
     [changePhase, finish, service],
   );
 
+  const cancelImport = useCallback(() => {
+    if (phaseRef.current !== 'confirming') {
+      return;
+    }
+    snapshotRef.current = null;
+    if (isActiveRef.current) {
+      setPreview(null);
+    }
+    changePhase('idle');
+  }, [changePhase]);
+
   return {
     phase,
     preview,
@@ -106,6 +117,6 @@ export const useProgressBackup = (): ProgressBackupView => {
     exportProgress,
     selectFile,
     confirmImport: ignore,
-    cancelImport: ignore,
+    cancelImport,
   };
 };
