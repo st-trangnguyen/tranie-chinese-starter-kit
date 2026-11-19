@@ -6,7 +6,7 @@ import {
   ROOT,
   toBackupFileSource,
 } from '@test/backup-machine.helpers';
-import { toLocalDateKey } from '@shared/utils/date.utils';
+import { previousLocalDateKey, toLocalDateKey } from '@shared/utils/date.utils';
 
 import { ProgressService } from './progress.service';
 
@@ -152,5 +152,35 @@ describe('BackupService.inspectImportFile + importProgress', () => {
       'intro-06': 'completed',
       'intro-07': 'open',
     });
+  });
+
+  it('S8.5-AC1 Chuỗi ngày học giữ đúng nhờ mục tiêu của từng ngày: máy A hôm qua học 20 phút với mục tiêu 15, hôm nay đổi sang 30 và chưa học, nhập ở máy B cùng ngày thì chuỗi vẫn 1 ngày', async () => {
+    const machineA = createMachine();
+    const progressA = new ProgressService(machineA.store);
+    await progressA.completeOnboarding(15);
+    const yesterday = previousLocalDateKey(toLocalDateKey(NOW));
+    await machineA.store.addStudySeconds(yesterday, 1200);
+    await progressA.changeDailyGoal(30, NOW);
+    expect(await progressA.getStudyStreak(NOW)).toBe(1);
+    await machineA.backup.exportProgress(NOW);
+    const exported = machineA.savedFiles[0]?.content ?? '';
+
+    const machineB = createMachine();
+    const progressB = new ProgressService(machineB.store);
+    await progressB.completeOnboarding(15);
+
+    const inspection = await machineB.backup.inspectImportFile(
+      toBackupFileSource(exported),
+    );
+    expect(inspection.status).toBe('valid');
+    if (inspection.status !== 'valid') {
+      return;
+    }
+    await machineB.backup.importProgress(inspection.snapshot);
+
+    expect(await progressB.getStudyStreak(NOW)).toBe(1);
+    expect((await progressB.getLearningPreferences()).dailyGoalMinutes).toBe(
+      30,
+    );
   });
 });
