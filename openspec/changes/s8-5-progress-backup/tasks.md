@@ -111,7 +111,7 @@ Test S8.2 cũ (`SettingsContainer*.test.tsx`) phải vẫn pass sau mỗi GREEN.
 - [x] 7.12 GREEN: `formatLocalDateKey` (`date.utils.ts`), `ImportConfirmDialog` (D7), pha `confirming`, giữ snapshot trong `useRef`; kiểm: test 7.11 pass
 - [x] 7.13 RED: S8.5-AC3 "Hủy thì không đổi gì" — mở hộp với `hop-le-5-bai`, bấm "Hủy" → không còn `dialog`, `status`/`alert` rỗng, DB chỉ `intro-01`; kiểm: fail vì "Hủy" chưa nối
 - [x] 7.14 GREEN: `cancelImport`; kiểm: test 7.13 pass
-- [ ] 7.15 RED: S8.5-AC3 "Esc thì như Hủy" — hộp mở, `keyboard('{Escape}')` → hộp đóng, không thông báo, DB không đổi; kiểm: fail
+- [x] 7.15 RED: S8.5-AC3 "Esc thì như Hủy" — hộp mở, `keyboard('{Escape}')` → hộp đóng, không thông báo, DB không đổi; kiểm: fail
 - [ ] 7.16 GREEN: `onKeyDown` `Escape` → `onCancel`; kiểm: test 7.15 pass
 - [ ] 7.17 RED: S8.5-AC3 "Hộp xác nhận dùng được bằng bàn phím" — hộp vừa mở: "Hủy" có focus; `tab()` → "Ghi đè"; `tab()` → "Hủy" (không ra nền); `tab({ shift: true })` từ "Hủy" → "Ghi đè"; Enter ở "Hủy" → hộp đóng, focus ở "Nhập tiến độ"; kiểm: fail
 - [ ] 7.18 GREEN: focus "Hủy" khi mở, vòng Tab, trả focus về nút Nhập (ref) khi đóng; kiểm: test 7.17 pass

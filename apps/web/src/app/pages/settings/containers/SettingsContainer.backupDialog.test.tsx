@@ -4,7 +4,13 @@ import { join } from 'node:path';
 import { createDatabase } from '@core/helpers/db.helper';
 import { contentSource } from '@core/services/content-source.service';
 import { ROOT } from '@test/backup-machine.helpers';
-import { renderWithProviders, screen, waitFor, within } from '@test/render';
+import {
+  act,
+  renderWithProviders,
+  screen,
+  waitFor,
+  within,
+} from '@test/render';
 
 import SettingsContainer from './SettingsContainer';
 
@@ -111,6 +117,30 @@ describe('SettingsContainer — hộp xác nhận nhập tiến độ', () => {
     });
 
     await user.click(within(dialog).getByRole('button', { name: 'Hủy' }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    expect(within(section).getByRole('status')).toBeEmptyDOMElement();
+    expect(within(section).getByRole('alert')).toBeEmptyDOMElement();
+    expect(await readLessonIds()).toEqual(['intro-01']);
+  });
+  it('S8.5-AC3 Esc thì như Hủy: hộp đóng, không có thông báo, tiến độ trên máy vẫn chỉ bài 1', async () => {
+    const { user, section } = await renderBackupSection();
+
+    await user.upload(getFileInput(section), fixtureFile('hop-le-5-bai.json'));
+    const dialog = await screen.findByRole('dialog', {
+      name: 'Nhập tiến độ từ file?',
+    });
+
+    // Focus đang ở trong hộp (ở nút "Ghi đè" để chắc Esc không phải bấm "Hủy").
+    const overwriteButton = within(dialog).getByRole('button', {
+      name: 'Ghi đè',
+    });
+    act(() => {
+      overwriteButton.focus();
+    });
+    await user.keyboard('{Escape}');
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
