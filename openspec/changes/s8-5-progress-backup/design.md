@@ -142,11 +142,14 @@ Quan sát được trong repo (`main` tại `8a88004`, sau khi merge PR code S8.
     defaultAudioSpeed: audioSpeedSchema, isPinyinVisible: z.boolean() } satisfies { [K in keyof Settings]: z.ZodType<Settings[K]> }`
     → `Settings` (interface S8.2 giữ nguyên) thêm field mà quên schema là lỗi typecheck. `settingsStrictSchema =
     z.object(settingsFieldSchemas)`; `settingsSchema` (đọc DB) = mỗi field `settingsFieldSchemas.<k>.catch(DEFAULT_SETTINGS.<k>)`;
-    cả hai `satisfies z.ZodType<Settings>` → thiếu field ở một trong hai là lỗi typecheck.
+    cả hai `satisfies z.ZodType<Settings, z.ZodTypeDef, unknown>` (input `unknown` vì `.catch` nhận mọi đầu vào; `z.ZodType<Settings>`
+    mặc định input = output nên bản khoan dung không thỏa) → thiếu field ở một trong hai là lỗi typecheck. `settingsFieldSchemas`,
+    `settingsStrictSchema`, `lessonProgressStrictSchema`, `dailyStatStrictSchema` export qua `packages/shared/src/index.ts`.
   - `lessonProgressStrictSchema` (`cursor: z.number().int().min(0).optional()`); `lessonProgressSchema` =
-    `lessonProgressStrictSchema.extend({ cursor: … .optional().catch(undefined) })`.
+    `lessonProgressStrictSchema.extend({ cursor: lessonProgressStrictSchema.shape.cursor.catch(undefined) })`.
   - `dailyStatStrictSchema` (`goalMinutes: dailyGoalMinutesSchema.optional()`: dòng ngày trước S8.3 không có field này vẫn hợp lệ,
-    nhưng `goalMinutes: 45` là file hỏng); `dailyStatSchema` = `.extend({ goalMinutes: … .optional().catch(undefined) })`.
+    nhưng `goalMinutes: 45` là file hỏng); `dailyStatSchema` = `.extend({ goalMinutes: dailyStatStrictSchema.shape.goalMinutes
+    .catch(undefined) })`.
 - Tương thích (proposal, Open Questions "Cam kết tương thích"): bản sau thêm `progressBackupV2Schema`, phần mới `.default(…)`
   để file v1 vẫn nhập được; nhánh theo `formatVersion` ở `BackupService.checkBackupText`. Không có file cũ hơn v1, nên chưa có
   nhánh nâng cấp.
@@ -198,17 +201,21 @@ Quan sát được trong repo (`main` tại `8a88004`, sau khi merge PR code S8.
     (bài vượt cấp đã là `completed`, xem Context; bài lạ không đếm).
 - **Phần 3 — Use case**:
   - `exportProgress(now = Date.now()): Promise<void>` — `readSnapshot` → `buildBackupFile` → `serializeBackupFile` →
-    `saveFile`. Đọc lỗi thì throw `Error('Không đọc được tiến độ để xuất.')` **trước** `saveFile` (không có file nào được lưu).
+    `saveFile`. Đọc lỗi thì throw `Error('Không đọc được tiến độ để xuất.', { cause })` **trước** `saveFile` (không có file nào
+    được lưu).
     Không ghi gì vào store (spec "Xuất không làm đổi tiến độ").
   - `inspectImportFile(file: BackupFileSource): Promise<ImportInspection>` với `BackupFileSource = { size: number; text():
     Promise<string> }` (`File` thỏa mãn; test truyền object thường). Quá lớn → `rejected/not-backup` **không** gọi `text()`;
-    `text()` lỗi → `not-backup`; rồi `checkBackupText`; hợp lệ thì `readKnownLessonIds` + `countCompletedLessons` →
+    `text()` reject → `rejected/not-backup` (không throw); rồi `checkBackupText`; hợp lệ thì `readKnownLessonIds` +
+    `countCompletedLessons` →
     `{ status: 'valid', snapshot, preview: { exportedOn, completedLessonCount } }`. Không ghi gì (spec "tiến độ trên máy chưa đổi
     khi hộp đang mở"). **Nạp nội dung app lỗi** (`readKnownLessonIds` reject) → throw `Error('Không đọc được nội dung app để đếm
-    bài đã xong.')`; hook báo `importFailed` và không mở hộp (quyết định của dev, Open Questions).
-  - `importProgress(snapshot): Promise<void>` → `writeSnapshot`; lỗi thì throw `Error('Không ghi được tiến độ từ file.')`.
+    bài đã xong.', { cause })`; hook báo `importFailed` và không mở hộp (quyết định của dev, Open Questions).
+  - `importProgress(snapshot): Promise<void>` → trả thẳng `writeSnapshot(snapshot)` (không bọc lỗi): `importAll` reject thì promise
+    reject với lỗi gốc của store, hook báo `importFailed`.
 - Type kết quả (`BackupCheck`, `ImportInspection`, `ImportPreview`, `BackupRejectReason = 'not-backup' | 'corrupted' |
   'newer-version'`, `BackupFileSource`) ở `shared/models/progress-backup.model.ts`.
+- `MAX_BACKUP_FILE_BYTES` và `REVOKE_OBJECT_URL_DELAY_MS` (D5) cùng ở `core/constants/backup.constants.ts`.
 - Thay thế: (a) để `ProgressService` làm luôn → file đã 260 dòng, và §1 có ô "backup" riêng. (b) Đọc file (`file.text()`) trong
   hook → hook biết luật 20 MB và thứ tự kiểm tra; giữ trong service để test không cần React.
 
@@ -216,7 +223,9 @@ Quan sát được trong repo (`main` tại `8a88004`, sau khi merge PR code S8.
 
 - `interface FileSaver { save(fileName: string, content: string, mimeType: string): void }`; `AnchorFileSaver`: `Blob` →
   `URL.createObjectURL` → `<a download={fileName}>` gắn vào `document.body`, `click()`, gỡ thẻ, `revokeObjectURL` sau
-  `setTimeout(…, 0)`. Đồng bộ, không chờ người học lưu (spec "Báo đã xuất khi file đã đưa cho trình duyệt"): `save` trả về là
+  `setTimeout(…, REVOKE_OBJECT_URL_DELAY_MS)` (= 40 000 ms, `core/constants/backup.constants.ts`): Safari iOS, Chrome Android đọc
+  blob bất đồng bộ sau `click()`, thu hồi ngay (`0`) có thể làm file tải về rỗng hoặc hỏng (finding minor của dev-lead, đã duyệt).
+  Test chạy timer giả: chưa thu hồi ở `REVOKE_OBJECT_URL_DELAY_MS - 1`, thu hồi ở mốc đó. Đồng bộ, không chờ người học lưu (spec "Báo đã xuất khi file đã đưa cho trình duyệt"): `save` trả về là
   hook báo "Đã xuất tiến độ."; hủy hộp lưu sau đó app không biết và không báo gì. Singleton `fileSaver`.
 - Đặt ở `core/services` vì là adapter trình duyệt có tác dụng phụ, không có luật nghiệp vụ (proposal, Layer đích); service
   `shared` gọi qua interface nên test thay bằng fake.
@@ -226,19 +235,23 @@ Quan sát được trong repo (`main` tại `8a88004`, sau khi merge PR code S8.
 ### D6. Hook `useProgressBackup` (`pages/settings/hooks/useProgressBackup.ts`, mới) + `useSettings.reloadPreferences`
 
 - `useProgressBackup(onImported: () => void): ProgressBackupView` — `BackupService` qua `useMemo`. Trả:
-  - `phase: 'idle' | 'exporting' | 'checking' | 'confirming' | 'importing'`, `preview: ImportPreview | null`,
+  - `phase: ProgressBackupPhase` (`'idle' | 'exporting' | 'checking' | 'confirming' | 'importing'`), `preview: ImportPreview | null`,
     `message: BackupMessage | null` với `BackupMessage = { tone: 'success' | 'error'; key: BackupMessageKey }`,
     `BackupMessageKey = 'exported' | 'exportFailed' | 'notBackup' | 'corrupted' | 'newerVersion' | 'imported' | 'importFailed'`.
   - Handler: `exportProgress()`, `selectFile(file: File | undefined)`, `confirmImport()`, `cancelImport()`.
-  - Type `ProgressBackupView`, `BackupMessage`, `BackupMessageKey` ở `shared/models/progress-backup.model.ts`.
+  - Type `ProgressBackupView`, `ProgressBackupPhase`, `BackupMessage`, `BackupMessageKey` ở `shared/models/progress-backup.model.ts`.
+  - Map lý do từ chối → khóa thông báo: hằng `REJECT_MESSAGE_KEYS: Record<BackupRejectReason, BackupMessageKey>` trong hook.
 - Luồng: mỗi thao tác mới xoá `message` cũ; đang ở pha khác `idle` thì bỏ qua lần bấm (không double-submit, không `disabled`
-  để nút vẫn giữ focus). `selectFile(undefined)` (đóng hộp chọn file) → không đổi gì. `rejected` → message lỗi theo `reason`,
+  để nút vẫn giữ focus). Pha đọc đồng bộ qua `phaseRef` (đổi cùng lúc với state qua `changePhase`) để chặn lần bấm lặp trước khi
+  state kịp render; `cancelImport`/`confirmImport` chỉ chạy ở pha `confirming`. `selectFile(undefined)` (đóng hộp chọn file) → không đổi gì. `rejected` → message lỗi theo `reason`,
   không mở hộp. `inspectImportFile` throw (nạp nội dung lỗi) → `importFailed`, không mở hộp. `valid` → `phase: 'confirming'`, giữ
-  `snapshot` trong `useRef` (không render). `cancelImport` → `idle`, không message. `confirmImport` → `importing` → thành công:
-  message `imported`, gọi `onImported()`; lỗi: `importFailed`. Export: thành công `exported`, lỗi `exportFailed`. Mọi promise kiểm
-  `isActive` khi unmount.
+  `snapshot` trong `useRef` (không render), `preview` trong state. `cancelImport` → xoá snapshot/preview, `idle`, không message.
+  `confirmImport` → xoá preview (hộp đóng) → `importing` → thành công: message `imported`, gọi `onImported()` (khi còn mount); lỗi:
+  `importFailed`. Export: thành công `exported`, lỗi `exportFailed`. Mọi promise kiểm `isActiveRef` (effect cleanup) trước khi
+  `setState`.
 - **`useSettings` thêm `reloadPreferences: () => void`** (S8.2 chưa có hàm nạp lại): state `loadId` (số), effect nạp
-  `getLearningPreferences()` phụ thuộc `[service, loadId]`; `reloadPreferences` = `setLoadId((n) => n + 1)` (effect cleanup
+  `getLearningPreferences()` phụ thuộc `[service, loadId]`; `reloadPreferences = useCallback(() => setLoadId((n) => n + 1), [])`
+  (tham chiếu ổn định, nên `useProgressBackup` nhận nó làm `onImported` mà `confirmImport` không đổi mỗi render; effect cleanup
   `isActive` như hiện có; không thêm effect đồng bộ state). Nạp xong ghi `persistedRef` và `preferences`. Không đổi hành vi hiện có
   của S8.2 (test S8.2 cũ vẫn pass).
 - `SettingsContainer` gọi `useProgressBackup(reloadPreferences)`. Trang chủ, Lộ trình, màn bài học đọc lại khi mount nên không cần
@@ -255,13 +268,16 @@ Quan sát được trong repo (`main` tại `8a88004`, sau khi merge PR code S8.
   được file ảnh để thấy thông báo lỗi (TC-S8.5-AC2-1).
   - Hai vùng thông báo luôn có trong DOM **bên trong section**: `<p role="status">` (thành công) và `<p role="alert">` (lỗi), chữ
     đổi theo `message` (spec "Thông báo … được trình đọc màn hình đọc"). Test truy vấn trong `region` "Sao lưu tiến độ" để không lẫn
-    với `role="alert"` lỗi lưu cài đặt của S8.2. Lỗi có class `.backup-message.has-error` và tiền tố chữ (không chỉ dựa vào màu,
-    TC-S8.5-AC2-12).
-  - Focus trả về nút "Nhập tiến độ" (ref) khi hộp xác nhận đóng (Hủy, Esc, Ghi đè xong).
+    với `role="alert"` lỗi lưu cài đặt của S8.2. Lỗi có class `.backup-message.has-error` và tiền tố chữ "Lỗi:" (i18n
+    `backup.errorPrefix`, ghép `"{prefix} {thông báo}"`; không chỉ dựa vào màu, TC-S8.5-AC2-12).
+  - Vì vùng `role="alert"` của mục sao lưu **luôn có trong DOM**, các test S8.2 cũ đếm/tìm `alert` trên cả màn đã được giới hạn ra
+    ngoài region "Sao lưu tiến độ" (xem D10), không đổi hành vi S8.2.
+  - Focus trả về nút "Nhập tiến độ" (ref) khi hộp xác nhận đóng (Hủy, Esc, Ghi đè): `useEffect` theo `isDialogOpen` (`phase ===
+    'confirming' && preview !== null`) với `wasDialogOpenRef`, chuyển từ mở sang đóng thì `focus()`.
 - `pages/settings/components/ImportConfirmDialog.tsx` — props `preview`, `onConfirm`, `onCancel`. Tự làm, **không** dùng
   `<dialog>.showModal()` (jsdom không có, nên không test được focus ở Vitest): `<div role="dialog" aria-modal="true"
   aria-labelledby aria-describedby>` trên lớp phủ; `useEffect` focus nút "Hủy" lúc mở; `onKeyDown`: `Escape` → `onCancel`, `Tab`/
-  `Shift+Tab` ở nút cuối/đầu thì vòng lại (chỉ hai nút "Hủy", "Ghi đè"). Nội dung: tiêu đề "Nhập tiến độ từ file?" (quyết định của
+  `Shift+Tab` ở nút cuối/đầu thì vòng lại (chỉ hai nút "Hủy", "Ghi đè"; "Hủy" đứng trước "Ghi đè" trong DOM). Nội dung: tiêu đề "Nhập tiến độ từ file?" (quyết định của
   dev, Open Questions), "File xuất ngày {{date}}, có {{count}} bài đã xong.", câu cảnh báo nguyên văn spec. Ngày hiện `dd/mm/yyyy`
   bằng `formatLocalDateKey` mới ở `shared/utils/date.utils.ts` (tách chuỗi khóa ngày, không qua `Date` để không lệch múi giờ).
   - Nằm ở `pages/settings/components/` vì `shared/components/` chưa có hộp xác nhận dùng chung (proposal, Layer đích). Story sau
@@ -269,12 +285,15 @@ Quan sát được trong repo (`main` tại `8a88004`, sau khi merge PR code S8.
 - `SettingsContainer`: render `<ProgressBackupSection backup={…} />` cuối `<main>`, **ngoài** nhánh `preferences === null` (mục sao
   lưu không phụ thuộc việc nạp tùy chọn xong). File vẫn < 100 dòng.
 - Style: `apps/web/src/styles/tailwind/components/_progress-backup.css` (BEM `.backup-section`, `.backup-section-title`,
-  `.backup-message`, `.confirm-dialog`, `.confirm-dialog-overlay`, `.confirm-dialog-actions`), import trong `main.css` cạnh
-  `_settings.css`; JSX chỉ layout/spacing (`CLAUDE.md` §6). Hộp trên mobile: `max-h` + `overflow-y-auto` trong hộp
-  (TC-S8.5-AC3-3). Màu theo token sáng/tối.
-- i18n: thêm vào `assets/i18n/vi/settings.json` nhóm `backup.*`: `title`, `export`, `import`, `exported`, `exportFailed`,
-  `notBackup`, `corrupted`, `newerVersion`, `imported`, `importFailed`, `errorPrefix`, `confirm.title`, `confirm.summary`,
-  `confirm.warning`, `confirm.overwrite` ("Ghi đè"), `confirm.cancel` ("Hủy"). Chuỗi thông báo chép nguyên văn spec;
+  `.backup-message` + `.has-error`, `.confirm-dialog-overlay`, `.confirm-dialog`, `.confirm-dialog-title`,
+  `.confirm-dialog-warning`; JSX còn gắn `.confirm-dialog-actions` nhưng chưa có rule CSS), import trong `main.css` cạnh
+  `_settings.css`; JSX chỉ layout/spacing (`CLAUDE.md` §6). Lớp phủ `fixed inset-0 z-50` trong CSS; hộp trên mobile: `max-h-full` +
+  `overflow-y-auto` trong hộp (TC-S8.5-AC3-3). Màu chữ/nền/viền theo token sáng/tối (`bg-surface`, `border-line`, `text-fg`,
+  `text-danger-text`); riêng lớp phủ dùng `bg-black/50` cho cả hai theme vì chưa có token lớp phủ (thêm token khi design system có).
+- i18n: thêm vào `assets/i18n/vi/settings.json` nhóm `backup.*`: `title`, `export`, `import`, `errorPrefix` ("Lỗi:"),
+  `messages.<BackupMessageKey>` (`messages.exported`, `exportFailed`, `notBackup`, `corrupted`, `newerVersion`, `imported`,
+  `importFailed`; component tra khóa `backup.messages.<key>` theo `message.key`), `confirm.title`, `confirm.summary`, `confirm.warning`,
+  `confirm.overwrite` ("Ghi đè"), `confirm.cancel` ("Hủy"). Chuỗi thông báo chép nguyên văn spec;
   `exportFailed` = "Không xuất được tiến độ. Hãy thử lại." (spec "Không đọc được tiến độ thì báo lỗi").
 
 ### D8. Kiểm tra `import` (Dependency Rule `CLAUDE.md` §2)
@@ -284,8 +303,8 @@ Quan sát được trong repo (`main` tại `8a88004`, sau khi merge PR code S8.
 | `progress-backup.schema.ts` | `zod`, `./progress.schema` | ✅ package shared |
 | `backup.service.ts` | `@csk/shared`, `@core/services/progress-store.service`, `content-source.service`, `file-saver.service`, `@core/constants/backup.constants`, `@shared/utils/*`, `@shared/models/*` | ✅ shared/services → core/services, utils, models; không React, không Dexie |
 | `progress-store.service.ts` | `@csk/shared`, `@core/helpers/db.helper` | ✅ core, không import shared/services |
-| `file-saver.service.ts` | DOM API | ✅ không React |
-| `useProgressBackup.ts`, `useSettings.ts` | `react`, `@shared/services/*`, `@shared/models/*` | ✅ hook → shared/services |
+| `file-saver.service.ts` | DOM API, `@core/constants/backup.constants` | ✅ không React |
+| `useProgressBackup.ts`, `useSettings.ts` | `react`, `@csk/shared` (type), `@shared/services/*`, `@shared/models/*` | ✅ hook → shared/services |
 | `ProgressBackupSection.tsx`, `ImportConfirmDialog.tsx` | `react`, `react-i18next`, `@shared/models/*`, `@shared/utils/date.utils`, component cùng feature | ✅ không import service |
 | `SettingsContainer.tsx` | `../hooks/useProgressBackup`, `../hooks/useSettings`, `../components/*` | ✅ container → hook |
 
@@ -305,10 +324,20 @@ Quan sát được trong repo (`main` tại `8a88004`, sau khi merge PR code S8.
   `shared/services/backup.service.test.ts` (pure); Phần 3 → `shared/services/backup.service.export.test.ts`,
   `backup.service.import.test.ts` (`DexieProgressStore` thật trên hai DB tên ngẫu nhiên = máy A, máy B; `ContentSource` fake;
   `FileSaver` fake ghi nhận lần gọi; kiểm Trang chủ/streak bằng `new ProgressService(storeB).getTodayStudy(now)` /
-  `getStudyStreak(now)`); UI → `pages/settings/containers/SettingsContainer.backup*.test.tsx` (`renderWithProviders` route
+  `getStudyStreak(now)`; dựng chung ở helper `apps/web/src/test/backup-machine.helpers.ts`: `ROOT` lộ trình 4 chủ đề,
+  `createMachine()` → `Machine` (store Dexie DB ngẫu nhiên + `BackupService` + fake saver ghi `SavedFile`), `NOW`,
+  `toBackupFileSource(content)`); UI → `pages/settings/containers/SettingsContainer.backup*.test.tsx` (`renderWithProviders` route
   `/settings` hoặc `openRoute` khi cần sang màn khác; `beforeEach` xoá **cả ba** bảng, khác `clearDatabase` của S8.2;
-  `vi.spyOn(fileSaver, 'save')` — ranh giới trình duyệt; file chọn bằng `userEvent.upload` với `new File([...])`); e2e →
-  `apps/web/e2e/E8/s8.5-*.spec.ts`.
+  `vi.spyOn(fileSaver, 'save')` — ranh giới trình duyệt; file chọn bằng `userEvent.upload` với `new File([...])`; lỗi xuất/ghi
+  đè bằng `vi.spyOn(DexieProgressStore.prototype, 'exportAll' | 'importAll')`, lỗi nạp nội dung bằng
+  `vi.spyOn(contentSource, 'getContentRoot')`); e2e → `apps/web/e2e/E8/s8.5-*.spec.ts`.
+- **Test S8.2 cũ và vùng alert luôn có sẵn** (D7): mục sao lưu luôn render một `role="alert"` (rỗng khi không có lỗi), nên truy
+  vấn `alert` toàn màn của S8.2 bị lẫn. Đã giới hạn ra ngoài region "Sao lưu tiến độ" (không lọc theo chữ):
+  - Unit: helper `apps/web/src/test/settings-alert.helpers.ts` (`queryAllSettingsAlerts`, `querySettingsAlert`,
+    `getSettingsAlert`, `findSettingsAlert`), dùng trong `SettingsContainer.errors.test.tsx`, `SettingsContainer.corrupt.test.tsx`.
+  - E2E: `alertsOutsideBackup(page)` trong `apps/web/e2e/E8/settings.helpers.ts` (xpath loại alert có tổ tiên mang
+    `aria-label`/`aria-labelledby` của region); `saveErrorAlert` dùng nó; `s8.2-settings-errors.spec.ts` đổi
+    `page.getByRole('alert')` → `alertsOutsideBackup(page)`.
 - **File mẫu** (test-cases: "đường dẫn ghi trong design.md"): `apps/web/e2e/E8/fixtures/progress-backup/`. Mọi file hợp lệ có
   đủ bốn field `settings` (`dailyGoalMinutes`, `hasCompletedOnboarding: true`, `defaultAudioSpeed: "normal"`,
   `isPinyinVisible: true`):
@@ -336,8 +365,13 @@ Quan sát được trong repo (`main` tại `8a88004`, sau khi merge PR code S8.
     bảng `lessonProgress`, method `put`/`add`), bật khi hộp xác nhận đang mở → transaction đã `clear()` ba bảng và ghi settings thì
     abort; kiểm dữ liệu cũ còn.
   - Tầng store: `vi.spyOn(db.lessonProgress, 'bulkPut').mockRejectedValueOnce(…)` trong `importAll`.
-- **Offline** (mẫu `e2e/E1/s1.2-offline.spec.ts`, `s8.3-streak-offline.spec.ts`): `openOnceWithServiceWorker` →
-  `context.setOffline(true)` → mở màn Cài đặt.
+- **Offline** (mẫu `e2e/E1/s1.2-offline.spec.ts`, `s8.3-streak-offline.spec.ts`): `openOnceWithServiceWorker` (bản riêng trong
+  `backup.helpers.ts`) → `context.setOffline(true)` → mở màn Cài đặt.
+- Helper e2e thực tế ở `apps/web/e2e/E8/backup.helpers.ts`: hằng chuỗi UI (`BACKUP_SECTION_TITLE`, thông báo, `CONFIRM_WARNING`…),
+  `fixturePath`, `backupFileName`, `backupSection`, `exportButton`, `importButton`, `backupStatus`, `backupAlert`,
+  `importConfirmDialog`, `overwriteButton`, `cancelButton`, `importFile`, `exportProgress`, `openOnceWithServiceWorker`,
+  `readDownloadText`, `expectInLiveRegion`, `serveBackupPath`, `breakLessonProgressWrites`. Đồng hồ: phần lớn case dùng `NOW` của
+  `home.helpers.ts`; case tên file (`s8.5-export.spec.ts`) dùng mốc 2026-11-17.
 
 ## Risks / Trade-offs
 

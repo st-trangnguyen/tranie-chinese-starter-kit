@@ -59,14 +59,15 @@ Test: `apps/web/src/app/shared/services/backup.service.test.ts` (pure).
 
 Test: `apps/web/src/app/core/services/file-saver.service.test.ts` (stub `URL.createObjectURL`/`revokeObjectURL`, spy `HTMLAnchorElement.prototype.click`).
 
-- [x] 5.1 RED: S8.5-AC1 "Báo đã xuất ngay khi trình duyệt nhận file" (core) — `fileSaver.save('tranie-tien-do-2026-11-17.json', '{}', 'application/json')` trả về đồng bộ (không phải Promise); anchor được click đúng một lần với `download` = tên file, `href` = URL blob; anchor đã gỡ khỏi `document.body` sau khi trả về; `revokeObjectURL` gọi sau khi chạy timer (`vi.useFakeTimers`). Skeleton: interface `FileSaver`, `AnchorFileSaver.save` no-op, singleton; kiểm: fail
+- [x] 5.1 RED: S8.5-AC1 "Báo đã xuất ngay khi trình duyệt nhận file" (core) — `fileSaver.save('tranie-tien-do-2026-11-17.json', '{}', 'application/json')` trả về đồng bộ (không phải Promise); anchor được click đúng một lần với `download` = tên file, `href` = URL blob; anchor đã gỡ khỏi `document.body` sau khi trả về; `revokeObjectURL` chưa gọi ở `REVOKE_OBJECT_URL_DELAY_MS - 1`, gọi ở đúng mốc `REVOKE_OBJECT_URL_DELAY_MS` (40 000 ms, `core/constants/backup.constants.ts`; `vi.useFakeTimers`). Skeleton: interface `FileSaver`, `AnchorFileSaver.save` no-op, singleton; kiểm: fail
 - [x] 5.2 GREEN: `AnchorFileSaver` (D5); kiểm: test 5.1 pass
 
 ## 6. Use case xuất/nhập — `BackupService` Phần 1 + 3 (design D4)
 
 Test: `apps/web/src/app/shared/services/backup.service.export.test.ts`, `backup.service.import.test.ts` — `DexieProgressStore`
 thật trên DB tên ngẫu nhiên (máy A, máy B là hai DB), `ContentSource` fake (lộ trình D10), `FileSaver` fake ghi nhận
-`{ fileName, content }`. Nhập dùng object `{ size, text }` dựng từ nội dung đã xuất.
+`{ fileName, content }`. Nhập dùng object `{ size, text }` dựng từ nội dung đã xuất. Dựng chung ở
+`apps/web/src/test/backup-machine.helpers.ts` (`ROOT`, `createMachine`, `NOW`, `toBackupFileSource`, design D10).
 
 - [x] 6.1 RED: S8.5-AC1 "Chưa học gì vẫn xuất được" (Phần 3) — DB chỉ có settings onboarding; `exportProgress(new Date(2026, 10, 17, 10).getTime())` → fake saver được gọi một lần, tên `tranie-tien-do-2026-11-17.json`, nội dung `checkBackupText` → `valid` với `lessonProgress: []`, `dailyStats: []`; kiểm: fail vì skeleton no-op
 - [x] 6.2 GREEN: Phần 1 (`readSnapshot`, `saveFile`), `exportProgress`; constructor 3 tham số mặc định singleton; kiểm: test 6.1 pass
@@ -95,7 +96,9 @@ Test: `apps/web/src/app/pages/settings/containers/SettingsContainer.backup.test.
 `openRoute('/settings')` khi cần sang màn khác (mẫu `SettingsContainer.test.tsx`), `mockContentFetch`; `beforeEach` xoá cả ba bảng
 (`settings`, `lessonProgress`, `dailyStats`); truy vấn thông báo trong `getByRole('region', { name: 'Sao lưu tiến độ' })` (D7);
 `vi.spyOn(fileSaver, 'save')`, `userEvent.upload(input, new File([...], 'x.json'))`. Util: `apps/web/src/app/shared/utils/date.utils.test.ts`.
-Test S8.2 cũ (`SettingsContainer*.test.tsx`) phải vẫn pass sau mỗi GREEN.
+Test S8.2 cũ (`SettingsContainer*.test.tsx`) phải vẫn pass sau mỗi GREEN; vì vùng `role="alert"` của mục sao lưu luôn có sẵn, truy
+vấn `alert` của S8.2 (`SettingsContainer.errors.test.tsx`, `SettingsContainer.corrupt.test.tsx`) được giới hạn ra ngoài region
+"Sao lưu tiến độ" qua `apps/web/src/test/settings-alert.helpers.ts` (commit `test(settings)` riêng trước GREEN 7.6, design D10).
 
 - [x] 7.1 RED: S8.5-AC1 "Màn Cài đặt có mục Sao lưu tiến độ" — mở `/settings` → `heading` "Sao lưu tiến độ", `button` "Xuất tiến độ", `button` "Nhập tiến độ"; kiểm: fail vì chưa có mục
 - [x] 7.2 GREEN: `ProgressBackupSection` (`section` region + tiêu đề + hai nút, chưa nối hành vi), `useProgressBackup` skeleton, type view ở `shared/models/progress-backup.model.ts`, nhóm `backup.*` trong `settings.json`, render cuối `<main>` của `SettingsContainer` ngoài nhánh `preferences === null`, `_progress-backup.css` + import `main.css` cạnh `_settings.css`; kiểm: test 7.1 pass
@@ -123,8 +126,9 @@ Test S8.2 cũ (`SettingsContainer*.test.tsx`) phải vẫn pass sau mỗi GREEN.
 ## 8. Luồng người dùng — Playwright `apps/web/e2e/E8/` (design D10)
 
 Helper `apps/web/e2e/E8/backup.helpers.ts`: `backupSection`, `exportProgress` (chờ `download`), `importFile` (`setInputFiles`),
-`fixturePath(name)`, `serveBackupPath` (4 chủ đề), `breakLessonProgressWrites` (mẫu guard `IDBObjectStore.prototype` của
-`settings.helpers.ts`, D10); dùng lại `seedProgress`, `completeOnboarding`, `TIMEZONE`, `NOW`, `expectTodayMinutes` (`home.helpers.ts`),
+`fixturePath(name)`, `openOnceWithServiceWorker`, `serveBackupPath` (4 chủ đề), `breakLessonProgressWrites` (mẫu guard
+`IDBObjectStore.prototype` của `settings.helpers.ts`, D10); e2e S8.2 cũ (`s8.2-settings-errors.spec.ts`, `saveErrorAlert`) giới hạn
+`alert` ra ngoài region "Sao lưu tiến độ" qua `alertsOutsideBackup` trong `settings.helpers.ts` (commit `test(e2e)` riêng); dùng lại `seedProgress`, `completeOnboarding`, `TIMEZONE`, `NOW`, `expectTodayMinutes` (`home.helpers.ts`),
 `openSettingsFromPath`, `goalRadio`, `pinyinSwitch`, `breakSettingsReads` (`settings.helpers.ts`), `expectStreak`, `dayKey`,
 `reachedDay` (`streak.helpers.ts`). Mỗi file < 300 dòng.
 
@@ -142,7 +146,7 @@ Helper `apps/web/e2e/E8/backup.helpers.ts`: `backupSection`, `exportProgress` (c
 
 ## 9. Tài liệu (docs thuần, miễn test-first)
 
-- [ ] 9.1 `docs/03-architecture.md`: §4 `backup.service` (Phần 2/3 chính), §6.3 `exportAll`/`importAll` + `ProgressSnapshot` + `FileSaver`, §8 "File import lỗi" dùng `format` + `formatVersion` (thay `schemaVersion`), ghi hợp đồng bảng mới phải vào sao lưu; kiểm: đọc lại khớp code (tên hàm, file)
+- [x] 9.1 `docs/03-architecture.md`: §4 `backup.service` (Phần 2/3 chính), §6.3 `exportAll`/`importAll` + `ProgressSnapshot` + `FileSaver`, §8 "File import lỗi" dùng `format` + `formatVersion` (thay `schemaVersion`), ghi hợp đồng bảng mới phải vào sao lưu; kiểm: đọc lại khớp code (tên hàm, file)
 - [ ] 9.2 Mô tả PR code: đường dẫn file mẫu (`apps/web/e2e/E8/fixtures/progress-backup/`), cách tạo trạng thái vượt cấp tay, giới hạn 20 000 000 byte, case chạy tay (cột "không" trong `test-cases.md`); screenshot màn Cài đặt có mục và hộp xác nhận ở 375×812 và 1280×800, sáng/tối (`CLAUDE.md` §8 Pull request); kiểm: PR có đủ mục theo template
 
 ## 10. Kiểm tra cuối
