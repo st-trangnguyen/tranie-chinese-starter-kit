@@ -187,4 +187,53 @@ describe('LearningPathContainer — audio offline: tên nút cho trình đọc m
     expect(announcer).toHaveTextContent(DOWNLOAD_INCOMPLETE);
     unmount();
   });
+
+  it('S8.4-AC1 Không kéo focus khi người học đã đi chỗ khác: should keep focus on a lesson link in "Phát âm" when "Chào hỏi" finishes downloading after the learner tabbed away', async () => {
+    const { user, cache, unmount } = renderPathWithOfflineAudio();
+
+    const intro = await findUnitSection('Phát âm');
+    const unit = await findUnitSection('Chào hỏi');
+    const lessonLinks = await within(intro).findAllByRole('link');
+    await user.click(await findButtonByVisibleText(unit, 'Tải audio (2,4 MB)'));
+
+    for (
+      let step = 0;
+      step < MAX_TAB_STEPS &&
+      !lessonLinks.some((link) => link === document.activeElement);
+      step += 1
+    ) {
+      await user.tab({ shift: true });
+    }
+    const focusedLink = document.activeElement;
+    expect(lessonLinks).toContain(focusedLink);
+
+    await releaseInAct(cache, AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D);
+
+    expect(within(unit).getByText('Đã tải audio (2,4 MB)')).toBeInTheDocument();
+    expect(document.activeElement).toBe(focusedLink);
+    unmount();
+  });
+
+  it('S8.4-AC1 Không kéo focus khi người học đã đi chỗ khác: should leave focus on the page body when the learner clicked non-focusable text outside the audio block before "Chào hỏi" finished downloading', async () => {
+    const { user, cache, unmount } = renderPathWithOfflineAudio();
+
+    const unit = await findUnitSection('Chào hỏi');
+    const downloadButton = await findButtonByVisibleText(
+      unit,
+      'Tải audio (2,4 MB)',
+    );
+    await user.click(downloadButton);
+    expect(document.activeElement).not.toBe(document.body);
+
+    await user.click(
+      within(unit).getByRole('heading', { level: 3, name: 'Chào hỏi' }),
+    );
+    expect(document.activeElement).toBe(document.body);
+
+    await releaseInAct(cache, AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D);
+
+    expect(within(unit).getByText('Đã tải audio (2,4 MB)')).toBeInTheDocument();
+    expect(document.activeElement).toBe(document.body);
+    unmount();
+  });
 });
