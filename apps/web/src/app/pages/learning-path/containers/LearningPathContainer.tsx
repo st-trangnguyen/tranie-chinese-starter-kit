@@ -15,7 +15,7 @@ const LearningPathContainer = () => {
   const { t } = useTranslation('learning-path');
   const { pathMap, statuses, placementTestUnitIds, hasError } =
     useLearningPath();
-  const { topics } = useOfflineAudio(pathMap?.stages);
+  const { topics, download } = useOfflineAudio(pathMap?.stages);
 
   const renderLesson = (lessonId: string) => (
     <LearningPathLessonItem
@@ -31,7 +31,12 @@ const LearningPathContainer = () => {
     const topic = topics.get(unit.id);
     return (
       <>
-        {topic && <OfflineAudioBlock topic={topic} />}
+        {topic && (
+          <OfflineAudioBlock
+            topic={topic}
+            onDownload={() => download({ id: unit.id, title: unit.title })}
+          />
+        )}
         {placementTestUnitIds.has(unit.id) && (
           <Link
             to={ROUTE_PATHS.placementTest(unit.id)}

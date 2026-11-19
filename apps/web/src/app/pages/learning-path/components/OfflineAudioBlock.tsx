@@ -5,10 +5,14 @@ import { formatAudioSize } from '@shared/utils/offline-audio.utils';
 
 interface OfflineAudioBlockProps {
   topic: OfflineAudioTopicView;
+  onDownload: () => void;
 }
 
 /** Khối audio offline của một chủ đề trên bản đồ (S8.4, design D9). */
-export function OfflineAudioBlock({ topic }: OfflineAudioBlockProps) {
+export function OfflineAudioBlock({
+  topic,
+  onDownload,
+}: OfflineAudioBlockProps) {
   const { t } = useTranslation('learning-path');
 
   return (
@@ -20,9 +24,15 @@ export function OfflineAudioBlock({ topic }: OfflineAudioBlockProps) {
         <button
           type="button"
           className="btn btn-secondary offline-audio-button"
+          onClick={onDownload}
         >
           {t('offlineAudio.download', { size: formatAudioSize(topic.bytes) })}
         </button>
+      )}
+      {topic.status === 'downloading' && (
+        <p tabIndex={-1} className="offline-audio-status">
+          {t('offlineAudio.downloading', { percent: topic.percent })}
+        </p>
       )}
       {topic.status === 'downloaded' && (
         <>

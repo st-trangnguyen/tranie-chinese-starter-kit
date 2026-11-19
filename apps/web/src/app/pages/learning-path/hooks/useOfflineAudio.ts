@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
 import type { Stage } from '@csk/shared';
 
+import { useOnlineStatus } from '@core/hooks/useOnlineStatus';
 import type {
   OfflineAudioAnnouncement,
   OfflineAudioTopicView,
@@ -29,6 +30,7 @@ export const useOfflineAudio = (
 ): OfflineAudioState => {
   const service = useOfflineAudioService();
   const snapshot = useSyncExternalStore(service.subscribe, service.getSnapshot);
+  const isOnline = useOnlineStatus();
 
   useEffect(() => {
     service.refresh().catch(() => {
@@ -41,10 +43,19 @@ export const useOfflineAudio = (
     [service, stages, snapshot],
   );
 
+  const download = useCallback(
+    (unit: OfflineAudioUnit) => {
+      service.startDownload(unit, isOnline).catch(() => {
+        // Lỗi ngoài dự kiến (không phải AudioDownloadError): chủ đề giữ trạng thái service ghi lại.
+      });
+    },
+    [service, isOnline],
+  );
+
   return {
     topics,
     announcements: snapshot.announcements,
-    download: noop,
+    download,
     remove: noop,
   };
 };
