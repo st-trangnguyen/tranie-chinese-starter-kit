@@ -127,8 +127,8 @@ Test: `apps/web/src/app/shared/services/offline-audio.service.download.test.ts`,
 - [x] 6.12 GREEN: bước 7 (nhánh `network`); kiểm: test 6.11 pass
 - [x] 6.13 RED: S8.4-AC1 "Không đủ bộ nhớ" (Phần 3) — `fail('storage-full')` → thông báo + câu đọc `storage-full`; kiểm: fail
 - [x] 6.14 GREEN: bước 7 (nhánh `storage-full`); kiểm: test 6.13 pass
-- [ ] 6.15 RED: S8.4-AC1 "Thông báo mất khi bấm nút kế tiếp" (Phần 3) — A có `download-incomplete`, `startDownload(A, true)` → snapshot ngay sau đó không còn thông báo của A, A `downloading`; kiểm: fail
-- [ ] 6.16 GREEN: bước 2; kiểm: test 6.15 pass
+- [x] 6.15 RED: S8.4-AC1 "Thông báo mất khi bấm nút kế tiếp" (Phần 3) — A có `download-incomplete`, `startDownload(A, true)` → snapshot ngay sau đó không còn thông báo của A, A `downloading`; kiểm: fail
+- [x] 6.16 GREEN: bước 2; kiểm: test 6.15 pass
 - [ ] 6.17 RED: S8.4-AC1 "Thông báo của mỗi chủ đề độc lập" (Phần 3) — A `needs-network`, `removeAudio(B)` → thông báo A còn, B có `removed` (skeleton `removeAudio` no-op); kiểm: fail ở B
 - [ ] 6.18 GREEN: `removeAudio` (Phần 1 `removeFiles`, thông báo + câu đọc `removed`); kiểm: test 6.17 pass
 - [ ] 6.19 RED: S8.4-AC1 "Thông báo mất khi trạng thái đổi mà không bấm gì" (Phần 3) — A lỗi khi còn thiếu file s (s cũng thuộc B), tải B xong → A `downloaded`, không còn thông báo của A; kiểm: chạy, nếu pass ngay thì tạm bỏ gọi `pruneStaleMessages` sau ghi để thấy fail rồi trả lại

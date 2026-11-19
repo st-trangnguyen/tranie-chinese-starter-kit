@@ -152,4 +152,40 @@ describe('OfflineAudioService.startDownload khi không tải được', () => {
     await cache.release(AUDIO_D);
     await download;
   });
+
+  it('S8.4-AC1 Thông báo mất khi bấm nút kế tiếp: chủ đề đang có thông báo tải chưa xong, có mạng và bấm tải lại thì thông báo mất ngay, chủ đề đang tải', async () => {
+    const { service, cache, snapshots } = setupOfflineAudioService();
+    await service.refresh();
+
+    const firstTry = service.startDownload(CHAO_HOI, true);
+    await flushAsync();
+    await cache.release(AUDIO_A);
+    await cache.release(AUDIO_B);
+    await cache.fail(AUDIO_C, 'network');
+    await firstTry;
+    expect(service.getSnapshot().messages.get(HSK_UNIT_ID)).toEqual({
+      kind: 'download-incomplete',
+      shownWith: 'not-downloaded',
+    });
+
+    const emittedBefore = snapshots.length;
+    const retry = service.startDownload(CHAO_HOI, true);
+    await flushAsync();
+
+    const afterClick = snapshots[emittedBefore];
+    expect(afterClick).toBeDefined();
+    expect(afterClick?.messages.has(HSK_UNIT_ID)).toBe(false);
+    expect(afterClick?.downloadingUnitIds.has(HSK_UNIT_ID)).toBe(true);
+
+    const snapshot = service.getSnapshot();
+    expect(snapshot.messages.has(HSK_UNIT_ID)).toBe(false);
+    expect(
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, snapshot),
+    ).toMatchObject({ status: 'downloading' });
+
+    // Thả file còn lại để lượt tải lại kết thúc, không treo test.
+    await cache.release(AUDIO_C);
+    await cache.release(AUDIO_D);
+    await retry;
+  });
 });
