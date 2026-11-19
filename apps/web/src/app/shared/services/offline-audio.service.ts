@@ -86,9 +86,15 @@ export class OfflineAudioService {
     return this.snapshot;
   }
 
-  /** Đặt snapshot mới (object mới, bất biến) rồi báo mọi listener. */
+  /** Đặt snapshot mới (object mới, bất biến, đã bỏ thông báo hết hiệu lực) rồi báo mọi listener. */
   private writeSnapshot(next: OfflineAudioSnapshot): void {
-    this.snapshot = next;
+    this.snapshot = {
+      ...next,
+      messages: this.pruneStaleMessages(
+        next.messages,
+        this.deriveIndexedTopics(next),
+      ),
+    };
     this.listeners.forEach((listener) => listener());
   }
 
@@ -234,6 +240,23 @@ export class OfflineAudioService {
           topicsNow.get(unitId)?.status === message.shownWith,
       ),
     );
+  }
+
+  /**
+   * Rule: trạng thái hiện tại của mọi chủ đề có trong audio index (S8.4 AC1), dùng để bỏ thông báo
+   * hết hiệu lực khi service không có danh sách giai đoạn. Chủ đề Nhập môn nhận ra qua `precached`.
+   */
+  deriveIndexedTopics(
+    snapshot: OfflineAudioSnapshot,
+  ): ReadonlyMap<string, OfflineAudioTopic> {
+    const topics = new Map<string, OfflineAudioTopic>();
+    Object.keys(snapshot.index?.units ?? {}).forEach((unitId) => {
+      const topic = this.deriveTopic('', unitId, snapshot);
+      if (topic) {
+        topics.set(unitId, topic);
+      }
+    });
+    return topics;
   }
 
   /**

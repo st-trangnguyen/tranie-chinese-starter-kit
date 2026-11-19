@@ -132,7 +132,7 @@ Test: `apps/web/src/app/shared/services/offline-audio.service.download.test.ts`,
 - [x] 6.17 RED: S8.4-AC1 "Thông báo của mỗi chủ đề độc lập" (Phần 3) — A `needs-network`, `removeAudio(B)` → thông báo A còn, B có `removed` (skeleton `removeAudio` no-op); kiểm: fail ở B
 - [x] 6.18 GREEN: `removeAudio` (Phần 1 `removeFiles`, thông báo + câu đọc `removed`); kiểm: test 6.17 pass
 - [x] 6.19 RED: S8.4-AC1 "Thông báo mất khi trạng thái đổi mà không bấm gì" (Phần 3) — A lỗi khi còn thiếu file s (s cũng thuộc B), tải B xong → A `downloaded`, không còn thông báo của A; kiểm: chạy, nếu pass ngay thì tạm bỏ gọi `pruneStaleMessages` sau ghi để thấy fail rồi trả lại
-- [ ] 6.20 GREEN: gọi `pruneStaleMessages` sau mỗi lần ghi; kiểm: test 6.19 pass
+- [x] 6.20 GREEN: gọi `pruneStaleMessages` sau mỗi lần ghi; kiểm: test 6.19 pass
 - [ ] 6.21 RED: S8.4-AC2 "Xóa audio đã tải" (Phần 3) — chủ đề đã tải, `removeAudio` → `FakeAudioCache.remove` nhận đúng tập xóa được, chủ đề `not-downloaded`, thông báo + câu đọc `removed`; kiểm: chạy, nếu pass ngay thì tạm xóa cả audio Nhập môn để thấy fail ở 6.25 rồi trả lại
 - [ ] 6.22 GREEN: sửa đến khi pass; kiểm: test 6.21 pass
 - [ ] 6.23 RED: S8.4-AC2 "Xóa không làm hỏng chủ đề khác đang tải" (Phần 3) — B đã tải, A đang tải đã có file chung s, `removeAudio(B)` giữa chừng → s còn trong cache, A tải xong `downloaded`, tiến độ A không lùi; kiểm: chạy, nếu pass ngay thì tạm truyền `downloadingUnitIds` rỗng cho `selectRemovableAudio` để thấy fail rồi trả lại
