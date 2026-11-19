@@ -6,6 +6,10 @@ import {
   type PathStage,
 } from '@test/offline-audio.render';
 import {
+  AUDIO_A,
+  AUDIO_B,
+  AUDIO_C,
+  AUDIO_D,
   EMPTY_AUDIO_UNITS_INDEX,
   HSK_STAGE_ID,
   HSK_UNIT_ID,
@@ -190,5 +194,30 @@ describe('LearningPathContainer — audio offline: nhãn và trạng thái', () 
 
     const tones = await findUnitSection('Thanh điệu');
     expectNoOfflineAudioBlock(tones);
+  });
+
+  it('S8.4-AC1 Đã tải thì hiện dung lượng và nút xóa: should show "Đã tải audio (2,4 MB)" and a "Xóa audio" button under "Chào hỏi" when all its files are cached', async () => {
+    renderPathWithOfflineAudio({
+      cached: [AUDIO_A, AUDIO_B, AUDIO_C, AUDIO_D],
+    });
+
+    const unit = await findUnitSection('Chào hỏi');
+    const heading = within(unit).getByRole('heading', {
+      level: 3,
+      name: 'Chào hỏi',
+    });
+
+    const status = await within(unit).findByText('Đã tải audio (2,4 MB)');
+    expect(within(unit).getAllByText('Đã tải audio (2,4 MB)')).toHaveLength(1);
+    expect(
+      heading.compareDocumentPosition(status) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    const removeLabel = within(unit).getByText('Xóa audio');
+    expect(removeLabel.closest('button')).not.toBeNull();
+
+    expect(within(unit).queryByText(/Tải audio \(/)).not.toBeInTheDocument();
+    expect(within(unit).queryByText(/Đang tải/)).not.toBeInTheDocument();
   });
 });
