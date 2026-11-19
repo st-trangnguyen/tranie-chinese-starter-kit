@@ -117,3 +117,31 @@ describe('BackupService.checkBackupText — file từ phiên bản app mới hơ
     },
   );
 });
+
+describe('BackupService.checkBackupText — file có một phần dữ liệu sai', () => {
+  it('S8.5-AC2 File có một phần dữ liệu sai bị từ chối cả file: bài 4 trạng thái không tồn tại → corrupted', () => {
+    const service = new BackupService();
+    const text = JSON.stringify({
+      format: PROGRESS_BACKUP_FORMAT,
+      formatVersion: PROGRESS_BACKUP_FORMAT_VERSION,
+      exportedOn: '2026-11-17',
+      settings: {
+        dailyGoalMinutes: 15,
+        hasCompletedOnboarding: true,
+        defaultAudioSpeed: 'normal',
+        isPinyinVisible: true,
+      },
+      lessonProgress: [
+        { lessonId: 'intro-02', status: 'completed' },
+        { lessonId: 'intro-03', status: 'completed' },
+        { lessonId: 'intro-04', status: 'skipped' },
+      ],
+      dailyStats: [],
+    });
+
+    expect(service.checkBackupText(text)).toEqual({
+      status: 'rejected',
+      reason: 'corrupted',
+    });
+  });
+});

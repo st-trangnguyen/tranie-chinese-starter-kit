@@ -11,3 +11,9 @@ export const progressBackupEnvelopeSchema = z.object({
   format: z.literal(PROGRESS_BACKUP_FORMAT),
   formatVersion: z.number(),
 });
+
+/**
+ * File tiến độ phiên bản 1 (design D2).
+ * Skeleton RED (tasks 2.9): chưa kiểm field nào, GREEN 2.10 thay bằng schema chặt.
+ */
+export const progressBackupV1Schema = z.object({}).passthrough();
