@@ -19,8 +19,6 @@ export interface OfflineAudioState {
 
 const EMPTY_TOPICS: ReadonlyMap<string, OfflineAudioTopicView> = new Map();
 
-const noop = (): void => undefined;
-
 /**
  * Trạng thái audio offline của các chủ đề trên bản đồ (S8.4, design D8). Trạng thái tải nằm trong
  * service (singleton), hook chỉ đọc snapshot và nạp lại tập file trên máy mỗi lần mở bản đồ.
@@ -52,10 +50,19 @@ export const useOfflineAudio = (
     [service, isOnline],
   );
 
+  const remove = useCallback(
+    (unit: OfflineAudioUnit) => {
+      service.removeAudio(unit).catch(() => {
+        // Lỗi ngoài dự kiến: chủ đề giữ trạng thái service ghi lại.
+      });
+    },
+    [service],
+  );
+
   return {
     topics,
     announcements: snapshot.announcements,
     download,
-    remove: noop,
+    remove,
   };
 };

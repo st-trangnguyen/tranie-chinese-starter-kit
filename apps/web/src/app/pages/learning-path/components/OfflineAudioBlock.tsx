@@ -4,14 +4,18 @@ import type { OfflineAudioTopicView } from '@shared/models/offline-audio.model';
 import { formatAudioSize } from '@shared/utils/offline-audio.utils';
 
 interface OfflineAudioBlockProps {
+  unitTitle: string;
   topic: OfflineAudioTopicView;
   onDownload: () => void;
+  onRemove: () => void;
 }
 
 /** Khối audio offline của một chủ đề trên bản đồ (S8.4, design D9). */
 export function OfflineAudioBlock({
+  unitTitle,
   topic,
   onDownload,
+  onRemove,
 }: OfflineAudioBlockProps) {
   const { t } = useTranslation('learning-path');
 
@@ -45,6 +49,7 @@ export function OfflineAudioBlock({
             <button
               type="button"
               className="btn btn-secondary offline-audio-button"
+              onClick={onRemove}
             >
               {t('offlineAudio.remove')}
             </button>
@@ -53,7 +58,7 @@ export function OfflineAudioBlock({
       )}
       {topic.message && (
         <p className="offline-audio-message">
-          {t(`offlineAudio.message.${topic.message}`)}
+          {t(`offlineAudio.message.${topic.message}`, { topic: unitTitle })}
         </p>
       )}
     </div>
