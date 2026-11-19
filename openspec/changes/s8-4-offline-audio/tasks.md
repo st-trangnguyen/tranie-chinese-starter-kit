@@ -141,7 +141,7 @@ Test: `apps/web/src/app/shared/services/offline-audio.service.download.test.ts`,
 - [x] 6.26 GREEN: sửa đến khi pass; kiểm: test 6.25 pass
 - [x] 6.27 RED: S8.4-AC2 "Tải lại sau khi xóa" (Phần 3) — xóa rồi `startDownload` → `downloaded`, thông báo `removed` mất; kiểm: chạy, nếu pass ngay thì tạm giữ `cachedPaths` cũ sau xóa để thấy fail rồi trả lại
 - [x] 6.28 GREEN: sửa đến khi pass; kiểm: test 6.27 pass
-- [ ] 6.29 RED: S8.4-AC1 "Quay lại màn khi việc tải còn đang chạy" (Phần 3) — bỏ mọi listener giữa chừng, thả 2/4 file, `getSnapshot` → 50; gọi `refresh()` trong lúc tải (cache giả đọc chậm hơn một lượt `download`) → không lùi dưới 50; kiểm: fail ở `refresh` (ghi đè tập đọc được)
+- [x] 6.29 RED: S8.4-AC1 "Quay lại màn khi việc tải còn đang chạy" (Phần 3) — bỏ mọi listener giữa chừng, thả 2/4 file, `getSnapshot` → 50; gọi `refresh()` trong lúc tải (cache giả đọc chậm hơn một lượt `download`) → không lùi dưới 50; kiểm: fail ở `refresh` (ghi đè tập đọc được)
 - [ ] 6.30 GREEN: `refresh` gộp path tải/xóa trong lúc đọc; kiểm: test 6.29 pass
 - [ ] 6.31 RED: S8.4-AC1 "Mở lại app vẫn thấy đã tải" (Phần 3) — tải xong bằng service 1; service 2 mới trên cùng `FakeAudioCache` → `refresh` → `downloaded`; kiểm: chạy, nếu pass ngay thì tạm bỏ đọc cache trong `refresh` để thấy fail rồi trả lại
 - [ ] 6.32 GREEN: sửa đến khi pass; kiểm: test 6.31 pass

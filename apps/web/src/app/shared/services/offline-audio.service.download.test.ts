@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import type { OfflineAudioUnit } from '@shared/models/offline-audio.model';
+import { OfflineAudioService } from '@shared/services/offline-audio.service';
 import {
+  FakeAudioCache,
+  fakeContentSourceWithIndex,
   flushAsync,
   setupOfflineAudioService,
 } from '@test/offline-audio.fakes';
@@ -11,6 +14,7 @@ import {
   AUDIO_C,
   AUDIO_D,
   AUDIO_E,
+  HSK_INDEX,
   HSK_STAGE_ID,
   HSK_TWO_UNITS_INDEX,
   HSK_UNIT_2_ID,
@@ -182,5 +186,49 @@ describe('OfflineAudioService.startDownload', () => {
       { kind: 'download-finished', unitTitle: 'Chào hỏi' },
       { kind: 'download-finished', unitTitle: 'Gia đình' },
     ]);
+  });
+
+  it('S8.4-AC1 Quay lại màn khi việc tải còn đang chạy: bỏ mọi listener, 2/4 file là đang tải 50%, refresh đọc cache chậm không làm lùi tiến độ', async () => {
+    const cache = new FakeAudioCache();
+    const service = new OfflineAudioService(
+      cache,
+      fakeContentSourceWithIndex(HSK_INDEX),
+    );
+    const unsubscribe = service.subscribe(() => undefined);
+    await service.refresh();
+    const topicNow = () =>
+      service.deriveTopic(HSK_STAGE_ID, HSK_UNIT_ID, service.getSnapshot());
+
+    const download = service.startDownload(CHAO_HOI, true);
+    await flushAsync();
+    // Rời màn: không còn ai nghe service, việc tải vẫn chạy.
+    unsubscribe();
+    await cache.release(AUDIO_A);
+    await cache.release(AUDIO_B);
+
+    expect(topicNow()).toEqual({ status: 'downloading', percent: 50 });
+
+    // Quay lại màn: refresh đọc cache (chụp {A, B}) chậm hơn lượt tải file C.
+    const releaseListing = cache.holdNextListing();
+    const refresh = service.refresh();
+    await flushAsync();
+    await cache.release(AUDIO_C);
+
+    expect(topicNow()).toEqual({ status: 'downloading', percent: 75 });
+
+    await releaseListing();
+    await refresh;
+
+    expect(service.getSnapshot().cachedPaths.has(AUDIO_C)).toBe(true);
+    expect(topicNow()).toEqual({ status: 'downloading', percent: 75 });
+
+    await cache.release(AUDIO_D);
+    await download;
+
+    expect(topicNow()).toEqual({
+      status: 'downloaded',
+      bytes: 2_516_582,
+      canRemove: true,
+    });
   });
 });

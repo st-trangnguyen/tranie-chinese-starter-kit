@@ -51,6 +51,7 @@ export class FakeAudioCache implements AudioCache {
   private readonly cached: Set<string>;
   private readonly pending = new Map<string, Deferred>();
   private readonly presets = new Map<string, PresetOutcome>();
+  private heldListing: Deferred | null = null;
 
   constructor(initialCached: Iterable<string> = []) {
     this.cached = new Set(initialCached);
@@ -64,7 +65,26 @@ export class FakeAudioCache implements AudioCache {
   async listCachedPaths(
     paths: readonly string[],
   ): Promise<ReadonlySet<string>> {
-    return new Set(paths.filter((path) => this.cached.has(path)));
+    const found = new Set(paths.filter((path) => this.cached.has(path)));
+    const held = this.heldListing;
+    this.heldListing = null;
+    if (held) {
+      await held.promise;
+    }
+    return found;
+  }
+
+  /**
+   * Lượt `listCachedPaths` kế tiếp chụp tập file lúc được gọi nhưng chỉ trả về khi test gọi hàm
+   * trả về (đọc cache chậm hơn các lượt `download` xảy ra trong lúc chờ).
+   */
+  holdNextListing(): () => Promise<void> {
+    const held = createDeferred();
+    this.heldListing = held;
+    return async () => {
+      held.resolve();
+      await flushAsync();
+    };
   }
 
   download(path: string): Promise<void> {
