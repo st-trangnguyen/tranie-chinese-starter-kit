@@ -8,36 +8,36 @@ import {
 } from '@csk/shared';
 
 import type { BackupCheck } from '@shared/models/progress-backup.model';
+import { toLocalDateKey } from '@shared/utils/date.utils';
 
 export class BackupService {
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
-  // TODO(S8.5 task 4.2): skeleton RED, chưa có hành vi.
+  /** Rule: tên file sao lưu mang ngày xuất theo giờ máy, để người học nhận ra bản nào mới hơn. */
   public buildBackupFileName(now: number): string {
-    void now;
-    return '';
+    return `tranie-tien-do-${toLocalDateKey(now)}.json`;
   }
 
-  // TODO(S8.5 task 4.2): skeleton RED, chưa có hành vi.
+  /** Rule: file sao lưu gắn định dạng, phiên bản hiện tại và ngày xuất (giờ máy) quanh tiến độ. */
   public buildBackupFile(
     snapshot: ProgressSnapshot,
     now: number,
   ): ProgressBackupFile {
-    void now;
     return {
-      ...snapshot,
       format: PROGRESS_BACKUP_FORMAT,
       formatVersion: PROGRESS_BACKUP_FORMAT_VERSION,
-      exportedOn: '',
+      exportedOn: toLocalDateKey(now),
+      settings: snapshot.settings,
+      lessonProgress: snapshot.lessonProgress,
+      dailyStats: snapshot.dailyStats,
     };
   }
 
-  // TODO(S8.5 task 4.2): skeleton RED, chưa có hành vi.
+  /** Rule: file sao lưu là JSON thụt lề, người học mở bằng trình soạn thảo vẫn đọc được. */
   public serializeBackupFile(file: ProgressBackupFile): string {
-    void file;
-    return '';
+    return JSON.stringify(file, null, 2);
   }
 
   /** Rule: chỉ file JSON do app xuất, đúng định dạng và phiên bản, mới được nhập. */
