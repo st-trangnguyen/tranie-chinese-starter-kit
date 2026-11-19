@@ -21,6 +21,11 @@ export type {
   LessonStatus,
   Settings,
 } from './progress.schema';
+export {
+  PROGRESS_BACKUP_FORMAT,
+  PROGRESS_BACKUP_FORMAT_VERSION,
+  progressBackupEnvelopeSchema,
+} from './progress-backup.schema';
 export { comparePinyin, parsePinyin } from './pinyin.compare';
 export type {
   PinyinComparison,

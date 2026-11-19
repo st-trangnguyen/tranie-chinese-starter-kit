@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
+import {
+  PROGRESS_BACKUP_FORMAT,
+  PROGRESS_BACKUP_FORMAT_VERSION,
+} from '@csk/shared';
+
 import { BackupService } from './backup.service';
 
 /** Tám byte đầu của mọi file PNG, cộng phần đầu khối IHDR. */
@@ -41,4 +46,31 @@ describe('BackupService.checkBackupText — file rỗng', () => {
       reason: 'not-backup',
     });
   });
+});
+
+describe('BackupService.checkBackupText — file JSON của nơi khác', () => {
+  it.each([
+    ['object của nơi khác', '{"name":"abc"}'],
+    ['mảng rỗng', '[]'],
+    ['null', 'null'],
+    ['số', '42'],
+    [
+      'format sai chữ',
+      JSON.stringify({
+        format: 'tranie-chinese-progres',
+        formatVersion: PROGRESS_BACKUP_FORMAT_VERSION,
+      }),
+    ],
+    ['thiếu formatVersion', JSON.stringify({ format: PROGRESS_BACKUP_FORMAT })],
+  ])(
+    'S8.5-AC2 File JSON của nơi khác bị từ chối: %s → not-backup',
+    (_label, text) => {
+      const service = new BackupService();
+
+      expect(service.checkBackupText(text)).toEqual({
+        status: 'rejected',
+        reason: 'not-backup',
+      });
+    },
+  );
 });
