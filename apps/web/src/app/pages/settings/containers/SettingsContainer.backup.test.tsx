@@ -1,5 +1,6 @@
 import { createDatabase } from '@core/helpers/db.helper';
 import { fileSaver } from '@core/services/file-saver.service';
+import { DexieProgressStore } from '@core/services/progress-store.service';
 import { renderWithProviders, screen, within } from '@test/render';
 
 import SettingsContainer from './SettingsContainer';
@@ -87,5 +88,64 @@ describe('SettingsContainer — mục Sao lưu tiến độ', () => {
 
     await user.tab();
     expect(importButton).toHaveFocus();
+  });
+  it('S8.5-AC1 Thông báo xuất được đọc cho trình đọc màn hình: "Đã xuất tiến độ." nằm trong vùng status có sẵn', async () => {
+    const save = vi
+      .spyOn(fileSaver, 'save')
+      .mockImplementation(() => undefined);
+    const { user } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const section = await screen.findByRole('region', {
+      name: 'Sao lưu tiến độ',
+    });
+    // Vùng live phải có sẵn (rỗng) trước khi bấm để trình đọc màn hình đọc khi chữ xuất hiện.
+    const status = within(section).getByRole('status');
+    expect(status).toBeEmptyDOMElement();
+
+    await user.click(
+      within(section).getByRole('button', { name: 'Xuất tiến độ' }),
+    );
+
+    await vi.waitFor(() => {
+      expect(save).toHaveBeenCalledTimes(1);
+    });
+    await vi.waitFor(() => {
+      expect(within(section).getByRole('status')).toHaveTextContent(
+        'Đã xuất tiến độ.',
+      );
+    });
+    expect(within(section).getByRole('alert')).toBeEmptyDOMElement();
+  });
+
+  it('S8.5-AC1 Thông báo xuất được đọc cho trình đọc màn hình: không đọc được tiến độ thì vùng alert báo lỗi, không lưu file', async () => {
+    const save = vi
+      .spyOn(fileSaver, 'save')
+      .mockImplementation(() => undefined);
+    vi.spyOn(DexieProgressStore.prototype, 'exportAll').mockRejectedValueOnce(
+      new Error('Không đọc được IndexedDB'),
+    );
+    const { user } = renderWithProviders(<SettingsContainer />, {
+      route: '/settings',
+    });
+
+    const section = await screen.findByRole('region', {
+      name: 'Sao lưu tiến độ',
+    });
+    const alert = within(section).getByRole('alert');
+    expect(alert).toBeEmptyDOMElement();
+
+    await user.click(
+      within(section).getByRole('button', { name: 'Xuất tiến độ' }),
+    );
+
+    await vi.waitFor(() => {
+      expect(within(section).getByRole('alert')).toHaveTextContent(
+        'Không xuất được tiến độ. Hãy thử lại.',
+      );
+    });
+    expect(save).not.toHaveBeenCalled();
+    expect(within(section).getByRole('status')).toBeEmptyDOMElement();
   });
 });
