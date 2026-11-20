@@ -294,3 +294,39 @@ describe('BackupService — ghi đè bằng file', () => {
     expect((await progress.getLearningPreferences()).dailyGoalMinutes).toBe(15);
   });
 });
+
+describe('BackupService — ghi đè bị lỗi', () => {
+  it('S8.5-AC3 Ghi lỗi giữa chừng thì giữ nguyên tiến độ cũ: ghi lỗi thì reject với lỗi rõ nghĩa, giữ lỗi gốc làm cause', async () => {
+    const machineA = createMachine();
+    await new ProgressService(machineA.store).completeOnboarding(15);
+    await Promise.all(
+      ['01', '02', '03', '04', '05'].map((n) =>
+        machineA.store.saveLessonProgress({
+          lessonId: `intro-${n}`,
+          status: 'completed',
+        }),
+      ),
+    );
+    await machineA.backup.exportProgress(NOW);
+    const exported = machineA.savedFiles[0]?.content ?? '';
+
+    const machine = createMachine();
+    await new ProgressService(machine.store).completeOnboarding(60);
+    const inspection = await machine.backup.inspectImportFile(
+      toBackupFileSource(exported),
+    );
+    expect(inspection.status).toBe('valid');
+    if (inspection.status !== 'valid') {
+      return;
+    }
+    const writeError = new Error('QuotaExceededError: ghi bị lỗi giữa chừng');
+    vi.spyOn(machine.store, 'importAll').mockRejectedValue(writeError);
+
+    const importing = machine.backup.importProgress(inspection.snapshot);
+
+    await expect(importing).rejects.toThrow(
+      new Error('Không ghi được tiến độ đã nhập.'),
+    );
+    await expect(importing).rejects.toMatchObject({ cause: writeError });
+  });
+});
