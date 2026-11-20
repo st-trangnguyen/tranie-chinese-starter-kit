@@ -97,6 +97,7 @@ chinese-starter-kit/
 │       ├── content.schema.ts                  # Stage, Unit, Lesson, Exercise (theo kind), Word, Sentence…
 │       ├── progress.schema.ts                 # LessonProgress, Settings, DailyStat (+ localDateKeySchema), Card, Snapshot (schemaVersion)
 │       ├── stroke.schema.ts                   # StrokeData (định dạng hanzi-writer), StrokeIndex, hanCharacterSchema
+│       ├── audio-index.schema.ts              # audioIndexSchema (units, bytes, precached), INTRO_STAGE_ID
 │       └── pinyin.utils.ts                    # đổi ni3 → nǐ, so sánh pinyin (+ *.test.ts cạnh file)
 │
 ├── content/                                   # @csk/content
@@ -130,7 +131,8 @@ chinese-starter-kit/
         ├── App.tsx  app.routes.ts  AppErrorBoundaryFallback.tsx  AppSuspense.tsx
         ├── core/
         │   ├── constants/                  # DB_NAME, ROUTE_PATHS, giới hạn mỗi ngày, ngưỡng mở khóa 80%,
-        │   │                               # study-time.constants.ts (STUDY_TIME_FLUSH_INTERVAL_MS = 15 giây)…
+        │   │                               # study-time.constants.ts (STUDY_TIME_FLUSH_INTERVAL_MS = 15 giây),
+        │   │                               # audio.constants.ts (AUDIO_CACHE_NAME = 'audio-cache')…
         │   ├── helpers/db.helper.ts        # khai báo schema và migration Dexie (version 3: thêm dailyStats)
         │   ├── hooks/                      # useAudioPlayer, useRecorder, useOnlineStatus,
         │   │                               # useStrokeAnimation (phát từng nét), useInitialReducedMotion,
@@ -140,13 +142,17 @@ chinese-starter-kit/
         │   │                               # khi ẩn, khi unmount; thời gian nền không tính)
         │   ├── modules/
         │   │   ├── custom-router-dom/      # giữ từ boilerplate, bỏ PrivateRoute
-        │   │   └── pwa/                    # đăng ký service worker, banner "Có bản mới"
+        │   │   └── pwa/                    # đăng ký service worker, banner "Có bản mới";
+        │   │                               # audio-caching.config.ts (precache audio theo index, route audio-cache, §7)
         │   └── services/
         │       ├── i18n.service.ts
         │       ├── progress-store.service.ts   # interface ProgressStore + DexieProgressStore
         │       ├── audio.service.ts            # phát audio, ghi âm
         │       ├── speech.service.ts           # adapter Web Speech
-        │       ├── content-source.service.ts   # fetch + validate JSON nội dung (cả strokes/index.json, strokes/<chữ>.json)
+        │       ├── content-source.service.ts   # fetch + validate JSON nội dung (cả strokes/index.json, strokes/<chữ>.json,
+        │       │                               # audio-index.json qua getAudioIndex)
+        │       ├── audio-cache.service.ts      # adapter Cache Storage `audio-cache`: tìm file đã có, tải, xóa;
+        │       │                               # lỗi tải phân loại 'network' / 'storage-full' (QuotaExceededError)
         │       └── stroke-writer.service.ts    # adapter hanzi-writer, file duy nhất import `hanzi-writer`:
         │                                       # createStrokeWriter (S6.1), createStrokeQuiz (S6.2)
         ├── pages/
@@ -159,6 +165,10 @@ chinese-starter-kit/
         │   │   ├── containers/HomeContainer.tsx   # bài tiếp theo, phút hôm nay / mục tiêu, link "Xem lộ trình"
         │   │   ├── components/NextLessonCard.tsx · TodayStudyStatus.tsx
         │   │   └── hooks/useHome.ts            # nạp bài tiếp theo; đọc phút hôm nay khi mount và khi trang hiện lại
+        │   ├── learning-path/
+        │   │   ├── components/OfflineAudioBlock.tsx      # khối audio offline của chủ đề: tải, tiến độ, xóa, thông báo lỗi
+        │   │   ├── components/OfflineAudioAnnouncer.tsx  # vùng thông báo cho trình đọc màn hình (bắt đầu/xong tải, lỗi, xóa)
+        │   │   └── hooks/useOfflineAudio.ts    # trạng thái audio offline từng chủ đề, gọi OfflineAudioService
         │   ├── lesson/hooks/useStudyTimeRecorder.ts   # LessonRunnerContainer gọi: ghi thời gian học khi màn bài hiện
         │   ├── stroke-order/
         │   │   ├── stroke-order.routes.ts      # /characters/:character?/stroke-order
@@ -176,10 +186,14 @@ chinese-starter-kit/
             │   │                           # StrokeWritingPad (khung viết theo nét, S6.2)
             │   └── StrokeGlyph · StrokeOrderAnimation · StrokeOrderStatic   # thứ tự nét (S6.1), nhận props
             ├── contexts/settings.context.tsx   # bật/tắt pinyin, tốc độ audio…
-            ├── models/                     # type riêng của UI (home.model: NextLesson, TodayStudy, StudyTimeShare);
+            ├── contexts/useOfflineAudioService.ts   # context OfflineAudioService (mặc định singleton, test thay instance)
+            ├── models/                     # type riêng của UI (home.model: NextLesson, TodayStudy, StudyTimeShare;
+            │                               # offline-audio.model: trạng thái chủ đề, thông báo);
             │                               # schema nội dung và tiến độ lấy từ @csk/shared
-            ├── services/                   # content · srs · progress · backup · stroke-order · writing-practice (.service.ts)
-            └── utils/                      # date.utils.ts (toLocalDateKey `YYYY-MM-DD` giờ máy, startOfNextLocalDay)…
+            ├── services/                   # content · srs · progress · backup · stroke-order · writing-practice ·
+            │                               # offline-audio (.service.ts)
+            └── utils/                      # date.utils.ts (toLocalDateKey `YYYY-MM-DD` giờ máy, startOfNextLocalDay),
+                                            # offline-audio.utils.ts (định dạng dung lượng, phần trăm tiến độ, số nguyên)…
 ```
 
 ### 3.3 Từ boilerplate sang
@@ -251,8 +265,23 @@ GrammarPoint{ id, title, explanationVi, pattern, examples: SentenceId[] }
 File output (`apps/web/src/assets/content/`): `content.json` (`contentVersion` + `stages`), `words.json`,
 `sentences.json`, `lessons/<id>.json`, `strokes/<chữ>.json` (hanzi-writer, chỉ chữ có trong bài),
 `strokes/index.json` (danh sách chữ có dữ liệu nét, đã sắp xếp; app tra danh sách này trước khi tải
-`strokes/<chữ>.json`).
+`strokes/<chữ>.json`), `audio-index.json` (danh sách audio, xem dưới).
 Audio: `apps/web/src/assets/audio/<hash>.mp3`, hash của giọng + chữ được đọc.
+
+`audio-index.json` (S8.4) là danh sách audio theo chủ đề, schema `audioIndexSchema` ở `@csk/shared`:
+
+```ts
+AudioIndex {
+  units:     Record<UnitId, AudioPath[]>   // audio các bài của chủ đề, không trùng, theo thứ tự bài; không có audio: []
+  bytes:     Record<AudioPath, number>     // số byte của từng mp3 (số nguyên ≥ 0)
+  precached: AudioPath[]                   // audio của mọi chủ đề thuộc stage `intro` (INTRO_STAGE_ID): danh sách precache
+}
+// mọi path trong units và precached phải có trong bytes
+```
+
+File do pipeline sinh: `content:build` ghi cùng các JSON khác (không tính vào `contentVersion`), `content:audio` tạo mp3 xong
+thì ghi lại để `bytes` khớp file vừa tạo. App đọc qua `ContentSource.getAudioIndex()`; `vite.config.ts` đọc lúc build để
+dựng danh sách precache (§7).
 
 **Lệnh pipeline** (`pnpm --filter @csk/content …`):
 
@@ -327,10 +356,24 @@ Lesson runner, màn ôn tập và màn luyện tự do chỉ làm việc qua `ex
 
 | Tài nguyên | Chiến lược |
 |---|---|
-| Khung app (JS/CSS/HTML), toàn bộ JSON nội dung, dữ liệu nét chữ đang dùng (`strokes/*.json` kể cả `index.json`), audio Nhập môn | **Precache** khi cài, nên bản 0.1 học offline được hoàn toàn |
-| Audio HSK | **Cache-first** trong `audio-cache`. Nút "Tải chủ đề" (S8.4) nạp sẵn audio của chủ đề vào cache này; xóa thì xóa khỏi cache |
+| Khung app (JS/CSS/HTML), toàn bộ JSON nội dung, dữ liệu nét chữ đang dùng (`strokes/*.json` kể cả `index.json`), audio Nhập môn | **Precache** khi cài, nên bản 0.1 học offline được hoàn toàn. Glob precache không gồm mp3; audio chỉ precache các file trong `precached` của `audio-index.json` (audio Nhập môn, pipeline sinh) |
+| Audio HSK | **Cache-first** trong `audio-cache`. Nút "Tải chủ đề" (S8.4) nạp sẵn audio của chủ đề vào cache này; xóa thì xóa khỏi cache, trừ audio Nhập môn và audio của chủ đề đang tải (`OfflineAudioService.selectRemovableAudio`) |
 | Cập nhật app | Service worker chế độ **prompt**: hiện banner, người học bấm mới tải lại (S1.4) |
 | Dữ liệu IndexedDB | Gọi `navigator.storage.persist()` để trình duyệt không tự xóa |
+
+Cấu hình cache audio nằm ở `core/modules/pwa/audio-caching.config.ts` (S8.4):
+
+- `listPrecachedAudioPatterns(indexJson)` parse `audio-index.json` bằng `audioIndexSchema`, trả `precached`. Index sai dạng thì
+  throw, build dừng.
+- `createAudioRuntimeCaching()` tạo route `audio-cache` (`AUDIO_CACHE_NAME` ở `core/constants/audio.constants.ts`), chiến
+  lược `CacheFirst`, `rangeRequests: true`, kèm hai plugin:
+  - `stripRangeRequest` (`requestWillFetch`): bỏ header `Range` khi tải từ mạng, để cache luôn giữ bản đầy đủ (200) thay vì
+    một đoạn 206.
+  - `toPartialResponse` (`handlerWillRespond`): request có `Range` mà response là 200 thì trả 206 cắt từ bản đầy đủ. `rangeRequests`
+    lo lần trúng cache, plugin này lo lần trượt cache đầu tiên (Safari iOS không phát audio thiếu 206).
+- `vite.config.ts` nạp file này bằng `runnerImport` của Vite, không import tĩnh. Lý do: config bundler của Vite để
+  `@csk/shared` là external, và Node không chạy được mã nguồn TS của package đó (import không đuôi). File config chỉ import
+  tương đối và `@csk/shared`, không dùng alias.
 
 ## 8. Xử lý lỗi
 
@@ -340,6 +383,7 @@ Lesson runner, màn ôn tập và màn luyện tự do chỉ làm việc qua `ex
 | Mic bị chặn hoặc không có mic | Hướng dẫn cấp quyền, chuyển sang "đọc to rồi tự chấm" (S5.4) |
 | Trình duyệt không có Web Speech hoặc đang offline | Ẩn phần chấm tự động (S5.3) |
 | Hết dung lượng lưu trữ | Hiện thông báo, gợi ý xóa audio đã tải |
+| Hết bộ nhớ khi tải audio chủ đề (`QuotaExceededError` khi ghi `audio-cache`) | Dừng tải, hiện thông báo trong khối audio của chủ đề đó trên bản đồ (kèm vùng thông báo cho trình đọc màn hình); file đã tải xong vẫn giữ. Câu thông báo gợi ý xóa audio của chủ đề khác (S8.4) |
 | Đổi cấu trúc IndexedDB | Migration theo version của Dexie trong `db.helper.ts` |
 | File import lỗi | Kiểm tra bằng zod và `schemaVersion` **trước khi** ghi đè. Lỗi thì không đụng vào dữ liệu hiện tại (S8.5) |
 | Lỗi render không lường trước | `AppErrorBoundaryFallback` của boilerplate |
