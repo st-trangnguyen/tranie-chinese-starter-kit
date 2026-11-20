@@ -232,12 +232,10 @@ export class OfflineAudioService {
     index: AudioIndex,
     downloadingUnitIds: ReadonlySet<string>,
   ): string[] {
-    const keptPaths = new Set(index.precached);
-    downloadingUnitIds.forEach((downloadingUnitId) => {
-      (index.units[downloadingUnitId] ?? []).forEach((path) =>
-        keptPaths.add(path),
-      );
-    });
+    const keptPaths = new Set([
+      ...index.precached,
+      ...[...downloadingUnitIds].flatMap((id) => index.units[id] ?? []),
+    ]);
     return [...new Set(index.units[unitId] ?? [])].filter(
       (path) => !keptPaths.has(path),
     );
@@ -326,15 +324,12 @@ export class OfflineAudioService {
     before: ReadonlySet<string>,
     current: ReadonlySet<string>,
   ): ReadonlySet<string> {
-    const merged = new Set(
-      [...readPaths].filter((path) => current.has(path) || !before.has(path)),
-    );
-    current.forEach((path) => {
-      if (!before.has(path)) {
-        merged.add(path);
-      }
-    });
-    return merged;
+    return new Set([
+      ...[...readPaths].filter(
+        (path) => current.has(path) || !before.has(path),
+      ),
+      ...[...current].filter((path) => !before.has(path)),
+    ]);
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
