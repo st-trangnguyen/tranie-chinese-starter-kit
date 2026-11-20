@@ -178,7 +178,11 @@ export class BackupService {
   }
 
   /** Ghi đè toàn bộ tiến độ trên máy bằng tiến độ từ file đã kiểm tra. */
-  public importProgress(snapshot: ProgressSnapshot): Promise<void> {
-    return this.writeSnapshot(snapshot);
+  public async importProgress(snapshot: ProgressSnapshot): Promise<void> {
+    try {
+      await this.writeSnapshot(snapshot);
+    } catch (error) {
+      throw new Error('Không ghi được tiến độ đã nhập.', { cause: error });
+    }
   }
 }
