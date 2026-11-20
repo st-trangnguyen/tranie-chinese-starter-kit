@@ -33,6 +33,7 @@
     --csk-tone-3: #86b8e6;
     --csk-tone-4: #c49ad6;
     --csk-tone-5: #a0a8a2;
+    --csk-scrim: #0f1411b3;
   }
 }
 
@@ -65,4 +66,5 @@
   --csk-tone-3: #86b8e6;
   --csk-tone-4: #c49ad6;
   --csk-tone-5: #a0a8a2;
+  --csk-scrim: #0f1411b3;
 }

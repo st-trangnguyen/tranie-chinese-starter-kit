@@ -70,7 +70,7 @@ export function ImportConfirmDialog({
             {t('backup.confirm.warning')}
           </p>
         </div>
-        <div className="confirm-dialog-actions flex flex-wrap justify-end gap-md">
+        <div className="flex flex-wrap justify-end gap-md">
           <button
             ref={cancelButtonRef}
             type="button"
