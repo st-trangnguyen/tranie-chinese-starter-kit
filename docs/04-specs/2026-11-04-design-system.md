@@ -82,6 +82,7 @@ Các token còn lại và toàn bộ chế độ tối được suy ra từ bả
 | `tone-3` | `#2C6491` | `#86B8E6` | thanh 3 · xanh lam |
 | `tone-4` | `#7A4789` | `#C49AD6` | thanh 4 · tím mận |
 | `tone-5` | `#646B66` | `#A0A8A2` | thanh nhẹ · xám |
+| `scrim` | `#252D2980` | `#0F1411B3` | lớp phủ sau hộp thoại (chỉ nền, không mang chữ) |
 
 Quy tắc:
 - Mọi cặp chữ/nền dùng cho chữ phải đạt độ tương phản **≥ 4.5:1**, có test tự động kiểm tra (§8).

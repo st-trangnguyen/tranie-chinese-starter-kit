@@ -32,6 +32,7 @@
   --csk-tone-3: #2c6491;
   --csk-tone-4: #7a4789;
   --csk-tone-5: #646b66;
+  --csk-scrim: #252d2980;
 }
 
 /* Token semantic cho Tailwind. `border` → `line`, `text` → `fg` để tránh `border-border`, `text-text`. */
@@ -63,4 +64,5 @@
   --color-tone-3: var(--csk-tone-3);
   --color-tone-4: var(--csk-tone-4);
   --color-tone-5: var(--csk-tone-5);
+  --color-scrim: var(--csk-scrim);
 }

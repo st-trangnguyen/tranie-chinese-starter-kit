@@ -1,0 +1,36 @@
+/* Mục Sao lưu tiến độ trong màn Cài đặt — S8.5 D7. */
+
+@layer components {
+  .backup-section {
+    @apply rounded-lg border-2 border-line bg-surface;
+  }
+
+  .backup-section-title {
+    @apply text-title-sm text-fg;
+  }
+
+  .backup-message {
+    @apply text-body-sm text-fg;
+  }
+
+  .backup-message.has-error {
+    @apply text-danger-text;
+  }
+
+  /* Hộp xác nhận nhập tiến độ: lớp phủ cả màn, hộp cuộn được trên mobile (TC-S8.5-AC3-3). */
+  .confirm-dialog-overlay {
+    @apply fixed inset-0 z-50 bg-scrim;
+  }
+
+  .confirm-dialog {
+    @apply rounded-lg border-2 border-line bg-surface text-body text-fg shadow-lg;
+  }
+
+  .confirm-dialog-title {
+    @apply text-title-sm text-fg;
+  }
+
+  .confirm-dialog-warning {
+    @apply text-body-sm text-danger-text;
+  }
+}
