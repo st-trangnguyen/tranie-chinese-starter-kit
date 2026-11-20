@@ -211,8 +211,8 @@ Quan sát được trong repo (`main` tại `8a88004`, sau khi merge PR code S8.
     `{ status: 'valid', snapshot, preview: { exportedOn, completedLessonCount } }`. Không ghi gì (spec "tiến độ trên máy chưa đổi
     khi hộp đang mở"). **Nạp nội dung app lỗi** (`readKnownLessonIds` reject) → throw `Error('Không đọc được nội dung app để đếm
     bài đã xong.', { cause })`; hook báo `importFailed` và không mở hộp (quyết định của dev, Open Questions).
-  - `importProgress(snapshot): Promise<void>` → trả thẳng `writeSnapshot(snapshot)` (không bọc lỗi): `importAll` reject thì promise
-    reject với lỗi gốc của store, hook báo `importFailed`.
+  - `importProgress(snapshot): Promise<void>` → `writeSnapshot(snapshot)`; `importAll` reject thì throw
+    `Error('Không ghi được tiến độ đã nhập.', { cause })` (giống phía xuất), hook báo `importFailed`.
 - Type kết quả (`BackupCheck`, `ImportInspection`, `ImportPreview`, `BackupRejectReason = 'not-backup' | 'corrupted' |
   'newer-version'`, `BackupFileSource`) ở `shared/models/progress-backup.model.ts`.
 - `MAX_BACKUP_FILE_BYTES` và `REVOKE_OBJECT_URL_DELAY_MS` (D5) cùng ở `core/constants/backup.constants.ts`.
@@ -286,10 +286,10 @@ Quan sát được trong repo (`main` tại `8a88004`, sau khi merge PR code S8.
   lưu không phụ thuộc việc nạp tùy chọn xong). File vẫn < 100 dòng.
 - Style: `apps/web/src/styles/tailwind/components/_progress-backup.css` (BEM `.backup-section`, `.backup-section-title`,
   `.backup-message` + `.has-error`, `.confirm-dialog-overlay`, `.confirm-dialog`, `.confirm-dialog-title`,
-  `.confirm-dialog-warning`; JSX còn gắn `.confirm-dialog-actions` nhưng chưa có rule CSS), import trong `main.css` cạnh
+  `.confirm-dialog-warning`; hàng nút của hộp chỉ dùng class layout, không có class BEM riêng), import trong `main.css` cạnh
   `_settings.css`; JSX chỉ layout/spacing (`CLAUDE.md` §6). Lớp phủ `fixed inset-0 z-50` trong CSS; hộp trên mobile: `max-h-full` +
   `overflow-y-auto` trong hộp (TC-S8.5-AC3-3). Màu chữ/nền/viền theo token sáng/tối (`bg-surface`, `border-line`, `text-fg`,
-  `text-danger-text`); riêng lớp phủ dùng `bg-black/50` cho cả hai theme vì chưa có token lớp phủ (thêm token khi design system có).
+  `text-danger-text`); riêng lớp phủ dùng token mới `bg-scrim` (`--csk-scrim`, sáng/tối, thêm vào design system §3).
 - i18n: thêm vào `assets/i18n/vi/settings.json` nhóm `backup.*`: `title`, `export`, `import`, `errorPrefix` ("Lỗi:"),
   `messages.<BackupMessageKey>` (`messages.exported`, `exportFailed`, `notBackup`, `corrupted`, `newerVersion`, `imported`,
   `importFailed`; component tra khóa `backup.messages.<key>` theo `message.key`), `confirm.title`, `confirm.summary`, `confirm.warning`,
