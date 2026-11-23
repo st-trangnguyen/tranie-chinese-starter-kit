@@ -164,3 +164,18 @@ describe('LessonRunnerContainer — audio của câu đang hiện', () => {
     expect(fakeAudio.src).not.toBe(srcOf(MA.audio));
   });
 });
+
+describe('LessonRunnerContainer — công tắc "Nghe chậm" qua các câu', () => {
+  it('S4.4-AC3 Dấu tick giữ qua các câu trong bài: bật ở câu chọn thanh, sang câu cặp âm vẫn bật và có dấu tick', async () => {
+    const { user } = renderRunner();
+    await user.click(await screen.findByRole('switch', { name: 'Nghe chậm' }));
+
+    await finishToneChoice(user);
+
+    await screen.findByRole('button', { name: SHI.pinyin });
+    const toggle = screen.getByRole('switch', { name: 'Nghe chậm' });
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+    expect(toggle.firstElementChild).toHaveAttribute('aria-hidden', 'true');
+    expect(toggle.firstElementChild).toHaveTextContent('✓');
+  });
+});
