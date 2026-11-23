@@ -84,6 +84,23 @@ const WRITING_PAD_PAIRS: ReadonlyArray<readonly [string, string]> = [
   ['line-strong', 'surface'],
 ];
 
+// S4.4-AC3 công tắc "Nghe chậm": lúc bật dấu tick và chữ (`text-accent`) nằm trên nền công tắc
+// (`bg-accent-soft`); lúc tắt chữ (`text-fg`) nằm trên nền màn phía sau (`bg` hoặc `surface`, công
+// tắc tắt không có nền riêng). Dấu tick là thành phần UI không phải chữ → 3:1 (WCAG 1.4.11); chữ
+// → 4.5:1 (WCAG 1.4.3). Cột: màu trước (tên Tailwind `--color-*`), màu nền, ngưỡng tối thiểu, vai trò.
+const SLOW_TOGGLE_CHECK_MARK_ROLE = 'check mark (on)';
+const SLOW_TOGGLE_PAIRS: ReadonlyArray<
+  readonly [string, string, number, string]
+> = [
+  ['accent', 'accent-soft', 3, SLOW_TOGGLE_CHECK_MARK_ROLE],
+  ['accent', 'accent-soft', 4.5, 'label (on)'],
+  ['fg', 'bg', 4.5, 'label (off, on page background)'],
+  ['fg', 'surface', 4.5, 'label (off, on card surface)'],
+];
+const SLOW_TOGGLE_CHECK_MARK_PAIRS = SLOW_TOGGLE_PAIRS.filter(
+  ([, , , role]) => role === SLOW_TOGGLE_CHECK_MARK_ROLE,
+);
+
 const THEMES = [
   ['light', light],
   ['dark', darkAttr],
@@ -142,6 +159,30 @@ describe('tokens.css', () => {
             token(vars, themeColorSource(bg)),
           ),
         ).toBeGreaterThanOrEqual(3);
+      },
+    );
+
+    it.each(SLOW_TOGGLE_CHECK_MARK_PAIRS)(
+      'S4.4-AC3 Phân biệt bật và tắt ở thang xám, giao diện sáng và tối: %s on %s should reach %s:1 (%s)',
+      (fg, bg, minRatio) => {
+        expect(
+          contrastRatio(
+            token(vars, themeColorSource(fg)),
+            token(vars, themeColorSource(bg)),
+          ),
+        ).toBeGreaterThanOrEqual(minRatio);
+      },
+    );
+
+    it.each(SLOW_TOGGLE_PAIRS)(
+      'S4.4-AC3 Tương phản của dấu tick và chữ: %s on %s should reach %s:1 (%s)',
+      (fg, bg, minRatio) => {
+        expect(
+          contrastRatio(
+            token(vars, themeColorSource(fg)),
+            token(vars, themeColorSource(bg)),
+          ),
+        ).toBeGreaterThanOrEqual(minRatio);
       },
     );
   });

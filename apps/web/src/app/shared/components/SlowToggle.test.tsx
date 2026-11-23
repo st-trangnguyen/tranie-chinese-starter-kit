@@ -28,6 +28,8 @@ class FakeAudio extends EventTarget {
 // AudioService giữ một element cho cả vòng đời module, nên dùng đúng một FakeAudio.
 const fakeAudio = new FakeAudio();
 const WORD_AUDIO = 'audio/0123456789abcdef.mp3';
+const SLOW_LABEL = 'Nghe chậm';
+const CHECK_MARK = '✓';
 
 function renderControls() {
   return renderWithProviders(
@@ -95,5 +97,90 @@ describe('SlowToggle', () => {
     await user.click(screen.getByRole('button', { name: 'Nghe' }));
 
     expect(fakeAudio.rateAtLastPlay).toBe(1);
+  });
+
+  it('S4.4-AC3 Bật Nghe chậm thì hiện dấu tick trước chữ: dấu tick ✓ ẩn với trình đọc màn hình, đứng trước nhãn', async () => {
+    const { user } = renderControls();
+    const toggle = screen.getByRole('switch', { name: SLOW_LABEL });
+
+    await user.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+    const checkMark = toggle.querySelector('[aria-hidden="true"]');
+    expect(checkMark).not.toBeNull();
+    expect(checkMark?.tagName).toBe('SPAN');
+    expect(checkMark?.textContent).toBe(CHECK_MARK);
+    expect(toggle.firstElementChild).toBe(checkMark);
+
+    const label = Array.from(toggle.children).find(
+      (child) => child !== checkMark && child.textContent === SLOW_LABEL,
+    );
+    expect(label).toBeDefined();
+    if (checkMark && label) {
+      expect(
+        checkMark.compareDocumentPosition(label) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    }
+  });
+
+  it('S4.4-AC3 Tắt thì không có dấu tick: mặc định công tắc tắt, chỉ hiện chữ "Nghe chậm"', () => {
+    renderControls();
+    const toggle = screen.getByRole('switch', { name: SLOW_LABEL });
+
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    expect(toggle.querySelector('[aria-hidden="true"]')).toBeNull();
+    expect(toggle.textContent).toBe(SLOW_LABEL);
+  });
+
+  it('S4.4-AC3 Bật rồi tắt thì dấu tick biến mất: bấm hai lần thì công tắc tắt, không còn dấu tick', async () => {
+    const { user } = renderControls();
+    const toggle = screen.getByRole('switch', { name: SLOW_LABEL });
+
+    await user.click(toggle);
+    expect(toggle.querySelector('[aria-hidden="true"]')).not.toBeNull();
+
+    await user.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    expect(toggle.querySelector('[aria-hidden="true"]')).toBeNull();
+    expect(toggle.textContent).toBe(SLOW_LABEL);
+  });
+
+  it('S4.4-AC3 Bật bằng bàn phím cũng hiện dấu tick: Tab tới công tắc, Space/Enter bật tắt kèm dấu tick', async () => {
+    const { user } = renderControls();
+    const toggle = screen.getByRole('switch', { name: SLOW_LABEL });
+
+    await user.tab();
+    expect(toggle).toHaveFocus();
+
+    await user.keyboard(' ');
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+    expect(toggle.querySelector('[aria-hidden="true"]')?.textContent).toBe(
+      CHECK_MARK,
+    );
+
+    await user.keyboard(' ');
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    expect(toggle.querySelector('[aria-hidden="true"]')).toBeNull();
+
+    await user.keyboard('{Enter}');
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+    expect(toggle.querySelector('[aria-hidden="true"]')?.textContent).toBe(
+      CHECK_MARK,
+    );
+  });
+
+  it('S4.4-AC3 Tên truy cập và trạng thái cho trình đọc màn hình: tên đúng "Nghe chậm" cả lúc tắt và bật, aria-checked phản ánh trạng thái', async () => {
+    const { user } = renderControls();
+    const toggle = screen.getByRole('switch');
+
+    expect(toggle).toHaveAccessibleName(SLOW_LABEL);
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+
+    await user.click(toggle);
+
+    expect(toggle).toHaveAccessibleName(SLOW_LABEL);
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
   });
 });
