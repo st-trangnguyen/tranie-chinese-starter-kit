@@ -56,12 +56,20 @@ const LearningPathContainer = () => {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-xl p-xl">
-      <Link
-        to={ROUTE_PATHS.home}
-        className="learning-path-home-link self-start"
-      >
-        {t('homeLink')}
-      </Link>
+      <nav aria-label={t('linksLabel')} className="flex gap-md">
+        <Link
+          to={ROUTE_PATHS.home}
+          className="learning-path-home-link self-start"
+        >
+          {t('homeLink')}
+        </Link>
+        <Link
+          to={ROUTE_PATHS.settings}
+          className="learning-path-settings-link self-start"
+        >
+          {t('settingsLink')}
+        </Link>
+      </nav>
       <h1 className="learning-path-title">{t('title')}</h1>
       {hasError && (
         <p role="alert" className="learning-path-error p-md">

@@ -19,6 +19,7 @@
 @import "./components/_pinyin-type.css";
 @import "./components/_record-guidance.css";
 @import "./components/_record.css";
+@import "./components/_settings.css";
 @import "./components/_tone-choice.css";
 @import "./components/_sound-pair.css";
 @import "./components/_speak-rating.css";

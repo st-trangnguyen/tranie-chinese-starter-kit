@@ -26,6 +26,8 @@ const makeStore = (
     saveLessonProgressBatch: vi.fn(async () => undefined),
     getDailyStat: vi.fn(async () => undefined),
     addStudySeconds: vi.fn(async () => undefined),
+    getAllDailyStats: vi.fn(async () => []),
+    saveDailyGoal: vi.fn(async () => undefined),
   };
   return store;
 };
@@ -203,6 +205,8 @@ describe('ProgressService — use cases', () => {
     expect(store.saveSettings).toHaveBeenCalledWith({
       dailyGoalMinutes: 30,
       hasCompletedOnboarding: true,
+      defaultAudioSpeed: 'normal',
+      isPinyinVisible: true,
     });
     await expect(service.needsOnboarding()).resolves.toBe(false);
   });

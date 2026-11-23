@@ -131,6 +131,7 @@ Là người học, tôi muốn nghe rồi gõ pinyin để nhớ cách ghi âm.
 Là người học, tôi muốn nghe lại nhiều lần và nghe chậm để nghe rõ.
 - **AC1** Nghe lại không giới hạn số lần.
 - **AC2** Có chế độ chậm 0.75x.
+- **AC3** Khi bật chế độ chậm, công tắc "Nghe chậm" hiện dấu tick trước chữ, không chỉ đổi màu; tên đọc ra vẫn là "Nghe chậm"; phân biệt được bật/tắt ở thang xám, giao diện sáng và tối.
 
 ## E5. Luyện nói
 

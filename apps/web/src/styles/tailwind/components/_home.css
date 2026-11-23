@@ -18,6 +18,10 @@
     @apply text-body text-fg;
   }
 
+  .home-streak {
+    @apply text-body text-fg;
+  }
+
   /* Trạng thái bằng chữ, nền màu chỉ là phụ (cặp success-text / success-soft ≥ 4.5:1 cả hai theme). */
   .home-goal-reached {
     @apply self-start rounded-md bg-success-soft px-md py-xs text-body-sm text-success-text;

@@ -16,7 +16,12 @@ describe('parseSettings', () => {
   it('keeps valid stored values', () => {
     expect(
       parseSettings({ dailyGoalMinutes: 60, hasCompletedOnboarding: true }),
-    ).toEqual({ dailyGoalMinutes: 60, hasCompletedOnboarding: true });
+    ).toEqual({
+      dailyGoalMinutes: 60,
+      hasCompletedOnboarding: true,
+      defaultAudioSpeed: 'normal',
+      isPinyinVisible: true,
+    });
   });
 
   it('falls back per field when a stored value is invalid', () => {
@@ -33,6 +38,90 @@ describe('parseSettings', () => {
   it('offers exactly 15, 30 and 60 minutes', () => {
     expect(DAILY_GOAL_OPTIONS).toEqual([15, 30, 60]);
   });
+});
+
+describe('parseSettings — tốc độ audio và hiện pinyin', () => {
+  const AC2 =
+    'S8.2-AC2 Một tùy chọn đã lưu bị hỏng thì chỉ tùy chọn đó về mặc định';
+
+  it(`${AC2}: bản ghi rỗng có tốc độ bình thường và hiện pinyin`, () => {
+    expect(parseSettings({})).toEqual({
+      dailyGoalMinutes: 15,
+      hasCompletedOnboarding: false,
+      defaultAudioSpeed: 'normal',
+      isPinyinVisible: true,
+    });
+  });
+
+  it(`${AC2}: tốc độ hỏng về bình thường, các tùy chọn khác giữ nguyên`, () => {
+    expect(
+      parseSettings({
+        dailyGoalMinutes: 60,
+        isPinyinVisible: false,
+        defaultAudioSpeed: 'fast',
+        hasCompletedOnboarding: true,
+      }),
+    ).toEqual({
+      dailyGoalMinutes: 60,
+      isPinyinVisible: false,
+      defaultAudioSpeed: 'normal',
+      hasCompletedOnboarding: true,
+    });
+  });
+
+  it(`${AC2}: tốc độ chậm hợp lệ được giữ nguyên`, () => {
+    expect(
+      parseSettings({
+        dailyGoalMinutes: 60,
+        isPinyinVisible: false,
+        defaultAudioSpeed: 'slow',
+        hasCompletedOnboarding: true,
+      }),
+    ).toEqual({
+      dailyGoalMinutes: 60,
+      isPinyinVisible: false,
+      defaultAudioSpeed: 'slow',
+      hasCompletedOnboarding: true,
+    });
+  });
+});
+
+describe('parseSettings — mục tiêu đã lưu bị hỏng', () => {
+  const AC1 = 'S8.2-AC1 Mục tiêu đã lưu bị hỏng thì về 15 phút';
+
+  it.each<[string, unknown]>([
+    ['chuỗi không đọc được', 'abc'],
+    ['số ngoài ba mức', 45],
+  ])(
+    `${AC1}: mục tiêu là %s thì về 15, tốc độ chậm giữ nguyên`,
+    (_label, dailyGoalMinutes) => {
+      const settings = parseSettings({
+        dailyGoalMinutes,
+        defaultAudioSpeed: 'slow',
+      });
+
+      expect(settings.dailyGoalMinutes).toBe(15);
+      expect(settings.defaultAudioSpeed).toBe('slow');
+    },
+  );
+});
+
+describe('parseSettings — tùy chọn pinyin đã lưu bị hỏng', () => {
+  const AC3 = 'S8.2-AC3 Tùy chọn pinyin đã lưu bị hỏng thì về bật';
+
+  it.each<[string, unknown]>([
+    ['chuỗi', 'yes'],
+    ['số 0', 0],
+    ['null', null],
+  ])(
+    `${AC3}: hiện pinyin là %s thì về bật, mục tiêu 30 phút giữ nguyên`,
+    (_label, isPinyinVisible) => {
+      const settings = parseSettings({ dailyGoalMinutes: 30, isPinyinVisible });
+
+      expect(settings.isPinyinVisible).toBe(true);
+      expect(settings.dailyGoalMinutes).toBe(30);
+    },
+  );
 });
 
 describe('lessonProgressSchema', () => {
@@ -142,5 +231,48 @@ describe('dailyStatSchema', () => {
     ['ngày thiếu số 0', { date: '2026-1-8', studySeconds: 60 }],
   ])('S8.1-AC2 Thời gian học đã lưu bị hỏng: từ chối %s', (_label, row) => {
     expect(dailyStatSchema.safeParse(row).success).toBe(false);
+  });
+});
+
+describe('dailyStatSchema — goalMinutes (S8.3)', () => {
+  const DATE = '2026-11-17';
+
+  it('S8.3-AC1 Ngày đã qua không có mục tiêu đọc được: giữ mục tiêu hợp lệ của ngày', () => {
+    expect(
+      dailyStatSchema.parse({
+        date: DATE,
+        studySeconds: 1200,
+        goalMinutes: 30,
+      }),
+    ).toEqual({ date: DATE, studySeconds: 1200, goalMinutes: 30 });
+  });
+
+  it.each<[string, unknown]>([
+    ['là chuỗi', 'abc'],
+    ['ngoài 15/30/60', 45],
+    ['là null', null],
+  ])(
+    'S8.3-AC1 Ngày đã qua không có mục tiêu đọc được: mục tiêu %s thành undefined, dòng vẫn dùng được',
+    (_label, goalMinutes) => {
+      const result = dailyStatSchema.safeParse({
+        date: DATE,
+        studySeconds: 1200,
+        goalMinutes,
+      });
+
+      // `toEqual` coi field `undefined` như không có: không có mục tiêu đọc được.
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({ date: DATE, studySeconds: 1200 });
+    },
+  );
+
+  it('S8.3-AC1 Ngày đã qua không có mục tiêu đọc được: thiếu mục tiêu thì undefined', () => {
+    const result = dailyStatSchema.safeParse({
+      date: DATE,
+      studySeconds: 1200,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({ date: DATE, studySeconds: 1200 });
   });
 });

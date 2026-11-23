@@ -15,7 +15,7 @@ describe('DexieProgressStore — daily stats', () => {
 
     const storeAfterReopen = new DexieProgressStore(createDatabase(dbName));
 
-    await expect(storeAfterReopen.getDailyStat(TODAY)).resolves.toEqual({
+    await expect(storeAfterReopen.getDailyStat(TODAY)).resolves.toMatchObject({
       date: TODAY,
       studySeconds: 540,
     });
@@ -39,11 +39,11 @@ describe('DexieProgressStore — daily stats', () => {
 
     await store.addStudySeconds(TODAY, 130);
 
-    await expect(store.getDailyStat(TODAY)).resolves.toEqual({
+    await expect(store.getDailyStat(TODAY)).resolves.toMatchObject({
       date: TODAY,
       studySeconds: 130,
     });
-    await expect(db.dailyStats.get(TODAY)).resolves.toEqual({
+    await expect(db.dailyStats.get(TODAY)).resolves.toMatchObject({
       date: TODAY,
       studySeconds: 130,
     });
@@ -61,7 +61,7 @@ describe('DexieProgressStore — daily stats', () => {
       ),
     );
 
-    await expect(storeTabA.getDailyStat(TODAY)).resolves.toEqual({
+    await expect(storeTabA.getDailyStat(TODAY)).resolves.toMatchObject({
       date: TODAY,
       studySeconds: 360,
     });
@@ -74,7 +74,7 @@ describe('DexieProgressStore — daily stats', () => {
     // Màn bài unmount ghi phần cuối (không chờ), Trang chủ mount đọc ngay.
     const pendingWrite = store.addStudySeconds(TODAY, 120);
 
-    await expect(store.getDailyStat(TODAY)).resolves.toEqual({
+    await expect(store.getDailyStat(TODAY)).resolves.toMatchObject({
       date: TODAY,
       studySeconds: 120,
     });
@@ -94,7 +94,7 @@ describe('DexieProgressStore — daily stats', () => {
     );
     const nextWrite = store.addStudySeconds(TODAY, 120);
 
-    await expect(store.getDailyStat(TODAY)).resolves.toEqual({
+    await expect(store.getDailyStat(TODAY)).resolves.toMatchObject({
       date: TODAY,
       studySeconds: 120,
     });

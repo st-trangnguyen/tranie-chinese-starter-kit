@@ -25,6 +25,8 @@ describe('DexieProgressStore', () => {
     const settings: Settings = {
       dailyGoalMinutes: 30,
       hasCompletedOnboarding: true,
+      defaultAudioSpeed: 'normal',
+      isPinyinVisible: true,
     };
 
     await store.saveSettings(settings);
@@ -41,6 +43,59 @@ describe('DexieProgressStore', () => {
       ...DEFAULT_SETTINGS,
       hasCompletedOnboarding: true,
     });
+  });
+});
+
+describe('DexieProgressStore — saveSettings(patch)', () => {
+  const STORED_SETTINGS: Settings = {
+    hasCompletedOnboarding: true,
+    dailyGoalMinutes: 30,
+    defaultAudioSpeed: 'slow',
+    isPinyinVisible: false,
+  };
+
+  const makeSeededStores = async () => {
+    const name = `test-${crypto.randomUUID()}`;
+    const db = createDatabase(name);
+    await db.settings.bulkPut(
+      Object.entries(STORED_SETTINGS).map(([key, value]) => ({ key, value })),
+    );
+    return {
+      db,
+      storeA: new DexieProgressStore(db),
+      openStoreB: () => new DexieProgressStore(createDatabase(name)),
+    };
+  };
+
+  it('S8.2-AC1: should write only the given key and keep the other settings', async () => {
+    const { storeA, openStoreB } = await makeSeededStores();
+
+    await storeA.saveSettings({ dailyGoalMinutes: 60 });
+
+    await expect(openStoreB().getSettings()).resolves.toEqual({
+      hasCompletedOnboarding: true,
+      dailyGoalMinutes: 60,
+      defaultAudioSpeed: 'slow',
+      isPinyinVisible: false,
+    });
+  });
+
+  it('S8.2-AC1: should skip keys whose value is undefined', async () => {
+    const { db, storeA, openStoreB } = await makeSeededStores();
+
+    await storeA.saveSettings({
+      dailyGoalMinutes: 15,
+      isPinyinVisible: undefined,
+    });
+
+    await expect(openStoreB().getSettings()).resolves.toEqual({
+      hasCompletedOnboarding: true,
+      dailyGoalMinutes: 15,
+      defaultAudioSpeed: 'slow',
+      isPinyinVisible: false,
+    });
+    const rows = await db.settings.toArray();
+    expect(rows.filter((row) => row.value === undefined)).toEqual([]);
   });
 });
 
