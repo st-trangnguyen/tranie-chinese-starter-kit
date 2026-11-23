@@ -55,9 +55,9 @@ Token: `apps/web/src/styles/tailwind/tokens.test.ts` (Vitest). e2e: `apps/web/e2
 - [x] 4.1 REFACTOR khi đã xanh; self-review CLAUDE.md §0, §2 (`SlowToggle` không thêm import), §6 (JSX chỉ có class BEM, visual qua `@apply`), §7 (a11y: `role="switch"`, focus nhìn thấy, `prefers-reduced-motion`; file < 300 dòng, kể cả hai file e2e); kiểm: `git diff` không có utility visual trong JSX
 - [x] 4.2 Verify: `pnpm typecheck && pnpm lint && pnpm test:run` pass
 - [x] 4.3 Verify build: `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts` pass (đụng CSS, thêm ký tự `✓`)
-- [ ] 4.4 Verify e2e: `pnpm e2e` pass (gồm `e2e/E4/` mới và `e2e/E8/s8.2-settings-lesson*.spec.ts` dùng chung công tắc)
-- [ ] 4.5 Screenshot PR: preview `web-build-preview`, bài `intro-01` câu 1, công tắc bật (con trỏ ngoài công tắc), khổ mobile 375×812 và desktop 1280×800, mỗi khổ sáng và tối, kèm trước/sau (trước = `main`); commit vào nhánh `pr-assets` ở `pr-<số PR>/slow-toggle-<mobile|desktop>-<light|dark>.png` (bản trước thêm hậu tố `-before`), nhúng bảng Mobile/Desktop × Sáng/Tối trong PR; kiểm: 8 ảnh hiện trong mô tả PR, ở 375px dấu tick và chữ cùng hàng, không cuộn ngang
-- [ ] 4.6 Tick mọi task; PR ghi `Spec PR: #140` và `Closes #139`; kiểm: `openspec validate --all --strict` pass
+- [x] 4.4 Verify e2e: `pnpm e2e` pass (gồm `e2e/E4/` mới và `e2e/E8/s8.2-settings-lesson*.spec.ts` dùng chung công tắc)
+- [x] 4.5 Screenshot PR: preview `web-build-preview`, bài `intro-01` câu 1, công tắc bật (con trỏ ngoài công tắc), khổ mobile 375×812 và desktop 1280×800, mỗi khổ sáng và tối, kèm trước/sau (trước = `main`); commit vào nhánh `pr-assets` ở `pr-<số PR>/slow-toggle-<mobile|desktop>-<light|dark>.png` (bản trước thêm hậu tố `-before`), nhúng bảng Mobile/Desktop × Sáng/Tối trong PR; kiểm: 8 ảnh hiện trong mô tả PR, ở 375px dấu tick và chữ cùng hàng, không cuộn ngang
+- [x] 4.6 Tick mọi task; PR ghi `Spec PR: #140` và `Closes #139`; kiểm: `openspec validate --all --strict` pass
 
 ## Workflow follow-up
 
