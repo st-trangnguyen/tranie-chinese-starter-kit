@@ -25,6 +25,7 @@ const makeSource = (): ContentSource => ({
   getSentences: vi.fn(async () => []),
   getStrokeIndex: vi.fn(async () => STROKE_INDEX),
   getStrokeData: vi.fn(async () => STROKE_DATA),
+  getAudioIndex: vi.fn(async () => ({ units: {}, bytes: {}, precached: [] })),
 });
 
 describe('StrokeOrderService — quy tắc nghiệp vụ', () => {

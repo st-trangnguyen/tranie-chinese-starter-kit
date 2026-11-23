@@ -14,6 +14,7 @@
 @import "./components/_home.css";
 @import "./components/_learning-path.css";
 @import "./components/_lesson.css";
+@import "./components/_offline-audio.css";
 @import "./components/_onboarding.css";
 @import "./components/_pinyin-type.css";
 @import "./components/_record-guidance.css";

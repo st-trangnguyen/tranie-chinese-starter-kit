@@ -53,6 +53,7 @@ const createContentSource = (): ContentSource => ({
   getSentences: vi.fn(notUsed),
   getStrokeIndex: vi.fn(notUsed),
   getStrokeData: vi.fn(notUsed),
+  getAudioIndex: vi.fn(notUsed),
 });
 
 export interface SavedFile {

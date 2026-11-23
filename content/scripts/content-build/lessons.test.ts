@@ -147,6 +147,7 @@ describe('assembleContent', () => {
       ),
       lessons: [parseYamlFile(FILE, VALID.join('\n'))],
       strokeData: () => undefined,
+      audioBytes: () => undefined,
     });
 
     expect(result.lessonIssues).toEqual([

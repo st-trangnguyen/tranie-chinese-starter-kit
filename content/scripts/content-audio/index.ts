@@ -85,6 +85,13 @@ async function main(): Promise<void> {
   orphans.forEach((path) => rmSync(join(PATHS.assets, path)));
   await runQueue(missing);
 
+  // S8.4 (design D2): ghép lại để `audio-index.json` có dung lượng mp3 vừa tạo.
+  const audioIndex =
+    assembleContent(readBuildInputs()).files.get('audio-index.json');
+  if (audioIndex !== undefined) {
+    writeFileSync(join(PATHS.contentOut, 'audio-index.json'), audioIndex);
+  }
+
   process.stdout.write(
     `content:audio — tạo ${missing.length}, xoá ${orphans.length}, ` +
       `tổng ${audioJobs.length} file trong ${repoPath(PATHS.audioOut)}\n`,

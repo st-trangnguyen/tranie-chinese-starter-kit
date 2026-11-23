@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 
@@ -44,6 +44,11 @@ function strokeData(char: string): string | undefined {
   return existsSync(file) ? readFileSync(file, 'utf8').trim() : undefined;
 }
 
+/** Dung lượng (byte) của một file audio trong `assets/` (S8.4), `undefined` nếu file chưa có. */
+function audioBytes(path: string): number | undefined {
+  return statSync(join(PATHS.assets, path), { throwIfNoEntry: false })?.size;
+}
+
 /** Đọc toàn bộ đầu vào của pipeline. Dữ liệu ngoài đều qua zod trước khi dùng. */
 export function readBuildInputs(): BuildInputs {
   const hskEntries: HskEntry[] = hskEntriesSchema.parse(
@@ -62,5 +67,6 @@ export function readBuildInputs(): BuildInputs {
     path: readYaml(PATHS.path),
     lessons: listYamlFiles(PATHS.lessons).map(readYaml),
     strokeData,
+    audioBytes,
   };
 }

@@ -17,6 +17,15 @@
     @apply bg-accent-hover;
   }
 
+  /* Nút phụ — spec §6: viền + chữ accent trên nền surface (cặp accent/surface ≥ 4.5:1, tokens.test.ts). */
+  .btn-secondary {
+    @apply border-2 border-accent bg-surface text-accent;
+  }
+
+  .btn-secondary:not(:disabled):hover {
+    @apply bg-accent-soft;
+  }
+
   .btn-ghost {
     @apply bg-transparent text-accent;
   }
