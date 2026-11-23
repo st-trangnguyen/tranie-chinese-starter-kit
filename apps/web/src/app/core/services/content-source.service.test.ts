@@ -213,3 +213,33 @@ describe('FetchContentSource.getStrokeData (S6.1 task 4.1)', () => {
     );
   });
 });
+
+const AUDIO_A = 'audio/0123456789abcdef.mp3';
+const AUDIO_B = 'audio/fedcba9876543210.mp3';
+
+const VALID_AUDIO_INDEX = {
+  units: { 'hsk1-family': [AUDIO_A], 'intro-strokes': [] },
+  bytes: { [AUDIO_A]: 1_048_576, [AUDIO_B]: 2048 },
+  precached: [AUDIO_B],
+};
+
+describe('FetchContentSource.getAudioIndex (S8.4 task 4.11)', () => {
+  const SCENARIO = 'S8.4-AC1 Chủ đề chưa tải có nút tải kèm dung lượng';
+
+  it(`${SCENARIO}: đọc /content/audio-index.json và trả index đã validate`, async () => {
+    const fetchSpy = respondWith(VALID_AUDIO_INDEX);
+
+    await expect(new FetchContentSource().getAudioIndex()).resolves.toEqual(
+      VALID_AUDIO_INDEX,
+    );
+    expect(fetchSpy).toHaveBeenCalledWith('/content/audio-index.json');
+  });
+
+  it(`${SCENARIO}: audio-index.json sai schema thì throw "Nội dung không hợp lệ" kèm tên file`, async () => {
+    respondWith({ ...VALID_AUDIO_INDEX, bytes: { [AUDIO_A]: -1 } });
+
+    await expect(new FetchContentSource().getAudioIndex()).rejects.toThrow(
+      'Nội dung không hợp lệ: /content/audio-index.json',
+    );
+  });
+});
