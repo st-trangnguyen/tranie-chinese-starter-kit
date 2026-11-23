@@ -10,7 +10,7 @@
   }
 
   .audio-slow-toggle {
-    @apply inline-flex min-h-11 items-center justify-center rounded-full border-2 border-line-strong bg-transparent px-lg text-body-sm font-semibold text-fg transition-colors;
+    @apply inline-flex min-h-11 items-center justify-center gap-xs rounded-full border-2 border-line-strong bg-transparent px-lg text-body-sm font-semibold text-fg transition-colors;
   }
 
   .audio-slow-toggle:hover {
@@ -20,6 +20,14 @@
   .audio-slow-toggle[aria-checked="true"],
   .audio-slow-toggle.is-active {
     @apply border-accent bg-accent-soft text-accent;
+  }
+
+  .audio-slow-toggle-icon {
+    @apply text-body-sm font-semibold leading-none text-accent transition-none animate-none;
+  }
+
+  .audio-slow-toggle-label {
+    @apply whitespace-nowrap;
   }
 
   .audio-listen-error {
