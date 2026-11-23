@@ -54,7 +54,7 @@ flowchart LR
 | Package | Tên | Vai trò |
 |---|---|---|
 | `apps/web` | `@csk/web` | PWA |
-| `packages/shared` | `@csk/shared` | Schema zod và logic thuần dùng chung: `content.schema`, `progress.schema` (cũng dùng cho file backup và đồng bộ sau này), `pinyin.utils` |
+| `packages/shared` | `@csk/shared` | Schema zod và logic thuần dùng chung: `content.schema`, `progress.schema` (cũng dùng cho đồng bộ sau này), `progress-backup.schema` (file sao lưu tiến độ, S8.5), `pinyin.utils` |
 | `content` | `@csk/content` | Pipeline nội dung: nguồn dữ liệu, YAML soạn tay, script build/check/audio |
 | `apps/api` | `@csk/api` | **Bản 1.0.** Supabase (`supabase/`: migration, RLS, edge function) hoặc Hono trên Cloudflare Workers. Chưa tạo |
 
@@ -95,7 +95,10 @@ chinese-starter-kit/
 │   └── src/
 │       ├── index.ts
 │       ├── content.schema.ts                  # Stage, Unit, Lesson, Exercise (theo kind), Word, Sentence…
-│       ├── progress.schema.ts                 # LessonProgress, Settings, DailyStat (+ localDateKeySchema), Card, Snapshot (schemaVersion)
+│       ├── progress.schema.ts                 # LessonProgress, Settings, DailyStat (+ localDateKeySchema), Card; mỗi bản ghi có
+│       │                                      # schema khoan dung (đọc DB) + bản *StrictSchema (đọc file sao lưu)
+│       ├── progress-backup.schema.ts          # PROGRESS_BACKUP_FORMAT/_FORMAT_VERSION, progressBackupEnvelopeSchema,
+│       │                                      # progressBackupV1Schema, ProgressSnapshot, ProgressBackupFile (S8.5)
 │       ├── stroke.schema.ts                   # StrokeData (định dạng hanzi-writer), StrokeIndex, hanCharacterSchema
 │       ├── audio-index.schema.ts              # audioIndexSchema (units, bytes, precached), INTRO_STAGE_ID
 │       └── pinyin.utils.ts                    # đổi ni3 → nǐ, so sánh pinyin (+ *.test.ts cạnh file)
@@ -132,7 +135,8 @@ chinese-starter-kit/
         ├── core/
         │   ├── constants/                  # DB_NAME, ROUTE_PATHS, giới hạn mỗi ngày, ngưỡng mở khóa 80%,
         │   │                               # study-time.constants.ts (STUDY_TIME_FLUSH_INTERVAL_MS = 15 giây),
-        │   │                               # audio.constants.ts (AUDIO_CACHE_NAME = 'audio-cache')…
+        │   │                               # audio.constants.ts (AUDIO_CACHE_NAME = 'audio-cache'),
+        │   │                               # backup.constants.ts (MAX_BACKUP_FILE_BYTES, REVOKE_OBJECT_URL_DELAY_MS)…
         │   ├── helpers/db.helper.ts        # khai báo schema và migration Dexie (version 3: thêm dailyStats)
         │   ├── hooks/                      # useAudioPlayer, useRecorder, useOnlineStatus,
         │   │                               # useStrokeAnimation (phát từng nét), useInitialReducedMotion,
@@ -154,6 +158,7 @@ chinese-starter-kit/
         │       │                               # audio-index.json qua getAudioIndex)
         │       ├── audio-cache.service.ts      # adapter Cache Storage `audio-cache`: tìm file đã có, tải, xóa;
         │       │                               # lỗi tải phân loại 'network' / 'storage-full' (QuotaExceededError)
+        │       ├── file-saver.service.ts       # interface FileSaver + AnchorFileSaver: tải file xuống bằng <a download> (S8.5)
         │       └── stroke-writer.service.ts    # adapter hanzi-writer, file duy nhất import `hanzi-writer`:
         │                                       # createStrokeWriter (S6.1), createStrokeQuiz (S6.2)
         ├── pages/
@@ -176,10 +181,16 @@ chinese-starter-kit/
         │   │                                          # AudioSpeedProvider(initialIsSlow) + PinyinVisibilityProvider
         │   ├── settings/
         │   │   ├── settings.routes.ts          # /settings (vào từ liên kết "Cài đặt" trên màn Lộ trình)
-        │   │   ├── containers/SettingsContainer.tsx   # "Về lộ trình", 3 nhóm, một thông báo lỗi lưu role="alert"
+        │   │   ├── containers/SettingsContainer.tsx   # "Về lộ trình", 3 nhóm, một thông báo lỗi lưu role="alert",
+        │   │   │                                      # mục "Sao lưu tiến độ" (S8.5)
         │   │   ├── components/DailyGoalSetting · AudioSpeedSetting · PinyinVisibilitySetting   # value + onChange
-        │   │   └── hooks/useSettings.ts        # đọc tùy chọn (lỗi → mặc định), đổi lạc quan từng khóa, lưu lỗi
-        │   │                                   # thì trả về giá trị đã lưu chắc chắn; saveErrorId
+        │   │   ├── components/ProgressBackupSection.tsx   # nút Xuất/Nhập, input file ẩn, thông báo kết quả (S8.5)
+        │   │   ├── components/ImportConfirmDialog.tsx     # hộp xác nhận ghi đè: ngày xuất + số bài đã xong
+        │   │   ├── hooks/useSettings.ts        # đọc tùy chọn (lỗi → mặc định), đổi lạc quan từng khóa, lưu lỗi
+        │   │   │                               # thì trả về giá trị đã lưu chắc chắn; saveErrorId;
+        │   │   │                               # reloadPreferences (đọc lại sau khi nhập tiến độ)
+        │   │   └── hooks/useProgressBackup.ts  # pha idle/exporting/checking/confirming/importing, gọi BackupService,
+        │   │                                   # nhập xong gọi onImported (container truyền reloadPreferences)
         │   ├── stroke-order/
         │   │   ├── stroke-order.routes.ts      # /characters/:character?/stroke-order
         │   │   ├── containers/StrokeOrderContainer.tsx   # + link "Tập viết" sang writing-practice
@@ -201,11 +212,14 @@ chinese-starter-kit/
             │                               # useOfflineAudioService (mặc định singleton, test thay instance)
             ├── models/                     # type riêng của UI (home.model: NextLesson, TodayStudy, StudyTimeShare;
             │                               # settings.model: LearningPreferences, LessonPreferences;
+            │                               # progress-backup.model: BackupCheck, ImportInspection, ImportPreview,
+            │                               # BackupFileSource, ProgressBackupView;
             │                               # offline-audio.model: trạng thái chủ đề, thông báo);
             │                               # schema nội dung và tiến độ lấy từ @csk/shared
             ├── services/                   # content · srs · progress · backup · stroke-order · writing-practice ·
             │                               # offline-audio (.service.ts)
-            └── utils/                      # date.utils.ts (toLocalDateKey `YYYY-MM-DD` giờ máy, startOfNextLocalDay),
+            └── utils/                      # date.utils.ts (toLocalDateKey `YYYY-MM-DD` giờ máy, startOfNextLocalDay,
+                                            # formatLocalDateKey),
                                             # offline-audio.utils.ts (định dạng dung lượng, phần trăm tiến độ, số nguyên)…
 ```
 
@@ -234,7 +248,7 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
 | `shared/services/progress.service` | Quy tắc mở khóa, chấm điểm bài, cursor học dở, bài tiếp theo (`findNextLessonId`), thời gian học mỗi ngày (`splitStudyTimeByDay` cắt tại 0 giờ giờ máy, `toStudyMinutes` làm tròn xuống, `isDailyGoalReached`; use case `recordStudyTime`, `getTodayStudy`), Cài đặt (S8.2: rule `isValidAudioSpeed`, `toLessonPreferences`; use case `getLearningPreferences`, `getLessonPreferences` đọc lỗi thì trả mặc định, `changeDailyGoal`, `changeDefaultAudioSpeed`, `changePinyinVisibility` ghi đúng một khóa), streak | E3, E8 |
 | `core/hooks/useVisibleTimeSegments` + `pages/lesson/hooks/useStudyTimeRecorder` | Đo thời gian học ở màn bài: chỉ khi trang hiện, ghi mỗi `STUDY_TIME_FLUSH_INTERVAL_MS` (15 giây), khi trang ẩn và khi rời màn; đóng app đột ngột chỉ mất phần sau lần ghi cuối. Chỉ `LessonRunnerContainer` gọi (bài thường, bài kiểm tra, kiểm tra vượt cấp, màn tổng kết) | E8 |
 | `shared/services/srs.service` | Bọc ts-fsrs: tạo thẻ, chấm, lấy thẻ đến hạn trong giới hạn mỗi ngày, thống kê | E9 |
-| `shared/services/backup.service` | Export/import, kiểm tra file trước khi ghi đè | E8 |
+| `shared/services/backup.service` | Sao lưu tiến độ (S8.5). Phần 2: tên file `tranie-tien-do-<YYYY-MM-DD>.json` (`buildBackupFileName`), dựng file từ snapshot (`buildBackupFile`: `format`, `formatVersion`, `exportedOn` giờ máy), JSON thụt lề (`serializeBackupFile`), chặn file > `MAX_BACKUP_FILE_BYTES` (`isBackupFileTooLarge`), phân loại file (`checkBackupText`: `not-backup` · `newer-version` · `corrupted` · `valid`), đếm bài đã xong có trong nội dung app (`countCompletedLessons`). Phần 3: `exportProgress` (đọc `exportAll` → lưu qua `FileSaver`), `inspectImportFile` (kiểm tra + bản xem trước, không ghi gì), `importProgress` (ghi đè qua `importAll`) | E8 |
 | `shared/services/stroke-order.service` | Rule chữ hợp lệ (đúng một chữ Hán), chữ có trong `strokes/index.json` mới có dữ liệu nét; nạp dữ liệu nét qua `ContentSource` | E6 |
 | `shared/services/writing-practice.service` | Phần 2: rule bắt đầu lượt viết, đếm sai liên tiếp ở nét hiện tại, hiện gợi ý sau 3 lần sai, đúng hết các nét là xong chữ, bỏ qua sự kiện sau khi xong, kết quả câu viết trong màn bài (`lessonResultOf`, S7.1); Phần 3: `loadCharacter` ủy quyền `StrokeOrderService` (rule chữ hợp lệ và có dữ liệu nét giữ một chỗ) | E6 |
 | `shared/components/StrokeGlyph`, `StrokeOrderAnimation`, `StrokeOrderStatic` | Vẽ chữ từ dữ liệu nét: animation có chữ mờ nền + nút "Phát lại"; bản tĩnh đánh số nét khi giảm chuyển động | E6 |
@@ -355,8 +369,28 @@ interface ProgressStore {
   getSettings(): Promise<Settings>;                     // gom mọi dòng rồi parseSettings: khóa hỏng → mặc định riêng khóa đó
   saveSettings(patch: Partial<Settings>): Promise<void>; // chỉ ghi các khóa có trong patch với giá trị khác undefined;
                                                          // khóa khác giữ nguyên; patch rỗng thì không ghi
-  exportAll(): Promise<Snapshot>;      // có schemaVersion
-  importAll(snapshot): Promise<void>;  // ghi đè toàn bộ
+  exportAll(): Promise<ProgressSnapshot>;          // chờ các lần ghi đang chờ trong tab; đọc ba bảng trong một transaction `r`
+                                                    // như app đang thấy (dòng hỏng bị bỏ); không ghi gì
+  importAll(snapshot: ProgressSnapshot): Promise<void>; // xếp hàng sau các lần ghi đang chờ; một transaction `rw` xóa
+                                                    // cả ba bảng rồi ghi snapshot; không gộp; lỗi thì dữ liệu cũ còn nguyên
+}
+
+// @csk/shared (progress-backup.schema.ts)
+interface ProgressSnapshot {
+  settings: Settings;
+  lessonProgress: LessonProgress[];
+  dailyStats: DailyStat[];
+}
+type ProgressBackupFile = ProgressSnapshot & {
+  format: 'tranie-chinese-progress';  // PROGRESS_BACKUP_FORMAT
+  formatVersion: 1;                   // PROGRESS_BACKUP_FORMAT_VERSION, tách khỏi version Dexie
+  exportedOn: string;                 // YYYY-MM-DD giờ máy
+};
+
+// core/services/file-saver.service.ts
+interface FileSaver {
+  save(fileName: string, content: string, mimeType: string): void; // AnchorFileSaver: blob + <a download>,
+                                                                    // thu hồi URL sau REVOKE_OBJECT_URL_DELAY_MS
 }
 
 type ExerciseProps<K extends ExerciseKind> = {
@@ -368,6 +402,8 @@ type ExerciseProps<K extends ExerciseKind> = {
 
 - `addStudySeconds` chỉ chụp giá trị mục tiêu đang chọn (`settings.dailyGoalMinutes`, đọc trong cùng transaction) vào `goalMinutes` của dòng: không rẽ nhánh theo mục tiêu, không so phút với mục tiêu, không quy tắc nghiệp vụ. Dùng mục tiêu thế nào (ngày đạt, streak) là việc của `ProgressService` Phần 2 (S8.3).
 - `addStudySeconds` và `saveDailyGoal` nối vào cùng một chuỗi ghi trong tab; `getDailyStat` và `getAllDailyStats` chờ chuỗi này nên đọc thấy cả lần ghi vừa gửi.
+- `importAll` cũng nối vào chuỗi ghi đó; `exportAll` chờ chuỗi này như `getAllDailyStats`. File sao lưu được đọc bằng các schema `*StrictSchema` (không `.catch`: một field sai là cả file sai), còn đọc DB dùng schema khoan dung.
+- **Hợp đồng sao lưu:** file sao lưu chứa `settings` (mọi khóa), `lessonProgress`, `dailyStats` (kể cả `goalMinutes`). Thêm bảng dữ liệu người dùng mới (E9 `cards`, `reviewLogs`…) hoặc khóa `settings` mới thì **phải** thêm vào cả `exportAll`, `importAll`, `ProgressSnapshot` và schema file (`progressBackupV1Schema`; đổi hình dạng file thì tăng `PROGRESS_BACKUP_FORMAT_VERSION` và viết schema bản mới). Thiếu thì sao lưu rồi nhập lại sẽ mất dữ liệu đó.
 
 Lesson runner, màn ôn tập và màn luyện tự do chỉ làm việc qua `exercise.registry.ts` (map từ `kind` sang component), không cần biết bên trong từng dạng bài. **Ngoại lệ: `stroke-write`** (S7.1).
 
@@ -417,7 +453,7 @@ Cấu hình cache audio nằm ở `core/modules/pwa/audio-caching.config.ts` (S8
 | Hết dung lượng lưu trữ | Hiện thông báo, gợi ý xóa audio đã tải |
 | Hết bộ nhớ khi tải audio chủ đề (`QuotaExceededError` khi ghi `audio-cache`) | Dừng tải, hiện thông báo trong khối audio của chủ đề đó trên bản đồ (kèm vùng thông báo cho trình đọc màn hình); file đã tải xong vẫn giữ. Câu thông báo gợi ý xóa audio của chủ đề khác (S8.4) |
 | Đổi cấu trúc IndexedDB | Migration theo version của Dexie trong `db.helper.ts` |
-| File import lỗi | Kiểm tra bằng zod và `schemaVersion` **trước khi** ghi đè. Lỗi thì không đụng vào dữ liệu hiện tại (S8.5) |
+| File import lỗi | `BackupService.checkBackupText` kiểm tra **trước khi** ghi đè: file > 20 MB, rỗng, không phải JSON hoặc sai `format` → "không phải file sao lưu"; `formatVersion` lớn hơn `PROGRESS_BACKUP_FORMAT_VERSION` → "bản mới hơn"; đúng vỏ nhưng sai `progressBackupV1Schema` (Zod) → "file hỏng". Lỗi thì không đụng vào dữ liệu hiện tại; ghi đè (`importAll`) lỗi giữa chừng thì transaction abort, dữ liệu cũ còn nguyên (S8.5) |
 | Lỗi render không lường trước | `AppErrorBoundaryFallback` của boilerplate |
 
 ## 9. Test

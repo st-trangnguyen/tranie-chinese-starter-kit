@@ -25,6 +25,8 @@ const unavailableStore: ProgressStore = {
   addStudySeconds: unavailable,
   getAllDailyStats: unavailable,
   saveDailyGoal: unavailable,
+  exportAll: unavailable,
+  importAll: unavailable,
 };
 
 const at = (day: number, hours: number, minutes: number, seconds = 0) =>

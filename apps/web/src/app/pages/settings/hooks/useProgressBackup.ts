@@ -1,0 +1,143 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ProgressSnapshot } from '@csk/shared';
+
+import type {
+  BackupMessage,
+  BackupMessageKey,
+  BackupRejectReason,
+  ImportPreview,
+  ProgressBackupPhase,
+  ProgressBackupView,
+} from '@shared/models/progress-backup.model';
+import { BackupService } from '@shared/services/backup.service';
+
+/** Thông báo lỗi theo lý do file bị từ chối (spec "Thông báo cho từng loại file lỗi"). */
+const REJECT_MESSAGE_KEYS: Record<BackupRejectReason, BackupMessageKey> = {
+  'not-backup': 'notBackup',
+  corrupted: 'corrupted',
+  'newer-version': 'newerVersion',
+};
+
+/**
+ * Mục Sao lưu tiến độ trong màn Cài đặt (S8.5, design D6).
+ * Nhập xong thì gọi `onImported` để màn nạp lại dữ liệu đang hiện.
+ */
+export const useProgressBackup = (
+  onImported: () => void,
+): ProgressBackupView => {
+  const service = useMemo(() => new BackupService(), []);
+  const [phase, setPhase] = useState<ProgressBackupPhase>('idle');
+  const [message, setMessage] = useState<BackupMessage | null>(null);
+  const [preview, setPreview] = useState<ImportPreview | null>(null);
+  // Snapshot chờ người học xác nhận ghi đè; không render nên không để trong state (design D6).
+  const snapshotRef = useRef<ProgressSnapshot | null>(null);
+  // Đọc đồng bộ để bỏ qua lần bấm lặp trước khi state kịp render lại (design D6).
+  const phaseRef = useRef<ProgressBackupPhase>('idle');
+  const isActiveRef = useRef(true);
+
+  useEffect(() => {
+    isActiveRef.current = true;
+    return () => {
+      isActiveRef.current = false;
+    };
+  }, []);
+
+  const changePhase = useCallback((next: ProgressBackupPhase) => {
+    phaseRef.current = next;
+    if (isActiveRef.current) {
+      setPhase(next);
+    }
+  }, []);
+
+  const finish = useCallback(
+    (next: BackupMessage) => {
+      changePhase('idle');
+      if (isActiveRef.current) {
+        setMessage(next);
+      }
+    },
+    [changePhase],
+  );
+
+  const exportProgress = useCallback(() => {
+    if (phaseRef.current !== 'idle') {
+      return;
+    }
+    setMessage(null);
+    changePhase('exporting');
+    void service.exportProgress().then(
+      () => finish({ tone: 'success', key: 'exported' }),
+      () => finish({ tone: 'error', key: 'exportFailed' }),
+    );
+  }, [changePhase, finish, service]);
+
+  const selectFile = useCallback(
+    (file: File | undefined) => {
+      if (file === undefined || phaseRef.current !== 'idle') {
+        return;
+      }
+      setMessage(null);
+      changePhase('checking');
+      void service.inspectImportFile(file).then(
+        (inspection) => {
+          if (inspection.status === 'rejected') {
+            finish({
+              tone: 'error',
+              key: REJECT_MESSAGE_KEYS[inspection.reason],
+            });
+            return;
+          }
+          snapshotRef.current = inspection.snapshot;
+          if (isActiveRef.current) {
+            setPreview(inspection.preview);
+          }
+          changePhase('confirming');
+        },
+        () => finish({ tone: 'error', key: 'importFailed' }),
+      );
+    },
+    [changePhase, finish, service],
+  );
+
+  const cancelImport = useCallback(() => {
+    if (phaseRef.current !== 'confirming') {
+      return;
+    }
+    snapshotRef.current = null;
+    if (isActiveRef.current) {
+      setPreview(null);
+    }
+    changePhase('idle');
+  }, [changePhase]);
+
+  const confirmImport = useCallback(() => {
+    const snapshot = snapshotRef.current;
+    if (phaseRef.current !== 'confirming' || snapshot === null) {
+      return;
+    }
+    snapshotRef.current = null;
+    if (isActiveRef.current) {
+      setPreview(null);
+    }
+    changePhase('importing');
+    void service.importProgress(snapshot).then(
+      () => {
+        finish({ tone: 'success', key: 'imported' });
+        if (isActiveRef.current) {
+          onImported();
+        }
+      },
+      () => finish({ tone: 'error', key: 'importFailed' }),
+    );
+  }, [changePhase, finish, onImported, service]);
+
+  return {
+    phase,
+    preview,
+    message,
+    exportProgress,
+    selectFile,
+    confirmImport,
+    cancelImport,
+  };
+};

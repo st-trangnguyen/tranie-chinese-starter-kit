@@ -8,6 +8,7 @@ import {
   seedProgress,
 } from './home.helpers';
 import {
+  alertsOutsideBackup,
   backToPathLink,
   breakSettingsReads,
   breakSettingsWrites,
@@ -69,7 +70,7 @@ const expectNihaoSpeakScreen = async (page: Page): Promise<void> => {
   await expect(page.getByText('你好！', { exact: true })).toBeVisible();
   await expect(page.getByText('nǐ hǎo!', { exact: true })).toBeVisible();
   await expect(page.getByText('Xin chào!', { exact: true })).toBeVisible();
-  await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect(alertsOutsideBackup(page)).toHaveCount(0);
 };
 
 test.describe('S8.2 Cài đặt: không lưu được / không đọc được', () => {
@@ -209,7 +210,7 @@ test.describe('S8.2 Cài đặt: không lưu được / không đọc được',
         page.getByRole('group', { name: 'Chọn thanh của âm tiết vừa nghe' }),
       ).toBeVisible();
       await expect(slowToggle(page)).toHaveAttribute('aria-checked', 'false');
-      await expect(page.getByRole('alert')).toHaveCount(0);
+      await expect(alertsOutsideBackup(page)).toHaveCount(0);
 
       await page.goBack();
       await expectLearningPathScreen(page);

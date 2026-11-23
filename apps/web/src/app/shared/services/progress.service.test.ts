@@ -28,6 +28,12 @@ const makeStore = (
     addStudySeconds: vi.fn(async () => undefined),
     getAllDailyStats: vi.fn(async () => []),
     saveDailyGoal: vi.fn(async () => undefined),
+    exportAll: vi.fn(async () => ({
+      settings: saved,
+      lessonProgress,
+      dailyStats: [],
+    })),
+    importAll: vi.fn(async () => undefined),
   };
   return store;
 };
@@ -107,6 +113,28 @@ describe('ProgressService — lesson status rule', () => {
 
   it('S3.1-AC2: should ignore completed ids that are not in the path', () => {
     expect(statusesOf(['unknown'])).toMatchObject({ l1: 'open', l2: 'locked' });
+  });
+
+  it('S8.5-AC3 Bài không có trong app không ảnh hưởng lộ trình: bài 1 + bài lạ đã xong → bài 2 mở, còn lại khóa', () => {
+    const introStages: Stage[] = [
+      stage('intro', {
+        'intro-a': ['intro-01', 'intro-02'],
+        'intro-b': ['intro-03', 'intro-04'],
+      }),
+    ];
+
+    const statuses = service.deriveLessonStatuses(
+      introStages,
+      new Set(['intro-01', 'khong-co-bai-nay']),
+    );
+
+    expect(Object.fromEntries(statuses)).toEqual({
+      'intro-01': 'completed',
+      'intro-02': 'open',
+      'intro-03': 'locked',
+      'intro-04': 'locked',
+    });
+    expect(statuses.has('khong-co-bai-nay')).toBe(false);
   });
 });
 

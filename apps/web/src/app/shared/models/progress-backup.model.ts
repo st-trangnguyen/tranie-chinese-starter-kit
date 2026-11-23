@@ -1,0 +1,56 @@
+import type { ProgressBackupFile, ProgressSnapshot } from '@csk/shared';
+
+/** Lý do từ chối file người học chọn để nhập tiến độ (S8.5 AC2). */
+export type BackupRejectReason = 'not-backup' | 'corrupted' | 'newer-version';
+
+/** Kết quả kiểm tra nội dung file sao lưu (`BackupService.checkBackupText`). */
+export type BackupCheck =
+  | { status: 'valid'; file: ProgressBackupFile }
+  | { status: 'rejected'; reason: BackupRejectReason };
+
+/** Tóm tắt file hiện trong hộp xác nhận (S8.5 AC3). */
+export interface ImportPreview {
+  exportedOn: string;
+  completedLessonCount: number;
+}
+
+/** Kết quả xem trước file nhập (`BackupService.inspectImportFile`). */
+export type ImportInspection =
+  | { status: 'valid'; snapshot: ProgressSnapshot; preview: ImportPreview }
+  | { status: 'rejected'; reason: BackupRejectReason };
+
+/** Nguồn file người học chọn để nhập: `File` thỏa mãn; test truyền object thường. */
+export interface BackupFileSource {
+  size: number;
+  text(): Promise<string>;
+}
+
+/** Khóa thông báo của mục Sao lưu tiến độ (chuỗi ở `settings.json` nhóm `backup.*`). */
+export type BackupMessageKey =
+  | 'exported'
+  | 'exportFailed'
+  | 'notBackup'
+  | 'corrupted'
+  | 'newerVersion'
+  | 'imported'
+  | 'importFailed';
+
+export interface BackupMessage {
+  tone: 'success' | 'error';
+  key: BackupMessageKey;
+}
+
+/** Pha của mục Sao lưu tiến độ; khác `idle` thì bỏ qua lần bấm mới (design D6). */
+export type ProgressBackupPhase =
+  'idle' | 'exporting' | 'checking' | 'confirming' | 'importing';
+
+/** State + handler `useProgressBackup` trả cho `ProgressBackupSection` (design D6, D7). */
+export interface ProgressBackupView {
+  phase: ProgressBackupPhase;
+  preview: ImportPreview | null;
+  message: BackupMessage | null;
+  exportProgress: () => void;
+  selectFile: (file: File | undefined) => void;
+  confirmImport: () => void;
+  cancelImport: () => void;
+}

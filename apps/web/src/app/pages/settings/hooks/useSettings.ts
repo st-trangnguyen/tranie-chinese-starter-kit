@@ -12,6 +12,8 @@ export interface SettingsState {
   changeDailyGoal: (minutes: DailyGoalMinutes) => void;
   changeDefaultAudioSpeed: (speed: AudioSpeed) => void;
   changePinyinVisibility: (isVisible: boolean) => void;
+  /** Đọc lại tùy chọn đã lưu (sau khi nhập tiến độ từ file, S8.5). */
+  reloadPreferences: () => void;
 }
 
 export const useSettings = (): SettingsState => {
@@ -20,6 +22,8 @@ export const useSettings = (): SettingsState => {
     null,
   );
   const [saveErrorId, setSaveErrorId] = useState<number | null>(null);
+  // Tăng mỗi lần cần đọc lại tùy chọn đã lưu; effect nạp phụ thuộc giá trị này (design D6).
+  const [loadId, setLoadId] = useState(0);
   // Giá trị đã lưu chắc chắn; dùng để trả về khi lưu lỗi (design D4).
   const persistedRef = useRef<LearningPreferences | null>(null);
   // Id lần đổi mới nhất của từng field; chỉ lần mới nhất được trả giá trị về khi lỗi (design D4).
@@ -39,7 +43,9 @@ export const useSettings = (): SettingsState => {
     return () => {
       isActive = false;
     };
-  }, [service]);
+  }, [service, loadId]);
+
+  const reloadPreferences = useCallback(() => setLoadId((n) => n + 1), []);
 
   // Đổi một field (design D4): hiển thị ngay, lưu qua service, ghi nhận giá trị đã lưu khi xong.
   // Lưu được: thông báo lỗi biến mất. Lưu lỗi: trả field về giá trị đã lưu (chỉ khi đây vẫn là
@@ -110,5 +116,6 @@ export const useSettings = (): SettingsState => {
     changeDailyGoal,
     changeDefaultAudioSpeed,
     changePinyinVisibility,
+    reloadPreferences,
   };
 };
