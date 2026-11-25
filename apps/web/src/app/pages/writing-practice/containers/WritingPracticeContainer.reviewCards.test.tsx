@@ -8,7 +8,7 @@ import {
   installLessonStrokeWriteFetch,
 } from '@test/lesson-stroke-write.helpers';
 import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
-import { act, screen, waitFor } from '@test/render';
+import { act, screen, userEvent, waitFor } from '@test/render';
 import { openRoute, setupStrokeOrderRoute } from '@test/stroke-order-route';
 
 // Ranh giới ngoài: thư viện vẽ/chấm nét hanzi-writer được thay bằng bản giả điều khiển được.
@@ -121,5 +121,65 @@ describe('WritingPracticeContainer — thẻ chiều viết (S9.1)', () => {
         .map((card) => card.facet)
         .toSorted(),
     ).toEqual(['listening', 'meaning']);
+  });
+
+  it('S9.1-AC2 Viết xong chữ vẫn báo xong khi không lưu được: should still announce 人 as written with a usable "Viết lại" button, show no alert and create no 人 writing card when saving the written character fails', async () => {
+    await clearDatabase();
+    installLessonStrokeWriteFetch();
+    await seedLearnedPerson();
+    // Lưu chữ đã viết bị lỗi (IndexedDB từ chối ghi).
+    const addWrittenSpy = vi
+      .spyOn(progressStore, 'addWrittenCharacter')
+      .mockRejectedValue(new Error('QuotaExceededError'));
+    try {
+      const user = userEvent.setup();
+      const writer = await openPersonPadWithActiveQuiz();
+
+      act(() => writer.emitCorrectStroke());
+      act(() => writer.emitCorrectStroke());
+
+      // Màn vẫn báo đã viết xong chữ như bình thường.
+      expect(
+        await screen.findByRole('status', {}, { timeout: 3000 }),
+      ).toHaveTextContent(`Đã viết xong chữ ${PERSON}.`);
+      await waitFor(() => expect(addWrittenSpy).toHaveBeenCalledWith(PERSON));
+      // Chờ lời ghi bị từ chối kịp lan ra (nếu bị bỏ lọt) trước khi kiểm.
+      await act(async () => {
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 100);
+        });
+      });
+
+      // Không có thông báo lỗi nào.
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(screen.getByRole('status')).toHaveTextContent(
+        `Đã viết xong chữ ${PERSON}.`,
+      );
+
+      // Không có thẻ 人 chiều viết.
+      const writingCards = (await progressStore.getAllCards()).filter(
+        (card) => card.wordId === PERSON && card.facet === 'writing',
+      );
+      expect(writingCards).toEqual([]);
+
+      // Nút "Viết lại" dùng được: bấm thì bắt đầu lượt mới từ nét đầu.
+      const restartButton = screen.getByRole('button', { name: 'Viết lại' });
+      expect(restartButton).toBeEnabled();
+      await user.click(restartButton);
+      await waitFor(() => {
+        const candidate = FakeHanziWriter.last();
+        expect(candidate).not.toBe(writer);
+        expect(candidate.isQuizActive).toBe(true);
+      });
+      expect(
+        screen.queryByText(`Đã viết xong chữ ${PERSON}.`),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole('figure', { name: `Khung viết chữ ${PERSON}` }),
+      ).toHaveAttribute('data-completed-stroke-count', '0');
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    } finally {
+      addWrittenSpy.mockRestore();
+    }
   });
 });

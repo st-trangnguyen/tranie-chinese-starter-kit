@@ -129,7 +129,7 @@ Test: `apps/web/src/app/pages/writing-practice/containers/WritingPracticeContain
 - [x] 7.4 GREEN: sửa đến khi pass (`restart` gán lại `practiceRef`); kiểm: test 7.3 pass
 - [x] 7.5 RED: S9.1-AC2 "Viết dở không tính" (container) — DB có `人` meaning + listening; viết đúng nét đầu rồi unmount → `getWrittenCharacters()` rỗng, không `人:writing`; kiểm: chạy, nếu pass ngay thì tạm gọi ghi nhận ở mỗi nét đúng để thấy fail rồi trả lại
 - [ ] 7.6 GREEN: sửa đến khi pass; kiểm: test 7.5 pass
-- [ ] 7.7 RED: S9.1-AC2 "Viết xong chữ vẫn báo xong khi không lưu được" (container) — `addWrittenCharacter` reject (spy) → thông báo xong chữ hiện, nút "Viết lại" dùng được, không `alert`, không `人:writing`; kiểm: chạy, nếu pass ngay thì tạm bỏ `.catch` ở hook để thấy lỗi lọt (unhandled rejection làm test fail) rồi trả lại
+- [x] 7.7 RED: S9.1-AC2 "Viết xong chữ vẫn báo xong khi không lưu được" (container) — `addWrittenCharacter` reject (spy) → thông báo xong chữ hiện, nút "Viết lại" dùng được, không `alert`, không `人:writing`; kiểm: chạy, nếu pass ngay thì tạm bỏ `.catch` ở hook để thấy lỗi lọt (unhandled rejection làm test fail) rồi trả lại
 - [ ] 7.8 GREEN: sửa đến khi pass; kiểm: test 7.7 pass, `useWritingPractice.ts` < 300 dòng
 
 ## 8. Sao lưu thẻ và chữ đã viết — schema v2, store, `BackupService` (design D3, D6)
