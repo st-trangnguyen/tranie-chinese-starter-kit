@@ -247,8 +247,8 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
 | `shared/services/content.service` | Nạp JSON nội dung, tra từ và câu theo ID, tìm kiếm từ điển | E3, E10 |
 | `shared/services/progress.service` | Quy tắc mở khóa, chấm điểm bài, cursor học dở, bài tiếp theo (`findNextLessonId`), thời gian học mỗi ngày (`splitStudyTimeByDay` cắt tại 0 giờ giờ máy, `toStudyMinutes` làm tròn xuống, `isDailyGoalReached`; use case `recordStudyTime`, `getTodayStudy`), Cài đặt (S8.2: rule `isValidAudioSpeed`, `toLessonPreferences`; use case `getLearningPreferences`, `getLessonPreferences` đọc lỗi thì trả mặc định, `changeDailyGoal`, `changeDefaultAudioSpeed`, `changePinyinVisibility` ghi đúng một khóa), streak | E3, E8 |
 | `core/hooks/useVisibleTimeSegments` + `pages/lesson/hooks/useStudyTimeRecorder` | Đo thời gian học ở màn bài: chỉ khi trang hiện, ghi mỗi `STUDY_TIME_FLUSH_INTERVAL_MS` (15 giây), khi trang ẩn và khi rời màn; đóng app đột ngột chỉ mất phần sau lần ghi cuối. Chỉ `LessonRunnerContainer` gọi (bài thường, bài kiểm tra, kiểm tra vượt cấp, màn tổng kết) | E8 |
-| `shared/services/srs.service` | Bọc ts-fsrs: tạo thẻ, chấm, lấy thẻ đến hạn trong giới hạn mỗi ngày, thống kê | E9 |
-| `shared/services/backup.service` | Sao lưu tiến độ (S8.5). Phần 2: tên file `tranie-tien-do-<YYYY-MM-DD>.json` (`buildBackupFileName`), dựng file từ snapshot (`buildBackupFile`: `format`, `formatVersion`, `exportedOn` giờ máy), JSON thụt lề (`serializeBackupFile`), chặn file > `MAX_BACKUP_FILE_BYTES` (`isBackupFileTooLarge`), phân loại file (`checkBackupText`: `not-backup` · `newer-version` · `corrupted` · `valid`), đếm bài đã xong có trong nội dung app (`countCompletedLessons`). Phần 3: `exportProgress` (đọc `exportAll` → lưu qua `FileSaver`), `inspectImportFile` (kiểm tra + bản xem trước, không ghi gì), `importProgress` (ghi đè qua `importAll`) | E8 |
+| `shared/services/srs.service` | Bọc ts-fsrs (file duy nhất import `ts-fsrs`): tạo thẻ, chấm, lấy thẻ đến hạn trong giới hạn mỗi ngày, thống kê. S9.1 (tạo thẻ). Phần 1: `readAllCards`, `writeNewCards`, `readWrittenCharacters`, `writeWrittenCharacter` qua `ProgressStore`; `readWords`, `readStrokeCharacters` qua `ContentSource`. Phần 2: chỉ bài `lesson` xong không bỏ câu nào mới tạo thẻ, bài `test` (cuối chủ đề, vượt cấp) không bao giờ (`isCardEligibleLesson`); từ của bài (`collectLessonWordIds`: `wordId`, cả hai `wordIds` của cặp âm, câu chỉ có `sentenceId` không có từ); chữ Hán của từ (`charactersOf`); chỉ lần viết xong trên khung có gợi ý mới tính (`countsAsStrokeWritten`, `addWrittenCharacter`); từ đã học xong (`isWordLearned`: có thẻ `meaning` hoặc thuộc bài đang xong); thẻ chiều viết khi mọi chữ của từ có dữ liệu nét và đã viết xong (`canHaveWritingCard`); thẻ "mới" từ `createEmptyCard` (`createNewCard`); thẻ còn thiếu khi xong bài (`planLessonCards`: `meaning` + `listening`, `writing` có điều kiện) và sau một lần viết (`planWritingCards`). Phần 3: `createCardsForFinishedLesson` (lỗi: `Không tạo được thẻ ôn tập.`), `recordCharacterWriting` (ghi chữ trước; lỗi ghi chữ: `Không ghi nhận được chữ đã viết.`, lỗi tạo thẻ viết: `Không tạo được thẻ chiều viết.`). Không use case nào chạy lúc mở app, nhập file hay đánh dấu vượt cấp (không tạo bù) | E9 |
+| `shared/services/backup.service` | Sao lưu tiến độ (S8.5). Phần 2: tên file `tranie-tien-do-<YYYY-MM-DD>.json` (`buildBackupFileName`), dựng file từ snapshot (`buildBackupFile`: `format`, `formatVersion`, `exportedOn` giờ máy), JSON thụt lề (`serializeBackupFile`), chặn file > `MAX_BACKUP_FILE_BYTES` (`isBackupFileTooLarge`), phân loại file (`checkBackupText`: `not-backup` · `newer-version` · `corrupted` · `valid`; version 1 qua `progressBackupV1Schema` rồi `upgradeV1File` thành version 2 với `cards: []`, `writtenCharacters: []`, còn lại qua `progressBackupV2Schema`), đếm bài đã xong có trong nội dung app (`countCompletedLessons`). Phần 3: `exportProgress` (đọc `exportAll` → lưu qua `FileSaver`), `inspectImportFile` (kiểm tra + bản xem trước, không ghi gì), `importProgress` (ghi đè qua `importAll`) | E8 |
 | `shared/services/stroke-order.service` | Rule chữ hợp lệ (đúng một chữ Hán), chữ có trong `strokes/index.json` mới có dữ liệu nét; nạp dữ liệu nét qua `ContentSource` | E6 |
 | `shared/services/writing-practice.service` | Phần 2: rule bắt đầu lượt viết, đếm sai liên tiếp ở nét hiện tại, hiện gợi ý sau 3 lần sai, đúng hết các nét là xong chữ, bỏ qua sự kiện sau khi xong, kết quả câu viết trong màn bài (`lessonResultOf`, S7.1); Phần 3: `loadCharacter` ủy quyền `StrokeOrderService` (rule chữ hợp lệ và có dữ liệu nét giữ một chỗ) | E6 |
 | `shared/components/StrokeGlyph`, `StrokeOrderAnimation`, `StrokeOrderStatic` | Vẽ chữ từ dữ liệu nét: animation có chữ mờ nền + nút "Phát lại"; bản tĩnh đánh số nét khi giảm chuyển động | E6 |
@@ -258,7 +258,7 @@ Theo boilerplate [`b-react-vite-ts`](/Users/trang.nguyen/Documents/projects/b-re
 ## 5. Pattern (theo boilerplate)
 
 - **Luồng dữ liệu:** `container → pages/<feature>/hooks/use… → shared/services → core/services`.
-  - Ví dụ: `useLessonRunner` gọi `ProgressService` để lưu cursor và chấm điểm, gọi `SrsService` để tạo thẻ.
+  - Ví dụ: `useLessonRunner` gọi `ProgressService` để lưu cursor và chấm điểm, gọi `SrsService.createCardsForFinishedLesson` để tạo thẻ (S9.1: sau `finishLesson`, cùng hàng đợi `saveQueueRef`; lỗi bị nuốt bằng `.catch(() => undefined)`, không đổi `isSaved` hay tổng kết). `useLessonStrokeWrite` (câu viết trong bài) và `useWritingPractice` (màn luyện viết) gọi `SrsService.recordCharacterWriting({ character, isGuided: true })` khi vừa xong chữ, cũng nuốt lỗi: use case throw, hook quyết định không báo người học.
 - **Service dạng class:**
   - Các service trong `shared/services` giữ một instance `ProgressStore`, giống cách `ArticleService` giữ `ApiService` trong boilerplate.
   - Mỗi service gồm 3 lớp: truy cập dữ liệu (private), quy tắc nghiệp vụ thuần (public, không đụng vào store), use-case điều phối.
@@ -333,9 +333,13 @@ Luật câu viết của `content:check` (`lessonStrokeWriteIssues` trong `conte
 |---|---|---|
 | `settings` | key | Khóa–giá trị (`{ key, value }`), mỗi tùy chọn một dòng. Khóa hiện có: `dailyGoalMinutes` (15 · 30 · 60), `hasCompletedOnboarding`, `defaultAudioSpeed` (`'normal' \| 'slow'`, S8.2), `isPinyinVisible` (S8.2). Đọc qua `parseSettings` (Zod): thiếu khóa hoặc giá trị hỏng thì **riêng khóa đó** về mặc định (15 phút, chưa xong onboarding, `'normal'`, `true`). Hai khóa S8.2 không cần Dexie version mới. Sau này thêm giới hạn SRS… S8.5 phải sao lưu đủ mọi khóa, kể cả `defaultAudioSpeed` và `isPinyinVisible` |
 | `lessonProgress` | `lessonId` | `status`, `bestScore`, `cursor` (vị trí câu đang dở) |
-| `cards` | `"wordId:facet"` | Trạng thái FSRS, `due` (có index) |
-| `reviewLogs` | auto | `cardId`, `rating`, `reviewedAt`… |
+| `cards` | `id` = `reviewCardId(wordId, facet)` = `"wordId:facet"` | S9.1, Dexie version 4 (`cards: 'id, due'`). Dòng = `ReviewCard` (`reviewCardSchema`, `@csk/shared` `review-card.schema.ts`) + `id`: `wordId`, `facet` (`CARD_FACETS`: `'meaning'` · `'listening'` · `'writing'`), `state` (`CARD_STATES`: `'new'` · `'learning'` · `'review'` · `'relearning'`), `due` (epoch ms, có index cho S9.2), `stability`, `difficulty`, `elapsedDays`, `scheduledDays`, `learningSteps`, `reps`, `lapses`, `lastReview?` (epoch ms, thẻ mới không có). Mirror `Card` của `ts-fsrs` (camelCase, `Date` → epoch ms, `State` số → chuỗi) để S9.2 chấm tiếp không đổi cấu trúc. `wordId` không đối chiếu nội dung (từ lạ vẫn hợp lệ). Dòng hỏng (thiếu field FSRS) bị bỏ cả dòng. Thẻ đã có không bao giờ bị `addNewCards` ghi đè. S8.5 phải sao lưu bảng này |
+| `writtenCharacters` | `character` | S9.1, Dexie version 4. Một dòng mỗi chữ Hán đã viết xong trên khung có gợi ý (`writtenCharacterSchema`: `{ character }`, `hanCharacterSchema`); không lưu nguồn hay thời điểm. Viết lại cùng chữ không tạo dòng mới. Dùng cho rule thẻ chiều viết. S8.5 phải sao lưu bảng này |
+| `reviewLogs` | auto | Chưa có (S9.2+ nếu cần): `cardId`, `rating`, `reviewedAt`… |
 | `dailyStats` | `date` (`YYYY-MM-DD` theo giờ máy) | `studySeconds` (giây, số thực, giữ phần lẻ giữa các lần ghi; Trang chủ hiện phút làm tròn xuống). `goalMinutes` (S8.3, optional): mục tiêu của chính ngày đó, chụp từ `settings.dailyGoalMinutes` mỗi lần ghi phút và khi đổi mục tiêu; ngày ghi trước S8.3 không có, thiếu hoặc hỏng thì đọc ra `undefined` mà không làm hỏng cả dòng. Giữ mọi ngày, không xoá. Dexie version 3 (thêm `goalMinutes` không đổi version vì không đổi khóa hay index). S8.3 dùng cho streak (sẽ thêm `reviews`, `newCards`…); S8.5 phải sao lưu bảng này |
+
+Dexie version 4 (S9.1) thêm hai bảng `cards` và `writtenCharacters`, không đụng dữ liệu cũ nên không có hàm `upgrade`; version 1–3
+không sửa. Row type chưa tin cậy (`CardRow`, `WrittenCharacterRow` trong `core/helpers/db.helper.ts`), validate khi đọc.
 
 **Bản ghi âm không được lưu.**
 
@@ -356,12 +360,17 @@ nhau bằng ảnh chụp cũ. `completeOnboarding` (S1.3) vẫn đọc → gộp
 
 ```ts
 interface ProgressStore {
+  getAllLessonProgress(): Promise<LessonProgress[]>;  // dòng hỏng bị bỏ qua
   getLessonProgress(lessonId): Promise<LessonProgress | undefined>;
   saveLessonProgress(progress): Promise<void>;
   saveLessonProgressBatch(rows): Promise<void>;  // một transaction: một dòng lỗi thì không dòng nào được ghi
-  getDueCards(now, limit): Promise<Card[]>;
-  upsertCard(card): Promise<void>;
-  logReview(log): Promise<void>;
+  getAllCards(): Promise<ReviewCard[]>;          // S9.1; dòng hỏng (Zod) bị bỏ; chờ các lần ghi đang chờ trong tab
+  addNewCards(cards: readonly ReviewCard[]): Promise<void>; // S9.1; một transaction `rw` trên `cards`: chỉ thêm thẻ chưa có
+                                                    // (khóa reviewCardId), thẻ đã có giữ trạng thái và lịch ôn; rỗng thì không
+                                                    // mở transaction; lỗi thì reject, không thẻ nào được ghi
+  getWrittenCharacters(): Promise<string[]>;     // S9.1; dòng hỏng bị bỏ; chờ các lần ghi đang chờ trong tab
+  addWrittenCharacter(character: string): Promise<void>; // S9.1; `put({ character })`: viết lại không tạo dòng mới
+  // S9.2 (chưa có): lấy thẻ đến hạn, ghi thẻ sau khi chấm, log ôn tập
   getDailyStat(date): Promise<DailyStat | undefined>;  // không có dòng hoặc dòng hỏng (Zod) → undefined; chờ các lần ghi đang chờ trong tab
   addStudySeconds(date, seconds): Promise<void>;        // một transaction rw: đọc + cộng + ghi; dòng hỏng coi là 0 và bị thay; chụp settings.dailyGoalMinutes vào goalMinutes
   getAllDailyStats(): Promise<DailyStat[]>;              // mọi ngày; dòng hỏng (Zod) bị bỏ qua; chờ các lần ghi đang chờ trong tab
@@ -369,10 +378,10 @@ interface ProgressStore {
   getSettings(): Promise<Settings>;                     // gom mọi dòng rồi parseSettings: khóa hỏng → mặc định riêng khóa đó
   saveSettings(patch: Partial<Settings>): Promise<void>; // chỉ ghi các khóa có trong patch với giá trị khác undefined;
                                                          // khóa khác giữ nguyên; patch rỗng thì không ghi
-  exportAll(): Promise<ProgressSnapshot>;          // chờ các lần ghi đang chờ trong tab; đọc ba bảng trong một transaction `r`
+  exportAll(): Promise<ProgressSnapshot>;          // chờ các lần ghi đang chờ trong tab; đọc năm bảng trong một transaction `r`
                                                     // như app đang thấy (dòng hỏng bị bỏ); không ghi gì
   importAll(snapshot: ProgressSnapshot): Promise<void>; // xếp hàng sau các lần ghi đang chờ; một transaction `rw` xóa
-                                                    // cả ba bảng rồi ghi snapshot; không gộp; lỗi thì dữ liệu cũ còn nguyên
+                                                    // cả năm bảng rồi ghi snapshot; không gộp; lỗi thì dữ liệu cũ còn nguyên
 }
 
 // @csk/shared (progress-backup.schema.ts)
@@ -380,12 +389,18 @@ interface ProgressSnapshot {
   settings: Settings;
   lessonProgress: LessonProgress[];
   dailyStats: DailyStat[];
+  cards: ReviewCard[];          // S9.1
+  writtenCharacters: string[];  // S9.1
 }
 type ProgressBackupFile = ProgressSnapshot & {
   format: 'tranie-chinese-progress';  // PROGRESS_BACKUP_FORMAT
-  formatVersion: 1;                   // PROGRESS_BACKUP_FORMAT_VERSION, tách khỏi version Dexie
+  formatVersion: 2;                   // PROGRESS_BACKUP_FORMAT_VERSION (S9.1: 2), tách khỏi version Dexie
   exportedOn: string;                 // YYYY-MM-DD giờ máy
 };
+// progressBackupEnvelopeSchema: { format, formatVersion: number } để phân loại trước khi kiểm chi tiết
+// progressBackupV1Schema: formatVersion 1 (S8.5), không có cards/writtenCharacters
+// progressBackupV2Schema = V1.extend({ formatVersion: 2, cards (không trùng reviewCardId),
+//                                       writtenCharacters (hanCharacterSchema, không trùng) })
 
 // core/services/file-saver.service.ts
 interface FileSaver {
@@ -401,9 +416,12 @@ type ExerciseProps<K extends ExerciseKind> = {
 ```
 
 - `addStudySeconds` chỉ chụp giá trị mục tiêu đang chọn (`settings.dailyGoalMinutes`, đọc trong cùng transaction) vào `goalMinutes` của dòng: không rẽ nhánh theo mục tiêu, không so phút với mục tiêu, không quy tắc nghiệp vụ. Dùng mục tiêu thế nào (ngày đạt, streak) là việc của `ProgressService` Phần 2 (S8.3).
-- `addStudySeconds` và `saveDailyGoal` nối vào cùng một chuỗi ghi trong tab; `getDailyStat` và `getAllDailyStats` chờ chuỗi này nên đọc thấy cả lần ghi vừa gửi.
+- `addStudySeconds`, `saveDailyGoal`, `addNewCards`, `addWrittenCharacter` nối vào cùng một chuỗi ghi trong tab (`pendingWrites` / `enqueueWrite`); `getDailyStat`, `getAllDailyStats`, `getAllCards`, `getWrittenCharacters` chờ chuỗi này nên đọc thấy cả lần ghi vừa gửi (chữ vừa viết ở câu viết trong bài được thấy khi bài kết thúc).
+- Bên trong transaction Dexie (`exportAll`, `addNewCards`, ghi snapshot) chỉ đọc bảng thô rồi validate (`parseRows`), không gọi method public chờ `pendingWrites`: chờ promise ngoài Dexie làm transaction commit sớm, chờ chuỗi ghi từ trong một lần ghi thì deadlock.
+- "Không ghi đè thẻ đã có" của `addNewCards` là ràng buộc toàn vẹn dữ liệu (như khóa duy nhất), không phải quy tắc nghiệp vụ: tạo thẻ nào do `SrsService` Phần 2 quyết định.
 - `importAll` cũng nối vào chuỗi ghi đó; `exportAll` chờ chuỗi này như `getAllDailyStats`. File sao lưu được đọc bằng các schema `*StrictSchema` (không `.catch`: một field sai là cả file sai), còn đọc DB dùng schema khoan dung.
-- **Hợp đồng sao lưu:** file sao lưu chứa `settings` (mọi khóa), `lessonProgress`, `dailyStats` (kể cả `goalMinutes`). Thêm bảng dữ liệu người dùng mới (E9 `cards`, `reviewLogs`…) hoặc khóa `settings` mới thì **phải** thêm vào cả `exportAll`, `importAll`, `ProgressSnapshot` và schema file (`progressBackupV1Schema`; đổi hình dạng file thì tăng `PROGRESS_BACKUP_FORMAT_VERSION` và viết schema bản mới). Thiếu thì sao lưu rồi nhập lại sẽ mất dữ liệu đó.
+- **Hợp đồng sao lưu:** file sao lưu (version 2, S9.1) chứa `settings` (mọi khóa), `lessonProgress`, `dailyStats` (kể cả `goalMinutes`), `cards` (đủ trạng thái FSRS) và `writtenCharacters`. Thêm bảng dữ liệu người dùng mới (`reviewLogs`…) hoặc khóa `settings` mới thì **phải** thêm vào cả `exportAll`, `importAll`, `ProgressSnapshot` và schema file (đổi hình dạng file thì tăng `PROGRESS_BACKUP_FORMAT_VERSION`, viết schema bản mới và giữ schema bản cũ để vẫn đọc được). Thiếu thì sao lưu rồi nhập lại sẽ mất dữ liệu đó.
+- **Đọc file theo version** (`BackupService.checkBackupText`): vỏ sai → `not-backup`; `formatVersion > PROGRESS_BACKUP_FORMAT_VERSION` → `newer-version`; `1` → `progressBackupV1Schema` rồi `upgradeV1File` (Rule: file trước S9.1 nhập như không có thẻ và chữ đã viết, `cards: []`, `writtenCharacters: []`); còn lại → `progressBackupV2Schema`. Không qua schema → `corrupted`. Thẻ sai chiều/thiếu field, thẻ trùng `reviewCardId`, chữ trùng → `corrupted`; thẻ của từ lạ, chữ không có trong nội dung hoặc không có dữ liệu nét vẫn hợp lệ (không đối chiếu nội dung). Nhập ghi đè cả năm bảng, nên nhập file version 1 xóa hết thẻ và chữ đã viết trên máy. Hộp xác nhận nhập (`ImportPreview`) không hiện số thẻ.
 
 Lesson runner, màn ôn tập và màn luyện tự do chỉ làm việc qua `exercise.registry.ts` (map từ `kind` sang component), không cần biết bên trong từng dạng bài. **Ngoại lệ: `stroke-write`** (S7.1).
 
