@@ -203,15 +203,30 @@ export class SrsService {
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
 
-  // Skeleton (RED 5.1): chưa có hành vi.
   async createCardsForFinishedLesson(
     lesson: Lesson,
     session: LessonSession,
     now: number = Date.now(),
   ): Promise<void> {
-    void lesson;
-    void session;
-    void now;
+    if (!this.isCardEligibleLesson(lesson.type, session)) {
+      return;
+    }
+    const [cards, writtenCharacters, words, strokeCharacters] =
+      await Promise.all([
+        this.readAllCards(),
+        this.readWrittenCharacters(),
+        this.readWords(),
+        this.readStrokeCharacters(),
+      ]);
+    const newCards = this.planLessonCards({
+      wordIds: this.collectLessonWordIds(lesson.exercises),
+      wordsById: new Map(words.map((word) => [word.id, word])),
+      cards,
+      writtenCharacters: new Set(writtenCharacters),
+      strokeCharacters: new Set(strokeCharacters),
+      now,
+    });
+    await this.writeNewCards(newCards);
   }
 
   // Skeleton (RED 5.1): chưa có hành vi.

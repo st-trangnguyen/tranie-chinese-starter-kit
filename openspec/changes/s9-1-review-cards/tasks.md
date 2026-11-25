@@ -69,7 +69,7 @@ tên ngẫu nhiên, `ContentSource` giả (`makeSource` trong `apps/web/src/test
 `杯`, stroke index `{人, 你, 好, 谢}`).
 
 - [x] 5.1 RED: S9.1-AC1 "Xong bài học thì tạo thẻ nghĩa và nghe" (Phần 3) — DB rỗng; `createCardsForFinishedLesson(bài 你好+谢谢, phiên finished không bỏ câu, now)` → `getAllCards()` đúng 4 thẻ `state: 'new'`. Skeleton: Phần 1 private + 2 use case `async` không làm gì; kiểm: fail ở assertion
-- [ ] 5.2 GREEN: Phần 1 (D4), `createCardsForFinishedLesson`; kiểm: test 5.1 pass
+- [x] 5.2 GREEN: Phần 1 (D4), `createCardsForFinishedLesson`; kiểm: test 5.1 pass
 - [ ] 5.3 RED: S9.1-AC1 "Bài chưa xong không tạo thẻ" + "Bài kiểm tra không tạo thẻ" (Phần 3) — phiên bỏ 1 câu, phiên chưa xong, bài `type: 'test'` đúng hết → không thẻ nào, và `ContentSource.getWords` không được gọi; kiểm: chạy, nếu pass ngay thì tạm bỏ bước `isCardEligibleLesson` để thấy fail rồi trả lại
 - [ ] 5.4 GREEN: sửa đến khi pass; kiểm: test 5.3 pass
 - [ ] 5.5 RED: S9.1-AC1 "Bài đã xong từ trước không được tạo bù thẻ" (Phần 3) — DB có `lessonProgress` bài 你好 `completed`, không thẻ; `new SrsService(store, source)` và `recordCharacterWriting({ 你, isGuided: true })` → không có thẻ `你好`; sau `createCardsForFinishedLesson(bài đó, phiên xong)` → có `你好` meaning + listening; kiểm: chạy, nếu pass ngay thì tạm cho `recordCharacterWriting` coi bài `completed` là đã học để thấy fail rồi trả lại
