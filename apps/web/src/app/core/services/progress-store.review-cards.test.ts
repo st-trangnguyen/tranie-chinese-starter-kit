@@ -124,3 +124,52 @@ describe('DexieProgressStore — thẻ ôn tập và chữ đã viết (S9.1)', 
     await expect(db.dailyStats.toArray()).resolves.toEqual([dailyRow]);
   });
 });
+
+const RETAKE = 'S9.1-AC1 Làm lại bài đã xong không tạo trùng thẻ';
+const REVIEW_DUE = Date.UTC(2026, 11, 2, 8, 0, 0);
+
+const reviewedMeaning: ReviewCard = {
+  ...newCard('你好', 'meaning'),
+  state: 'review',
+  due: REVIEW_DUE,
+  stability: 3.2,
+  difficulty: 5.1,
+  scheduledDays: 7,
+  learningSteps: 0,
+  reps: 2,
+  lastReview: Date.UTC(2026, 10, 25, 8, 0, 0),
+};
+
+describe('DexieProgressStore — không tạo trùng thẻ (S9.1)', () => {
+  it(`${RETAKE}: thẻ đã có giữ nguyên trạng thái và lịch ôn, thẻ chưa có được thêm`, async () => {
+    const { store } = openStore();
+    await store.addNewCards([reviewedMeaning]);
+
+    await store.addNewCards([
+      newCard('你好', 'meaning'),
+      newCard('你好', 'listening'),
+    ]);
+
+    const cards = await store.getAllCards();
+    expect([...cards].sort(byId)).toStrictEqual(
+      [newCard('你好', 'listening'), reviewedMeaning].sort(byId),
+    );
+  });
+
+  it(`${RETAKE}: ghi thẻ lỗi thì reject và không thẻ nào được ghi`, async () => {
+    const { db, store } = openStore();
+    await store.addNewCards([reviewedMeaning]);
+    const writeFailure = new Error('ghi thẻ lỗi');
+    vi.spyOn(db.cards, 'bulkAdd').mockRejectedValueOnce(writeFailure);
+
+    await expect(
+      store.addNewCards([
+        newCard('你好', 'meaning'),
+        newCard('你好', 'listening'),
+        newCard('谢谢', 'meaning'),
+      ]),
+    ).rejects.toThrow(writeFailure);
+
+    await expect(store.getAllCards()).resolves.toStrictEqual([reviewedMeaning]);
+  });
+});
