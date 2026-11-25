@@ -66,4 +66,53 @@ describe('SrsService — Phần 3: createCardsForFinishedLesson', () => {
       expect(reviewCardSchema.safeParse(card).success).toBe(true);
     }
   });
+
+  it.each([
+    {
+      name: 'làm hết nhưng bỏ qua 1 câu',
+      session: {
+        ...finishedSession(['e1', 'e2']),
+        skippedCount: 1,
+        correctCount: 1,
+      },
+    },
+    {
+      name: 'thoát khi chưa làm hết các câu',
+      session: {
+        ...finishedSession(['e1', 'e2']),
+        currentIndex: 0,
+        phase: 'answering',
+        correctCount: 0,
+        finishedAt: null,
+      },
+    },
+  ] satisfies readonly { name: string; session: LessonSession }[])(
+    'S9.1-AC1 Bài chưa xong không tạo thẻ: $name → không có thẻ mới, không nạp từ',
+    async ({ session }) => {
+      const { store, source, service } = openService();
+
+      await service.createCardsForFinishedLesson(GREETING_LESSON, session, NOW);
+
+      expect(await store.getAllCards()).toEqual([]);
+      expect(source.getWords).not.toHaveBeenCalled();
+    },
+  );
+
+  it('S9.1-AC1 Bài kiểm tra không tạo thẻ: làm hết bài kiểm tra, đúng mọi câu → không có thẻ mới, không nạp từ', async () => {
+    const { store, source, service } = openService();
+    const testLesson: Lesson = {
+      ...GREETING_LESSON,
+      id: 'kiem-tra',
+      type: 'test',
+    };
+
+    await service.createCardsForFinishedLesson(
+      testLesson,
+      finishedSession(['e1', 'e2']),
+      NOW,
+    );
+
+    expect(await store.getAllCards()).toEqual([]);
+    expect(source.getWords).not.toHaveBeenCalled();
+  });
 });
