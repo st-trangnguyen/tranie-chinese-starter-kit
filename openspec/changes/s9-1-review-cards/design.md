@@ -30,6 +30,11 @@ Hiện trạng đã quan sát trong repo (nhánh cắt từ `main` sau PR spec #
 - e2e: thay nội dung bằng `page.route` + `serviceWorkers: 'block'` (`serveBackupPath`), đọc/ghi IndexedDB thô bằng `page.evaluate`
   (`home.helpers.ts`, `intro-lessons.helpers.ts`), làm hỏng ghi một bảng bằng guard `IDBObjectStore.prototype.put/add`
   (`backup.helpers.ts` `breakLessonProgressWrites`). Mở bài trực tiếp bằng URL `/lessons/:lessonId` (màn bài không chặn bài khóa).
+- e2e offline có service worker (S8.4 D12): `vite.config.ts` thêm `offlineFixturesPlugin()` (build, emit bài `e2e-*` vào
+  `content/lessons/`) và `offlineAudioNetworkPlugin()` (`vite preview`, trả `content.json`… gộp mẫu khi có cookie
+  `csk-e2e-fixture=offline-audio`) chỉ khi `mode === 'e2e'`; `playwright.config.ts` chạy `pnpm build --mode e2e` +
+  `vite preview --mode e2e`. File trong `e2e/fixtures/` được `vite.config.ts` nạp tĩnh nên chỉ `import type` từ `@csk/shared`.
+  `openOnceWithServiceWorker` (E8) chờ service worker điều khiển trang.
 - `ts-fsrs` chưa có trong `apps/web/package.json` (đã được duyệt thêm, proposal Dependencies).
 
 ## Goals / Non-Goals
@@ -301,8 +306,11 @@ Tầng theo `docs/05-standards/spec-driven.md` §4 và bảng cuối `test-cases
 
   Từ không có trong `words.json` thật (`你好`, `妈`, `马`) được thêm vào bản `words.json` phục vụ trong test, dùng lại `audio` của một từ
   thật (đúng `audioPathSchema`). Từ lạ cho `the-tu-la`: `wordId` `'龘龘'`; chữ lạ cho `chu-la`: `'龘'` (không có trong nội dung).
+  Dữ liệu nằm ở `apps/web/e2e/fixtures/reviewCardsFixtures.ts` (D12), `review-cards.content.ts` re-export và validate bằng Zod.
 - `review-cards.helpers.ts`: `serveReviewCardsPath(page)` (`page.route` cho `content.json`, `lessons/s91-*.json`, `words.json`;
-  cần `serviceWorkers: 'block'`, mẫu `serveBackupPath`); `readReviewCards(page)` và `readWrittenCharacters(page)` (`page.evaluate`
+  cần `serviceWorkers: 'block'`, mẫu `serveBackupPath`; dùng cho mọi spec E9 **trừ** spec offline);
+  `useReviewCardsFixture(context)` (đặt cookie `csk-e2e-fixture=review-cards` trước lần mở trang đầu, mẫu
+  `useOfflineAudioFixture`; chỉ spec offline, D12); `readReviewCards(page)` và `readWrittenCharacters(page)` (`page.evaluate`
   mở `indexedDB.open('tranie-chinese')` không chỉ version, `getAll` bảng, trả mảng sắp theo `id`; mẫu `home.helpers.ts`);
   `seedReviewProgress(page, { lessonProgress?, cards?, writtenCharacters? })` (sau khi app đã mở một lần để Dexie tạo version 4, ghi
   thô rồi `reload`; thẻ "đã ôn một lần" = `state: 'review'`, `due`/`lastReview` cố định); `breakReviewWrites(page, tables)` /
@@ -316,13 +324,51 @@ Tầng theo `docs/05-standards/spec-driven.md` §4 và bảng cuối `test-cases
   `s9.1-review-cards-errors.spec.ts`, `s9.1-review-cards-offline.spec.ts`, `s9.1-review-cards-backup.spec.ts`,
   `s9.1-review-cards-backup-reject.spec.ts` (mỗi file < 300 dòng). Hồi quy S8.5: thêm kiểm "danh sách thẻ máy B rỗng" vào
   TC-S8.5-AC1-20 trong `e2e/E8/s8.5-roundtrip.spec.ts`.
-- Offline: `context.setOffline(true)` sau khi app đã mở, nội dung mẫu vẫn do `page.route` phục vụ (xem Risks).
+- Offline (`s9.1-review-cards-offline.spec.ts`): **không** `serviceWorkers: 'block'`, không `serveReviewCardsPath`. Nội dung mẫu
+  có trong bản build e2e và được service worker precache cùng code (D12); `context.setOffline(true)` sau khi service worker đã
+  điều khiển trang.
 
 ### D11. Tài liệu
 
 `docs/03-architecture.md`: §4 dòng `srs.service` (rule + use case S9.1), §6.2 bảng `cards` (field D2, Dexie version 4) và bảng mới
 `writtenCharacters`, §6.3 method store mới + `ProgressSnapshot` + file version 2, §5 ví dụ hook gọi `SrsService`. Docs thuần, miễn
 test-first.
+
+### D12. Nội dung mẫu E9 trong bản build e2e (spec offline)
+
+Quyết định của người thật (2026-11-25), thay cho "nội dung mẫu do `page.route` phục vụ khi offline". Bằng chứng (lần chạy task
+9.2): với `serviceWorkers: 'block'` + `setOffline(true)`, bấm vào bài thì `GET /assets/LessonRunnerContainer-*.js` lỗi
+`net::ERR_INTERNET_DISCONNECTED` → "Failed to fetch dynamically imported module" → app hiện "Có lỗi xảy ra". Không có service worker
+thì chunk lazy-load không tải được khi offline; `page.route` chỉ thay được nội dung, không thay được code. Vì vậy spec offline cho
+service worker chạy, và nội dung mẫu phải nằm trong thứ service worker precache. Theo mẫu S8.4 D12 (build + preview, cookie):
+
+- **Dữ liệu** `apps/web/e2e/fixtures/reviewCardsFixtures.ts` (mới, chuyển từ `e2e/E9/review-cards.content.ts`, không đổi giá trị):
+  `REVIEW_LESSON_IDS`, `REVIEW_LESSON_TITLES`, `REVIEW_UNIT_TITLES`, hằng chữ/từ lạ, `REVIEW_LESSONS: readonly Lesson[]`,
+  `REVIEW_CONTENT_ROOT: ContentRoot`, `withExtraWords(realWords)` (pure, không Zod), `REVIEW_CARDS_FIXTURE = 'review-cards'`.
+  Chỉ `import type` từ `@csk/shared` (file bị `vite.config.ts` nạp trong Node). `e2e/E9/review-cards.content.ts` còn lại: re-export
+  + validate bằng Zod lúc nạp module (`lessonSchema.array()`, `contentRootSchema`, `wordSchema.array()` cho kết quả `withExtraWords`)
+  để dữ liệu sai làm e2e fail sớm; import của các spec E9 không đổi.
+- **Build** `apps/web/e2e/fixtures/reviewCardsFixturePlugin.ts` (mới) `reviewCardsBuildPlugin()` (`apply: 'build'`,
+  `generateBundle`): emit `content/lessons/s91-*.json` (dùng `lessonFilePath`). Là `.json` nên vào precache
+  (`PRECACHE_BASE_PATTERNS`). Không đè file thật (tên `s91-*` mới).
+- **Preview** cùng file, `reviewCardsPreviewPlugin()` (`apply: (_, env) => env.isPreview === true`, `configurePreviewServer`):
+  middleware theo cookie `csk-e2e-fixture` có cờ `review-cards` → `/content/content.json` trả `REVIEW_CONTENT_ROOT` (thay hẳn, như
+  `serveReviewCardsPath`); `/content/words.json` trả `withExtraWords(words.json thật trong outDir)` (validate tối thiểu
+  `{ id, audio }` bằng `zod`, mẫu `offlineAudioContent.ts`). Không có cờ → `next()`, e2e cũ không đổi. Service worker gửi kèm
+  cookie cùng origin nên precache lần cài đầu lấy bản mẫu. `GET /__e2e/fixture/review-cards` đặt cookie rồi chuyển về `/` (QA chạy
+  tay trên bản build e2e). Đọc cookie/pathname/gửi JSON: export lại helper sẵn có của `offlineAudioNetworkPlugin.ts` (`readCookies`,
+  `pathnameOf`, `sendJson`), không đổi hành vi S8.4. Cờ `offline-audio` và `review-cards` độc lập (mỗi middleware chỉ xét cờ của mình).
+- **`apps/web/vite.config.ts`** (sửa): thêm `mode === 'e2e' && reviewCardsBuildPlugin()` và `mode === 'e2e' && reviewCardsPreviewPlugin()`
+  cạnh hai plugin S8.4. `playwright.config.ts` không đổi (đã `--mode e2e`).
+- **Không vào bản production**: hai plugin chỉ được thêm khi `mode === 'e2e'`; `pnpm --filter @csk/web build` (mode `production`)
+  không có `dist/content/lessons/s91-*.json`, không có middleware (preview thường không nạp plugin). Kiểm ở task 9.3.
+- **Quan hệ với `serveReviewCardsPath`**: hai đường cùng một nguồn dữ liệu (`reviewCardsFixtures.ts`) nên nội dung giống hệt. Spec
+  E9 có mạng (lesson, placement, writing, errors, backup, backup-reject) giữ `serveReviewCardsPath` + `serviceWorkers: 'block'`
+  (không cần cài service worker, chạy nhanh, đã ổn ở task 9.1). Chỉ spec offline dùng `useReviewCardsFixture`. Bài `s91-*` có trong
+  mọi bản build e2e nhưng không nằm trên lộ trình khi không có cookie, nên spec E1–E8 không thấy.
+- **Spec offline**: mỗi context gọi `useReviewCardsFixture(context)` trước `page.goto` đầu tiên, rồi `openOnceWithServiceWorker`
+  (E8 `offline-audio.helpers.ts`) để service worker điều khiển trang trước onboarding/nạp tiến độ; sau đó mới `setOffline(true)`.
+  Không có `audioNetwork`: S9.1 offline không phát audio.
 
 ## Risks / Trade-offs
 
@@ -333,9 +379,15 @@ test-first.
   `createCardsForFinishedLesson` chờ chuỗi ghi của store (D3).
 - [Nạp `words.json`/`strokes/index.json` lỗi lúc xong bài] → không tạo thẻ, không báo; thẻ tạo ở lần xong bài sau (cùng hành vi
   "lưu thẻ lỗi"). Bản thật đọc từ precache nên offline vẫn chạy.
-- [e2e offline: `page.route` có thể không nhận request khi `setOffline(true)`] → RED của nhóm offline chạy trước, nếu request mẫu
-  không được phục vụ thì dừng, báo điều phối; phương án dự phòng là phát nội dung mẫu vào bản build `--mode e2e` theo mẫu
-  `offlineFixturesPlugin` (S8.4 D12), cần cập nhật tasks.
+- [e2e offline: không có service worker thì chunk lazy-load (`LessonRunnerContainer-*.js`) không tải được khi offline; `page.route`
+  chỉ thay được nội dung] → đã xảy ra ở task 9.2; người thật chốt phương án dự phòng (2026-11-25): D12, spec offline cho service
+  worker precache cả code lẫn nội dung mẫu.
+- [Nội dung mẫu E9 lọt vào bản production] → plugin chỉ thêm khi `mode === 'e2e'`; task 9.3 kiểm bản build thường không có
+  `content/lessons/s91-*.json`.
+- [`setOffline(true)` có thể không chặn fetch do service worker gửi, offline "giả"] → mọi thứ spec offline cần (code, `content.json`,
+  `words.json`, bài `s91-*`, `strokes`) đều được precache nên service worker trả từ cache, không ra mạng; S9.1 không phát audio nên
+  không cần `goOffline` của S8.4.
+- [Hai đường phục vụ nội dung mẫu (cookie và `page.route`) lệch nhau] → cùng một module dữ liệu `reviewCardsFixtures.ts` (D12).
 - [Đổi version file làm hỏng file mẫu và test S8.5] → `ban-moi-hon.json` lên 3, test dùng hằng + 1 (D6); `hop-le-*` (version 1)
   vẫn hợp lệ nhờ nhánh V1.
 - [Tiến độ trước S9.1 không có thẻ] → đúng spec ("Không tạo bù"), ghi trong mô tả PR cho QA.
@@ -351,3 +403,7 @@ test-first.
 
 - [x] Tạo thẻ khi ghi "Đã xong" của bài bị lỗi (tổng kết báo chưa lưu)? → vẫn tạo thẻ (người thật xác nhận 2026-11-25). Lý do:
   người học đã làm hết bài; thẻ và tiến độ bài là hai lần ghi độc lập. Áp dụng ở D5 (`useLessonRunner`), khóa bằng task 6.15–6.16.
+- [x] e2e offline: nội dung mẫu phục vụ thế nào khi `page.route` + `serviceWorkers: 'block'` không chạy được offline (chunk
+  lazy-load lỗi)? → phương án dự phòng: phát nội dung mẫu E9 vào bản build `--mode e2e` theo mẫu `offlineFixturesPlugin` (S8.4 D12),
+  spec offline bỏ `serviceWorkers: 'block'` để service worker precache cả code lẫn nội dung (người thật xác nhận 2026-11-25). Áp dụng
+  ở D12, task 9.2–9.3.

@@ -11,7 +11,7 @@ Tên test chứa Scenario ID và tên Scenario (`S9.1-AC2 Viết dở không tí
 - Object `ProgressStore` viết tay trong test cũ và snapshot dựng tay trong test S8.5 được bổ sung stub/field mới ở commit `test(...)`
   đầu tiên cần đến (design D10), không đổi assertion cũ.
 
-Vitest: `pnpm --filter @csk/web test:run <mẫu>`, `pnpm --filter @csk/shared test:run <mẫu>`. E2E: `pnpm e2e -- e2e/E9/<file>`.
+Vitest: `pnpm --filter @csk/web test:run <mẫu>`, `pnpm --filter @csk/shared test:run <mẫu>`. E2E một file: `pnpm --filter @csk/web exec playwright test e2e/E9/<file>` (`pnpm e2e -- <file>` chạy cả suite).
 
 ## 1. Chuẩn bị (không có Scenario)
 
@@ -166,18 +166,19 @@ Test: `packages/shared/src/progress-backup.schema.test.ts`, `apps/web/src/app/co
 Hành vi đã có test RED ở tầng dưới (nhóm 2–8); commit `test(e2e)`. Helper `apps/web/e2e/E9/review-cards.content.ts` (lộ trình, bài
 `s91-*`, từ thêm) và `review-cards.helpers.ts` (`serveReviewCardsPath`, `readReviewCards`, `readWrittenCharacters`,
 `seedReviewProgress`, `breakReviewWrites`, `restoreReviewWrites`); dùng lại `completeOnboarding` (E7), `writeCharacter`/`drawMedian`
-(E6/E7), helper sao lưu (`backup.helpers.ts`). Mọi context `serviceWorkers: 'block'`. Mỗi file < 300 dòng.
+(E6/E7), helper sao lưu (`backup.helpers.ts`). Mọi context `serviceWorkers: 'block'` + `serveReviewCardsPath`, **trừ** spec offline
+(service worker bật, nội dung mẫu trong bản build e2e, design D12). Mỗi file < 300 dòng.
 
 - [x] 9.1 Helper + nội dung mẫu (test code): `review-cards.content.ts`, `review-cards.helpers.ts`; kiểm: một test khói trong `s9.1-review-cards-lesson.spec.ts` mở `/lessons/s91-a` thấy tiêu đề "Bài mẫu A", `readReviewCards` trả `[]`
-- [ ] 9.2 RED: offline trước (rủi ro design) `s9.1-review-cards-offline.spec.ts`: TC-S9.1-AC1-2, TC-S9.1-AC2-19, TC-S9.1-AC1-21 (`context.setOffline(true)` sau khi app mở); kiểm: hành vi đã có từ nhóm 6 nên tạm bỏ lời gọi `createCardsForFinishedLesson` ở `useLessonRunner`, build, thấy fail vì danh sách thẻ rỗng (không phải vì nội dung mẫu không tải được), rồi trả lại; nếu fail vì nội dung mẫu không tải được khi offline thì dừng, báo điều phối (design Risks)
-- [ ] 9.3 GREEN: offline pass (không đổi code production, hoặc theo phương án dự phòng sau khi điều phối cập nhật tasks); kiểm: `pnpm e2e -- e2e/E9/s9.1-review-cards-offline.spec.ts` pass
+- [ ] 9.2 RED (test-writer, test code; design D12): (a) chuyển dữ liệu từ `apps/web/e2e/E9/review-cards.content.ts` sang `apps/web/e2e/fixtures/reviewCardsFixtures.ts` (chỉ `import type` từ `@csk/shared`, không Zod; `withExtraWords` pure; thêm `REVIEW_CARDS_FIXTURE = 'review-cards'`), `review-cards.content.ts` còn re-export + validate Zod lúc nạp, import của spec E9 không đổi; (b) `useReviewCardsFixture(context)` trong `review-cards.helpers.ts` (cookie `FIXTURE_COOKIE` = `REVIEW_CARDS_FIXTURE`, mẫu `useOfflineAudioFixture`); (c) `s9.1-review-cards-offline.spec.ts` (TC-S9.1-AC1-2, TC-S9.1-AC2-19, TC-S9.1-AC1-21): bỏ `test.use({ serviceWorkers: 'block' })` và `serviceWorkers: 'block'` ở `openMachine`, bỏ `serveReviewCardsPath`; mỗi context `useReviewCardsFixture` trước `page.goto` đầu, `openOnceWithServiceWorker` (E8) trước onboarding/`seedReviewProgress`, `setOffline(true)` sau đó; kiểm: test khói 9.1 (`s9.1-review-cards-lesson.spec.ts`) vẫn pass; `pnpm --filter @csk/web exec playwright test e2e/E9/s9.1-review-cards-offline.spec.ts` fail vì lộ trình là nội dung thật (không thấy liên kết "Bài mẫu A"/"Bài mẫu C") do bản build e2e chưa có nội dung mẫu, **không** vì "Failed to fetch dynamically imported module"; `pnpm typecheck && pnpm lint` sạch; commit `test(e2e)`
+- [ ] 9.3 GREEN (implementer, cấu hình build e2e; design D12): `apps/web/e2e/fixtures/reviewCardsFixturePlugin.ts` (mới) `reviewCardsBuildPlugin()` (emit `content/lessons/s91-*.json`) + `reviewCardsPreviewPlugin()` (cookie cờ `review-cards` → `content.json` = `REVIEW_CONTENT_ROOT`, `words.json` = `withExtraWords(words.json thật)` validate `zod`; `GET /__e2e/fixture/review-cards`); export `readCookies`/`pathnameOf`/`sendJson` từ `offlineAudioNetworkPlugin.ts` (không đổi hành vi); `apps/web/vite.config.ts` thêm hai plugin dưới `mode === 'e2e'`; không sửa file spec/helper E9; kiểm: spec offline pass; tạm bỏ lời gọi `createCardsForFinishedLesson` ở `useLessonRunner` → build e2e → TC-S9.1-AC1-2 fail vì danh sách thẻ rỗng, trả lại → pass; `pnpm --filter @csk/web exec playwright test e2e/E8/s8.4-offline-audio-offline.spec.ts e2e/E9/s9.1-review-cards-lesson.spec.ts` pass (S8.4 và đường `page.route` không đổi); `pnpm --filter @csk/web build` (production) rồi `ls apps/web/dist/content/lessons | grep -c '^s91-'` = 0; `pnpm typecheck && pnpm lint` sạch, mỗi file < 300 dòng; commit `feat(e2e)`
 - [ ] 9.4 Test e2e nghiệm thu `s9.1-review-cards-lesson.spec.ts`: TC-S9.1-AC1-1, AC1-4, AC1-5, AC1-6, AC1-7, AC1-8, AC1-14, AC1-15, AC1-30; kiểm: file này pass
 - [ ] 9.5 Test e2e nghiệm thu `s9.1-review-cards-placement.spec.ts`: TC-S9.1-AC1-9, AC1-10, AC1-11, AC1-12, AC1-13, TC-S9.1-AC2-16, AC2-17; kiểm: file này pass
 - [ ] 9.6 Test e2e nghiệm thu `s9.1-review-cards-writing.spec.ts`: TC-S9.1-AC2-1, AC2-2, AC2-3, AC2-4, AC2-5, AC2-6, AC2-7, AC2-8, AC2-10, AC2-11, AC2-18, TC-S6.2-AC1-33; kiểm: file này pass
 - [ ] 9.7 Test e2e nghiệm thu `s9.1-review-cards-errors.spec.ts`: TC-S9.1-AC1-16, AC1-17 ("lỗi lưu thẻ"), TC-S9.1-AC2-12, AC2-20, AC2-21 ("lỗi lưu"), AC2-22 ("lỗi lưu thẻ"); kiểm: file này pass
 - [ ] 9.8 Test e2e nghiệm thu `s9.1-review-cards-backup.spec.ts` (hai `browser.newContext()` cho máy A/B): TC-S9.1-AC1-18, AC1-19, AC1-20, AC1-23, AC1-24, AC1-25, AC1-26 (`breakLessonProgressWrites`), AC1-28, AC1-31, AC1-34, AC1-35, TC-S9.1-AC2-14, AC2-15, AC2-24, AC2-26, AC2-27; kiểm: file này pass
 - [ ] 9.9 Test e2e nghiệm thu `s9.1-review-cards-backup-reject.spec.ts`: TC-S9.1-AC1-27, AC1-33, TC-S9.1-AC2-23; kiểm: file này pass
-- [ ] 9.10 Hồi quy S8.5: TC-S8.5-AC1-20 trong `e2e/E8/s8.5-roundtrip.spec.ts` thêm kiểm `readReviewCards` máy B rỗng; TC-S8.5-AC1-16, AC1-19, AC1-22 chạy lại không đổi; kiểm: `pnpm e2e -- e2e/E8/s8.5-roundtrip.spec.ts e2e/E8/s8.5-import-reject.spec.ts` pass (gồm `ban-moi-hon` version 3)
+- [ ] 9.10 Hồi quy S8.5: TC-S8.5-AC1-20 trong `e2e/E8/s8.5-roundtrip.spec.ts` thêm kiểm `readReviewCards` máy B rỗng; TC-S8.5-AC1-16, AC1-19, AC1-22 chạy lại không đổi; kiểm: `pnpm --filter @csk/web exec playwright test e2e/E8/s8.5-roundtrip.spec.ts e2e/E8/s8.5-import-reject.spec.ts` pass (gồm `ban-moi-hon` version 3)
 
 ## 10. Tài liệu (docs thuần, miễn test-first)
 
