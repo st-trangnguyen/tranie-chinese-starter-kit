@@ -32,6 +32,7 @@ import {
   openSettingsFromPath,
 } from '../E8/settings.helpers';
 
+import { waitForFirstQuestion } from './review-cards-lesson.helpers';
 import {
   REVIEW_LESSON_IDS,
   REVIEW_LESSON_TITLES,
@@ -78,6 +79,7 @@ const finishLessonFromPath = async (
   await expect(page).toHaveURL(
     new RegExp(`/lessons/${REVIEW_LESSON_IDS[key]}$`),
   );
+  await waitForFirstQuestion(page);
   await finishLesson(page);
   await expect(page.getByText(FINISHED_MESSAGE)).toBeVisible();
   await expect(alertsOutsideBackup(page)).toHaveCount(0);

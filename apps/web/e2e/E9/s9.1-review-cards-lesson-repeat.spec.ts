@@ -14,6 +14,7 @@ import {
   openReviewPath,
   pathLessonItem,
   pathLessonStatus,
+  waitForFirstQuestion,
 } from './review-cards-lesson.helpers';
 import { REVIEW_LESSON_IDS } from './review-cards.content';
 import {
@@ -97,6 +98,7 @@ test.describe('S9.1-AC1 Học xong một từ thì tạo thẻ chiều nghĩa v�
     await expect(page).toHaveURL(
       new RegExp(`/lessons/${REVIEW_LESSON_IDS.a}$`),
     );
+    await waitForFirstQuestion(page);
     await finishOpenedLesson(page);
 
     await expectCards(page, newMeaningAndListening('你好', '谢谢'));

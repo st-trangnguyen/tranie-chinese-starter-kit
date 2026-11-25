@@ -5,7 +5,7 @@ import {
   FINISHED_MESSAGE,
   LEARNING_PATH_URL,
 } from '../E7/intro-lessons.helpers';
-import { finishLesson } from '../E8/home.helpers';
+import { finishLesson, lessonProgress } from '../E8/home.helpers';
 import { alertsOutsideBackup } from '../E8/settings.helpers';
 
 import {
@@ -53,6 +53,14 @@ export const openReviewLesson = async (
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     REVIEW_LESSON_TITLES[key],
   );
+};
+
+/**
+ * Sau khi bấm vào bài (vd. từ Lộ trình), chờ màn bài hiện câu 1. Màn Lộ trình cũng có liên kết
+ * "Trang chủ" mà `finishLesson` dùng để biết bài đã xong, nên phải chờ trước khi làm bài.
+ */
+export const waitForFirstQuestion = async (page: Page): Promise<void> => {
+  await expect(lessonProgress(page)).toHaveAccessibleName(/^Câu 1 \/ \d+$/);
 };
 
 /** Ở màn bài đang mở, làm hết mọi câu tới màn tổng kết "đã xong", không có thông báo lỗi. */
