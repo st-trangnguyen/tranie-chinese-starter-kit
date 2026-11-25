@@ -104,20 +104,34 @@ export class SrsService {
     });
   }
 
-  // Rule: (skeleton) từ đã học xong cho thẻ chiều viết.
+  // Rule: từ đã học xong cho thẻ chiều viết khi đã có thẻ nghĩa của từ, hoặc từ thuộc bài đang
+  // làm xong (bảng "Từ đã học xong cho thẻ chiều viết").
   isWordLearned(
     wordId: string,
     cards: readonly ReviewCard[],
     completingWordIds: ReadonlySet<string>,
   ): boolean {
-    void [wordId, cards, completingWordIds];
-    return false;
+    return (
+      completingWordIds.has(wordId) ||
+      cards.some((card) => card.wordId === wordId && card.facet === 'meaning')
+    );
   }
 
-  // Rule: (skeleton) thẻ chiều viết còn thiếu sau một lần viết.
+  // Rule: sau một lần viết, từ trong nội dung chứa chữ vừa viết được thẻ chiều viết khi từ đã học
+  // xong và đủ điều kiện chiều viết.
   planWritingCards(input: WritingCardPlanInput): ReviewCard[] {
-    void input;
-    return [];
+    return input.words
+      .filter(
+        (word) =>
+          this.charactersOf(word.hanzi).includes(input.character) &&
+          this.isWordLearned(word.id, input.cards, new Set()) &&
+          this.canHaveWritingCard(
+            word,
+            input.writtenCharacters,
+            input.strokeCharacters,
+          ),
+      )
+      .map((word) => this.createNewCard(word.id, 'writing', input.now));
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
