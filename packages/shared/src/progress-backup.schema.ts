@@ -9,7 +9,11 @@ import {
   localDateKeySchema,
   settingsStrictSchema,
 } from './progress.schema';
-import { type ReviewCard, reviewCardSchema } from './review-card.schema';
+import {
+  type ReviewCard,
+  reviewCardId,
+  reviewCardSchema,
+} from './review-card.schema';
 import { hanCharacterSchema } from './stroke.schema';
 
 /** Dấu nhận file tiến độ do app xuất (S8.5, design D2). */
@@ -61,7 +65,13 @@ export const progressBackupV1Schema = z.object({
  */
 export const progressBackupV2Schema = progressBackupV1Schema.extend({
   formatVersion: z.literal(2),
-  cards: z.array(reviewCardSchema),
+  cards: z
+    .array(reviewCardSchema)
+    .refine((cards) =>
+      hasNoDuplicates(
+        cards.map((card) => reviewCardId(card.wordId, card.facet)),
+      ),
+    ),
   writtenCharacters: z.array(hanCharacterSchema),
 });
 
