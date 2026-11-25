@@ -84,7 +84,7 @@ describe('SrsService — Phần 3: createCardsForFinishedLesson', () => {
   });
 
   it('S9.1-AC1 Bài đã xong từ trước không được tạo bù thẻ: bài 你好 "Đã xong" chưa có thẻ, mở app và viết chữ → không thẻ; làm lại hết bài → có thẻ nghĩa và nghe', async () => {
-    const { store, source } = openService();
+    const { store, source } = openService([GREETING_LESSON]);
     await store.saveLessonProgress({
       lessonId: GREETING_LESSON.id,
       status: 'completed',
@@ -97,8 +97,9 @@ describe('SrsService — Phần 3: createCardsForFinishedLesson', () => {
       NOW,
     );
 
+    // Viết chữ chỉ được tạo thẻ chiều viết; không được tạo bù thẻ nghĩa/nghe cho bất kỳ từ nào.
     const cardsBefore = await store.getAllCards();
-    expect(cardsBefore.filter((card) => card.wordId === '你好')).toEqual([]);
+    expect(cardsBefore.filter((card) => card.facet !== 'writing')).toEqual([]);
 
     await service.createCardsForFinishedLesson(
       GREETING_LESSON,
@@ -114,7 +115,6 @@ describe('SrsService — Phần 3: createCardsForFinishedLesson', () => {
     );
   });
   it('S9.1-AC1 Làm hết bài được đánh dấu xong nhờ kiểm tra vượt cấp thì tạo thẻ: bài 你好 và bài 人 "Đã xong" nhờ vượt cấp, làm hết bài 你好 → chỉ thẻ 你好 nghĩa và nghe "mới", không thẻ 人', async () => {
-    const { store, service } = openService();
     const skipLevelGreeting: Lesson = {
       id: 'vuot-cap-1',
       type: 'lesson',
@@ -127,6 +127,10 @@ describe('SrsService — Phần 3: createCardsForFinishedLesson', () => {
       title: 'Vượt cấp 2',
       exercises: [{ id: 'v2', kind: 'tone-choice', wordId: '人' }],
     };
+    const { store, service } = openService([
+      skipLevelGreeting,
+      skipLevelPerson,
+    ]);
     for (const lesson of [skipLevelGreeting, skipLevelPerson]) {
       await store.saveLessonProgress({
         lessonId: lesson.id,
