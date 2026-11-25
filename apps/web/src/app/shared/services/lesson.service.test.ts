@@ -392,6 +392,10 @@ describe('LessonService — lưu và mở lại vị trí (S3.3)', () => {
       saveDailyGoal: vi.fn(async () => undefined),
       exportAll: vi.fn(),
       importAll: vi.fn(),
+      getAllCards: vi.fn(async () => []),
+      addNewCards: vi.fn(async () => undefined),
+      getWrittenCharacters: vi.fn(async () => []),
+      addWrittenCharacter: vi.fn(async () => undefined),
       saveLessonProgressBatch: vi.fn(),
       getLessonProgress: vi.fn(async () => {
         throw new Error('IndexedDB unavailable');
@@ -752,6 +756,10 @@ describe('LessonService — ghi tiến độ lỗi khi xong bài (S3.4)', () => 
       saveDailyGoal: vi.fn(async () => undefined),
       exportAll: vi.fn(),
       importAll: vi.fn(),
+      getAllCards: vi.fn(async () => []),
+      addNewCards: vi.fn(async () => undefined),
+      getWrittenCharacters: vi.fn(async () => []),
+      addWrittenCharacter: vi.fn(async () => undefined),
       getLessonProgress: vi.fn(async () => undefined),
       saveLessonProgressBatch: vi.fn(),
       saveLessonProgress: vi.fn(async () => {

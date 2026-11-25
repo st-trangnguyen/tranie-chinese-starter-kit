@@ -29,6 +29,10 @@ const unavailableStore: ProgressStore = {
   saveDailyGoal: unavailable,
   exportAll: unavailable,
   importAll: unavailable,
+  getAllCards: unavailable,
+  addNewCards: unavailable,
+  getWrittenCharacters: unavailable,
+  addWrittenCharacter: unavailable,
 };
 
 const at = (day: number, hours: number, minutes: number, seconds = 0) =>

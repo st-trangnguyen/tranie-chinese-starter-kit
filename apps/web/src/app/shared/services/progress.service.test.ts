@@ -34,6 +34,10 @@ const makeStore = (
       dailyStats: [],
     })),
     importAll: vi.fn(async () => undefined),
+    getAllCards: vi.fn(async () => []),
+    addNewCards: vi.fn(async () => undefined),
+    getWrittenCharacters: vi.fn(async () => []),
+    addWrittenCharacter: vi.fn(async () => undefined),
   };
   return store;
 };
