@@ -50,6 +50,58 @@ const mockGreetingContent = (): void => {
   );
 };
 
+/** Chủ đề có hai bài học (你好, 谢谢) và bài kiểm tra cuối chủ đề phủ cả hai từ. */
+const CONTENT_ROOT = {
+  contentVersion: '0123456789ab',
+  stages: [
+    {
+      id: 'hsk1',
+      title: 'HSK 1',
+      units: [
+        { id: 'unit-g', title: 'Chào hỏi', lessonIds: ['g1', 'g2', 'test-g'] },
+      ],
+    },
+  ],
+};
+
+const UNIT_LESSONS: Record<string, unknown> = {
+  g1: {
+    id: 'g1',
+    type: 'lesson',
+    title: 'Bài g1',
+    exercises: [{ id: 'g1-e1', kind: 'tone-choice', wordId: '你好' }],
+  },
+  g2: {
+    id: 'g2',
+    type: 'lesson',
+    title: 'Bài g2',
+    exercises: [{ id: 'g2-e1', kind: 'tone-choice', wordId: '谢谢' }],
+  },
+  'test-g': { ...greetingLesson('test-g'), type: 'test', title: 'Kiểm tra' },
+};
+
+const mockUnitContent = (): void => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation(
+    mockContentFetch(
+      (input) => {
+        const url = String(input);
+        if (url === '/content/content.json') {
+          return Response.json(CONTENT_ROOT);
+        }
+        if (/\/strokes\/index\.json$/.test(url)) {
+          return Response.json([]);
+        }
+        const id = /\/content\/lessons\/(.+)\.json$/.exec(url)?.[1] ?? '';
+        const lesson = UNIT_LESSONS[decodeURIComponent(id)];
+        return lesson === undefined
+          ? new Response('', { status: 404 })
+          : Response.json(lesson);
+      },
+      { words: GREETING_WORDS },
+    ),
+  );
+};
+
 const cardKeysOf = async (): Promise<string[]> =>
   (await progressStore.getAllCards())
     .map((card) => `${card.wordId}:${card.facet}:${card.state}`)
@@ -136,6 +188,50 @@ describe('useLessonRunner — tạo thẻ ôn tập khi xong bài', () => {
     expect((await progressStore.getLessonProgress('a'))?.status).not.toBe(
       'completed',
     );
+    expect(await cardKeysOf()).toEqual([]);
+  });
+
+  it('S9.1-AC1 Bài kiểm tra không tạo thẻ: làm hết bài kiểm tra cuối chủ đề, đúng mọi câu → không có thẻ', async () => {
+    mockUnitContent();
+    const { result } = renderHook(() => useLessonRunner('test-g'));
+    await waitFor(() => expect(result.current.session).not.toBeNull());
+
+    for (let step = 0; step < 2; step += 1) {
+      act(() => result.current.submitResult({ isCorrect: true }));
+      act(() => result.current.continueLesson());
+    }
+    expect(result.current.session?.phase).toBe('finished');
+    await waitFor(async () =>
+      expect((await progressStore.getLessonProgress('test-g'))?.status).toBe(
+        'completed',
+      ),
+    );
+    await settleWrites();
+
+    expect(await cardKeysOf()).toEqual([]);
+  });
+
+  it('S9.1-AC1 Bài được mở nhờ kiểm tra vượt cấp không tạo thẻ: qua bài kiểm tra vượt cấp, các bài của chủ đề "Đã xong" → không có thẻ', async () => {
+    mockUnitContent();
+    const { result } = renderHook(() =>
+      useLessonRunner('test-g', { placementUnitId: 'unit-g' }),
+    );
+    await waitFor(() => expect(result.current.session).not.toBeNull());
+
+    for (let step = 0; step < 2; step += 1) {
+      act(() => result.current.submitResult({ isCorrect: true }));
+      act(() => result.current.continueLesson());
+    }
+    expect(result.current.session?.phase).toBe('finished');
+    await waitFor(async () => {
+      for (const lessonId of ['g1', 'g2', 'test-g']) {
+        expect((await progressStore.getLessonProgress(lessonId))?.status).toBe(
+          'completed',
+        );
+      }
+    });
+    await settleWrites();
+
     expect(await cardKeysOf()).toEqual([]);
   });
 });
