@@ -55,6 +55,15 @@ const cardKeysOf = async (): Promise<string[]> =>
     .map((card) => `${card.wordId}:${card.facet}:${card.state}`)
     .sort();
 
+/**
+ * Chờ hàng đợi ghi của hook chạy hết: bài chưa xong không có lần ghi nào để chờ theo,
+ * nên đợi một khoảng đủ cho đọc/ghi IndexedDB (fake-indexeddb) hoàn tất.
+ */
+const settleWrites = (): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, 200);
+  });
+
 beforeEach(async () => {
   await clearDatabase();
 });
@@ -90,5 +99,43 @@ describe('useLessonRunner — tạo thẻ ôn tập khi xong bài', () => {
         ].sort(),
       ),
     );
+  });
+  it('S9.1-AC1 Bài chưa xong không tạo thẻ: trả lời 1 câu rồi thoát bài → không có thẻ', async () => {
+    mockGreetingContent();
+    const { result, unmount } = renderHook(() => useLessonRunner('a'));
+    await waitFor(() => expect(result.current.session).not.toBeNull());
+
+    act(() => result.current.submitResult({ isCorrect: true }));
+    act(() => result.current.continueLesson());
+    expect(result.current.session?.phase).toBe('answering');
+    await waitFor(async () =>
+      expect((await progressStore.getLessonProgress('a'))?.status).toBe(
+        'in-progress',
+      ),
+    );
+    unmount();
+    await settleWrites();
+
+    expect(await cardKeysOf()).toEqual([]);
+  });
+
+  it('S9.1-AC1 Bài chưa xong không tạo thẻ: làm hết bài nhưng bỏ qua 1 câu → không có thẻ', async () => {
+    mockGreetingContent();
+    const { result } = renderHook(() => useLessonRunner('a'));
+    await waitFor(() => expect(result.current.session).not.toBeNull());
+
+    act(() => result.current.skipExercise());
+    act(() => result.current.submitResult({ isCorrect: true }));
+    act(() => result.current.continueLesson());
+    expect(result.current.session?.phase).toBe('finished');
+    await waitFor(async () =>
+      expect(await progressStore.getLessonProgress('a')).toBeDefined(),
+    );
+    await settleWrites();
+
+    expect((await progressStore.getLessonProgress('a'))?.status).not.toBe(
+      'completed',
+    );
+    expect(await cardKeysOf()).toEqual([]);
   });
 });
