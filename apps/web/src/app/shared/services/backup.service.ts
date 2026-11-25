@@ -71,6 +71,9 @@ export class BackupService {
       settings: snapshot.settings,
       lessonProgress: snapshot.lessonProgress,
       dailyStats: snapshot.dailyStats,
+      // Skeleton RED S9.1 task 8.2: chưa mang thẻ và chữ đã viết (task 8.9).
+      cards: [],
+      writtenCharacters: [],
     };
   }
 
@@ -106,7 +109,11 @@ export class BackupService {
     if (!file.success) {
       return { status: 'rejected', reason: 'corrupted' };
     }
-    return { status: 'valid', file: file.data };
+    // Skeleton RED S9.1 task 8.2: chưa có nhánh V1/V2 (task 8.3).
+    return {
+      status: 'valid',
+      file: { ...file.data, cards: [], writtenCharacters: [] },
+    };
   }
 
   /**
@@ -166,7 +173,14 @@ export class BackupService {
     }
     return {
       status: 'valid',
-      snapshot: { settings, lessonProgress, dailyStats },
+      // Skeleton RED S9.1 task 8.2: chưa mang thẻ và chữ đã viết (task 8.9).
+      snapshot: {
+        settings,
+        lessonProgress,
+        dailyStats,
+        cards: [],
+        writtenCharacters: [],
+      },
       preview: {
         exportedOn,
         completedLessonCount: this.countCompletedLessons(

@@ -60,6 +60,8 @@ describe('DexieProgressStore — sao lưu tiến độ (S8.5)', () => {
       },
       lessonProgress: ['intro-01', 'intro-02', 'intro-03'].map(completed),
       dailyStats: [],
+      cards: [],
+      writtenCharacters: [],
     };
 
     await store.importAll(snapshot);
@@ -107,6 +109,8 @@ describe('DexieProgressStore — sao lưu tiến độ (S8.5)', () => {
         'intro-05',
       ].map(completed),
       dailyStats: [],
+      cards: [],
+      writtenCharacters: [],
     };
 
     await expect(store.importAll(snapshot)).rejects.toThrow();

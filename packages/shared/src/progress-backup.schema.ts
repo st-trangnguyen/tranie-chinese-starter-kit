@@ -9,6 +9,7 @@ import {
   localDateKeySchema,
   settingsStrictSchema,
 } from './progress.schema';
+import type { ReviewCard } from './review-card.schema';
 
 /** Dấu nhận file tiến độ do app xuất (S8.5, design D2). */
 export const PROGRESS_BACKUP_FORMAT = 'tranie-chinese-progress';
@@ -53,11 +54,16 @@ export const progressBackupV1Schema = z.object({
     .refine((rows) => hasNoDuplicates(rows.map((row) => row.date))),
 });
 
-/** Toàn bộ tiến độ trên máy, đọc/ghi một lần (S8.5). */
+/** Skeleton RED S9.1 task 8.2: file tiến độ phiên bản 2 (design D6), chưa có hành vi. */
+export const progressBackupV2Schema = progressBackupV1Schema.passthrough();
+
+/** Toàn bộ tiến độ trên máy, đọc/ghi một lần (S8.5, S9.1). */
 export interface ProgressSnapshot {
   settings: Settings;
   lessonProgress: LessonProgress[];
   dailyStats: DailyStat[];
+  cards: ReviewCard[];
+  writtenCharacters: string[];
 }
 
 /** Nội dung file sao lưu: tiến độ kèm dấu nhận, phiên bản và ngày xuất. */

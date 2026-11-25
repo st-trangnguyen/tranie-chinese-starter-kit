@@ -113,6 +113,9 @@ export class DexieProgressStore implements ProgressStore {
           settings,
           lessonProgress: parseRows(lessonRows, lessonProgressSchema),
           dailyStats: parseRows(dailyRows, dailyStatSchema),
+          // Skeleton RED S9.1 task 8.2: thẻ và chữ đã viết chưa được đọc (task 8.9).
+          cards: [],
+          writtenCharacters: [],
         };
       },
     );

@@ -32,6 +32,8 @@ const makeStore = (
       settings: saved,
       lessonProgress,
       dailyStats: [],
+      cards: [],
+      writtenCharacters: [],
     })),
     importAll: vi.fn(async () => undefined),
     getAllCards: vi.fn(async () => []),

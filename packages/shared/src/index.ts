@@ -30,6 +30,7 @@ export {
   PROGRESS_BACKUP_FORMAT_VERSION,
   progressBackupEnvelopeSchema,
   progressBackupV1Schema,
+  progressBackupV2Schema,
 } from './progress-backup.schema';
 export type {
   ProgressBackupFile,
