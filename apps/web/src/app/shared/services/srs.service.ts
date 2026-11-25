@@ -22,7 +22,13 @@ export class SrsService {
 
   // Rule: từ của bài được tạo thẻ (bảng "Từ nào của bài được tạo thẻ").
   collectLessonWordIds(exercises: readonly Exercise[]): string[] {
-    return exercises.flatMap(() => []);
+    const wordIds = exercises.flatMap((exercise) => {
+      if (exercise.kind === 'sound-pair') {
+        return [...exercise.wordIds];
+      }
+      return exercise.wordId === undefined ? [] : [exercise.wordId];
+    });
+    return [...new Set(wordIds)];
   }
 
   // Rule: thẻ "mới" của một chiều của từ, đến hạn ngay lúc tạo, chưa ôn (không có lastReview).
