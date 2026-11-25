@@ -50,19 +50,20 @@ export class SrsService {
     return [...new Set(characters)];
   }
 
-  // Rule: (skeleton) chỉ lần viết xong trên khung có gợi ý mới được tính là đã viết chữ.
+  // Rule: chỉ lần viết xong trên khung có gợi ý mới được tính là đã viết chữ.
   countsAsStrokeWritten(writing: CharacterWriting): boolean {
-    void writing;
-    return false;
+    return writing.isGuided;
   }
 
-  // Rule: (skeleton) tập chữ đã viết sau một lần viết; lần viết không được tính không đổi tập.
+  // Rule: tập chữ đã viết sau một lần viết; lần viết không được tính không đổi tập.
   addWrittenCharacter(
     written: ReadonlySet<string>,
     writing: CharacterWriting,
   ): ReadonlySet<string> {
-    void writing;
-    return written;
+    if (!this.countsAsStrokeWritten(writing)) {
+      return new Set(written);
+    }
+    return new Set([...written, writing.character]);
   }
 
   // Rule: từ được có thẻ chiều viết khi mọi chữ của từ có dữ liệu nét và đã viết xong.
