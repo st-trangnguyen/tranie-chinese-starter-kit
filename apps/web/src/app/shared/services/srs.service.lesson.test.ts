@@ -223,4 +223,48 @@ describe('SrsService — Phần 3: createCardsForFinishedLesson', () => {
       firstListening,
     );
   });
+  it('S9.1-AC1 Từ đã có thẻ từ bài khác: xong bài 你 rồi xong bài 你 + 好 → thêm thẻ nghĩa và nghe cho 好, vẫn một thẻ 你 mỗi chiều', async () => {
+    const { store, service } = openService();
+    const firstFinish = NOW - 24 * 60 * 60 * 1000;
+    const youLesson: Lesson = {
+      id: 'ban',
+      type: 'lesson',
+      title: 'Bạn',
+      exercises: [{ id: 'y1', kind: 'tone-choice', wordId: '你' }],
+    };
+    const youGoodLesson: Lesson = {
+      id: 'ban-tot',
+      type: 'lesson',
+      title: 'Bạn và tốt',
+      exercises: [
+        { id: 'g1', kind: 'tone-choice', wordId: '你' },
+        { id: 'g2', kind: 'tone-choice', wordId: '好' },
+      ],
+    };
+
+    await service.createCardsForFinishedLesson(
+      youLesson,
+      finishedSession(['y1']),
+      firstFinish,
+    );
+    const youCardsBefore = await store.getAllCards();
+    await service.createCardsForFinishedLesson(
+      youGoodLesson,
+      finishedSession(['g1', 'g2']),
+      NOW,
+    );
+
+    const cards = await store.getAllCards();
+    expect(keysOf(cards)).toEqual(
+      [
+        '你:meaning:new',
+        '你:listening:new',
+        '好:meaning:new',
+        '好:listening:new',
+      ].sort(),
+    );
+    const youCards = cards.filter((card) => card.wordId === '你');
+    expect(youCards).toHaveLength(2);
+    expect(youCards).toEqual(expect.arrayContaining(youCardsBefore));
+  });
 });

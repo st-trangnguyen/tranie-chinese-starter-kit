@@ -78,7 +78,7 @@ tên ngẫu nhiên, `ContentSource` giả (`makeSource` trong `apps/web/src/test
 - [ ] 5.8 GREEN: sửa đến khi pass; kiểm: test 5.7 pass
 - [x] 5.9 RED: S9.1-AC1 "Làm lại bài đã xong không tạo trùng thẻ" (Phần 3) — DB có `你好:meaning` `state: 'review'`, `due` T, `你好:listening` mới; xong bài 你好 lần nữa → vẫn 2 thẻ, meaning giữ `state`/`due`; kiểm: chạy, nếu pass ngay thì tạm bỏ lọc thẻ đã có ở `planLessonCards` và đổi `addNewCards` sang `bulkPut` để thấy fail rồi trả lại
 - [ ] 5.10 GREEN: sửa đến khi pass; kiểm: test 5.9 pass
-- [ ] 5.11 RED: S9.1-AC1 "Từ đã có thẻ từ bài khác" (Phần 3) — xong bài 你 rồi bài 你+好 → 4 thẻ, một `你:meaning`, một `你:listening`; kiểm: chạy, nếu pass ngay thì như 5.9
+- [x] 5.11 RED: S9.1-AC1 "Từ đã có thẻ từ bài khác" (Phần 3) — xong bài 你 rồi bài 你+好 → 4 thẻ, một `你:meaning`, một `你:listening`; kiểm: chạy, nếu pass ngay thì như 5.9
 - [ ] 5.12 GREEN: sửa đến khi pass; kiểm: test 5.11 pass
 - [ ] 5.13 RED: S9.1-AC1 "Không lưu được thẻ thì bài vẫn xong" + "Thẻ còn thiếu được tạo ở lần xong bài sau" (Phần 3) — `addNewCards` reject một lần (spy) → `createCardsForFinishedLesson` reject `Error('Không tạo được thẻ ôn tập.')` có `cause`, không có thẻ; gọi lại (lần này lưu được) → có `你好` meaning + listening; kiểm: fail vì lỗi gốc lọt ra
 - [ ] 5.14 GREEN: bọc lỗi đọc/ghi thành `Error` rõ nghĩa (D4); kiểm: test 5.13 pass
