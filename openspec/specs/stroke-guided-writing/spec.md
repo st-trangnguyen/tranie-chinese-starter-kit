@@ -32,7 +32,7 @@ Hệ thống SHALL cho người học viết từng nét của chữ trên một
 #### Scenario: S6.2-AC1 Viết đúng hết các nét thì hoàn thành chữ
 - **WHEN** người học viết đúng nét cuối cùng của chữ
 - **THEN** màn báo đã viết xong chữ
-- **AND** người học ở lại màn, có nút "Viết lại" và màn không ghi điểm hay tiến độ
+- **AND** người học ở lại màn, có nút "Viết lại" và màn không ghi điểm; lần viết xong được ghi nhận cho việc tạo thẻ ôn tập chiều viết (S9.1)
 
 #### Scenario: S6.2-AC1 Viết lại sau khi hoàn thành
 - **WHEN** người học đã viết xong chữ và bấm "Viết lại"
