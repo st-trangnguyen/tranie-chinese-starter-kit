@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { createDatabase } from '@core/helpers/db.helper';
+import { progressStore } from '@core/services/progress-store.service';
 import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
 import { act, screen, userEvent, waitFor } from '@test/render';
 import { setupStrokeOrderRoute } from '@test/stroke-order-route';
@@ -18,11 +19,31 @@ vi.mock('hanzi-writer', async () => {
 
 const env = setupStrokeOrderRoute();
 
-const STROKE_INDEX_URL = '/content/strokes/index.json';
-const STROKE_FILE_OF_SHI = `/content/strokes/${encodeURIComponent(SHI)}.json`;
+const CONTENT_PREFIX = '/content/';
+
+/** Màn đã xong chữ: có nút "Viết lại", không có điểm, phần trăm hay chữ "đã lưu". */
+const expectCompletedScreenWithoutScore = (): void => {
+  expect(screen.getByRole('button', { name: 'Viết lại' })).toBeEnabled();
+  expect(document.body).not.toHaveTextContent(/điểm|%|đã lưu/i);
+};
+
+/** Mọi dòng IndexedDB ngoài bảng chữ đã viết (tiến độ bài, thống kê ngày, cài đặt, thẻ). */
+const rowsOutsideWrittenCharacters = async (
+  db: ReturnType<typeof createDatabase>,
+): Promise<unknown[]> => {
+  const otherTables = db.tables.filter(
+    (table) => table.name !== 'writtenCharacters',
+  );
+  expect(otherTables.length).toBeGreaterThan(0);
+  const rowsByTable = await Promise.all(
+    otherTables.map((table) => table.toArray()),
+  );
+  return rowsByTable.flat();
+};
 
 describe('WritingPracticeContainer: phản hồi khi viết', () => {
-  it('S6.2-AC1 Viết đúng hết các nét thì hoàn thành chữ: should show status "Đã viết xong chữ 十." and a "Viết lại" button, stay on the screen, and write no score or progress after both strokes of 十 are correct', async () => {
+  it('S6.2-AC1 Viết đúng hết các nét thì hoàn thành chữ: should show status "Đã viết xong chữ 十." and a "Viết lại" button, stay on the screen with no score, percent or "đã lưu", and record 十 as written once (also after "Viết lại" and writing it again)', async () => {
+    const user = userEvent.setup();
     const db = createDatabase();
     await Promise.all(db.tables.map((table) => table.clear()));
 
@@ -37,9 +58,7 @@ describe('WritingPracticeContainer: phản hồi khi viết', () => {
       await screen.findByRole('status', {}, { timeout: 3000 }),
     ).toHaveTextContent(`Đã viết xong chữ ${SHI}.`);
     expect(pad).toHaveAttribute('data-completed-stroke-count', '2');
-
-    // Có nút "Viết lại".
-    expect(screen.getByRole('button', { name: 'Viết lại' })).toBeEnabled();
+    expectCompletedScreenWithoutScore();
 
     // Người học ở lại màn luyện viết của 十.
     expect(router.state.location.pathname).toBe(
@@ -49,19 +68,53 @@ describe('WritingPracticeContainer: phản hồi khi viết', () => {
       pad,
     );
 
-    // Không gửi điểm/tiến độ đi đâu: chỉ có request đọc dữ liệu nét.
-    const otherRequests = env.strokeFetch.requests.filter(
-      (url) => url !== STROKE_INDEX_URL && url !== STROKE_FILE_OF_SHI,
-    );
-    expect(otherRequests).toEqual([]);
+    // Lần viết xong được ghi nhận cho thẻ chiều viết (S9.1): chữ 十 là chữ đã viết.
+    await waitFor(async () => {
+      expect(await progressStore.getWrittenCharacters()).toEqual([SHI]);
+    });
 
-    // Không ghi bản ghi tiến độ nào vào IndexedDB.
-    const rowsByTable = await Promise.all(
-      db.tables.map((table) => table.toArray()),
+    // Không gửi điểm/tiến độ đi đâu: chỉ có request đọc nội dung tĩnh (dữ liệu nét, từ vựng).
+    const nonContentRequests = env.strokeFetch.requests.filter(
+      (url) => !url.startsWith(CONTENT_PREFIX),
     );
+    expect(nonContentRequests).toEqual([]);
+
+    // Không ghi điểm hay tiến độ: ngoài chữ đã viết, IndexedDB không có dòng nào.
+    // 十 chưa học trong bài nào nên cũng không có thẻ.
+    expect(await rowsOutsideWrittenCharacters(db)).toEqual([]);
+
+    // Viết lại rồi viết xong lần nữa.
+    await user.click(screen.getByRole('button', { name: 'Viết lại' }));
+    await waitFor(() => {
+      const candidate = FakeHanziWriter.last();
+      expect(candidate).not.toBe(writer);
+      expect(candidate.isQuizActive).toBe(true);
+    });
+    const newWriter = FakeHanziWriter.last();
+    act(() => newWriter.emitCorrectStroke());
+    act(() => newWriter.emitCorrectStroke());
+
+    // Giao diện như lần đầu.
+    expect(
+      await screen.findByRole('status', {}, { timeout: 3000 }),
+    ).toHaveTextContent(`Đã viết xong chữ ${SHI}.`);
+    expect(
+      screen.getByRole('figure', { name: `Khung viết chữ ${SHI}` }),
+    ).toHaveAttribute('data-completed-stroke-count', '2');
+    expectCompletedScreenWithoutScore();
+    expect(router.state.location.pathname).toBe(
+      `/characters/${encodeURIComponent(SHI)}/writing-practice`,
+    );
+
+    // Chữ 十 vẫn chỉ được ghi một lần.
+    await waitFor(async () => {
+      expect(await db.table('writtenCharacters').toArray()).toEqual([
+        { character: SHI },
+      ]);
+    });
+    expect(await progressStore.getWrittenCharacters()).toEqual([SHI]);
+    expect(await rowsOutsideWrittenCharacters(db)).toEqual([]);
     db.close();
-    expect(db.tables.length).toBeGreaterThan(0);
-    expect(rowsByTable.flat()).toEqual([]);
   });
 
   it('S6.2-AC1 Viết lại sau khi hoàn thành: should drop the completed status, reset the pad to 0 written strokes, cancel the old quiz and start a quiz on a new writer after clicking "Viết lại"', async () => {
