@@ -116,4 +116,19 @@ describe('SrsService — Phần 2 (quy tắc tạo thẻ)', () => {
     expect(wordIds).toEqual([]);
     expect(service.planLessonCards(lessonInput(wordIds))).toEqual([]);
   });
+
+  it('S9.1-AC1 Học xong bài chưa có thẻ chiều viết: bài có 人, chưa từng viết 人 → chỉ thẻ nghĩa và nghe, không có chiều viết', () => {
+    const input = lessonInput(['人'], {
+      writtenCharacters: new Set(),
+      strokeCharacters: new Set(['人']),
+    });
+
+    const cards = service.planLessonCards(input);
+
+    expect(keysOf(cards)).toEqual(['人:listening:new', '人:meaning:new']);
+    expect(cards.some((card) => card.facet === 'writing')).toBe(false);
+    expect(
+      service.canHaveWritingCard(wordOf('人'), new Set(), new Set(['人'])),
+    ).toBe(false);
+  });
 });

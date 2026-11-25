@@ -1,6 +1,12 @@
 import { createEmptyCard, State } from 'ts-fsrs';
 
-import type { CardFacet, CardState, Exercise, ReviewCard } from '@csk/shared';
+import type {
+  CardFacet,
+  CardState,
+  Exercise,
+  ReviewCard,
+  Word,
+} from '@csk/shared';
 
 import type { LessonCardPlanInput } from '@shared/models/review-card.model';
 
@@ -29,6 +35,16 @@ export class SrsService {
       return exercise.wordId === undefined ? [] : [exercise.wordId];
     });
     return [...new Set(wordIds)];
+  }
+
+  // Rule: từ được có thẻ chiều viết khi mọi chữ của từ có dữ liệu nét và đã viết xong.
+  canHaveWritingCard(
+    word: Word,
+    writtenCharacters: ReadonlySet<string>,
+    strokeCharacters: ReadonlySet<string>,
+  ): boolean {
+    void [word, writtenCharacters, strokeCharacters];
+    return false;
   }
 
   // Rule: thẻ "mới" của một chiều của từ, đến hạn ngay lúc tạo, chưa ôn (không có lastReview).
