@@ -71,15 +71,15 @@ tên ngẫu nhiên, `ContentSource` giả (`makeSource` trong `apps/web/src/test
 - [x] 5.1 RED: S9.1-AC1 "Xong bài học thì tạo thẻ nghĩa và nghe" (Phần 3) — DB rỗng; `createCardsForFinishedLesson(bài 你好+谢谢, phiên finished không bỏ câu, now)` → `getAllCards()` đúng 4 thẻ `state: 'new'`. Skeleton: Phần 1 private + 2 use case `async` không làm gì; kiểm: fail ở assertion
 - [x] 5.2 GREEN: Phần 1 (D4), `createCardsForFinishedLesson`; kiểm: test 5.1 pass
 - [x] 5.3 RED: S9.1-AC1 "Bài chưa xong không tạo thẻ" + "Bài kiểm tra không tạo thẻ" (Phần 3) — phiên bỏ 1 câu, phiên chưa xong, bài `type: 'test'` đúng hết → không thẻ nào, và `ContentSource.getWords` không được gọi; kiểm: chạy, nếu pass ngay thì tạm bỏ bước `isCardEligibleLesson` để thấy fail rồi trả lại
-- [ ] 5.4 GREEN: sửa đến khi pass; kiểm: test 5.3 pass
+- [x] 5.4 GREEN: sửa đến khi pass; kiểm: test 5.3 pass
 - [x] 5.5 RED: S9.1-AC1 "Bài đã xong từ trước không được tạo bù thẻ" (Phần 3) — DB có `lessonProgress` bài 你好 `completed`, không thẻ; `new SrsService(store, source)` và `recordCharacterWriting({ 你, isGuided: true })` → không có thẻ `你好`; sau `createCardsForFinishedLesson(bài đó, phiên xong)` → có `你好` meaning + listening; kiểm: chạy, nếu pass ngay thì tạm cho `recordCharacterWriting` coi bài `completed` là đã học để thấy fail rồi trả lại
 - [ ] 5.6 GREEN: sửa đến khi pass (không đọc `lessonProgress` trong `SrsService`); kiểm: test 5.5 pass
 - [x] 5.7 RED: S9.1-AC1 "Làm hết bài được đánh dấu xong nhờ kiểm tra vượt cấp thì tạo thẻ" (Phần 3) — DB có bài VC1 (你好) và VC2 (人) `completed`, không thẻ; `createCardsForFinishedLesson(VC1, phiên xong)` → chỉ `你好` meaning + listening, không có thẻ `人`; kiểm: chạy, nếu pass ngay thì tạm cho use case tạo thẻ cho mọi bài `completed` để thấy fail rồi trả lại
-- [ ] 5.8 GREEN: sửa đến khi pass; kiểm: test 5.7 pass
+- [x] 5.8 GREEN: sửa đến khi pass; kiểm: test 5.7 pass
 - [x] 5.9 RED: S9.1-AC1 "Làm lại bài đã xong không tạo trùng thẻ" (Phần 3) — DB có `你好:meaning` `state: 'review'`, `due` T, `你好:listening` mới; xong bài 你好 lần nữa → vẫn 2 thẻ, meaning giữ `state`/`due`; kiểm: chạy, nếu pass ngay thì tạm bỏ lọc thẻ đã có ở `planLessonCards` và đổi `addNewCards` sang `bulkPut` để thấy fail rồi trả lại
-- [ ] 5.10 GREEN: sửa đến khi pass; kiểm: test 5.9 pass
+- [x] 5.10 GREEN: sửa đến khi pass; kiểm: test 5.9 pass
 - [x] 5.11 RED: S9.1-AC1 "Từ đã có thẻ từ bài khác" (Phần 3) — xong bài 你 rồi bài 你+好 → 4 thẻ, một `你:meaning`, một `你:listening`; kiểm: chạy, nếu pass ngay thì như 5.9
-- [ ] 5.12 GREEN: sửa đến khi pass; kiểm: test 5.11 pass
+- [x] 5.12 GREEN: sửa đến khi pass; kiểm: test 5.11 pass
 - [ ] 5.13 RED: S9.1-AC1 "Không lưu được thẻ thì bài vẫn xong" + "Thẻ còn thiếu được tạo ở lần xong bài sau" (Phần 3) — `addNewCards` reject một lần (spy) → `createCardsForFinishedLesson` reject `Error('Không tạo được thẻ ôn tập.')` có `cause`, không có thẻ; gọi lại (lần này lưu được) → có `你好` meaning + listening; kiểm: fail vì lỗi gốc lọt ra
 - [ ] 5.14 GREEN: bọc lỗi đọc/ghi thành `Error` rõ nghĩa (D4); kiểm: test 5.13 pass
 - [ ] 5.15 RED: S9.1-AC2 "Viết xong chữ của từ đã học thì tạo thẻ chiều viết" (Phần 3) — xong bài 人 (có meaning + listening), `recordCharacterWriting({ 人, isGuided: true })` → `getWrittenCharacters()` có `人`, có `人:writing` `state: 'new'`; kiểm: fail vì use case skeleton

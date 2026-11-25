@@ -2,6 +2,7 @@ import { createEmptyCard, State } from 'ts-fsrs';
 
 import {
   hanCharacterSchema,
+  reviewCardId,
   type CardFacet,
   type CardState,
   type Exercise,
@@ -36,6 +37,10 @@ const CARD_STATE_BY_FSRS_STATE: Record<State, CardState> = {
 
 /** Chiều luôn được tạo khi xong bài (chiều viết có điều kiện riêng). */
 const LESSON_FACETS: readonly CardFacet[] = ['meaning', 'listening'];
+
+/** Khóa (`reviewCardId`) của các thẻ đã có. */
+const cardIdsOf = (cards: readonly ReviewCard[]): ReadonlySet<string> =>
+  new Set(cards.map((card) => reviewCardId(card.wordId, card.facet)));
 
 export class SrsService {
   constructor(
@@ -151,9 +156,10 @@ export class SrsService {
   }
 
   // Rule: thẻ cho bài vừa xong: nghĩa + nghe cho mọi từ của bài; viết cho từ có trong nội dung
-  // và đủ điều kiện chiều viết.
+  // và đủ điều kiện chiều viết. Thẻ đã có (cùng từ, cùng chiều) không tạo lại.
   planLessonCards(input: LessonCardPlanInput): ReviewCard[] {
-    return input.wordIds.flatMap((wordId) => {
+    const existingIds = cardIdsOf(input.cards);
+    const cards = input.wordIds.flatMap((wordId) => {
       const word = input.wordsById.get(wordId);
       const isWritingAllowed =
         word !== undefined &&
@@ -169,6 +175,9 @@ export class SrsService {
         this.createNewCard(wordId, facet, input.now),
       );
     });
+    return cards.filter(
+      (card) => !existingIds.has(reviewCardId(card.wordId, card.facet)),
+    );
   }
 
   // Rule: từ đã học xong cho thẻ chiều viết khi đã có thẻ nghĩa của từ, hoặc từ thuộc bài đang
@@ -185,11 +194,13 @@ export class SrsService {
   }
 
   // Rule: sau một lần viết, từ trong nội dung chứa chữ vừa viết được thẻ chiều viết khi từ đã học
-  // xong và đủ điều kiện chiều viết.
+  // xong và đủ điều kiện chiều viết. Từ đã có thẻ chiều viết không tạo lại.
   planWritingCards(input: WritingCardPlanInput): ReviewCard[] {
+    const existingIds = cardIdsOf(input.cards);
     return input.words
       .filter(
         (word) =>
+          !existingIds.has(reviewCardId(word.id, 'writing')) &&
           this.charactersOf(word.hanzi).includes(input.character) &&
           this.isWordLearned(word.id, input.cards, new Set()) &&
           this.canHaveWritingCard(
