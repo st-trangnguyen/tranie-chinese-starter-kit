@@ -81,7 +81,7 @@ tên ngẫu nhiên, `ContentSource` giả (`makeSource` trong `apps/web/src/test
 - [x] 5.11 RED: S9.1-AC1 "Từ đã có thẻ từ bài khác" (Phần 3) — xong bài 你 rồi bài 你+好 → 4 thẻ, một `你:meaning`, một `你:listening`; kiểm: chạy, nếu pass ngay thì như 5.9
 - [x] 5.12 GREEN: sửa đến khi pass; kiểm: test 5.11 pass
 - [x] 5.13 RED: S9.1-AC1 "Không lưu được thẻ thì bài vẫn xong" + "Thẻ còn thiếu được tạo ở lần xong bài sau" (Phần 3) — `addNewCards` reject một lần (spy) → `createCardsForFinishedLesson` reject `Error('Không tạo được thẻ ôn tập.')` có `cause`, không có thẻ; gọi lại (lần này lưu được) → có `你好` meaning + listening; kiểm: fail vì lỗi gốc lọt ra
-- [ ] 5.14 GREEN: bọc lỗi đọc/ghi thành `Error` rõ nghĩa (D4); kiểm: test 5.13 pass
+- [x] 5.14 GREEN: bọc lỗi đọc/ghi thành `Error` rõ nghĩa (D4); kiểm: test 5.13 pass
 - [ ] 5.15 RED: S9.1-AC2 "Viết xong chữ của từ đã học thì tạo thẻ chiều viết" (Phần 3) — xong bài 人 (có meaning + listening), `recordCharacterWriting({ 人, isGuided: true })` → `getWrittenCharacters()` có `人`, có `人:writing` `state: 'new'`; kiểm: fail vì use case skeleton
 - [ ] 5.16 GREEN: `recordCharacterWriting` (ghi chữ trước mọi `await`, rồi `planWritingCards`); kiểm: test 5.15 pass
 - [ ] 5.17 RED: S9.1-AC2 "Viết trước rồi học xong sau" (Phần 3) — DB rỗng; viết `人` → không thẻ nào của `人`; rồi xong bài 人 → có meaning, listening, writing; kiểm: chạy, nếu pass ngay thì tạm bỏ nhánh writing của `planLessonCards` để thấy fail rồi trả lại

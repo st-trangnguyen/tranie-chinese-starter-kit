@@ -35,6 +35,9 @@ const CARD_STATE_BY_FSRS_STATE: Record<State, CardState> = {
   [State.Relearning]: 'relearning',
 };
 
+/** Lỗi của use case tạo thẻ khi xong bài (đọc hoặc ghi thất bại). */
+const CREATE_CARDS_FAILED_MESSAGE = 'Không tạo được thẻ ôn tập.';
+
 /** Chiều luôn được tạo khi xong bài (chiều viết có điều kiện riêng). */
 const LESSON_FACETS: readonly CardFacet[] = ['meaning', 'listening'];
 
@@ -222,13 +225,18 @@ export class SrsService {
     if (!this.isCardEligibleLesson(lesson.type, session)) {
       return;
     }
-    const [cards, writtenCharacters, words, strokeCharacters] =
-      await Promise.all([
+    let loaded: [ReviewCard[], string[], Word[], string[]];
+    try {
+      loaded = await Promise.all([
         this.readAllCards(),
         this.readWrittenCharacters(),
         this.readWords(),
         this.readStrokeCharacters(),
       ]);
+    } catch (error) {
+      throw new Error(CREATE_CARDS_FAILED_MESSAGE, { cause: error });
+    }
+    const [cards, writtenCharacters, words, strokeCharacters] = loaded;
     const newCards = this.planLessonCards({
       wordIds: this.collectLessonWordIds(lesson.exercises),
       wordsById: new Map(words.map((word) => [word.id, word])),
@@ -237,7 +245,11 @@ export class SrsService {
       strokeCharacters: new Set(strokeCharacters),
       now,
     });
-    await this.writeNewCards(newCards);
+    try {
+      await this.writeNewCards(newCards);
+    } catch (error) {
+      throw new Error(CREATE_CARDS_FAILED_MESSAGE, { cause: error });
+    }
   }
 
   // Skeleton (RED 5.1): chưa có hành vi.
