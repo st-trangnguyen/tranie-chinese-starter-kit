@@ -232,4 +232,37 @@ describe('SrsService — Phần 2 (quy tắc tạo thẻ)', () => {
 
     expect(cards).toEqual([]);
   });
+
+  it('S9.1-AC2 Chữ đã viết dùng chung cho các từ: đã viết 你 và 好, xong bài có 你, 好, 你好 → cả ba từ có thẻ chiều viết', () => {
+    const cards = service.planLessonCards(
+      lessonInput(['你', '好', '你好'], {
+        writtenCharacters: new Set(['你', '好']),
+        strokeCharacters: new Set(['你', '好']),
+      }),
+    );
+
+    expect(
+      cards
+        .filter((card) => card.facet === 'writing')
+        .map((card) => card.wordId)
+        .sort(),
+    ).toEqual(['你', '你好', '好'].sort());
+    expect(keysOf(cards)).toEqual(
+      [
+        '你:meaning:new',
+        '你:listening:new',
+        '你:writing:new',
+        '好:meaning:new',
+        '好:listening:new',
+        '好:writing:new',
+        '你好:meaning:new',
+        '你好:listening:new',
+        '你好:writing:new',
+      ].sort(),
+    );
+    for (const card of cards) {
+      expect(reviewCardSchema.safeParse(card).success).toBe(true);
+      expect(card.due).toBe(NOW);
+    }
+  });
 });

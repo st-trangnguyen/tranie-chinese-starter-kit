@@ -53,7 +53,7 @@ Test: `apps/web/src/app/shared/services/srs.service.rules.test.ts` (pure, không
 - [ ] 4.12 GREEN: sửa đến khi pass; kiểm: test 4.11 pass
 - [x] 4.13 RED: S9.1-AC2 "Bài được mở nhờ kiểm tra vượt cấp không đủ để tạo thẻ chiều viết" (Phần 2) — `人` không có thẻ nào, `completingWordIds` rỗng, written `{人}` → `isWordLearned` false, `planWritingCards` `[]`; kiểm: chạy, nếu pass ngay thì tạm cho `isWordLearned` trả true để thấy fail rồi trả lại
 - [ ] 4.14 GREEN: sửa đến khi pass; kiểm: test 4.13 pass
-- [ ] 4.15 RED: S9.1-AC2 "Chữ đã viết dùng chung cho các từ" (Phần 2) — written `{你,好}`, `planLessonCards(['你','好','你好'])` (đều trong nội dung, đều có nét) → writing cho cả ba; kiểm: chạy, nếu pass ngay thì tạm cho `canHaveWritingCard` so cả từ thay vì từng chữ để thấy fail rồi trả lại
+- [x] 4.15 RED: S9.1-AC2 "Chữ đã viết dùng chung cho các từ" (Phần 2) — written `{你,好}`, `planLessonCards(['你','好','你好'])` (đều trong nội dung, đều có nét) → writing cho cả ba; kiểm: chạy, nếu pass ngay thì tạm cho `canHaveWritingCard` so cả từ thay vì từng chữ để thấy fail rồi trả lại
 - [ ] 4.16 GREEN: sửa đến khi pass; kiểm: test 4.15 pass
 - [ ] 4.17 RED: S9.1-AC2 "Từ có chữ không có dữ liệu nét" (Phần 2) — từ `杯`, stroke `{人,你,好}`, written `{杯}` → `canHaveWritingCard` false, `planLessonCards(['杯'])` chỉ meaning + listening; kiểm: chạy, nếu pass ngay thì tạm bỏ điều kiện dữ liệu nét để thấy fail rồi trả lại
 - [ ] 4.18 GREEN: sửa đến khi pass; kiểm: test 4.17 pass
