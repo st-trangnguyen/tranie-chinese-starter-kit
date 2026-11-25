@@ -1,50 +1,17 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { reviewCardSchema, type Lesson, type ReviewCard } from '@csk/shared';
 
-import { makeSource } from '@test/content-service.fixtures';
-
-import { createDatabase } from '@core/helpers/db.helper';
-import { DexieProgressStore } from '@core/services/progress-store.service';
 import type { LessonSession } from '@shared/models/lesson-session.model';
+import {
+  finishedSession,
+  GREETING_LESSON,
+  keysOf,
+  NOW,
+  openService,
+} from '@test/srs-lesson.helpers';
 
 import { SrsService } from './srs.service';
-
-const NOW = Date.UTC(2026, 10, 25, 8, 30);
-
-const openService = () => {
-  const store = new DexieProgressStore(
-    createDatabase(`test-${crypto.randomUUID()}`),
-  );
-  const source = makeSource();
-  return { store, source, service: new SrsService(store, source) };
-};
-
-const finishedSession = (exerciseIds: readonly string[]): LessonSession => ({
-  exerciseIds,
-  currentIndex: exerciseIds.length - 1,
-  phase: 'finished',
-  lastResult: null,
-  skippedCount: 0,
-  correctCount: exerciseIds.length,
-  wrongCount: 0,
-  wrongExerciseIds: [],
-  startedAt: NOW - 60_000,
-  finishedAt: NOW,
-});
-
-const GREETING_LESSON: Lesson = {
-  id: 'chao-hoi',
-  type: 'lesson',
-  title: 'Chào hỏi',
-  exercises: [
-    { id: 'e1', kind: 'tone-choice', wordId: '你好' },
-    { id: 'e2', kind: 'pinyin-type', wordId: '谢谢' },
-  ],
-};
-
-const keysOf = (cards: readonly ReviewCard[]): string[] =>
-  cards.map((card) => `${card.wordId}:${card.facet}:${card.state}`).sort();
 
 describe('SrsService — Phần 3: createCardsForFinishedLesson', () => {
   it('S9.1-AC1 Xong bài học thì tạo thẻ nghĩa và nghe: chưa có thẻ, xong bài 你好 + 谢谢 không bỏ câu → đúng 4 thẻ nghĩa/nghe "mới"', async () => {
@@ -266,5 +233,38 @@ describe('SrsService — Phần 3: createCardsForFinishedLesson', () => {
     const youCards = cards.filter((card) => card.wordId === '你');
     expect(youCards).toHaveLength(2);
     expect(youCards).toEqual(expect.arrayContaining(youCardsBefore));
+  });
+
+  it('S9.1-AC1 Không lưu được thẻ thì bài vẫn xong + Thẻ còn thiếu được tạo ở lần xong bài sau: lưu thẻ lỗi → báo lỗi rõ nghĩa giữ lỗi gốc, không thẻ 你好; làm lại hết bài, lưu được → có thẻ 你好 nghĩa và nghe', async () => {
+    const { store, service } = openService();
+    const storageError = new Error('QuotaExceededError');
+    vi.spyOn(store, 'addNewCards').mockRejectedValueOnce(storageError);
+
+    const failedFinish = service.createCardsForFinishedLesson(
+      GREETING_LESSON,
+      finishedSession(['e1', 'e2']),
+      NOW,
+    );
+
+    await expect(failedFinish).rejects.toThrow(
+      new Error('Không tạo được thẻ ôn tập.'),
+    );
+    await expect(failedFinish).rejects.toHaveProperty('cause', storageError);
+    expect(
+      (await store.getAllCards()).filter((card) => card.wordId === '你好'),
+    ).toEqual([]);
+
+    await service.createCardsForFinishedLesson(
+      GREETING_LESSON,
+      finishedSession(['e1', 'e2']),
+      NOW + 60_000,
+    );
+
+    const greetingKeys = keysOf(
+      (await store.getAllCards()).filter((card) => card.wordId === '你好'),
+    );
+    expect(greetingKeys).toEqual(
+      ['你好:meaning:new', '你好:listening:new'].sort(),
+    );
   });
 });
