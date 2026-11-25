@@ -32,8 +32,8 @@ Test: `apps/web/src/app/core/services/progress-store.review-cards.test.ts` (fake
 - [x] 3.1 RED: S9.1-AC1 "Xong bài học thì tạo thẻ nghĩa và nghe" (store) — `addNewCards([4 thẻ 你好/谢谢 meaning/listening])` → `getAllCards()` có đúng 4 thẻ bằng đầu vào (không có `id`); một dòng `cards` hỏng ghi thô → bị bỏ khi đọc; `addWrittenCharacter('人')` hai lần → `getWrittenCharacters()` = `['人']`; dòng chữ hỏng (`'ab'`) bị bỏ; DB version 3 có `settings`, `lessonProgress`, `dailyStats` mở bằng `createDatabase` (version 4) → dữ liệu cũ còn nguyên, hai bảng mới rỗng. Skeleton: `progress-store.interface.ts` (interface tách khỏi `progress-store.service.ts`, re-export type), 4 method no-op/`[]` trong `DexieProgressStore`, stub 4 method trong 5 object `ProgressStore` viết tay của test cũ; kiểm: `pnpm typecheck` sạch, fail ở assertion
 - [x] 3.2 GREEN: `db.version(4)` + `CardRow`, `WrittenCharacterRow` (D1); `getAllCards`, `addNewCards`, `getWrittenCharacters`, `addWrittenCharacter` qua chuỗi ghi; helper `parseRows`; kiểm: test 3.1 pass, test `progress-store.*.test.ts` cũ pass, `progress-store.service.ts` < 300 dòng
 - [x] 3.3 RED: S9.1-AC1 "Làm lại bài đã xong không tạo trùng thẻ" (store) — DB có thẻ `你好:meaning` `state: 'review'`, `due` T; `addNewCards([thẻ mới 你好 meaning, thẻ mới 你好 listening])` → vẫn một thẻ meaning, giữ `state: 'review'` và `due` T, có thêm listening; `addNewCards` có `bulkAdd` lỗi (spy) → reject, không thẻ nào được ghi; kiểm: chạy, nếu pass ngay nhờ 3.2 thì tạm đổi `bulkAdd` thành `bulkPut` không lọc khóa đã có để thấy fail rồi trả lại
-- [ ] 3.4 GREEN: lọc khóa đã có trong cùng transaction `rw` (D3); kiểm: test 3.3 pass
-- [ ] 3.5 REFACTOR: đổi tên `studyTimeWrites`/`enqueueStudyTimeWrite` → `pendingWrites`/`enqueueWrite` (D3), không đổi hành vi; kiểm: `pnpm --filter @csk/web test:run progress-store` pass
+- [x] 3.4 GREEN: lọc khóa đã có trong cùng transaction `rw` (D3); kiểm: test 3.3 pass
+- [x] 3.5 REFACTOR: đổi tên `studyTimeWrites`/`enqueueStudyTimeWrite` → `pendingWrites`/`enqueueWrite` (D3), không đổi hành vi; kiểm: `pnpm --filter @csk/web test:run progress-store` pass
 
 ## 4. Quy tắc tạo thẻ — `SrsService` Phần 2 (design D4)
 
