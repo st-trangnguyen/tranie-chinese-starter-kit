@@ -102,7 +102,7 @@ Test: `apps/web/src/app/pages/lesson/hooks/useLessonRunner.reviewCards.test.ts`,
 `progressStore.getAllCards()` / `getWrittenCharacters()`, `beforeEach` xoá năm bảng.
 
 - [x] 6.1 RED: S9.1-AC1 "Xong bài học thì tạo thẻ nghĩa và nghe" (hook) — `renderHook(useLessonRunner('a'))`, bài có câu 你好 và 谢谢, trả lời hết, `continueLesson` tới `finished` → `waitFor` 4 thẻ `state: 'new'`; kiểm: fail vì hook chưa gọi `SrsService`
-- [ ] 6.2 GREEN: `useLessonRunner` gọi `createCardsForFinishedLesson` sau `finishLesson` trong `saveQueueRef`, nuốt lỗi (D5); kiểm: test 6.1 pass, test `useLessonRunner.test.ts` cũ pass
+- [x] 6.2 GREEN: `useLessonRunner` gọi `createCardsForFinishedLesson` sau `finishLesson` trong `saveQueueRef`, nuốt lỗi (D5); kiểm: test 6.1 pass, test `useLessonRunner.test.ts` cũ pass
 - [ ] 6.3 RED: S9.1-AC1 "Bài chưa xong không tạo thẻ" (hook) — trả lời 1 câu rồi unmount → không thẻ; bài có câu `skipExercise` rồi hết bài → không thẻ; kiểm: chạy, nếu pass ngay thì tạm gọi use case với `type: 'lesson'` bỏ qua kiểm phiên để thấy fail rồi trả lại
 - [ ] 6.4 GREEN: sửa đến khi pass; kiểm: test 6.3 pass
 - [ ] 6.5 RED: S9.1-AC1 "Bài kiểm tra không tạo thẻ" + "Bài được mở nhờ kiểm tra vượt cấp không tạo thẻ" (hook) — bài `type: 'test'` đúng hết → không thẻ; `useLessonRunner(testId, { placementUnitId })` đạt → các bài của chủ đề `completed`, không thẻ; kiểm: chạy, nếu pass ngay thì tạm truyền `'lesson'` làm loại bài để thấy fail rồi trả lại
