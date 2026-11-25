@@ -41,6 +41,9 @@ const CREATE_CARDS_FAILED_MESSAGE = 'Không tạo được thẻ ôn tập.';
 /** Lỗi của use case ghi nhận chữ đã viết khi ghi chữ thất bại (lần viết không được tính). */
 const RECORD_WRITING_FAILED_MESSAGE = 'Không ghi nhận được chữ đã viết.';
 
+/** Lỗi khi đã ghi chữ nhưng đọc/ghi thẻ chiều viết thất bại (lần xong bài sau tạo bù). */
+const CREATE_WRITING_CARDS_FAILED_MESSAGE = 'Không tạo được thẻ chiều viết.';
+
 /** Chiều luôn được tạo khi xong bài (chiều viết có điều kiện riêng). */
 const LESSON_FACETS: readonly CardFacet[] = ['meaning', 'listening'];
 
@@ -267,21 +270,25 @@ export class SrsService {
     } catch (error) {
       throw new Error(RECORD_WRITING_FAILED_MESSAGE, { cause: error });
     }
-    const [cards, writtenCharacters, words, strokeCharacters] =
-      await Promise.all([
-        this.readAllCards(),
-        this.readWrittenCharacters(),
-        this.readWords(),
-        this.readStrokeCharacters(),
-      ]);
-    const newCards = this.planWritingCards({
-      character: writing.character,
-      words,
-      cards,
-      writtenCharacters: new Set(writtenCharacters),
-      strokeCharacters: new Set(strokeCharacters),
-      now,
-    });
-    await this.writeNewCards(newCards);
+    try {
+      const [cards, writtenCharacters, words, strokeCharacters] =
+        await Promise.all([
+          this.readAllCards(),
+          this.readWrittenCharacters(),
+          this.readWords(),
+          this.readStrokeCharacters(),
+        ]);
+      const newCards = this.planWritingCards({
+        character: writing.character,
+        words,
+        cards,
+        writtenCharacters: new Set(writtenCharacters),
+        strokeCharacters: new Set(strokeCharacters),
+        now,
+      });
+      await this.writeNewCards(newCards);
+    } catch (error) {
+      throw new Error(CREATE_WRITING_CARDS_FAILED_MESSAGE, { cause: error });
+    }
   }
 }
