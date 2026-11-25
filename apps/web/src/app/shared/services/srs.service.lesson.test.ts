@@ -146,4 +146,37 @@ describe('SrsService — Phần 3: createCardsForFinishedLesson', () => {
       ['你好:meaning:new', '你好:listening:new'].sort(),
     );
   });
+  it('S9.1-AC1 Làm hết bài được đánh dấu xong nhờ kiểm tra vượt cấp thì tạo thẻ: bài 你好 và bài 人 "Đã xong" nhờ vượt cấp, làm hết bài 你好 → chỉ thẻ 你好 nghĩa và nghe "mới", không thẻ 人', async () => {
+    const { store, service } = openService();
+    const skipLevelGreeting: Lesson = {
+      id: 'vuot-cap-1',
+      type: 'lesson',
+      title: 'Vượt cấp 1',
+      exercises: [{ id: 'v1', kind: 'tone-choice', wordId: '你好' }],
+    };
+    const skipLevelPerson: Lesson = {
+      id: 'vuot-cap-2',
+      type: 'lesson',
+      title: 'Vượt cấp 2',
+      exercises: [{ id: 'v2', kind: 'tone-choice', wordId: '人' }],
+    };
+    for (const lesson of [skipLevelGreeting, skipLevelPerson]) {
+      await store.saveLessonProgress({
+        lessonId: lesson.id,
+        status: 'completed',
+      });
+    }
+
+    await service.createCardsForFinishedLesson(
+      skipLevelGreeting,
+      finishedSession(['v1']),
+      NOW,
+    );
+
+    const cards = await store.getAllCards();
+    expect(keysOf(cards)).toEqual(
+      ['你好:meaning:new', '你好:listening:new'].sort(),
+    );
+    expect(cards.filter((card) => card.wordId === '人')).toEqual([]);
+  });
 });
