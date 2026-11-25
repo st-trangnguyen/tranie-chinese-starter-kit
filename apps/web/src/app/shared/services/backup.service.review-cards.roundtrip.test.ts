@@ -75,6 +75,14 @@ const HELLO_LESSON: Lesson = {
 
 const SCENARIO_OVERWRITE_CARDS = 'S9.1-AC1 (bổ sung) Nhập ghi đè thẻ trên máy';
 
+const SCENARIO_CANCEL_IMPORT = 'S9.1-AC1 (bổ sung) Hủy nhập thì thẻ không đổi';
+
+/** Hai thẻ 谢谢 (nghĩa + nghe) đang có trên máy B. */
+const THANKS_CARDS: ReviewCard[] = [
+  { ...NEW_LISTENING_CARD, wordId: '谢谢', facet: 'meaning' },
+  { ...NEW_LISTENING_CARD, wordId: '谢谢' },
+];
+
 const cardKeysOf = (cards: readonly ReviewCard[]): string[] =>
   cards.map((card) => `${card.wordId}:${card.facet}`).sort();
 
@@ -215,6 +223,30 @@ describe('BackupService — xuất rồi nhập thẻ ôn tập giữa hai máy'
 
     expect(byCardKey(await machineB.store.getAllCards())).toEqual(
       byCardKey([REVIEWED_MEANING_CARD, NEW_LISTENING_CARD]),
+    );
+  });
+
+  it(`${SCENARIO_CANCEL_IMPORT}: máy B có thẻ 谢谢 nghĩa + nghe, kiểm file hợp lệ chỉ có 你好 rồi hủy (không ghi đè) → vẫn chỉ 2 thẻ 谢谢`, async () => {
+    const machineA = createMachine();
+    await new ProgressService(machineA.store).completeOnboarding(15);
+    await machineA.store.addNewCards([
+      REVIEWED_MEANING_CARD,
+      NEW_LISTENING_CARD,
+    ]);
+    await machineA.backup.exportProgress(NOW);
+    const content = machineA.savedFiles[0]?.content ?? '';
+
+    const machineB = createMachine();
+    await new ProgressService(machineB.store).completeOnboarding(15);
+    await machineB.store.addNewCards(THANKS_CARDS);
+
+    const inspection = await machineB.backup.inspectImportFile(
+      toBackupFileSource(content),
+    );
+    expect(inspection.status).toBe('valid');
+
+    expect(byCardKey(await machineB.store.getAllCards())).toEqual(
+      byCardKey(THANKS_CARDS),
     );
   });
 });
