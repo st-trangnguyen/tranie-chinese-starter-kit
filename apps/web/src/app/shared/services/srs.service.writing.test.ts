@@ -46,4 +46,30 @@ describe('SrsService — Phần 3: recordCharacterWriting', () => {
     );
     expect(reviewCardSchema.safeParse(writingCard).success).toBe(true);
   });
+
+  it('S9.1-AC2 Viết trước rồi học xong sau: DB rỗng, viết xong 人 → chưa có thẻ nào của 人; rồi xong bài 人 → có thẻ 人 chiều nghĩa, nghe và viết', async () => {
+    const { store, service } = openService([PERSON_LESSON]);
+
+    await service.recordCharacterWriting(
+      { character: '人', isGuided: true },
+      NOW,
+    );
+
+    expect(await store.getWrittenCharacters()).toContain('人');
+    expect(
+      (await store.getAllCards()).filter((card) => card.wordId === '人'),
+    ).toEqual([]);
+
+    await service.createCardsForFinishedLesson(
+      PERSON_LESSON,
+      finishedSession(['p1']),
+      NOW + 60_000,
+    );
+
+    expect(keysOf(await store.getAllCards())).toEqual([
+      '人:listening:new',
+      '人:meaning:new',
+      '人:writing:new',
+    ]);
+  });
 });
