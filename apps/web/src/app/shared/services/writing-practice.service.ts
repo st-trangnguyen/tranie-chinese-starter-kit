@@ -103,6 +103,16 @@ export class WritingPracticeService {
     }
   }
 
+  // Rule: lượt viết vừa chuyển sang xong chữ (chưa xong → xong).
+  // Skeleton RED (S9.1 task 7.1): chưa có hành vi.
+  hasJustCompleted(
+    previous: WritingPracticeState,
+    next: WritingPracticeState,
+  ): boolean {
+    void [previous, next];
+    return false;
+  }
+
   // Rule: trong màn bài, câu viết chỉ có kết quả "Đúng", đúng một lần lúc vừa xong chữ; viết sai
   // nét không cho kết quả. Không có giải thích.
   lessonResultOf(
