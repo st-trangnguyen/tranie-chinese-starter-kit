@@ -73,6 +73,8 @@ const HELLO_LESSON: Lesson = {
   exercises: [{ id: 'h1', kind: 'tone-choice', wordId: '你好' }],
 };
 
+const SCENARIO_OVERWRITE_CARDS = 'S9.1-AC1 (bổ sung) Nhập ghi đè thẻ trên máy';
+
 const cardKeysOf = (cards: readonly ReviewCard[]): string[] =>
   cards.map((card) => `${card.wordId}:${card.facet}`).sort();
 
@@ -182,6 +184,37 @@ describe('BackupService — xuất rồi nhập thẻ ôn tập giữa hai máy'
         '你好:meaning',
         '你好:writing',
       ].toSorted(),
+    );
+  });
+
+  it(`${SCENARIO_OVERWRITE_CARDS}: máy B có thẻ 谢谢 nghĩa + nghe, nhập file chỉ có 你好 nghĩa + nghe rồi ghi đè → chỉ còn 2 thẻ 你好`, async () => {
+    const machineA = createMachine();
+    await new ProgressService(machineA.store).completeOnboarding(15);
+    await machineA.store.addNewCards([
+      REVIEWED_MEANING_CARD,
+      NEW_LISTENING_CARD,
+    ]);
+    await machineA.backup.exportProgress(NOW);
+    const content = machineA.savedFiles[0]?.content ?? '';
+
+    const machineB = createMachine();
+    await new ProgressService(machineB.store).completeOnboarding(15);
+    await machineB.store.addNewCards([
+      { ...NEW_LISTENING_CARD, wordId: '谢谢', facet: 'meaning' },
+      { ...NEW_LISTENING_CARD, wordId: '谢谢' },
+    ]);
+
+    const inspection = await machineB.backup.inspectImportFile(
+      toBackupFileSource(content),
+    );
+    expect(inspection.status).toBe('valid');
+    if (inspection.status !== 'valid') {
+      return;
+    }
+    await machineB.backup.importProgress(inspection.snapshot);
+
+    expect(byCardKey(await machineB.store.getAllCards())).toEqual(
+      byCardKey([REVIEWED_MEANING_CARD, NEW_LISTENING_CARD]),
     );
   });
 });

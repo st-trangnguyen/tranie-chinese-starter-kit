@@ -150,7 +150,7 @@ Test: `packages/shared/src/progress-backup.schema.test.ts`, `apps/web/src/app/co
 - [ ] 8.11 GREEN: sửa đến khi pass; kiểm: test 8.10 pass
 - [x] 8.12 RED: S9.1-AC2 (bổ sung) "Xuất rồi nhập vẫn còn thẻ chiều viết và chữ đã viết" (Phần 3) — A: `人:writing`, chữ đã viết `人`, `你`; xuất, B nhập → B có `人:writing`, chữ `人`, `你`; B `createCardsForFinishedLesson(bài 你好)` rồi `recordCharacterWriting({ 好 })` → có `你好:writing`; kiểm: chạy, nếu pass ngay thì tạm bỏ `writtenCharacters` khỏi `exportAll` để thấy fail rồi trả lại
 - [ ] 8.13 GREEN: sửa đến khi pass; kiểm: test 8.12 pass
-- [ ] 8.14 RED: S9.1-AC1 (bổ sung) "Nhập ghi đè thẻ trên máy" (store + Phần 3) — B có `谢谢` meaning + listening; nhập snapshot chỉ có `你好` meaning + listening → `getAllCards()` chỉ 2 thẻ `你好`; kiểm: chạy, nếu pass ngay thì tạm bỏ `cards.clear()` trong `writeSnapshot` để thấy fail rồi trả lại
+- [x] 8.14 RED: S9.1-AC1 (bổ sung) "Nhập ghi đè thẻ trên máy" (store + Phần 3) — B có `谢谢` meaning + listening; nhập snapshot chỉ có `你好` meaning + listening → `getAllCards()` chỉ 2 thẻ `你好`; kiểm: chạy, nếu pass ngay thì tạm bỏ `cards.clear()` trong `writeSnapshot` để thấy fail rồi trả lại
 - [ ] 8.15 GREEN: sửa đến khi pass; kiểm: test 8.14 pass
 - [ ] 8.16 RED: S9.1-AC1 (bổ sung) "Ghi lỗi giữa chừng thì giữ nguyên thẻ" (store) — B có `谢谢` meaning + listening và chữ `人`; `vi.spyOn(db.cards, 'bulkPut' | 'bulkAdd').mockRejectedValueOnce` → `importAll` reject; thẻ `谢谢`, chữ `人`, `lessonProgress`, settings còn nguyên; lỗi ở `lessonProgress` cũng giữ thẻ; kiểm: chạy, nếu pass ngay thì tạm ghi bảng `cards` ngoài transaction để thấy fail rồi trả lại
 - [ ] 8.17 GREEN: sửa đến khi pass (năm bảng trong một transaction); kiểm: test 8.16 pass

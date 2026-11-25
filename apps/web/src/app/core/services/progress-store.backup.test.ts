@@ -1,4 +1,4 @@
-import type { LessonProgress, ProgressSnapshot } from '@csk/shared';
+import type { LessonProgress, ProgressSnapshot, ReviewCard } from '@csk/shared';
 
 import { createDatabase } from '@core/helpers/db.helper';
 import {
@@ -170,5 +170,54 @@ describe('DexieProgressStore — sao lưu tiến độ (S8.5)', () => {
     const rawAfter = await readRaw();
     expect(rawAfter).toEqual(rawBefore);
     expect(rawAfter.lessonProgress).toHaveLength(3);
+  });
+});
+
+const SCENARIO_OVERWRITE_CARDS = 'S9.1-AC1 (bổ sung) Nhập ghi đè thẻ trên máy';
+
+const newCard = (wordId: string, facet: ReviewCard['facet']): ReviewCard => ({
+  wordId,
+  facet,
+  state: 'new',
+  due: Date.UTC(2026, 10, 18, 3),
+  stability: 0,
+  difficulty: 0,
+  elapsedDays: 0,
+  scheduledDays: 0,
+  learningSteps: 0,
+  reps: 0,
+  lapses: 0,
+});
+
+describe('DexieProgressStore — ghi đè thẻ ôn tập (S9.1)', () => {
+  it(`${SCENARIO_OVERWRITE_CARDS}: máy có thẻ 谢谢, nhập snapshot chỉ có 你好 → chỉ còn 2 thẻ 你好`, async () => {
+    const { store } = openStore();
+    await store.addNewCards([
+      newCard('谢谢', 'meaning'),
+      newCard('谢谢', 'listening'),
+    ]);
+    const helloCards = [
+      newCard('你好', 'meaning'),
+      newCard('你好', 'listening'),
+    ];
+    const snapshot: ProgressSnapshot = {
+      settings: {
+        dailyGoalMinutes: 15,
+        hasCompletedOnboarding: true,
+        defaultAudioSpeed: 'normal',
+        isPinyinVisible: true,
+      },
+      lessonProgress: [],
+      dailyStats: [],
+      cards: helloCards,
+      writtenCharacters: [],
+    };
+
+    await store.importAll(snapshot);
+
+    const cards = await store.getAllCards();
+    expect(cards).toHaveLength(2);
+    expect(cards).toEqual(expect.arrayContaining(helloCards));
+    expect(cards.some((card) => card.wordId === '谢谢')).toBe(false);
   });
 });
