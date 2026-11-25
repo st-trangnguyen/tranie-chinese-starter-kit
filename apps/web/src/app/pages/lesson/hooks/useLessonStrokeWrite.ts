@@ -7,6 +7,7 @@ import type {
   StrokeAttemptResult,
   WritingPracticeState,
 } from '@shared/models/writing-practice.model';
+import { SrsService } from '@shared/services/srs.service';
 import { WritingPracticeService } from '@shared/services/writing-practice.service';
 
 /** State đã nạp, gắn với câu đã nạp để đổi câu không lẫn state cũ. */
@@ -31,6 +32,7 @@ export const useLessonStrokeWrite = (
     () => new WritingPracticeService(),
     [],
   );
+  const srsService = useMemo(() => new SrsService(), []);
   const [loaded, setLoaded] = useState<LoadedStrokeWrite | null>(null);
   const [attempt, setAttempt] = useState(0);
   /** Lượt viết mới nhất, gán đồng bộ trong handler để hai sự kiện liền nhau tính từ lượt mới. */
@@ -90,7 +92,7 @@ export const useLessonStrokeWrite = (
   const recordStrokeAttempt = useCallback(
     (result: StrokeAttemptResult) => {
       const previous = practiceRef.current;
-      if (!previous) {
+      if (!previous || character === null) {
         return;
       }
       const next = writingPracticeService.recordStrokeAttempt(previous, result);
@@ -101,10 +103,14 @@ export const useLessonStrokeWrite = (
         next,
       );
       if (lessonResult) {
+        // Lỗi ghi chữ đã viết / thẻ viết không báo cho người học (D5).
+        srsService
+          .recordCharacterWriting({ character, isGuided: true })
+          .catch(() => undefined);
         onResult(lessonResult);
       }
     },
-    [writingPracticeService, onResult],
+    [writingPracticeService, srsService, character, onResult],
   );
 
   if (exerciseId === null || character === null) {
