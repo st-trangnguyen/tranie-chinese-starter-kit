@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { reviewCardSchema, type Lesson, type ReviewCard } from '@csk/shared';
 
@@ -139,5 +139,57 @@ describe('SrsService — Phần 3: recordCharacterWriting', () => {
       cards.filter((card) => card.wordId === '人' && card.facet === 'writing'),
     ).toStrictEqual([reviewedWriting]);
     expect(await store.getWrittenCharacters()).toEqual(['人']);
+  });
+
+  it('S9.1-AC2 Thẻ chiều viết còn thiếu được tạo ở lần viết xong sau: đã có thẻ 人 nghĩa và nghe, lần viết 人 lưu lỗi → báo lỗi rõ nghĩa giữ lỗi gốc, 人 chưa là chữ đã viết, không thẻ 人 chiều viết (xong bài 人 lần nữa vẫn không); viết lại lưu được → có thẻ 人 chiều viết "mới"', async () => {
+    const { store, service } = openService([PERSON_LESSON]);
+    await service.createCardsForFinishedLesson(
+      PERSON_LESSON,
+      finishedSession(['p1']),
+      NOW,
+    );
+    expect(keysOf(await store.getAllCards())).toEqual([
+      '人:listening:new',
+      '人:meaning:new',
+    ]);
+    const storageError = new Error('QuotaExceededError');
+    vi.spyOn(store, 'addWrittenCharacter').mockRejectedValueOnce(storageError);
+
+    const failedWrite = service.recordCharacterWriting(
+      { character: '人', isGuided: true },
+      NOW + 60_000,
+    );
+
+    await expect(failedWrite).rejects.toThrow(
+      new Error('Không ghi nhận được chữ đã viết.'),
+    );
+    await expect(failedWrite).rejects.toHaveProperty('cause', storageError);
+    expect(await store.getWrittenCharacters()).not.toContain('人');
+    expect(keysOf(await store.getAllCards())).toEqual([
+      '人:listening:new',
+      '人:meaning:new',
+    ]);
+
+    await service.createCardsForFinishedLesson(
+      PERSON_LESSON,
+      finishedSession(['p1']),
+      NOW + 120_000,
+    );
+    expect(keysOf(await store.getAllCards())).toEqual([
+      '人:listening:new',
+      '人:meaning:new',
+    ]);
+
+    await service.recordCharacterWriting(
+      { character: '人', isGuided: true },
+      NOW + 180_000,
+    );
+
+    expect(await store.getWrittenCharacters()).toEqual(['人']);
+    expect(keysOf(await store.getAllCards())).toEqual([
+      '人:listening:new',
+      '人:meaning:new',
+      '人:writing:new',
+    ]);
   });
 });
