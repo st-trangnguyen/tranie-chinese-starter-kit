@@ -2,7 +2,10 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 
 import type { Word } from '@csk/shared';
 import { createDatabase } from '@core/helpers/db.helper';
-import { progressStore } from '@core/services/progress-store.service';
+import {
+  DexieProgressStore,
+  progressStore,
+} from '@core/services/progress-store.service';
 import { mockContentFetch, wordOf } from '@test/mocks/content-fetch';
 import { useLessonRunner } from './useLessonRunner';
 
@@ -233,5 +236,40 @@ describe('useLessonRunner — tạo thẻ ôn tập khi xong bài', () => {
     await settleWrites();
 
     expect(await cardKeysOf()).toEqual([]);
+  });
+
+  it('S9.1-AC1 Thẻ còn thiếu được tạo ở lần xong bài sau: lần đầu lưu thẻ lỗi, làm lại hết bài → có thẻ 你好 nghĩa và nghe', async () => {
+    mockGreetingContent();
+    vi.spyOn(DexieProgressStore.prototype, 'addNewCards').mockRejectedValueOnce(
+      new Error('QuotaExceededError'),
+    );
+    const finishLessonA = async (): Promise<() => void> => {
+      const { result, unmount } = renderHook(() => useLessonRunner('a'));
+      await waitFor(() => expect(result.current.session).not.toBeNull());
+      for (let step = 0; step < 2; step += 1) {
+        act(() => result.current.submitResult({ isCorrect: true }));
+        act(() => result.current.continueLesson());
+      }
+      expect(result.current.session?.phase).toBe('finished');
+      return unmount;
+    };
+
+    const unmountFirst = await finishLessonA();
+    await waitFor(async () =>
+      expect((await progressStore.getLessonProgress('a'))?.status).toBe(
+        'completed',
+      ),
+    );
+    await settleWrites();
+    expect(await cardKeysOf()).toEqual([]);
+    unmountFirst();
+
+    await finishLessonA();
+
+    await waitFor(async () =>
+      expect(await cardKeysOf()).toEqual(
+        expect.arrayContaining(['你好:meaning:new', '你好:listening:new']),
+      ),
+    );
   });
 });
