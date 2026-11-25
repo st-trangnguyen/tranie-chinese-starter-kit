@@ -30,6 +30,7 @@ export {
   PROGRESS_BACKUP_FORMAT_VERSION,
   progressBackupEnvelopeSchema,
   progressBackupV1Schema,
+  progressBackupV2Schema,
 } from './progress-backup.schema';
 export type {
   ProgressBackupFile,
@@ -79,5 +80,13 @@ export {
   strokeIndexSchema,
 } from './stroke.schema';
 export type { StrokeData, StrokeIndex } from './stroke.schema';
+export {
+  CARD_FACETS,
+  CARD_STATES,
+  reviewCardId,
+  reviewCardSchema,
+  writtenCharacterSchema,
+} from './review-card.schema';
+export type { CardFacet, CardState, ReviewCard } from './review-card.schema';
 export { INTRO_STAGE_ID, audioIndexSchema } from './audio-index.schema';
 export type { AudioIndex } from './audio-index.schema';

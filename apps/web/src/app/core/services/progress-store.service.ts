@@ -2,76 +2,42 @@ import {
   dailyStatSchema,
   lessonProgressSchema,
   parseSettings,
+  reviewCardId,
+  reviewCardSchema,
+  writtenCharacterSchema,
   type DailyGoalMinutes,
   type DailyStat,
   type LessonProgress,
   type ProgressSnapshot,
+  type ReviewCard,
   type Settings,
 } from '@csk/shared';
 
 import { createDatabase, type AppDatabase } from '@core/helpers/db.helper';
+import type { ProgressStore } from './progress-store.interface';
 
-/**
- * Cổng duy nhất đọc/ghi dữ liệu người dùng (03-architecture §6.3).
- * Các method khác (lessonProgress, cards, dailyStats…) thêm vào khi tới epic cần.
- */
-export interface ProgressStore {
-  getSettings(): Promise<Settings>;
-  /** Chỉ ghi các khóa có trong `patch` với giá trị khác `undefined`; khóa khác giữ nguyên. */
-  saveSettings(patch: Partial<Settings>): Promise<void>;
-  /** Mọi tiến độ bài hợp lệ; dòng hỏng bị bỏ qua (S3.1 AC2). */
-  getAllLessonProgress(): Promise<LessonProgress[]>;
-  /** Tiến độ một bài; không có dòng hoặc dòng hỏng thì `undefined` (S3.3). */
-  getLessonProgress(lessonId: string): Promise<LessonProgress | undefined>;
-  /** Ghi đè dòng cùng `lessonId`, không đụng bài khác. */
-  saveLessonProgress(progress: LessonProgress): Promise<void>;
-  /** Ghi mọi dòng trong một transaction: một dòng lỗi thì không dòng nào được ghi (S3.6). */
-  saveLessonProgressBatch(rows: LessonProgress[]): Promise<void>;
-  /** Thống kê học của một ngày (`YYYY-MM-DD`); chưa có thì `undefined` (S8.1). */
-  getDailyStat(date: string): Promise<DailyStat | undefined>;
-  /**
-   * Cộng dồn số giây đã học vào ngày `date` (S8.1) và chụp mục tiêu đang chọn
-   * (`settings.dailyGoalMinutes`) vào `goalMinutes` của dòng (S8.3, design D2).
-   * Store chỉ chụp giá trị mục tiêu đang chọn vào dòng: không rẽ nhánh theo mục tiêu, không so
-   * phút với mục tiêu, không quy tắc nghiệp vụ (quy tắc nằm ở `StudyTimeService` Phần 2).
-   */
-  addStudySeconds(date: string, seconds: number): Promise<void>;
-  /** Mọi thống kê ngày hợp lệ; dòng hỏng bị bỏ qua (S8.3). */
-  getAllDailyStats(): Promise<DailyStat[]>;
-  /**
-   * Đổi mục tiêu của ngày `date` rồi mục tiêu đang chọn (qua `saveSettings`) (S8.3).
-   * Ghi dòng ngày lỗi thì settings không đổi. Ghi settings lỗi thì settings giữ giá trị cũ
-   * (dòng ngày có thể đã mang mục tiêu mới; lần ghi phút kế tiếp chụp lại mục tiêu đang chọn).
-   */
-  saveDailyGoal(date: string, goalMinutes: DailyGoalMinutes): Promise<void>;
-  /**
-   * Toàn bộ tiến độ trên máy, đọc trong một transaction (S8.5, design D3): chờ mọi lần ghi
-   * phút/mục tiêu đang chờ trong tab, rồi đọc đúng như app đang thấy (settings qua
-   * `parseSettings`, dòng `lessonProgress`/`dailyStats` hỏng bị bỏ, `goalMinutes` hỏng thành
-   * không có). Không ghi gì. Lỗi IndexedDB thì reject.
-   * Thêm bảng dữ liệu người dùng (E9 `cards`, `reviewLogs`…) phải thêm vào cả `exportAll`,
-   * `importAll` và schema file sao lưu.
-   */
-  exportAll(): Promise<ProgressSnapshot>;
-  /**
-   * Ghi đè toàn bộ tiến độ bằng `snapshot` (S8.5, design D3): xếp hàng sau mọi lần ghi
-   * phút/mục tiêu đang chờ, rồi trong một transaction xóa cả ba bảng (`settings`,
-   * `lessonProgress`, `dailyStats`) và ghi dữ liệu của snapshot (giữ `goalMinutes` từng ngày).
-   * Không gộp: dòng trên máy không có trong snapshot bị xóa. Bất kỳ bước nào lỗi thì reject
-   * và dữ liệu cũ còn nguyên.
-   * Thêm bảng dữ liệu người dùng phải thêm vào cả `exportAll`, `importAll` và schema file.
-   */
-  importAll(snapshot: ProgressSnapshot): Promise<void>;
+export type { ProgressStore } from './progress-store.interface';
+
+/** Schema tối thiểu cho `parseRows`: chỉ cần `safeParse` (Zod schema thỏa). */
+interface RowSchema<T> {
+  safeParse(row: unknown): { success: true; data: T } | { success: false };
 }
+
+/** Validate từng dòng thô của bảng; dòng hỏng bị bỏ. */
+const parseRows = <T>(rows: readonly unknown[], schema: RowSchema<T>): T[] =>
+  rows.flatMap((row) => {
+    const result = schema.safeParse(row);
+    return result.success ? [result.data] : [];
+  });
 
 export class DexieProgressStore implements ProgressStore {
   /**
-   * Chuỗi các lần ghi thời gian học trong tab này (design D2): `getDailyStat` và
-   * `getAllDailyStats` chờ nó để đọc thấy cả lần ghi chưa xong
-   * (màn bài unmount ghi phần cuối, Trang chủ mount đọc ngay).
+   * Chuỗi các lần ghi cần đọc thấy ngay trong tab này (thời gian học, mục tiêu, import,
+   * thẻ ôn tập, chữ đã viết): các method đọc chờ nó để thấy cả lần ghi chưa xong
+   * (vd. màn bài unmount ghi phần cuối, Trang chủ mount đọc ngay).
    * Luôn resolve: lỗi một lần ghi không gãy chuỗi.
    */
-  private studyTimeWrites: Promise<void> = Promise.resolve();
+  private pendingWrites: Promise<void> = Promise.resolve();
 
   constructor(private readonly db: AppDatabase) {}
 
@@ -93,10 +59,7 @@ export class DexieProgressStore implements ProgressStore {
 
   async getAllLessonProgress(): Promise<LessonProgress[]> {
     const rows = await this.db.lessonProgress.toArray();
-    return rows.flatMap((row) => {
-      const result = lessonProgressSchema.safeParse(row);
-      return result.success ? [result.data] : [];
-    });
+    return parseRows(rows, lessonProgressSchema);
   }
 
   async getLessonProgress(
@@ -118,84 +81,132 @@ export class DexieProgressStore implements ProgressStore {
   }
 
   async getDailyStat(date: string): Promise<DailyStat | undefined> {
-    await this.studyTimeWrites;
+    await this.pendingWrites;
     const row = await this.db.dailyStats.get(date);
     const result = dailyStatSchema.safeParse(row);
     return result.success ? result.data : undefined;
   }
 
   async getAllDailyStats(): Promise<DailyStat[]> {
-    await this.studyTimeWrites;
+    await this.pendingWrites;
     const rows = await this.db.dailyStats.toArray();
-    return rows.flatMap((row) => {
-      const result = dailyStatSchema.safeParse(row);
-      return result.success ? [result.data] : [];
-    });
+    return parseRows(rows, dailyStatSchema);
   }
 
   saveDailyGoal(date: string, goalMinutes: DailyGoalMinutes): Promise<void> {
-    return this.enqueueStudyTimeWrite(() =>
-      this.writeDailyGoal(date, goalMinutes),
-    );
+    return this.enqueueWrite(() => this.writeDailyGoal(date, goalMinutes));
   }
 
   async exportAll(): Promise<ProgressSnapshot> {
-    await this.studyTimeWrites;
-    // Đọc ba bảng trong một transaction `r`: ảnh chụp nhất quán, không ghi gì.
+    await this.pendingWrites;
+    // Đọc năm bảng trong một transaction `r`: ảnh chụp nhất quán, không ghi gì.
+    // Chỉ đọc bảng thô (không gọi method chờ `pendingWrites`): chờ promise ngoài Dexie làm
+    // transaction commit sớm.
     return this.db.transaction(
       'r',
-      this.db.settings,
-      this.db.lessonProgress,
-      this.db.dailyStats,
+      [
+        this.db.settings,
+        this.db.lessonProgress,
+        this.db.dailyStats,
+        this.db.cards,
+        this.db.writtenCharacters,
+      ],
       async () => {
         const settings = await this.getSettings();
         const lessonRows = await this.db.lessonProgress.toArray();
         const dailyRows = await this.db.dailyStats.toArray();
+        const cardRows = await this.db.cards.toArray();
+        const characterRows = await this.db.writtenCharacters.toArray();
         return {
           settings,
-          lessonProgress: lessonRows.flatMap((row) => {
-            const result = lessonProgressSchema.safeParse(row);
-            return result.success ? [result.data] : [];
-          }),
-          dailyStats: dailyRows.flatMap((row) => {
-            const result = dailyStatSchema.safeParse(row);
-            return result.success ? [result.data] : [];
-          }),
+          lessonProgress: parseRows(lessonRows, lessonProgressSchema),
+          dailyStats: parseRows(dailyRows, dailyStatSchema),
+          cards: parseRows(cardRows, reviewCardSchema),
+          writtenCharacters: parseRows(
+            characterRows,
+            writtenCharacterSchema,
+          ).map((row) => row.character),
         };
       },
     );
   }
 
   importAll(snapshot: ProgressSnapshot): Promise<void> {
-    return this.enqueueStudyTimeWrite(() => this.writeSnapshot(snapshot));
+    return this.enqueueWrite(() => this.writeSnapshot(snapshot));
   }
 
   addStudySeconds(date: string, seconds: number): Promise<void> {
-    return this.enqueueStudyTimeWrite(() =>
-      this.writeStudySeconds(date, seconds),
-    );
+    return this.enqueueWrite(() => this.writeStudySeconds(date, seconds));
   }
 
-  private enqueueStudyTimeWrite(task: () => Promise<void>): Promise<void> {
+  async getAllCards(): Promise<ReviewCard[]> {
+    await this.pendingWrites;
+    const rows = await this.db.cards.toArray();
+    return parseRows(rows, reviewCardSchema);
+  }
+
+  addNewCards(cards: readonly ReviewCard[]): Promise<void> {
+    return this.enqueueWrite(() => this.writeNewCards(cards));
+  }
+
+  async getWrittenCharacters(): Promise<string[]> {
+    await this.pendingWrites;
+    const rows = await this.db.writtenCharacters.toArray();
+    return parseRows(rows, writtenCharacterSchema).map((row) => row.character);
+  }
+
+  addWrittenCharacter(character: string): Promise<void> {
+    // `put` theo khóa chữ: viết lại cùng chữ không tạo dòng mới.
+    return this.enqueueWrite(async () => {
+      await this.db.writtenCharacters.put({ character });
+    });
+  }
+
+  private enqueueWrite(task: () => Promise<void>): Promise<void> {
     // Nối vào chuỗi đồng bộ (trước mọi `await`) để lần đọc gọi ngay sau đó chờ được lần ghi này.
-    const write = this.studyTimeWrites.then(task);
+    const write = this.pendingWrites.then(task);
     // Lỗi vẫn reject cho người gọi qua `write`; bản trong chuỗi chỉ bỏ lỗi để lần sau chạy tiếp.
-    this.studyTimeWrites = write.catch(() => undefined);
+    this.pendingWrites = write.catch(() => undefined);
     return write;
   }
 
+  private async writeNewCards(cards: readonly ReviewCard[]): Promise<void> {
+    if (cards.length === 0) {
+      return;
+    }
+    const rows = cards.map((card) => ({
+      ...card,
+      id: reviewCardId(card.wordId, card.facet),
+    }));
+    // Đọc khóa đã có và thêm trong cùng transaction `rw`: thẻ đã có (kể cả do tab khác vừa tạo)
+    // giữ nguyên trạng thái và lịch ôn, chỉ thẻ chưa có được thêm.
+    await this.db.transaction('rw', this.db.cards, async () => {
+      const existing = await this.db.cards.bulkGet(rows.map((row) => row.id));
+      const newRows = rows.filter((_, index) => existing[index] === undefined);
+      if (newRows.length > 0) {
+        await this.db.cards.bulkAdd(newRows);
+      }
+    });
+  }
+
   private async writeSnapshot(snapshot: ProgressSnapshot): Promise<void> {
-    // Xóa + ghi cả ba bảng trong một transaction: bước nào lỗi thì Dexie abort,
+    // Xóa + ghi cả năm bảng trong một transaction: bước nào lỗi thì Dexie abort,
     // dữ liệu cũ còn nguyên.
     await this.db.transaction(
       'rw',
-      this.db.settings,
-      this.db.lessonProgress,
-      this.db.dailyStats,
+      [
+        this.db.settings,
+        this.db.lessonProgress,
+        this.db.dailyStats,
+        this.db.cards,
+        this.db.writtenCharacters,
+      ],
       async () => {
         await this.db.settings.clear();
         await this.db.lessonProgress.clear();
         await this.db.dailyStats.clear();
+        await this.db.cards.clear();
+        await this.db.writtenCharacters.clear();
         const settingsRows = Object.entries(snapshot.settings).map(
           ([key, value]) => ({ key, value }),
         );
@@ -203,6 +214,15 @@ export class DexieProgressStore implements ProgressStore {
         await this.db.lessonProgress.bulkPut(snapshot.lessonProgress);
         // Giữ nguyên `goalMinutes` của từng ngày như trong snapshot.
         await this.db.dailyStats.bulkPut(snapshot.dailyStats);
+        await this.db.cards.bulkPut(
+          snapshot.cards.map((card) => ({
+            ...card,
+            id: reviewCardId(card.wordId, card.facet),
+          })),
+        );
+        await this.db.writtenCharacters.bulkPut(
+          snapshot.writtenCharacters.map((character) => ({ character })),
+        );
       },
     );
   }

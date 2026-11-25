@@ -1,0 +1,18 @@
+{
+  "format": "tranie-chinese-progress",
+  "formatVersion": 1,
+  "exportedOn": "2026-11-20",
+  "settings": {
+    "dailyGoalMinutes": 15,
+    "hasCompletedOnboarding": true,
+    "defaultAudioSpeed": "normal",
+    "isPinyinVisible": true
+  },
+  "lessonProgress": [
+    {
+      "lessonId": "s91-a",
+      "status": "completed"
+    }
+  ],
+  "dailyStats": []
+}

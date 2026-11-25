@@ -1,6 +1,6 @@
 {
   "format": "tranie-chinese-progress",
-  "formatVersion": 2,
+  "formatVersion": 3,
   "exportedOn": "2026-11-17",
   "settings": {
     "dailyGoalMinutes": 15,

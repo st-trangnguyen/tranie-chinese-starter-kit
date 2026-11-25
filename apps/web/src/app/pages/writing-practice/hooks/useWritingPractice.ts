@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { StrokeOrderView } from '@shared/models/stroke-order.model';
 import type {
   StrokeAttemptResult,
   WritingPracticeState,
 } from '@shared/models/writing-practice.model';
+import { SrsService } from '@shared/services/srs.service';
 import { WritingPracticeService } from '@shared/services/writing-practice.service';
 
 export interface WritingPracticeScreenState {
@@ -26,12 +27,16 @@ export const useWritingPractice = (
     () => new WritingPracticeService(),
     [],
   );
+  const srsService = useMemo(() => new SrsService(), []);
   const [view, setView] = useState<StrokeOrderView>({ status: 'loading' });
   const [practice, setPractice] = useState<WritingPracticeState | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [padKey, setPadKey] = useState(0);
+  /** Lượt viết mới nhất, gán đồng bộ trong handler để hai sự kiện liền nhau tính từ lượt mới. */
+  const practiceRef = useRef<WritingPracticeState | null>(null);
 
   useEffect(() => {
+    practiceRef.current = null;
     let isActive = true;
     writingPracticeService
       .loadCharacter(character)
@@ -48,11 +53,11 @@ export const useWritingPractice = (
           character: result.character,
           strokeData: result.strokeData,
         });
-        setPractice(
-          writingPracticeService.startPractice(
-            result.strokeData.strokes.length,
-          ),
+        const started = writingPracticeService.startPractice(
+          result.strokeData.strokes.length,
         );
+        practiceRef.current = started;
+        setPractice(started);
       })
       .catch(() => {
         if (isActive) {
@@ -73,13 +78,21 @@ export const useWritingPractice = (
   /** Ổn định giữa các lần render để khung không tạo lại writer chấm nét. */
   const recordStrokeAttempt = useCallback(
     (result: StrokeAttemptResult) => {
-      setPractice(
-        (previous) =>
-          previous &&
-          writingPracticeService.recordStrokeAttempt(previous, result),
-      );
+      const previous = practiceRef.current;
+      if (!previous || view.status !== 'ready') {
+        return;
+      }
+      const next = writingPracticeService.recordStrokeAttempt(previous, result);
+      practiceRef.current = next;
+      setPractice(next);
+      if (writingPracticeService.hasJustCompleted(previous, next)) {
+        // Lỗi ghi chữ đã viết / thẻ viết không báo cho người học (D5).
+        srsService
+          .recordCharacterWriting({ character: view.character, isGuided: true })
+          .catch(() => undefined);
+      }
     },
-    [writingPracticeService],
+    [writingPracticeService, srsService, view],
   );
 
   /** Viết lại chữ vừa xong: lượt mới từ nét đầu và khung viết mới (writer cũ bị huỷ cùng khung cũ). */
@@ -87,9 +100,11 @@ export const useWritingPractice = (
     if (view.status !== 'ready') {
       return;
     }
-    setPractice(
-      writingPracticeService.startPractice(view.strokeData.strokes.length),
+    const started = writingPracticeService.startPractice(
+      view.strokeData.strokes.length,
     );
+    practiceRef.current = started;
+    setPractice(started);
     setPadKey((previous) => previous + 1);
   }, [writingPracticeService, view]);
 

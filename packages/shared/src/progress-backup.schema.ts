@@ -9,12 +9,18 @@ import {
   localDateKeySchema,
   settingsStrictSchema,
 } from './progress.schema';
+import {
+  type ReviewCard,
+  reviewCardId,
+  reviewCardSchema,
+} from './review-card.schema';
+import { hanCharacterSchema } from './stroke.schema';
 
 /** Dấu nhận file tiến độ do app xuất (S8.5, design D2). */
 export const PROGRESS_BACKUP_FORMAT = 'tranie-chinese-progress';
 
 /** Phiên bản định dạng file tiến độ bản app này đọc được. */
-export const PROGRESS_BACKUP_FORMAT_VERSION = 1;
+export const PROGRESS_BACKUP_FORMAT_VERSION = 2;
 
 /** Vỏ file sao lưu: chỉ để phân loại file trước khi kiểm chi tiết. */
 export const progressBackupEnvelopeSchema = z.object({
@@ -42,7 +48,7 @@ const hasNoDuplicates = (keys: readonly string[]): boolean =>
  */
 export const progressBackupV1Schema = z.object({
   format: z.literal(PROGRESS_BACKUP_FORMAT),
-  formatVersion: z.literal(PROGRESS_BACKUP_FORMAT_VERSION),
+  formatVersion: z.literal(1),
   exportedOn: localDateKeySchema.refine(isRealCalendarDate),
   settings: settingsStrictSchema,
   lessonProgress: z
@@ -53,11 +59,29 @@ export const progressBackupV1Schema = z.object({
     .refine((rows) => hasNoDuplicates(rows.map((row) => row.date))),
 });
 
-/** Toàn bộ tiến độ trên máy, đọc/ghi một lần (S8.5). */
+/**
+ * File tiến độ phiên bản 2 (S9.1, design D6): thêm thẻ ôn tập và chữ đã viết.
+ * Một thẻ sai là cả file sai; thẻ của từ lạ vẫn hợp lệ (không đối chiếu nội dung).
+ */
+export const progressBackupV2Schema = progressBackupV1Schema.extend({
+  formatVersion: z.literal(2),
+  cards: z
+    .array(reviewCardSchema)
+    .refine((cards) =>
+      hasNoDuplicates(
+        cards.map((card) => reviewCardId(card.wordId, card.facet)),
+      ),
+    ),
+  writtenCharacters: z.array(hanCharacterSchema).refine(hasNoDuplicates),
+});
+
+/** Toàn bộ tiến độ trên máy, đọc/ghi một lần (S8.5, S9.1). */
 export interface ProgressSnapshot {
   settings: Settings;
   lessonProgress: LessonProgress[];
   dailyStats: DailyStat[];
+  cards: ReviewCard[];
+  writtenCharacters: string[];
 }
 
 /** Nội dung file sao lưu: tiến độ kèm dấu nhận, phiên bản và ngày xuất. */

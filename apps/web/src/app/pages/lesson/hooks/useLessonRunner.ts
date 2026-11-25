@@ -12,6 +12,7 @@ import type {
 } from '@shared/models/lesson-session.model';
 import { ContentService } from '@shared/services/content.service';
 import { LessonService } from '@shared/services/lesson.service';
+import { SrsService } from '@shared/services/srs.service';
 
 export interface LessonRunnerState {
   /** null khi đang nạp hoặc lỗi. */
@@ -62,6 +63,7 @@ export const useLessonRunner = (
   const placementUnitId = options?.placementUnitId;
   const service = useMemo(() => new LessonService(), []);
   const contentService = useMemo(() => new ContentService(), []);
+  const srsService = useMemo(() => new SrsService(), []);
   const [opened, setOpened] = useState<OpenedState | null>(null);
   const [failedLessonId, setFailedLessonId] = useState<string | null>(null);
   const [unsavedLessonId, setUnsavedLessonId] = useState<string | null>(null);
@@ -139,6 +141,7 @@ export const useLessonRunner = (
   const current = opened?.lessonId === lessonId ? opened : null;
   const session = current?.session ?? null;
   const lessonType = current?.lesson.type ?? null;
+  const openedLesson = current?.lesson ?? null;
 
   // Lưu vị trí khi đổi câu hoặc kết thúc bài (D4); không lưu khi chỉ xem kết quả.
   const latestSessionRef = useRef<LessonSession | null>(null);
@@ -176,7 +179,7 @@ export const useLessonRunner = (
   // (session đang trả lời), nên session cũ còn sót lúc đổi bài không ghi lần hai. Kết quả
   // gắn với lessonId nên bài cũ không đè lên bài mới.
   useEffect(() => {
-    if (openedLessonId === null) {
+    if (openedLessonId === null || openedLesson === null) {
       return;
     }
     if (!isFinished) {
@@ -205,8 +208,20 @@ export const useLessonRunner = (
       .then((outcome) =>
         setUnsavedLessonId(outcome.isSaved ? null : openedLessonId),
       )
-      .catch(() => setUnsavedLessonId(openedLessonId));
-  }, [service, contentService, placementUnitId, openedLessonId, isFinished]);
+      .catch(() => setUnsavedLessonId(openedLessonId))
+      // Tạo thẻ ôn tập bất kể ghi "đã xong" thành công hay không, và lỗi tạo thẻ không đổi
+      // isSaved: thẻ còn thiếu được tạo bù ở lần xong bài sau (S9.1, D5).
+      .then(() => srsService.createCardsForFinishedLesson(openedLesson, latest))
+      .catch(() => undefined);
+  }, [
+    service,
+    contentService,
+    srsService,
+    placementUnitId,
+    openedLessonId,
+    openedLesson,
+    isFinished,
+  ]);
 
   const summary = useMemo(
     () =>

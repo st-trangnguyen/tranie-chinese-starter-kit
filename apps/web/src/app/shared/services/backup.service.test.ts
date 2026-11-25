@@ -83,7 +83,7 @@ describe('BackupService.checkBackupText — file từ phiên bản app mới hơ
       'phiên bản kế tiếp, thân không đọc được',
       PROGRESS_BACKUP_FORMAT_VERSION + 1,
     ],
-    ['phiên bản lẻ lớn hơn 1', 1.5],
+    ['phiên bản lẻ lớn hơn bản hiện tại', PROGRESS_BACKUP_FORMAT_VERSION + 0.5],
   ])(
     'S8.5-AC2 File từ phiên bản app mới hơn bị từ chối: %s → newer-version',
     (_label, formatVersion) => {
@@ -185,6 +185,8 @@ describe('BackupService — xuất file sao lưu', () => {
       { lessonId: 'intro-02', status: 'in-progress', cursor: 3 },
     ],
     dailyStats: [{ date: '2026-11-17', studySeconds: 720, goalMinutes: 15 }],
+    cards: [],
+    writtenCharacters: [],
   };
 
   it.each([
@@ -221,7 +223,7 @@ describe('BackupService — xuất file sao lưu', () => {
     }).not.toThrow();
     expect(parsed).toMatchObject({
       format: PROGRESS_BACKUP_FORMAT,
-      formatVersion: 1,
+      formatVersion: PROGRESS_BACKUP_FORMAT_VERSION,
       exportedOn: '2026-11-17',
     });
     expect(service.checkBackupText(text)).toEqual({
@@ -229,7 +231,7 @@ describe('BackupService — xuất file sao lưu', () => {
       file: {
         ...snapshot,
         format: PROGRESS_BACKUP_FORMAT,
-        formatVersion: 1,
+        formatVersion: PROGRESS_BACKUP_FORMAT_VERSION,
         exportedOn: '2026-11-17',
       },
     });

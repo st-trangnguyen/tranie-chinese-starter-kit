@@ -103,13 +103,21 @@ export class WritingPracticeService {
     }
   }
 
+  // Rule: lượt viết vừa chuyển sang xong chữ (chưa xong → xong).
+  hasJustCompleted(
+    previous: WritingPracticeState,
+    next: WritingPracticeState,
+  ): boolean {
+    return !previous.isComplete && next.isComplete;
+  }
+
   // Rule: trong màn bài, câu viết chỉ có kết quả "Đúng", đúng một lần lúc vừa xong chữ; viết sai
   // nét không cho kết quả. Không có giải thích.
   lessonResultOf(
     previous: WritingPracticeState,
     next: WritingPracticeState,
   ): ExerciseResult | null {
-    if (!previous.isComplete && next.isComplete) {
+    if (this.hasJustCompleted(previous, next)) {
       return { isCorrect: true };
     }
     return null;

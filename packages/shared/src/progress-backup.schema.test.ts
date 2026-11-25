@@ -39,7 +39,7 @@ describe('progressBackupEnvelopeSchema', () => {
 /** File v1 hợp lệ: bài 2, bài 3 đã xong, đủ bốn field cài đặt. */
 const buildValidV1File = (): Record<string, unknown> => ({
   format: PROGRESS_BACKUP_FORMAT,
-  formatVersion: PROGRESS_BACKUP_FORMAT_VERSION,
+  formatVersion: 1,
   exportedOn: '2026-11-17',
   settings: {
     dailyGoalMinutes: 30,

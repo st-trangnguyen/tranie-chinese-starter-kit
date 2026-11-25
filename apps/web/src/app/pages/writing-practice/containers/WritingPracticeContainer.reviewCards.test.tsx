@@ -1,0 +1,185 @@
+import { describe, expect, it, vi } from 'vitest';
+
+import { createDatabase } from '@core/helpers/db.helper';
+import { progressStore } from '@core/services/progress-store.service';
+import { SrsService } from '@shared/services/srs.service';
+import {
+  PERSON,
+  installLessonStrokeWriteFetch,
+} from '@test/lesson-stroke-write.helpers';
+import { FakeHanziWriter } from '@test/mocks/hanzi-writer';
+import { act, screen, userEvent, waitFor } from '@test/render';
+import { openRoute, setupStrokeOrderRoute } from '@test/stroke-order-route';
+
+// Ranh giới ngoài: thư viện vẽ/chấm nét hanzi-writer được thay bằng bản giả điều khiển được.
+vi.mock('hanzi-writer', async () => {
+  const mock = await import('@test/mocks/hanzi-writer');
+  return { default: mock.FakeHanziWriter };
+});
+
+setupStrokeOrderRoute();
+
+const NOW = Date.UTC(2026, 10, 25, 8, 30);
+
+/** Xoá mọi bảng của IndexedDB thật (fake-indexeddb) của app. */
+const clearDatabase = async (): Promise<void> => {
+  const db = createDatabase();
+  await Promise.all(db.tables.map((table) => table.clear()));
+  db.close();
+};
+
+/** Người học đã làm xong bài có từ 人: đã có thẻ 人 chiều nghĩa và chiều nghe. */
+const seedLearnedPerson = async (): Promise<void> => {
+  const srs = new SrsService();
+  await progressStore.addNewCards([
+    srs.createNewCard(PERSON, 'meaning', NOW),
+    srs.createNewCard(PERSON, 'listening', NOW),
+  ]);
+};
+
+/** Mở màn luyện viết của 人, chờ khung viết hiện và quiz của writer kích hoạt. */
+const openPersonPadWithActiveQuiz = async (): Promise<FakeHanziWriter> => {
+  openRoute(`/characters/${encodeURIComponent(PERSON)}/writing-practice`);
+  await screen.findByRole(
+    'figure',
+    { name: `Khung viết chữ ${PERSON}` },
+    { timeout: 3000 },
+  );
+  await waitFor(() => expect(FakeHanziWriter.last().isQuizActive).toBe(true));
+  return FakeHanziWriter.last();
+};
+
+describe('WritingPracticeContainer — thẻ chiều viết (S9.1)', () => {
+  it('S9.1-AC2 Viết xong chữ của từ đã học thì tạo thẻ chiều viết: should record 人 as written and create a new 人 writing card after writing every stroke of 人 on /characters/人/writing-practice', async () => {
+    await clearDatabase();
+    // Nội dung thật cho từ 人 (words.json) + file nét thật (人 có 2 nét).
+    installLessonStrokeWriteFetch();
+    await seedLearnedPerson();
+    expect(await progressStore.getWrittenCharacters()).toEqual([]);
+
+    const writer = await openPersonPadWithActiveQuiz();
+
+    act(() => writer.emitCorrectStroke());
+    act(() => writer.emitCorrectStroke());
+
+    // Màn báo đã viết xong chữ.
+    expect(
+      await screen.findByRole('status', {}, { timeout: 3000 }),
+    ).toHaveTextContent(`Đã viết xong chữ ${PERSON}.`);
+
+    // Chữ 人 được ghi là đã viết, và có thẻ 人 chiều viết ở trạng thái "mới".
+    await waitFor(async () => {
+      expect(await progressStore.getWrittenCharacters()).toEqual([PERSON]);
+    });
+    await waitFor(async () => {
+      const writingCards = (await progressStore.getAllCards()).filter(
+        (card) => card.wordId === PERSON && card.facet === 'writing',
+      );
+      expect(writingCards).toHaveLength(1);
+      expect(writingCards[0]?.state).toBe('new');
+    });
+  });
+
+  it('S9.1-AC2 Viết dở không tính: should not record 人 as written nor create a 人 writing card when the learner writes only the first stroke of 人 and leaves the writing practice screen', async () => {
+    await clearDatabase();
+    installLessonStrokeWriteFetch();
+    await seedLearnedPerson();
+
+    const { unmount } = openRoute(
+      `/characters/${encodeURIComponent(PERSON)}/writing-practice`,
+    );
+    await screen.findByRole(
+      'figure',
+      { name: `Khung viết chữ ${PERSON}` },
+      { timeout: 3000 },
+    );
+    await waitFor(() => expect(FakeHanziWriter.last().isQuizActive).toBe(true));
+    const writer = FakeHanziWriter.last();
+
+    // Chỉ viết đúng nét đầu (人 có 2 nét): chưa xong chữ.
+    act(() => writer.emitCorrectStroke());
+    expect(screen.queryByText(`Đã viết xong chữ ${PERSON}.`)).toBeNull();
+
+    // Thoát màn luyện viết.
+    unmount();
+    // Chờ mọi lần ghi IndexedDB (nếu có) kịp hoàn tất trước khi đọc.
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 100);
+    });
+
+    expect(await progressStore.getWrittenCharacters()).toEqual([]);
+    const cards = await progressStore.getAllCards();
+    expect(
+      cards.filter(
+        (card) => card.wordId === PERSON && card.facet === 'writing',
+      ),
+    ).toEqual([]);
+    // Thẻ nghĩa và nghe của 人 vẫn còn nguyên.
+    expect(
+      cards
+        .filter((card) => card.wordId === PERSON)
+        .map((card) => card.facet)
+        .toSorted(),
+    ).toEqual(['listening', 'meaning']);
+  });
+
+  it('S9.1-AC2 Viết xong chữ vẫn báo xong khi không lưu được: should still announce 人 as written with a usable "Viết lại" button, show no alert and create no 人 writing card when saving the written character fails', async () => {
+    await clearDatabase();
+    installLessonStrokeWriteFetch();
+    await seedLearnedPerson();
+    // Lưu chữ đã viết bị lỗi (IndexedDB từ chối ghi).
+    const addWrittenSpy = vi
+      .spyOn(progressStore, 'addWrittenCharacter')
+      .mockRejectedValue(new Error('QuotaExceededError'));
+    try {
+      const user = userEvent.setup();
+      const writer = await openPersonPadWithActiveQuiz();
+
+      act(() => writer.emitCorrectStroke());
+      act(() => writer.emitCorrectStroke());
+
+      // Màn vẫn báo đã viết xong chữ như bình thường.
+      expect(
+        await screen.findByRole('status', {}, { timeout: 3000 }),
+      ).toHaveTextContent(`Đã viết xong chữ ${PERSON}.`);
+      await waitFor(() => expect(addWrittenSpy).toHaveBeenCalledWith(PERSON));
+      // Chờ lời ghi bị từ chối kịp lan ra (nếu bị bỏ lọt) trước khi kiểm.
+      await act(async () => {
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 100);
+        });
+      });
+
+      // Không có thông báo lỗi nào.
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(screen.getByRole('status')).toHaveTextContent(
+        `Đã viết xong chữ ${PERSON}.`,
+      );
+
+      // Không có thẻ 人 chiều viết.
+      const writingCards = (await progressStore.getAllCards()).filter(
+        (card) => card.wordId === PERSON && card.facet === 'writing',
+      );
+      expect(writingCards).toEqual([]);
+
+      // Nút "Viết lại" dùng được: bấm thì bắt đầu lượt mới từ nét đầu.
+      const restartButton = screen.getByRole('button', { name: 'Viết lại' });
+      expect(restartButton).toBeEnabled();
+      await user.click(restartButton);
+      await waitFor(() => {
+        const candidate = FakeHanziWriter.last();
+        expect(candidate).not.toBe(writer);
+        expect(candidate.isQuizActive).toBe(true);
+      });
+      expect(
+        screen.queryByText(`Đã viết xong chữ ${PERSON}.`),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole('figure', { name: `Khung viết chữ ${PERSON}` }),
+      ).toHaveAttribute('data-completed-stroke-count', '0');
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    } finally {
+      addWrittenSpy.mockRestore();
+    }
+  });
+});
