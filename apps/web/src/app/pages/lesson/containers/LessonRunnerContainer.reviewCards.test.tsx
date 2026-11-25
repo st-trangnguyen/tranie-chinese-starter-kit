@@ -5,9 +5,24 @@ import {
   progressStore,
 } from '@core/services/progress-store.service';
 import type { ExerciseRegistry } from '@shared/components/exercises/exercise.registry';
+import {
+  PERSON,
+  STROKE_WRITE_LESSON,
+  emitCorrectStroke,
+  findLessonPad,
+  renderLessonRunner,
+  setupLessonStrokeWrite,
+  waitForActiveQuiz,
+} from '@test/lesson-stroke-write.helpers';
 import { mockContentFetch, wordOf } from '@test/mocks/content-fetch';
 import { renderWithProviders, screen, waitFor } from '@test/render';
 import LessonRunnerContainer from './LessonRunnerContainer';
+
+// Ranh giới ngoài: thư viện vẽ/chấm nét hanzi-writer được thay bằng bản giả điều khiển được.
+vi.mock('hanzi-writer', async () => {
+  const mock = await import('@test/mocks/hanzi-writer');
+  return { default: mock.FakeHanziWriter };
+});
 
 const LESSON_ID = 'greeting';
 
@@ -110,5 +125,53 @@ describe('LessonRunnerContainer — tạo thẻ ôn tập (S9.1)', () => {
     ).not.toBeInTheDocument();
     const cards = await progressStore.getAllCards();
     expect(cards.filter((card) => card.wordId === '你好')).toEqual([]);
+  });
+});
+
+describe('LessonRunnerContainer — câu viết trong bài và thẻ chiều viết (S9.1)', () => {
+  const env = setupLessonStrokeWrite();
+
+  /** Bài học có câu viết chữ 人 rồi câu chọn thanh của 人. */
+  const PERSON_LESSON = {
+    ...STROKE_WRITE_LESSON,
+    exercises: [
+      { id: 'e1', kind: 'stroke-write', wordId: PERSON },
+      { id: 'e2', kind: 'tone-choice', wordId: PERSON },
+    ],
+  };
+
+  it('S9.1-AC2 Làm hết bài có câu viết chữ thì có đủ ba chiều: should create exactly 3 new 人 cards (meaning, listening, writing) after writing every stroke of 人 and answering the rest of the lesson', async () => {
+    env.replaceFetch({ lesson: PERSON_LESSON });
+    expect(await progressStore.getAllCards()).toEqual([]);
+    expect(await progressStore.getWrittenCharacters()).toEqual([]);
+    const { user } = renderLessonRunner();
+
+    await findLessonPad(PERSON);
+    const writer = await waitForActiveQuiz(PERSON);
+    emitCorrectStroke(writer);
+    emitCorrectStroke(writer);
+    expect(await screen.findByText('Đúng')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+
+    await user.click(await screen.findByRole('button', { name: 'Thanh 2' }));
+    await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+    expect(
+      await screen.findByText('Bạn đã làm xong các câu của bài này.'),
+    ).toBeInTheDocument();
+
+    await waitFor(async () => {
+      const cards = await progressStore.getAllCards();
+      expect(
+        cards
+          .filter((card) => card.wordId === PERSON)
+          .map((card) => card.facet)
+          .sort(),
+      ).toEqual(['listening', 'meaning', 'writing']);
+    });
+    const personCards = (await progressStore.getAllCards()).filter(
+      (card) => card.wordId === PERSON,
+    );
+    expect(personCards).toHaveLength(3);
+    expect(personCards.every((card) => card.state === 'new')).toBe(true);
   });
 });
