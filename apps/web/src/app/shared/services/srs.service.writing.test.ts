@@ -192,4 +192,48 @@ describe('SrsService — Phần 3: recordCharacterWriting', () => {
       '人:writing:new',
     ]);
   });
+
+  it('S9.1-AC2 Thẻ chiều viết còn thiếu được tạo ở lần xong bài sau: đã có thẻ 人 nghĩa và nghe, viết xong 人 nhưng lưu thẻ chiều viết lỗi → báo lỗi rõ nghĩa giữ lỗi gốc, 人 đã là chữ đã viết, không thẻ 人 chiều viết; xong bài 人 lần nữa lưu được → có thẻ 人 chiều viết "mới", vẫn một thẻ nghĩa và một thẻ nghe', async () => {
+    const { store, service } = openService([PERSON_LESSON]);
+    await service.createCardsForFinishedLesson(
+      PERSON_LESSON,
+      finishedSession(['p1']),
+      NOW,
+    );
+    expect(keysOf(await store.getAllCards())).toEqual([
+      '人:listening:new',
+      '人:meaning:new',
+    ]);
+    const storageError = new Error('QuotaExceededError');
+    vi.spyOn(store, 'addNewCards').mockRejectedValueOnce(storageError);
+
+    const failedWrite = service.recordCharacterWriting(
+      { character: '人', isGuided: true },
+      NOW + 60_000,
+    );
+
+    await expect(failedWrite).rejects.toThrow(
+      new Error('Không tạo được thẻ chiều viết.'),
+    );
+    await expect(failedWrite).rejects.toHaveProperty('cause', storageError);
+    expect(await store.getWrittenCharacters()).toEqual(['人']);
+    expect(keysOf(await store.getAllCards())).toEqual([
+      '人:listening:new',
+      '人:meaning:new',
+    ]);
+
+    await service.createCardsForFinishedLesson(
+      PERSON_LESSON,
+      finishedSession(['p1']),
+      NOW + 120_000,
+    );
+
+    const cards = await store.getAllCards();
+    expect(keysOf(cards)).toEqual([
+      '人:listening:new',
+      '人:meaning:new',
+      '人:writing:new',
+    ]);
+    expect(cards).toHaveLength(3);
+  });
 });
