@@ -3,6 +3,7 @@ import {
   PROGRESS_BACKUP_FORMAT_VERSION,
   progressBackupEnvelopeSchema,
   progressBackupV1Schema,
+  progressBackupV2Schema,
   type LessonProgress,
   type ProgressBackupFile,
   type ProgressSnapshot,
@@ -105,15 +106,27 @@ export class BackupService {
     if (envelope.data.formatVersion > PROGRESS_BACKUP_FORMAT_VERSION) {
       return { status: 'rejected', reason: 'newer-version' };
     }
-    const file = progressBackupV1Schema.safeParse(parsed);
+    if (envelope.data.formatVersion === 1) {
+      const v1File = progressBackupV1Schema.safeParse(parsed);
+      if (!v1File.success) {
+        return { status: 'rejected', reason: 'corrupted' };
+      }
+      // File trước S9.1 nhập như không có thẻ và chữ đã viết (rule tách riêng ở task 8.9).
+      return {
+        status: 'valid',
+        file: {
+          ...v1File.data,
+          formatVersion: PROGRESS_BACKUP_FORMAT_VERSION,
+          cards: [],
+          writtenCharacters: [],
+        },
+      };
+    }
+    const file = progressBackupV2Schema.safeParse(parsed);
     if (!file.success) {
       return { status: 'rejected', reason: 'corrupted' };
     }
-    // Skeleton RED S9.1 task 8.2: chưa có nhánh V1/V2 (task 8.3).
-    return {
-      status: 'valid',
-      file: { ...file.data, cards: [], writtenCharacters: [] },
-    };
+    return { status: 'valid', file: file.data };
   }
 
   /**

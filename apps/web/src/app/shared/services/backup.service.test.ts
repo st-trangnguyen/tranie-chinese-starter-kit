@@ -83,7 +83,7 @@ describe('BackupService.checkBackupText — file từ phiên bản app mới hơ
       'phiên bản kế tiếp, thân không đọc được',
       PROGRESS_BACKUP_FORMAT_VERSION + 1,
     ],
-    ['phiên bản lẻ lớn hơn 1', 1.5],
+    ['phiên bản lẻ lớn hơn bản hiện tại', PROGRESS_BACKUP_FORMAT_VERSION + 0.5],
   ])(
     'S8.5-AC2 File từ phiên bản app mới hơn bị từ chối: %s → newer-version',
     (_label, formatVersion) => {
