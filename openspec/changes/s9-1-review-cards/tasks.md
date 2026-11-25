@@ -168,7 +168,7 @@ Hành vi đã có test RED ở tầng dưới (nhóm 2–8); commit `test(e2e)`.
 `seedReviewProgress`, `breakReviewWrites`, `restoreReviewWrites`); dùng lại `completeOnboarding` (E7), `writeCharacter`/`drawMedian`
 (E6/E7), helper sao lưu (`backup.helpers.ts`). Mọi context `serviceWorkers: 'block'`. Mỗi file < 300 dòng.
 
-- [ ] 9.1 Helper + nội dung mẫu (test code): `review-cards.content.ts`, `review-cards.helpers.ts`; kiểm: một test khói trong `s9.1-review-cards-lesson.spec.ts` mở `/lessons/s91-a` thấy tiêu đề "Bài mẫu A", `readReviewCards` trả `[]`
+- [x] 9.1 Helper + nội dung mẫu (test code): `review-cards.content.ts`, `review-cards.helpers.ts`; kiểm: một test khói trong `s9.1-review-cards-lesson.spec.ts` mở `/lessons/s91-a` thấy tiêu đề "Bài mẫu A", `readReviewCards` trả `[]`
 - [ ] 9.2 RED: offline trước (rủi ro design) `s9.1-review-cards-offline.spec.ts`: TC-S9.1-AC1-2, TC-S9.1-AC2-19, TC-S9.1-AC1-21 (`context.setOffline(true)` sau khi app mở); kiểm: hành vi đã có từ nhóm 6 nên tạm bỏ lời gọi `createCardsForFinishedLesson` ở `useLessonRunner`, build, thấy fail vì danh sách thẻ rỗng (không phải vì nội dung mẫu không tải được), rồi trả lại; nếu fail vì nội dung mẫu không tải được khi offline thì dừng, báo điều phối (design Risks)
 - [ ] 9.3 GREEN: offline pass (không đổi code production, hoặc theo phương án dự phòng sau khi điều phối cập nhật tasks); kiểm: `pnpm e2e -- e2e/E9/s9.1-review-cards-offline.spec.ts` pass
 - [ ] 9.4 Test e2e nghiệm thu `s9.1-review-cards-lesson.spec.ts`: TC-S9.1-AC1-1, AC1-4, AC1-5, AC1-6, AC1-7, AC1-8, AC1-14, AC1-15, AC1-30; kiểm: file này pass
