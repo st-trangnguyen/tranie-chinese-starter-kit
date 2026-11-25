@@ -10,6 +10,14 @@ import {
   type Word,
 } from '@csk/shared';
 
+import {
+  contentSource,
+  type ContentSource,
+} from '@core/services/content-source.service';
+import {
+  progressStore,
+  type ProgressStore,
+} from '@core/services/progress-store.service';
 import type { LessonSession } from '@shared/models/lesson-session.model';
 import type {
   CharacterWriting,
@@ -30,7 +38,36 @@ const CARD_STATE_BY_FSRS_STATE: Record<State, CardState> = {
 const LESSON_FACETS: readonly CardFacet[] = ['meaning', 'listening'];
 
 export class SrsService {
+  constructor(
+    private readonly store: ProgressStore = progressStore,
+    private readonly content: ContentSource = contentSource,
+  ) {}
+
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
+
+  private readAllCards(): Promise<ReviewCard[]> {
+    return this.store.getAllCards();
+  }
+
+  private writeNewCards(cards: readonly ReviewCard[]): Promise<void> {
+    return this.store.addNewCards(cards);
+  }
+
+  private readWrittenCharacters(): Promise<string[]> {
+    return this.store.getWrittenCharacters();
+  }
+
+  private writeWrittenCharacter(character: string): Promise<void> {
+    return this.store.addWrittenCharacter(character);
+  }
+
+  private readWords(): Promise<Word[]> {
+    return this.content.getWords();
+  }
+
+  private readStrokeCharacters(): Promise<string[]> {
+    return this.content.getStrokeIndex();
+  }
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
@@ -165,4 +202,24 @@ export class SrsService {
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
+
+  // Skeleton (RED 5.1): chưa có hành vi.
+  async createCardsForFinishedLesson(
+    lesson: Lesson,
+    session: LessonSession,
+    now: number = Date.now(),
+  ): Promise<void> {
+    void lesson;
+    void session;
+    void now;
+  }
+
+  // Skeleton (RED 5.1): chưa có hành vi.
+  async recordCharacterWriting(
+    writing: CharacterWriting,
+    now: number = Date.now(),
+  ): Promise<void> {
+    void writing;
+    void now;
+  }
 }

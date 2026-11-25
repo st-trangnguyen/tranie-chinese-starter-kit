@@ -57,8 +57,14 @@ export const makeSentence = (id: string): Sentence => ({
   audio: 'audio/fedcba9876543210.mp3',
 });
 
-const WORDS: Word[] = ['w1', 'w2', 'w3'].map(makeWord);
-const STROKE_INDEX: StrokeIndex = ['八'];
+/** Từ tiếng Trung thật (id = chữ Hán) cho test tạo thẻ ôn tập (S9.1). */
+export const SRS_WORD_IDS = ['你好', '谢谢', '人', '你', '好', '杯'] as const;
+
+const WORDS: Word[] = [
+  ...['w1', 'w2', 'w3'].map(makeWord),
+  ...SRS_WORD_IDS.map((id) => ({ ...makeWord(id), hanzi: id })),
+];
+const STROKE_INDEX: StrokeIndex = ['八', '人', '你', '好', '谢'];
 const STROKE_DATA: StrokeData = {
   strokes: ['M 0 0 L 1 1'],
   medians: [
