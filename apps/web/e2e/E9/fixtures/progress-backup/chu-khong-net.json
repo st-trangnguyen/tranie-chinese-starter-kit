@@ -1,0 +1,49 @@
+{
+  "format": "tranie-chinese-progress",
+  "formatVersion": 2,
+  "exportedOn": "2026-11-23",
+  "settings": {
+    "dailyGoalMinutes": 15,
+    "hasCompletedOnboarding": true,
+    "defaultAudioSpeed": "normal",
+    "isPinyinVisible": true
+  },
+  "lessonProgress": [
+    {
+      "lessonId": "s91-k",
+      "status": "completed"
+    }
+  ],
+  "dailyStats": [],
+  "cards": [
+    {
+      "wordId": "杯",
+      "facet": "meaning",
+      "state": "new",
+      "due": 1795399200000,
+      "stability": 0,
+      "difficulty": 0,
+      "elapsedDays": 0,
+      "scheduledDays": 0,
+      "learningSteps": 0,
+      "reps": 0,
+      "lapses": 0
+    },
+    {
+      "wordId": "杯",
+      "facet": "listening",
+      "state": "new",
+      "due": 1795399200000,
+      "stability": 0,
+      "difficulty": 0,
+      "elapsedDays": 0,
+      "scheduledDays": 0,
+      "learningSteps": 0,
+      "reps": 0,
+      "lapses": 0
+    }
+  ],
+  "writtenCharacters": [
+    "杯"
+  ]
+}

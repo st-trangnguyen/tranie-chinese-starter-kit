@@ -1,0 +1,43 @@
+{
+  "format": "tranie-chinese-progress",
+  "formatVersion": 2,
+  "exportedOn": "2026-11-23",
+  "settings": {
+    "dailyGoalMinutes": 15,
+    "hasCompletedOnboarding": true,
+    "defaultAudioSpeed": "normal",
+    "isPinyinVisible": true
+  },
+  "lessonProgress": [],
+  "dailyStats": [],
+  "cards": [
+    {
+      "wordId": "你好",
+      "facet": "meaning",
+      "state": "new",
+      "due": 1795399200000,
+      "stability": 0,
+      "difficulty": 0,
+      "elapsedDays": 0,
+      "scheduledDays": 0,
+      "learningSteps": 0,
+      "reps": 0,
+      "lapses": 0
+    },
+    {
+      "wordId": "龘龘",
+      "facet": "meaning",
+      "state": "review",
+      "due": 1795658400000,
+      "stability": 3.1262,
+      "difficulty": 5.3146,
+      "elapsedDays": 0,
+      "scheduledDays": 3,
+      "learningSteps": 0,
+      "reps": 1,
+      "lapses": 0,
+      "lastReview": 1795399200000
+    }
+  ],
+  "writtenCharacters": []
+}
