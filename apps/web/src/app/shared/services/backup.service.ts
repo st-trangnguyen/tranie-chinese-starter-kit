@@ -27,6 +27,12 @@ import type {
 import { toLocalDateKey } from '@shared/utils/date.utils';
 import { listLessonIdsInOrder } from '@shared/utils/learning-path.utils';
 
+/** Nội dung file version 1 sau khi qua schema: chưa có thẻ ôn tập và chữ đã viết. */
+type ProgressBackupV1File = Omit<
+  ProgressBackupFile,
+  'formatVersion' | 'cards' | 'writtenCharacters'
+>;
+
 export class BackupService {
   constructor(
     private readonly store: ProgressStore = progressStore,
@@ -72,9 +78,8 @@ export class BackupService {
       settings: snapshot.settings,
       lessonProgress: snapshot.lessonProgress,
       dailyStats: snapshot.dailyStats,
-      // Skeleton RED S9.1 task 8.2: chưa mang thẻ và chữ đã viết (task 8.9).
-      cards: [],
-      writtenCharacters: [],
+      cards: snapshot.cards,
+      writtenCharacters: snapshot.writtenCharacters,
     };
   }
 
@@ -86,6 +91,19 @@ export class BackupService {
   /** Rule: file lớn hơn MAX_BACKUP_FILE_BYTES (20 × 10⁶ byte) không được đọc khi nhập. */
   public isBackupFileTooLarge(bytes: number): boolean {
     return bytes > MAX_BACKUP_FILE_BYTES;
+  }
+
+  /**
+   * Rule: file trước S9.1 (version 1) nhập như không có thẻ ôn tập và chữ đã viết; nhập ghi đè
+   * nên thẻ và chữ đã viết trên máy bị xóa.
+   */
+  public upgradeV1File(v1File: ProgressBackupV1File): ProgressBackupFile {
+    return {
+      ...v1File,
+      formatVersion: PROGRESS_BACKUP_FORMAT_VERSION,
+      cards: [],
+      writtenCharacters: [],
+    };
   }
 
   /** Rule: chỉ file JSON do app xuất, đúng định dạng và phiên bản, mới được nhập. */
@@ -111,16 +129,7 @@ export class BackupService {
       if (!v1File.success) {
         return { status: 'rejected', reason: 'corrupted' };
       }
-      // File trước S9.1 nhập như không có thẻ và chữ đã viết (rule tách riêng ở task 8.9).
-      return {
-        status: 'valid',
-        file: {
-          ...v1File.data,
-          formatVersion: PROGRESS_BACKUP_FORMAT_VERSION,
-          cards: [],
-          writtenCharacters: [],
-        },
-      };
+      return { status: 'valid', file: this.upgradeV1File(v1File.data) };
     }
     const file = progressBackupV2Schema.safeParse(parsed);
     if (!file.success) {
@@ -175,7 +184,14 @@ export class BackupService {
     if (check.status === 'rejected') {
       return check;
     }
-    const { exportedOn, settings, lessonProgress, dailyStats } = check.file;
+    const {
+      exportedOn,
+      settings,
+      lessonProgress,
+      dailyStats,
+      cards,
+      writtenCharacters,
+    } = check.file;
     let knownLessonIds: ReadonlySet<string>;
     try {
       knownLessonIds = await this.readKnownLessonIds();
@@ -186,13 +202,12 @@ export class BackupService {
     }
     return {
       status: 'valid',
-      // Skeleton RED S9.1 task 8.2: chưa mang thẻ và chữ đã viết (task 8.9).
       snapshot: {
         settings,
         lessonProgress,
         dailyStats,
-        cards: [],
-        writtenCharacters: [],
+        cards,
+        writtenCharacters,
       },
       preview: {
         exportedOn,

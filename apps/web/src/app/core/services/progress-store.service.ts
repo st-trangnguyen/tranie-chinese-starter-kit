@@ -99,23 +99,33 @@ export class DexieProgressStore implements ProgressStore {
 
   async exportAll(): Promise<ProgressSnapshot> {
     await this.pendingWrites;
-    // Đọc ba bảng trong một transaction `r`: ảnh chụp nhất quán, không ghi gì.
+    // Đọc năm bảng trong một transaction `r`: ảnh chụp nhất quán, không ghi gì.
+    // Chỉ đọc bảng thô (không gọi method chờ `pendingWrites`): chờ promise ngoài Dexie làm
+    // transaction commit sớm.
     return this.db.transaction(
       'r',
-      this.db.settings,
-      this.db.lessonProgress,
-      this.db.dailyStats,
+      [
+        this.db.settings,
+        this.db.lessonProgress,
+        this.db.dailyStats,
+        this.db.cards,
+        this.db.writtenCharacters,
+      ],
       async () => {
         const settings = await this.getSettings();
         const lessonRows = await this.db.lessonProgress.toArray();
         const dailyRows = await this.db.dailyStats.toArray();
+        const cardRows = await this.db.cards.toArray();
+        const characterRows = await this.db.writtenCharacters.toArray();
         return {
           settings,
           lessonProgress: parseRows(lessonRows, lessonProgressSchema),
           dailyStats: parseRows(dailyRows, dailyStatSchema),
-          // Skeleton RED S9.1 task 8.2: thẻ và chữ đã viết chưa được đọc (task 8.9).
-          cards: [],
-          writtenCharacters: [],
+          cards: parseRows(cardRows, reviewCardSchema),
+          writtenCharacters: parseRows(
+            characterRows,
+            writtenCharacterSchema,
+          ).map((row) => row.character),
         };
       },
     );
@@ -180,17 +190,23 @@ export class DexieProgressStore implements ProgressStore {
   }
 
   private async writeSnapshot(snapshot: ProgressSnapshot): Promise<void> {
-    // Xóa + ghi cả ba bảng trong một transaction: bước nào lỗi thì Dexie abort,
+    // Xóa + ghi cả năm bảng trong một transaction: bước nào lỗi thì Dexie abort,
     // dữ liệu cũ còn nguyên.
     await this.db.transaction(
       'rw',
-      this.db.settings,
-      this.db.lessonProgress,
-      this.db.dailyStats,
+      [
+        this.db.settings,
+        this.db.lessonProgress,
+        this.db.dailyStats,
+        this.db.cards,
+        this.db.writtenCharacters,
+      ],
       async () => {
         await this.db.settings.clear();
         await this.db.lessonProgress.clear();
         await this.db.dailyStats.clear();
+        await this.db.cards.clear();
+        await this.db.writtenCharacters.clear();
         const settingsRows = Object.entries(snapshot.settings).map(
           ([key, value]) => ({ key, value }),
         );
@@ -198,6 +214,15 @@ export class DexieProgressStore implements ProgressStore {
         await this.db.lessonProgress.bulkPut(snapshot.lessonProgress);
         // Giữ nguyên `goalMinutes` của từng ngày như trong snapshot.
         await this.db.dailyStats.bulkPut(snapshot.dailyStats);
+        await this.db.cards.bulkPut(
+          snapshot.cards.map((card) => ({
+            ...card,
+            id: reviewCardId(card.wordId, card.facet),
+          })),
+        );
+        await this.db.writtenCharacters.bulkPut(
+          snapshot.writtenCharacters.map((character) => ({ character })),
+        );
       },
     );
   }
