@@ -54,7 +54,7 @@ interface Session {
 /** Đường dẫn audio dạng `audio/<file>.mp3` (như audio-index), bỏ `/` đầu. */
 const normalizePath = (path: string): string => path.replace(/^\/+/, '');
 
-const readCookies = (req: IncomingMessage): Map<string, string> =>
+export const readCookies = (req: IncomingMessage): Map<string, string> =>
   new Map(
     (req.headers.cookie ?? '').split(';').flatMap((part) => {
       const separator = part.indexOf('=');
@@ -79,10 +79,14 @@ const fixtureVariantOf = (
   return flags.includes(INTRO_EMPTY_VARIANT) ? INTRO_EMPTY_VARIANT : 'default';
 };
 
-const pathnameOf = (req: IncomingMessage): string =>
+export const pathnameOf = (req: IncomingMessage): string =>
   decodeURIComponent(new URL(req.url ?? '/', 'http://localhost').pathname);
 
-const sendJson = (res: ServerResponse, status: number, body: unknown): void => {
+export const sendJson = (
+  res: ServerResponse,
+  status: number,
+  body: unknown,
+): void => {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Cache-Control', 'no-store');

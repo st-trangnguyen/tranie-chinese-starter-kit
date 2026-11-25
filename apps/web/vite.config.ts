@@ -13,6 +13,10 @@ import {
   offlineFixturesPlugin,
 } from './e2e/fixtures/offlineFixturesPlugin';
 import { offlineAudioNetworkPlugin } from './e2e/fixtures/offlineAudioNetworkPlugin';
+import {
+  reviewCardsBuildPlugin,
+  reviewCardsPreviewPlugin,
+} from './e2e/fixtures/reviewCardsFixturePlugin';
 import type * as AudioCachingConfig from './src/app/core/modules/pwa/audio-caching.config';
 
 // Màu `bg` sáng của design system: nền splash và thanh trạng thái khi cài PWA.
@@ -65,6 +69,9 @@ export default defineConfig(async ({ mode }) => {
       mode === 'e2e' && offlineFixturesPlugin(),
       // S8.4 (`vite preview --mode e2e`): nội dung gộp mẫu theo cookie và điều khiển mạng audio.
       mode === 'e2e' && offlineAudioNetworkPlugin(),
+      // S9.1 D12: bài `s91-*` trong bản build e2e; lộ trình + từ mẫu theo cookie `review-cards`.
+      mode === 'e2e' && reviewCardsBuildPlugin(),
+      mode === 'e2e' && reviewCardsPreviewPlugin(),
       tailwindcss(),
       svgr(),
       createHtmlPlugin({
