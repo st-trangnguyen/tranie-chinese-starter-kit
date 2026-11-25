@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { reviewCardSchema, type Lesson } from '@csk/shared';
+import { reviewCardSchema, type Lesson, type ReviewCard } from '@csk/shared';
 
 import {
   finishedSession,
@@ -104,5 +104,40 @@ describe('SrsService — Phần 3: recordCharacterWriting', () => {
       '人:writing:new',
     ]);
     expect(cards).toHaveLength(3);
+  });
+
+  it('S9.1-AC2 Viết lại không tạo trùng thẻ chiều viết: đã có thẻ 人 chiều viết (đã ôn, "review"), viết xong 人 thêm một lần → vẫn một thẻ 人 chiều viết, giữ trạng thái và ngày ôn', async () => {
+    const { store, service } = openService([PERSON_LESSON]);
+    const firstWrite = NOW - 7 * 24 * 60 * 60 * 1000;
+    const meaning = service.createNewCard('人', 'meaning', firstWrite);
+    const listening = service.createNewCard('人', 'listening', firstWrite);
+    const reviewedWriting: ReviewCard = {
+      ...service.createNewCard('人', 'writing', firstWrite),
+      state: 'review',
+      due: Date.UTC(2026, 11, 2, 8, 0, 0),
+      stability: 3.2,
+      difficulty: 5.1,
+      scheduledDays: 7,
+      reps: 1,
+      lastReview: NOW - 60 * 60 * 1000,
+    };
+    await store.addNewCards([meaning, listening, reviewedWriting]);
+    await store.addWrittenCharacter('人');
+
+    await service.recordCharacterWriting(
+      { character: '人', isGuided: true },
+      NOW,
+    );
+
+    const cards = await store.getAllCards();
+    expect(keysOf(cards)).toEqual([
+      '人:listening:new',
+      '人:meaning:new',
+      '人:writing:review',
+    ]);
+    expect(
+      cards.filter((card) => card.wordId === '人' && card.facet === 'writing'),
+    ).toStrictEqual([reviewedWriting]);
+    expect(await store.getWrittenCharacters()).toEqual(['人']);
   });
 });
