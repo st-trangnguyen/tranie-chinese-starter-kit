@@ -76,7 +76,7 @@ tên ngẫu nhiên, `ContentSource` giả (`makeSource` trong `apps/web/src/test
 - [ ] 5.6 GREEN: sửa đến khi pass (không đọc `lessonProgress` trong `SrsService`); kiểm: test 5.5 pass
 - [x] 5.7 RED: S9.1-AC1 "Làm hết bài được đánh dấu xong nhờ kiểm tra vượt cấp thì tạo thẻ" (Phần 3) — DB có bài VC1 (你好) và VC2 (人) `completed`, không thẻ; `createCardsForFinishedLesson(VC1, phiên xong)` → chỉ `你好` meaning + listening, không có thẻ `人`; kiểm: chạy, nếu pass ngay thì tạm cho use case tạo thẻ cho mọi bài `completed` để thấy fail rồi trả lại
 - [ ] 5.8 GREEN: sửa đến khi pass; kiểm: test 5.7 pass
-- [ ] 5.9 RED: S9.1-AC1 "Làm lại bài đã xong không tạo trùng thẻ" (Phần 3) — DB có `你好:meaning` `state: 'review'`, `due` T, `你好:listening` mới; xong bài 你好 lần nữa → vẫn 2 thẻ, meaning giữ `state`/`due`; kiểm: chạy, nếu pass ngay thì tạm bỏ lọc thẻ đã có ở `planLessonCards` và đổi `addNewCards` sang `bulkPut` để thấy fail rồi trả lại
+- [x] 5.9 RED: S9.1-AC1 "Làm lại bài đã xong không tạo trùng thẻ" (Phần 3) — DB có `你好:meaning` `state: 'review'`, `due` T, `你好:listening` mới; xong bài 你好 lần nữa → vẫn 2 thẻ, meaning giữ `state`/`due`; kiểm: chạy, nếu pass ngay thì tạm bỏ lọc thẻ đã có ở `planLessonCards` và đổi `addNewCards` sang `bulkPut` để thấy fail rồi trả lại
 - [ ] 5.10 GREEN: sửa đến khi pass; kiểm: test 5.9 pass
 - [ ] 5.11 RED: S9.1-AC1 "Từ đã có thẻ từ bài khác" (Phần 3) — xong bài 你 rồi bài 你+好 → 4 thẻ, một `你:meaning`, một `你:listening`; kiểm: chạy, nếu pass ngay thì như 5.9
 - [ ] 5.12 GREEN: sửa đến khi pass; kiểm: test 5.11 pass

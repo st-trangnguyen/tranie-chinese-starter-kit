@@ -179,4 +179,48 @@ describe('SrsService — Phần 3: createCardsForFinishedLesson', () => {
     );
     expect(cards.filter((card) => card.wordId === '人')).toEqual([]);
   });
+
+  it('S9.1-AC1 Làm lại bài đã xong không tạo trùng thẻ: có 你好 nghĩa (đã ôn, "review") và nghe "mới", làm lại hết bài 你好 → vẫn một thẻ mỗi chiều, thẻ nghĩa giữ trạng thái và ngày ôn', async () => {
+    const { store, service } = openService();
+    const firstFinish = NOW - 7 * 24 * 60 * 60 * 1000;
+    const reviewedMeaning: ReviewCard = {
+      ...service.createNewCard('你好', 'meaning', firstFinish),
+      state: 'review',
+      due: Date.UTC(2026, 11, 2, 8, 0, 0),
+      stability: 3.2,
+      difficulty: 5.1,
+      scheduledDays: 7,
+      reps: 1,
+      lastReview: NOW - 60 * 60 * 1000,
+    };
+    const firstListening = service.createNewCard(
+      '你好',
+      'listening',
+      firstFinish,
+    );
+    await store.addNewCards([reviewedMeaning, firstListening]);
+    const retakeLesson: Lesson = {
+      id: 'chao-hoi-lam-lai',
+      type: 'lesson',
+      title: 'Chào hỏi (làm lại)',
+      exercises: [{ id: 'r1', kind: 'tone-choice', wordId: '你好' }],
+    };
+
+    await service.createCardsForFinishedLesson(
+      retakeLesson,
+      finishedSession(['r1']),
+      NOW,
+    );
+
+    const cards = await store.getAllCards();
+    expect(keysOf(cards)).toEqual(
+      ['你好:meaning:review', '你好:listening:new'].sort(),
+    );
+    expect(cards.find((card) => card.facet === 'meaning')).toStrictEqual(
+      reviewedMeaning,
+    );
+    expect(cards.find((card) => card.facet === 'listening')).toStrictEqual(
+      firstListening,
+    );
+  });
 });
