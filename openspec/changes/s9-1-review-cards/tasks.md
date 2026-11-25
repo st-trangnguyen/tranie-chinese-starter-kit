@@ -41,7 +41,7 @@ Test: `apps/web/src/app/shared/services/srs.service.rules.test.ts` (pure, không
 
 - [x] 4.1 RED: S9.1-AC1 "Xong bài học thì tạo thẻ nghĩa và nghe" (Phần 2) — `createNewCard('你好', 'meaning', now)` → `state: 'new'`, `due` = `now`, `reps: 0`, `lapses: 0`, không có `lastReview`, qua `reviewCardSchema`; `planLessonCards` cho `['你好','谢谢']`, chưa có thẻ → đúng 4 thẻ meaning/listening `state: 'new'`, không có writing. Skeleton: `srs.service.ts` (class 3 banner, method Phần 2 trả `[]`/`false`, `createNewCard` trả object rỗng ép kiểu qua hàm dựng có field 0), `shared/models/review-card.model.ts`; kiểm: fail ở assertion
 - [x] 4.2 GREEN: `createNewCard` (`ts-fsrs` `createEmptyCard`, bảng tra `State` → `CardState`), `planLessonCards` phần meaning/listening; kiểm: test 4.1 pass
-- [ ] 4.3 RED: S9.1-AC1 "Câu cặp âm tạo thẻ cho cả hai từ" (Phần 2) — `collectLessonWordIds([sound-pair ['妈','马'] đáp án '妈'])` = `['妈','马']`; tone-choice, pinyin-type, stroke-write, speak `wordId` → từ của câu; trùng từ giữa câu → một lần; kiểm: fail
+- [x] 4.3 RED: S9.1-AC1 "Câu cặp âm tạo thẻ cho cả hai từ" (Phần 2) — `collectLessonWordIds([sound-pair ['妈','马'] đáp án '妈'])` = `['妈','马']`; tone-choice, pinyin-type, stroke-write, speak `wordId` → từ của câu; trùng từ giữa câu → một lần; kiểm: fail
 - [ ] 4.4 GREEN: `collectLessonWordIds`; kiểm: test 4.3 pass
 - [ ] 4.5 RED: S9.1-AC1 "Câu nói theo câu không tạo thẻ" (Phần 2) — `collectLessonWordIds([speak sentenceId])` = `[]`, `planLessonCards` với `wordIds: []` = `[]`; kiểm: chạy, nếu pass ngay nhờ 4.4 thì tạm cho speak câu trả `sentenceId` như từ để thấy fail rồi trả lại
 - [ ] 4.6 GREEN: sửa đến khi pass; kiểm: test 4.5 pass

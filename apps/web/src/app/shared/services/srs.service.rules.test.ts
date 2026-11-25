@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { reviewCardSchema, type ReviewCard, type Word } from '@csk/shared';
+import {
+  reviewCardSchema,
+  type Exercise,
+  type ReviewCard,
+  type Word,
+} from '@csk/shared';
 
 import type { LessonCardPlanInput } from '@shared/models/review-card.model';
 import { makeWord } from '@test/content-service.fixtures';
@@ -61,5 +66,42 @@ describe('SrsService — Phần 2 (quy tắc tạo thẻ)', () => {
       expect(reviewCardSchema.safeParse(card).success).toBe(true);
       expect(card.due).toBe(NOW);
     }
+  });
+
+  it('S9.1-AC1 Câu cặp âm tạo thẻ cho cả hai từ: collectLessonWordIds lấy cả hai từ của cặp âm', () => {
+    const exercises: readonly Exercise[] = [
+      {
+        id: 'e1',
+        kind: 'sound-pair',
+        wordIds: ['妈', '马'],
+        answerWordId: '妈',
+      },
+    ];
+
+    expect(service.collectLessonWordIds(exercises)).toEqual(['妈', '马']);
+  });
+
+  it('S9.1-AC1 Câu cặp âm tạo thẻ cho cả hai từ: câu một từ lấy từ của câu, trùng từ chỉ một lần', () => {
+    const exercises: readonly Exercise[] = [
+      { id: 'e1', kind: 'tone-choice', wordId: '人' },
+      { id: 'e2', kind: 'pinyin-type', wordId: '你好' },
+      { id: 'e3', kind: 'stroke-write', wordId: '人' },
+      { id: 'e4', kind: 'speak', wordId: '谢谢' },
+      {
+        id: 'e5',
+        kind: 'sound-pair',
+        wordIds: ['妈', '马'],
+        answerWordId: '马',
+      },
+      { id: 'e6', kind: 'tone-choice', wordId: '妈' },
+    ];
+
+    expect(service.collectLessonWordIds(exercises)).toEqual([
+      '人',
+      '你好',
+      '谢谢',
+      '妈',
+      '马',
+    ]);
   });
 });

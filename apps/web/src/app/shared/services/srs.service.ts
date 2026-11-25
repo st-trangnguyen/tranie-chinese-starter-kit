@@ -1,6 +1,6 @@
 import { createEmptyCard, State } from 'ts-fsrs';
 
-import type { CardFacet, CardState, ReviewCard } from '@csk/shared';
+import type { CardFacet, CardState, Exercise, ReviewCard } from '@csk/shared';
 
 import type { LessonCardPlanInput } from '@shared/models/review-card.model';
 
@@ -19,6 +19,11 @@ export class SrsService {
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
+
+  // Rule: từ của bài được tạo thẻ (bảng "Từ nào của bài được tạo thẻ").
+  collectLessonWordIds(exercises: readonly Exercise[]): string[] {
+    return exercises.flatMap(() => []);
+  }
 
   // Rule: thẻ "mới" của một chiều của từ, đến hạn ngay lúc tạo, chưa ôn (không có lastReview).
   createNewCard(wordId: string, facet: CardFacet, now: number): ReviewCard {
