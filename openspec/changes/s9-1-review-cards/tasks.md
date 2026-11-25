@@ -51,7 +51,7 @@ Test: `apps/web/src/app/shared/services/srs.service.rules.test.ts` (pure, không
 - [x] 4.10 GREEN: `isWordLearned`, `planWritingCards`; kiểm: test 4.9 pass
 - [x] 4.11 RED: S9.1-AC2 "Viết xong chữ của từ đã học thì tạo thẻ chiều viết" (Phần 2, TC-S9.1-AC2-25) — từ `你好` có thẻ meaning + listening, không có bài đang làm xong (`completingWordIds` rỗng), written `{你}` + vừa viết `好` → `planWritingCards` tạo `你好:writing` `state: 'new'`; `isWordLearned('你好', [thẻ meaning], ∅)` true, chỉ có thẻ listening → false; kiểm: chạy, nếu pass ngay thì tạm cho `isWordLearned` đòi cả thẻ listening để thấy fail rồi trả lại
 - [ ] 4.12 GREEN: sửa đến khi pass; kiểm: test 4.11 pass
-- [ ] 4.13 RED: S9.1-AC2 "Bài được mở nhờ kiểm tra vượt cấp không đủ để tạo thẻ chiều viết" (Phần 2) — `人` không có thẻ nào, `completingWordIds` rỗng, written `{人}` → `isWordLearned` false, `planWritingCards` `[]`; kiểm: chạy, nếu pass ngay thì tạm cho `isWordLearned` trả true để thấy fail rồi trả lại
+- [x] 4.13 RED: S9.1-AC2 "Bài được mở nhờ kiểm tra vượt cấp không đủ để tạo thẻ chiều viết" (Phần 2) — `人` không có thẻ nào, `completingWordIds` rỗng, written `{人}` → `isWordLearned` false, `planWritingCards` `[]`; kiểm: chạy, nếu pass ngay thì tạm cho `isWordLearned` trả true để thấy fail rồi trả lại
 - [ ] 4.14 GREEN: sửa đến khi pass; kiểm: test 4.13 pass
 - [ ] 4.15 RED: S9.1-AC2 "Chữ đã viết dùng chung cho các từ" (Phần 2) — written `{你,好}`, `planLessonCards(['你','好','你好'])` (đều trong nội dung, đều có nét) → writing cho cả ba; kiểm: chạy, nếu pass ngay thì tạm cho `canHaveWritingCard` so cả từ thay vì từng chữ để thấy fail rồi trả lại
 - [ ] 4.16 GREEN: sửa đến khi pass; kiểm: test 4.15 pass

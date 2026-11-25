@@ -217,4 +217,19 @@ describe('SrsService — Phần 2 (quy tắc tạo thẻ)', () => {
       false,
     );
   });
+
+  it('S9.1-AC2 Bài được mở nhờ kiểm tra vượt cấp không đủ để tạo thẻ chiều viết: 人 chưa có thẻ nào, không bài nào đang xong, viết xong 人 → không học xong, không có thẻ', () => {
+    expect(service.isWordLearned('人', [], new Set())).toBe(false);
+
+    const cards = service.planWritingCards(
+      writingInput('人', {
+        words: [wordOf('人')],
+        cards: [],
+        writtenCharacters: new Set(['人']),
+        strokeCharacters: new Set(['人']),
+      }),
+    );
+
+    expect(cards).toEqual([]);
+  });
 });
