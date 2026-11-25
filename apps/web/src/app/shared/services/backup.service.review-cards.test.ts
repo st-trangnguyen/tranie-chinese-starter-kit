@@ -6,6 +6,11 @@ import {
   type ReviewCard,
 } from '@csk/shared';
 
+import {
+  createMachine,
+  toBackupFileSource,
+} from '@test/backup-machine.helpers';
+
 import { BackupService } from './backup.service';
 
 const SCENARIO_BAD_CARD =
@@ -162,6 +167,61 @@ describe('BackupService.checkBackupText — file v2 có chữ đã viết trùng
     expect(service.checkBackupText(JSON.stringify(file))).toEqual({
       status: 'valid',
       file,
+    });
+  });
+});
+
+const SCENARIO_OLD_FILE = 'S9.1-AC1 (bổ sung) Nhập file sao lưu bản cũ';
+
+/** File do bản app trước S9.1 xuất (version 1): không có thẻ, không có chữ đã viết. */
+const V1_FILE = {
+  format: PROGRESS_BACKUP_FORMAT,
+  formatVersion: 1,
+  exportedOn: '2026-11-20',
+  settings: SETTINGS,
+  lessonProgress: [{ lessonId: 's91-a', status: 'completed' }],
+  dailyStats: [],
+} as const;
+
+describe('BackupService — nhập file sao lưu bản cũ (version 1)', () => {
+  it(`${SCENARIO_OLD_FILE}: file v1 hợp lệ → valid, không có thẻ và chữ đã viết`, () => {
+    const service = new BackupService();
+
+    const check = service.checkBackupText(JSON.stringify(V1_FILE));
+
+    expect(check).toMatchObject({
+      status: 'valid',
+      file: { lessonProgress: V1_FILE.lessonProgress },
+    });
+    if (check.status !== 'valid') {
+      return;
+    }
+    expect(check.file.cards).toEqual([]);
+    expect(check.file.writtenCharacters).toEqual([]);
+  });
+
+  it(`${SCENARIO_OLD_FILE}: máy có thẻ 谢谢 và chữ 人, nhập file v1 → không còn thẻ, chữ; bài s91-a đã xong`, async () => {
+    const machineB = createMachine();
+    await machineB.store.addNewCards([
+      newCard('谢谢', 'meaning'),
+      newCard('谢谢', 'listening'),
+    ]);
+    await machineB.store.addWrittenCharacter('人');
+    expect(await machineB.store.getAllCards()).toHaveLength(2);
+
+    const inspection = await machineB.backup.inspectImportFile(
+      toBackupFileSource(JSON.stringify(V1_FILE)),
+    );
+    expect(inspection.status).toBe('valid');
+    if (inspection.status !== 'valid') {
+      return;
+    }
+    await machineB.backup.importProgress(inspection.snapshot);
+
+    expect(await machineB.store.getAllCards()).toEqual([]);
+    expect(await machineB.store.getWrittenCharacters()).toEqual([]);
+    expect(await machineB.store.getLessonProgress('s91-a')).toMatchObject({
+      status: 'completed',
     });
   });
 });
