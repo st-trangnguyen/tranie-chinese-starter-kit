@@ -290,4 +290,27 @@ describe('SrsService — Phần 2 (quy tắc tạo thẻ)', () => {
       expect(card.due).toBe(NOW);
     }
   });
+
+  it('S9.1-AC2 Viết không gợi ý không tính: 人 đã học, chưa viết có gợi ý, viết xong 人 không gợi ý → không tính, không có thẻ chiều viết', () => {
+    const meaningCard = service.createNewCard('人', 'meaning', NOW);
+    const planAfter = (writing: { character: string; isGuided: boolean }) =>
+      service.planWritingCards(
+        writingInput('人', {
+          words: [wordOf('人')],
+          cards: [meaningCard],
+          writtenCharacters: service.addWrittenCharacter(new Set(), writing),
+          strokeCharacters: new Set(['人']),
+        }),
+      );
+    const unguided = { character: '人', isGuided: false };
+    const guided = { character: '人', isGuided: true };
+
+    expect(service.countsAsStrokeWritten(unguided)).toBe(false);
+    expect([...service.addWrittenCharacter(new Set(), unguided)]).toEqual([]);
+    expect(planAfter(unguided)).toEqual([]);
+
+    expect(service.countsAsStrokeWritten(guided)).toBe(true);
+    expect([...service.addWrittenCharacter(new Set(), guided)]).toEqual(['人']);
+    expect(keysOf(planAfter(guided))).toEqual(['人:writing:new']);
+  });
 });

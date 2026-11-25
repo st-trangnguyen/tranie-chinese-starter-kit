@@ -1,5 +1,12 @@
 import type { ReviewCard, Word } from '@csk/shared';
 
+/** Một lần viết xong một chữ (khung luyện viết hoặc câu viết trong bài). */
+export interface CharacterWriting {
+  character: string;
+  /** Viết trên khung có gợi ý (nét mờ). */
+  isGuided: boolean;
+}
+
 /** Đầu vào quy tắc tạo thẻ cho một bài vừa xong (`SrsService.planLessonCards`). */
 export interface LessonCardPlanInput {
   /** Từ của bài, đã bỏ trùng, giữ thứ tự. */

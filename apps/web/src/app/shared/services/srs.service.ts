@@ -10,6 +10,7 @@ import {
 } from '@csk/shared';
 
 import type {
+  CharacterWriting,
   LessonCardPlanInput,
   WritingCardPlanInput,
 } from '@shared/models/review-card.model';
@@ -47,6 +48,21 @@ export class SrsService {
       (character) => hanCharacterSchema.safeParse(character).success,
     );
     return [...new Set(characters)];
+  }
+
+  // Rule: (skeleton) chỉ lần viết xong trên khung có gợi ý mới được tính là đã viết chữ.
+  countsAsStrokeWritten(writing: CharacterWriting): boolean {
+    void writing;
+    return false;
+  }
+
+  // Rule: (skeleton) tập chữ đã viết sau một lần viết; lần viết không được tính không đổi tập.
+  addWrittenCharacter(
+    written: ReadonlySet<string>,
+    writing: CharacterWriting,
+  ): ReadonlySet<string> {
+    void writing;
+    return written;
   }
 
   // Rule: từ được có thẻ chiều viết khi mọi chữ của từ có dữ liệu nét và đã viết xong.
