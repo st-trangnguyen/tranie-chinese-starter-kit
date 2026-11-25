@@ -187,9 +187,9 @@ Hành vi đã có test RED ở tầng dưới (nhóm 2–8); commit `test(e2e)`.
 
 ## 11. Kiểm tra cuối
 
-- [ ] 11.1 `pnpm typecheck && pnpm lint && pnpm test:run` pass; `pnpm content:check` pass (không đổi nội dung, hook chạy)
-- [ ] 11.2 `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts` pass; `pnpm e2e` pass toàn bộ (E1–E9); fail có sẵn trên `main` ghi rõ trong PR
-- [ ] 11.3 Self-review theo `CLAUDE.md` §0, §2 (bảng design D8), §7: không `any`, không `as` cho dữ liệu ngoài, không `enum` mới, `ts-fsrs` chỉ import ở `srs.service.ts` (`grep -rn "ts-fsrs" apps/web/src` chỉ một file), service không import React/Dexie, mỗi file < 300 dòng; kiểm: lệnh `grep` và `wc -l` trên file mới/sửa
+- [x] 11.1 `pnpm typecheck && pnpm lint && pnpm test:run` pass; `pnpm content:check` pass (không đổi nội dung, hook chạy)
+- [x] 11.2 `pnpm --filter @csk/web build && pnpm --filter @csk/web check:fonts` pass; `pnpm e2e` pass toàn bộ (E1–E9); fail có sẵn trên `main` ghi rõ trong PR
+- [x] 11.3 Self-review theo `CLAUDE.md` §0, §2 (bảng design D8), §7: không `any`, không `as` cho dữ liệu ngoài, không `enum` mới, `ts-fsrs` chỉ import ở `srs.service.ts` (`grep -rn "ts-fsrs" apps/web/src` chỉ một file), service không import React/Dexie, mỗi file < 300 dòng; kiểm: lệnh `grep` và `wc -l` trên file mới/sửa
 
 ## Workflow follow-up
 
