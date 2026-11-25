@@ -115,4 +115,35 @@ describe('SrsService — Phần 3: createCardsForFinishedLesson', () => {
     expect(await store.getAllCards()).toEqual([]);
     expect(source.getWords).not.toHaveBeenCalled();
   });
+
+  it('S9.1-AC1 Bài đã xong từ trước không được tạo bù thẻ: bài 你好 "Đã xong" chưa có thẻ, mở app và viết chữ → không thẻ; làm lại hết bài → có thẻ nghĩa và nghe', async () => {
+    const { store, source } = openService();
+    await store.saveLessonProgress({
+      lessonId: GREETING_LESSON.id,
+      status: 'completed',
+    });
+
+    // Mở app: tạo service mới trên DB đã có tiến độ; viết một chữ của 你好 trên khung có gợi ý.
+    const service = new SrsService(store, source);
+    await service.recordCharacterWriting(
+      { character: '你', isGuided: true },
+      NOW,
+    );
+
+    const cardsBefore = await store.getAllCards();
+    expect(cardsBefore.filter((card) => card.wordId === '你好')).toEqual([]);
+
+    await service.createCardsForFinishedLesson(
+      GREETING_LESSON,
+      finishedSession(['e1', 'e2']),
+      NOW,
+    );
+
+    const greetingKeys = keysOf(
+      (await store.getAllCards()).filter((card) => card.wordId === '你好'),
+    );
+    expect(greetingKeys).toEqual(
+      ['你好:meaning:new', '你好:listening:new'].sort(),
+    );
+  });
 });
