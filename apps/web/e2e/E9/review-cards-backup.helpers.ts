@@ -46,7 +46,10 @@ export type ReviewBackupFixture =
   | 'ban-truoc-s9-1.json'
   | 'chu-khong-net.json'
   | 'chu-la.json'
+  | 'chu-trung.json'
   | 'the-nihao.json'
+  | 'the-sai-chieu.json'
+  | 'the-trung.json'
   | 'the-tu-la.json';
 
 /** Đường dẫn tuyệt đối của file mẫu `name`. */

@@ -8,6 +8,7 @@ import {
 } from '@playwright/test';
 
 import { pathLessonStatuses } from '../E7/intro-lessons.helpers';
+import { readReviewCards } from '../E9/review-cards.helpers';
 
 import {
   backupStatus,
@@ -195,6 +196,8 @@ test.describe('S8.5 Xuất ở máy này, nhập ở máy khác', () => {
 
     await backToPathLink(machineB).click();
     await expect(pathLessonStatuses(machineB)).toHaveText(SKIP_AHEAD_STATUSES);
+    // S9.1: vượt cấp không tạo thẻ, nên máy B không có thẻ ôn tập nào sau khi nhập.
+    expect(await readReviewCards(machineB)).toEqual([]);
   });
 
   test('TC-S8.5-AC1-21: S8.5-AC1 Chuỗi ngày học giữ đúng nhờ mục tiêu của từng ngày', async ({
