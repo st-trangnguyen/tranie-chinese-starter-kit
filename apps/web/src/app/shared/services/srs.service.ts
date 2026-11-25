@@ -252,12 +252,29 @@ export class SrsService {
     }
   }
 
-  // Skeleton (RED 5.1): chưa có hành vi.
   async recordCharacterWriting(
     writing: CharacterWriting,
     now: number = Date.now(),
   ): Promise<void> {
-    void writing;
-    void now;
+    if (!this.countsAsStrokeWritten(writing)) {
+      return;
+    }
+    await this.writeWrittenCharacter(writing.character);
+    const [cards, writtenCharacters, words, strokeCharacters] =
+      await Promise.all([
+        this.readAllCards(),
+        this.readWrittenCharacters(),
+        this.readWords(),
+        this.readStrokeCharacters(),
+      ]);
+    const newCards = this.planWritingCards({
+      character: writing.character,
+      words,
+      cards,
+      writtenCharacters: new Set(writtenCharacters),
+      strokeCharacters: new Set(strokeCharacters),
+      now,
+    });
+    await this.writeNewCards(newCards);
   }
 }
