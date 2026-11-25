@@ -16,6 +16,7 @@ import type {
   LessonCardPlanInput,
   WritingCardPlanInput,
 } from '@shared/models/review-card.model';
+import { summarizeSession } from '@shared/utils/lesson-session.utils';
 
 /** Trạng thái số của `ts-fsrs` → chuỗi lưu trong `ReviewCard`. */
 const CARD_STATE_BY_FSRS_STATE: Record<State, CardState> = {
@@ -33,14 +34,14 @@ export class SrsService {
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
-  // Rule: chỉ bài học kết thúc không bỏ câu nào mới tạo thẻ.
+  // Rule: chỉ bài học kết thúc không bỏ câu nào mới tạo thẻ; bài kiểm tra không bao giờ tạo thẻ.
   isCardEligibleLesson(
     lessonType: Lesson['type'],
     session: LessonSession,
   ): boolean {
-    void lessonType;
-    void session;
-    return false;
+    return (
+      lessonType === 'lesson' && summarizeSession(session, 'lesson').isComplete
+    );
   }
 
   // Rule: từ của bài được tạo thẻ (bảng "Từ nào của bài được tạo thẻ").
