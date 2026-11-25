@@ -104,13 +104,13 @@ Test: `apps/web/src/app/pages/lesson/hooks/useLessonRunner.reviewCards.test.ts`,
 - [x] 6.1 RED: S9.1-AC1 "Xong bài học thì tạo thẻ nghĩa và nghe" (hook) — `renderHook(useLessonRunner('a'))`, bài có câu 你好 và 谢谢, trả lời hết, `continueLesson` tới `finished` → `waitFor` 4 thẻ `state: 'new'`; kiểm: fail vì hook chưa gọi `SrsService`
 - [x] 6.2 GREEN: `useLessonRunner` gọi `createCardsForFinishedLesson` sau `finishLesson` trong `saveQueueRef`, nuốt lỗi (D5); kiểm: test 6.1 pass, test `useLessonRunner.test.ts` cũ pass
 - [x] 6.3 RED: S9.1-AC1 "Bài chưa xong không tạo thẻ" (hook) — trả lời 1 câu rồi unmount → không thẻ; bài có câu `skipExercise` rồi hết bài → không thẻ; kiểm: chạy, nếu pass ngay thì tạm gọi use case với `type: 'lesson'` bỏ qua kiểm phiên để thấy fail rồi trả lại
-- [ ] 6.4 GREEN: sửa đến khi pass; kiểm: test 6.3 pass
+- [x] 6.4 GREEN: sửa đến khi pass; kiểm: test 6.3 pass
 - [x] 6.5 RED: S9.1-AC1 "Bài kiểm tra không tạo thẻ" + "Bài được mở nhờ kiểm tra vượt cấp không tạo thẻ" (hook) — bài `type: 'test'` đúng hết → không thẻ; `useLessonRunner(testId, { placementUnitId })` đạt → các bài của chủ đề `completed`, không thẻ; kiểm: chạy, nếu pass ngay thì tạm truyền `'lesson'` làm loại bài để thấy fail rồi trả lại
-- [ ] 6.6 GREEN: sửa đến khi pass; kiểm: test 6.5 pass
+- [x] 6.6 GREEN: sửa đến khi pass; kiểm: test 6.5 pass
 - [x] 6.7 RED: S9.1-AC1 "Không lưu được thẻ thì bài vẫn xong" (container) — `vi.spyOn(DexieProgressStore.prototype, 'addNewCards').mockRejectedValueOnce(…)`; `LessonRunnerContainer` làm hết bài 你好 → màn tổng kết hiện, `queryByRole('alert')` không có, `progressStore.getLessonProgress` `completed`, không thẻ `你好`; kiểm: chạy, nếu pass ngay thì tạm cho lỗi tạo thẻ đặt `setUnsavedLessonId` để thấy fail rồi trả lại
-- [ ] 6.8 GREEN: sửa đến khi pass (lỗi tạo thẻ không đổi `isSaved`); kiểm: test 6.7 pass
+- [x] 6.8 GREEN: sửa đến khi pass (lỗi tạo thẻ không đổi `isSaved`); kiểm: test 6.7 pass
 - [x] 6.9 RED: S9.1-AC1 "Thẻ còn thiếu được tạo ở lần xong bài sau" (hook) — tiếp 6.7: mở lại bài, làm hết (lưu được) → có `你好` meaning + listening; kiểm: chạy, nếu pass ngay thì tạm cho hook bỏ qua tạo thẻ khi bài đã `completed` để thấy fail rồi trả lại
-- [ ] 6.10 GREEN: sửa đến khi pass; kiểm: test 6.9 pass
+- [x] 6.10 GREEN: sửa đến khi pass; kiểm: test 6.9 pass
 - [ ] 6.11 RED: S9.1-AC2 "Viết xong ở câu viết trong bài cũng tính" (hook) — DB có `人` meaning + listening; `useLessonStrokeWrite('e1', '人', onResult)` nạp xong, gửi `'correct'` đủ số nét → `onResult` một lần `{ isCorrect: true }`, `getWrittenCharacters()` có `人`, có `人:writing`; gửi `'correct'` thiếu một nét → không ghi gì; kiểm: fail vì hook chưa gọi `SrsService`
 - [ ] 6.12 GREEN: `useLessonStrokeWrite` gọi `recordCharacterWriting` khi `lessonResult` khác `null`, nuốt lỗi (D5); kiểm: test 6.11 pass, test `useLessonStrokeWrite.test.ts` và `LessonRunnerContainer.strokeWrite*.test.tsx` cũ pass
 - [ ] 6.13 RED: S9.1-AC2 "Làm hết bài có câu viết chữ thì có đủ ba chiều" (container) — DB rỗng; `LessonRunnerContainer` bài C (stroke-write 人, tone-choice 人), viết đủ nét, trả lời câu còn lại, tới tổng kết → đúng 3 thẻ `人` `state: 'new'`; kiểm: chạy, nếu pass ngay thì tạm bỏ lời gọi ở `useLessonStrokeWrite` để thấy fail rồi trả lại
