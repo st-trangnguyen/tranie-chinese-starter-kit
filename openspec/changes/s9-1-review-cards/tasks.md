@@ -91,7 +91,7 @@ tên ngẫu nhiên, `ContentSource` giả (`makeSource` trong `apps/web/src/test
 - [x] 5.21 RED: S9.1-AC2 "Viết lại không tạo trùng thẻ chiều viết" (Phần 3) — DB có `人:writing` `state: 'review'`, `due` T; viết `人` lần nữa → một `人:writing`, giữ `state`/`due`; kiểm: chạy, nếu pass ngay thì như 5.9
 - [x] 5.22 GREEN: sửa đến khi pass; kiểm: test 5.21 pass
 - [x] 5.23 RED: S9.1-AC2 "Thẻ chiều viết còn thiếu được tạo ở lần viết xong sau" (Phần 3) — có `人` meaning + listening; `addWrittenCharacter` reject một lần → `recordCharacterWriting` reject `Error('Không ghi nhận được chữ đã viết.')`, không có `人` trong chữ đã viết, không `人:writing`; xong bài 人 lần nữa → vẫn không `人:writing`; viết lại → có `人:writing`; kiểm: fail vì lỗi gốc lọt ra
-- [ ] 5.24 GREEN: bọc lỗi ghi chữ (D4); kiểm: test 5.23 pass
+- [x] 5.24 GREEN: bọc lỗi ghi chữ (D4); kiểm: test 5.23 pass
 - [ ] 5.25 RED: S9.1-AC2 "Thẻ chiều viết còn thiếu được tạo ở lần xong bài sau" (Phần 3) — có `人` meaning + listening; `addNewCards` reject một lần → `recordCharacterWriting` reject `Error('Không tạo được thẻ chiều viết.')`, `人` đã có trong chữ đã viết, không `人:writing`; xong bài 人 → có `人:writing` `state: 'new'`, vẫn một meaning và một listening; kiểm: fail
 - [ ] 5.26 GREEN: bọc lỗi ghi thẻ (D4); kiểm: test 5.25 pass, `srs.service.ts` < 300 dòng, không import React/Dexie (`pnpm lint`)
 

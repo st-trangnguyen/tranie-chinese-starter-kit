@@ -38,6 +38,9 @@ const CARD_STATE_BY_FSRS_STATE: Record<State, CardState> = {
 /** Lỗi của use case tạo thẻ khi xong bài (đọc hoặc ghi thất bại). */
 const CREATE_CARDS_FAILED_MESSAGE = 'Không tạo được thẻ ôn tập.';
 
+/** Lỗi của use case ghi nhận chữ đã viết khi ghi chữ thất bại (lần viết không được tính). */
+const RECORD_WRITING_FAILED_MESSAGE = 'Không ghi nhận được chữ đã viết.';
+
 /** Chiều luôn được tạo khi xong bài (chiều viết có điều kiện riêng). */
 const LESSON_FACETS: readonly CardFacet[] = ['meaning', 'listening'];
 
@@ -259,7 +262,11 @@ export class SrsService {
     if (!this.countsAsStrokeWritten(writing)) {
       return;
     }
-    await this.writeWrittenCharacter(writing.character);
+    try {
+      await this.writeWrittenCharacter(writing.character);
+    } catch (error) {
+      throw new Error(RECORD_WRITING_FAILED_MESSAGE, { cause: error });
+    }
     const [cards, writtenCharacters, words, strokeCharacters] =
       await Promise.all([
         this.readAllCards(),
