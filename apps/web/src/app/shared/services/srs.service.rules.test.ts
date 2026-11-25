@@ -265,4 +265,29 @@ describe('SrsService — Phần 2 (quy tắc tạo thẻ)', () => {
       expect(card.due).toBe(NOW);
     }
   });
+
+  it('S9.1-AC2 Từ có chữ không có dữ liệu nét: 杯 không có dữ liệu nét dù đã viết → xong bài có 杯 chỉ có thẻ nghĩa và nghe, không có chiều viết', () => {
+    const strokeCharacters = new Set(['人', '你', '好']);
+    const writtenCharacters = new Set(['杯']);
+
+    expect(
+      service.canHaveWritingCard(
+        wordOf('杯'),
+        writtenCharacters,
+        strokeCharacters,
+      ),
+    ).toBe(false);
+
+    const cards = service.planLessonCards(
+      lessonInput(['杯'], { writtenCharacters, strokeCharacters }),
+    );
+
+    expect(keysOf(cards)).toEqual(
+      ['杯:meaning:new', '杯:listening:new'].sort(),
+    );
+    for (const card of cards) {
+      expect(reviewCardSchema.safeParse(card).success).toBe(true);
+      expect(card.due).toBe(NOW);
+    }
+  });
 });
