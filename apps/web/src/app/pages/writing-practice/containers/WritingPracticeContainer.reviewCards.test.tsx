@@ -79,4 +79,47 @@ describe('WritingPracticeContainer — thẻ chiều viết (S9.1)', () => {
       expect(writingCards[0]?.state).toBe('new');
     });
   });
+
+  it('S9.1-AC2 Viết dở không tính: should not record 人 as written nor create a 人 writing card when the learner writes only the first stroke of 人 and leaves the writing practice screen', async () => {
+    await clearDatabase();
+    installLessonStrokeWriteFetch();
+    await seedLearnedPerson();
+
+    const { unmount } = openRoute(
+      `/characters/${encodeURIComponent(PERSON)}/writing-practice`,
+    );
+    await screen.findByRole(
+      'figure',
+      { name: `Khung viết chữ ${PERSON}` },
+      { timeout: 3000 },
+    );
+    await waitFor(() => expect(FakeHanziWriter.last().isQuizActive).toBe(true));
+    const writer = FakeHanziWriter.last();
+
+    // Chỉ viết đúng nét đầu (人 có 2 nét): chưa xong chữ.
+    act(() => writer.emitCorrectStroke());
+    expect(screen.queryByText(`Đã viết xong chữ ${PERSON}.`)).toBeNull();
+
+    // Thoát màn luyện viết.
+    unmount();
+    // Chờ mọi lần ghi IndexedDB (nếu có) kịp hoàn tất trước khi đọc.
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 100);
+    });
+
+    expect(await progressStore.getWrittenCharacters()).toEqual([]);
+    const cards = await progressStore.getAllCards();
+    expect(
+      cards.filter(
+        (card) => card.wordId === PERSON && card.facet === 'writing',
+      ),
+    ).toEqual([]);
+    // Thẻ nghĩa và nghe của 人 vẫn còn nguyên.
+    expect(
+      cards
+        .filter((card) => card.wordId === PERSON)
+        .map((card) => card.facet)
+        .toSorted(),
+    ).toEqual(['listening', 'meaning']);
+  });
 });
