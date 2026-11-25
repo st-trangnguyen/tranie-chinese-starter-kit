@@ -194,4 +194,27 @@ describe('SrsService — Phần 2 (quy tắc tạo thẻ)', () => {
       expect(card.due).toBe(NOW);
     }
   });
+  it('S9.1-AC2 Viết xong chữ của từ đã học thì tạo thẻ chiều viết (TC-S9.1-AC2-25): 你好 có thẻ nghĩa + nghe, không bài nào đang xong, đã viết 你 rồi viết 好 → thẻ 你好 chiều viết "mới"', () => {
+    const meaningCard = service.createNewCard('你好', 'meaning', NOW);
+    const listeningCard = service.createNewCard('你好', 'listening', NOW);
+
+    const cards = service.planWritingCards(
+      writingInput('好', {
+        words: [wordOf('你好')],
+        cards: [meaningCard, listeningCard],
+        writtenCharacters: new Set(['你', '好']),
+        strokeCharacters: new Set(['你', '好']),
+      }),
+    );
+
+    expect(keysOf(cards)).toEqual(['你好:writing:new']);
+    for (const card of cards) {
+      expect(reviewCardSchema.safeParse(card).success).toBe(true);
+      expect(card.due).toBe(NOW);
+    }
+    expect(service.isWordLearned('你好', [meaningCard], new Set())).toBe(true);
+    expect(service.isWordLearned('你好', [listeningCard], new Set())).toBe(
+      false,
+    );
+  });
 });
