@@ -1,14 +1,17 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ReviewCard } from '@csk/shared';
+import type { Lesson, ReviewCard } from '@csk/shared';
 
 import {
   createMachine,
   NOW,
   toBackupFileSource,
 } from '@test/backup-machine.helpers';
+import { makeSource } from '@test/content-service.fixtures';
+import { finishedSession } from '@test/srs-lesson.helpers';
 
 import { ProgressService } from './progress.service';
+import { SrsService } from './srs.service';
 
 const SCENARIO_ROUNDTRIP =
   'S9.1-AC1 (bổ sung) Xuất rồi nhập ở máy khác vẫn còn thẻ';
@@ -43,6 +46,35 @@ const NEW_LISTENING_CARD: ReviewCard = {
   reps: 0,
   lapses: 0,
 };
+
+const SCENARIO_WRITING_ROUNDTRIP =
+  'S9.1-AC2 (bổ sung) Xuất rồi nhập vẫn còn thẻ chiều viết và chữ đã viết';
+
+/** Thẻ chiều viết của 人 ở máy A. */
+const PERSON_WRITING_CARD: ReviewCard = {
+  wordId: '人',
+  facet: 'writing',
+  state: 'new',
+  due: Date.UTC(2026, 10, 16, 3),
+  stability: 0,
+  difficulty: 0,
+  elapsedDays: 0,
+  scheduledDays: 0,
+  learningSteps: 0,
+  reps: 0,
+  lapses: 0,
+};
+
+/** Bài học chỉ có từ 你好. */
+const HELLO_LESSON: Lesson = {
+  id: 'xin-chao',
+  type: 'lesson',
+  title: 'Xin chào',
+  exercises: [{ id: 'h1', kind: 'tone-choice', wordId: '你好' }],
+};
+
+const cardKeysOf = (cards: readonly ReviewCard[]): string[] =>
+  cards.map((card) => `${card.wordId}:${card.facet}`).sort();
 
 const byCardKey = (cards: readonly ReviewCard[]): ReviewCard[] =>
   cards.toSorted((a, b) =>
@@ -102,6 +134,54 @@ describe('BackupService — xuất rồi nhập thẻ ôn tập giữa hai máy'
     );
     expect(byCardKey(await machineB.store.getAllCards())).toEqual(
       byCardKey(cardsOnA),
+    );
+  });
+
+  it(`${SCENARIO_WRITING_ROUNDTRIP}: máy B nhập file của máy A (thẻ 人 chiều viết, chữ 人 và 你) → có thẻ 人 chiều viết; xong bài 你好 rồi viết 好 → có thẻ 你好 chiều viết`, async () => {
+    const machineA = createMachine();
+    await new ProgressService(machineA.store).completeOnboarding(15);
+    await machineA.store.addNewCards([PERSON_WRITING_CARD]);
+    await machineA.store.addWrittenCharacter('人');
+    await machineA.store.addWrittenCharacter('你');
+    await machineA.backup.exportProgress(NOW);
+    const content = machineA.savedFiles[0]?.content ?? '';
+
+    const machineB = createMachine();
+    await new ProgressService(machineB.store).completeOnboarding(15);
+    const inspection = await machineB.backup.inspectImportFile(
+      toBackupFileSource(content),
+    );
+    expect(inspection.status).toBe('valid');
+    if (inspection.status !== 'valid') {
+      return;
+    }
+    await machineB.backup.importProgress(inspection.snapshot);
+
+    expect(cardKeysOf(await machineB.store.getAllCards())).toEqual([
+      '人:writing',
+    ]);
+    expect((await machineB.store.getWrittenCharacters()).toSorted()).toEqual(
+      ['人', '你'].toSorted(),
+    );
+
+    const srsOnB = new SrsService(machineB.store, makeSource());
+    await srsOnB.createCardsForFinishedLesson(
+      HELLO_LESSON,
+      finishedSession(['h1']),
+      NOW + 60_000,
+    );
+    await srsOnB.recordCharacterWriting(
+      { character: '好', isGuided: true },
+      NOW + 120_000,
+    );
+
+    expect(cardKeysOf(await machineB.store.getAllCards())).toEqual(
+      [
+        '人:writing',
+        '你好:listening',
+        '你好:meaning',
+        '你好:writing',
+      ].toSorted(),
     );
   });
 });
