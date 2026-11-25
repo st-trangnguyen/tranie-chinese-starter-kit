@@ -107,7 +107,7 @@ Test: `apps/web/src/app/pages/lesson/hooks/useLessonRunner.reviewCards.test.ts`,
 - [ ] 6.4 GREEN: sửa đến khi pass; kiểm: test 6.3 pass
 - [x] 6.5 RED: S9.1-AC1 "Bài kiểm tra không tạo thẻ" + "Bài được mở nhờ kiểm tra vượt cấp không tạo thẻ" (hook) — bài `type: 'test'` đúng hết → không thẻ; `useLessonRunner(testId, { placementUnitId })` đạt → các bài của chủ đề `completed`, không thẻ; kiểm: chạy, nếu pass ngay thì tạm truyền `'lesson'` làm loại bài để thấy fail rồi trả lại
 - [ ] 6.6 GREEN: sửa đến khi pass; kiểm: test 6.5 pass
-- [ ] 6.7 RED: S9.1-AC1 "Không lưu được thẻ thì bài vẫn xong" (container) — `vi.spyOn(DexieProgressStore.prototype, 'addNewCards').mockRejectedValueOnce(…)`; `LessonRunnerContainer` làm hết bài 你好 → màn tổng kết hiện, `queryByRole('alert')` không có, `progressStore.getLessonProgress` `completed`, không thẻ `你好`; kiểm: chạy, nếu pass ngay thì tạm cho lỗi tạo thẻ đặt `setUnsavedLessonId` để thấy fail rồi trả lại
+- [x] 6.7 RED: S9.1-AC1 "Không lưu được thẻ thì bài vẫn xong" (container) — `vi.spyOn(DexieProgressStore.prototype, 'addNewCards').mockRejectedValueOnce(…)`; `LessonRunnerContainer` làm hết bài 你好 → màn tổng kết hiện, `queryByRole('alert')` không có, `progressStore.getLessonProgress` `completed`, không thẻ `你好`; kiểm: chạy, nếu pass ngay thì tạm cho lỗi tạo thẻ đặt `setUnsavedLessonId` để thấy fail rồi trả lại
 - [ ] 6.8 GREEN: sửa đến khi pass (lỗi tạo thẻ không đổi `isSaved`); kiểm: test 6.7 pass
 - [ ] 6.9 RED: S9.1-AC1 "Thẻ còn thiếu được tạo ở lần xong bài sau" (hook) — tiếp 6.7: mở lại bài, làm hết (lưu được) → có `你好` meaning + listening; kiểm: chạy, nếu pass ngay thì tạm cho hook bỏ qua tạo thẻ khi bài đã `completed` để thấy fail rồi trả lại
 - [ ] 6.10 GREEN: sửa đến khi pass; kiểm: test 6.9 pass
