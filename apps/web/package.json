@@ -27,6 +27,7 @@
     "react-error-boundary": "catalog:",
     "react-i18next": "catalog:",
     "react-router-dom": "catalog:",
+    "ts-fsrs": "catalog:",
     "workbox-window": "catalog:",
     "zod": "catalog:"
   },
