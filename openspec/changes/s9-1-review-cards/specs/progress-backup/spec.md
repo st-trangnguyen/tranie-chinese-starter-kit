@@ -9,8 +9,7 @@ File xuất SHALL chứa các loại tiến độ theo bảng dưới; nhập l�
 | Mọi lựa chọn trong Cài đặt: mục tiêu phút mỗi ngày, tốc độ audio mặc định, hiện pinyin; đã qua màn chào mừng | Có |
 | Số phút đã học từng ngày | Có |
 | Mục tiêu của từng ngày | Có |
-| Thẻ ôn tập: từ, chiều (nghĩa, nghe, viết), trạng thái, ngày ôn tiếp theo (S9.1) | Có |
-| Chữ đã viết xong trên khung có gợi ý (S9.1) | Có |
+| Thẻ ôn tập, chữ đã viết xong (S9.1) | Có |
 | Bản ghi âm, audio đã tải | Không |
 
 #### Scenario: S8.5-AC1 Xuất ở máy này, nhập ở máy khác thì có đúng tiến độ
