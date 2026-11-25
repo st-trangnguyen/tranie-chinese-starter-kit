@@ -221,3 +221,72 @@ describe('DexieProgressStore — ghi đè thẻ ôn tập (S9.1)', () => {
     expect(cards.some((card) => card.wordId === '谢谢')).toBe(false);
   });
 });
+
+const SCENARIO_WRITE_FAILS_KEEPS_CARDS =
+  'S9.1-AC1 (bổ sung) Ghi lỗi giữa chừng thì giữ nguyên thẻ';
+
+describe('DexieProgressStore — ghi lỗi giữ nguyên thẻ (S9.1)', () => {
+  const OLD_SETTINGS = {
+    dailyGoalMinutes: 30,
+    hasCompletedOnboarding: true,
+    defaultAudioSpeed: 'normal',
+    isPinyinVisible: true,
+  } as const;
+  const thanksCards = [
+    newCard('谢谢', 'meaning'),
+    newCard('谢谢', 'listening'),
+  ];
+  const incoming: ProgressSnapshot = {
+    settings: { ...OLD_SETTINGS, dailyGoalMinutes: 15 },
+    lessonProgress: ['intro-01', 'intro-02'].map(completed),
+    dailyStats: [],
+    cards: [newCard('你好', 'meaning'), newCard('你好', 'listening')],
+    writtenCharacters: ['你'],
+  };
+
+  const seedMachineB = async () => {
+    const opened = openStore();
+    await opened.store.saveSettings(OLD_SETTINGS);
+    await opened.store.saveLessonProgressBatch([completed('intro-09')]);
+    await opened.store.addNewCards(thanksCards);
+    await opened.store.addWrittenCharacter('人');
+    return opened;
+  };
+
+  const expectUnchanged = async (store: ProgressStore) => {
+    const cards = await store.getAllCards();
+    expect(cards).toHaveLength(2);
+    expect(cards).toEqual(expect.arrayContaining(thanksCards));
+    await expect(store.getWrittenCharacters()).resolves.toEqual(['人']);
+    await expect(store.getAllLessonProgress()).resolves.toEqual([
+      completed('intro-09'),
+    ]);
+    await expect(store.getSettings()).resolves.toEqual(OLD_SETTINGS);
+  };
+
+  it(`${SCENARIO_WRITE_FAILS_KEEPS_CARDS}: ghi bảng thẻ lỗi thì thẻ 谢谢, chữ 人, tiến độ, cài đặt còn nguyên`, async () => {
+    const { db, store } = await seedMachineB();
+    const putSpy = vi
+      .spyOn(db.cards, 'bulkPut')
+      .mockRejectedValueOnce(new Error('ghi lỗi'));
+    const addSpy = vi
+      .spyOn(db.cards, 'bulkAdd')
+      .mockRejectedValueOnce(new Error('ghi lỗi'));
+
+    await expect(store.importAll(incoming)).rejects.toThrow();
+    expect(putSpy.mock.calls.length + addSpy.mock.calls.length).toBe(1);
+
+    await expectUnchanged(store);
+  });
+
+  it(`${SCENARIO_WRITE_FAILS_KEEPS_CARDS}: ghi tiến độ bài lỗi thì thẻ và chữ đã viết cũng còn nguyên`, async () => {
+    const { db, store } = await seedMachineB();
+    vi.spyOn(db.lessonProgress, 'bulkPut').mockRejectedValueOnce(
+      new Error('ghi lỗi'),
+    );
+
+    await expect(store.importAll(incoming)).rejects.toThrow();
+
+    await expectUnchanged(store);
+  });
+});
