@@ -6,13 +6,20 @@ import {
   type CardFacet,
   type ReviewCard,
 } from '@csk/shared';
-import { expect, type Page, type Route } from '@playwright/test';
+import {
+  expect,
+  type BrowserContext,
+  type Page,
+  type Route,
+} from '@playwright/test';
 import { z } from 'zod';
 
 import { readBuiltWords } from '../E7/intro-lessons.helpers';
+import { FIXTURE_COOKIE } from '../fixtures/offlineAudioFixtures';
 
 import {
   findReviewLesson,
+  REVIEW_CARDS_FIXTURE,
   REVIEW_CONTENT_ROOT,
   withExtraWords,
 } from './review-cards.content';
@@ -23,9 +30,7 @@ const WRITTEN_STORE = 'writtenCharacters';
 const REVIEW_LESSON_URL = /\/content\/lessons\/(s91-[^/]+)\.json(\?.*)?$/;
 
 /**
- * Thay nội dung bằng lộ trình mẫu S9.1: `content.json`, `lessons/s91-*.json`, `words.json` (từ thật
- * + từ thêm). Phục vụ thẳng từ phía test (không `route.fetch`) nên vẫn chạy khi `setOffline(true)`.
- * Cần `serviceWorkers: 'block'`: page.route không chặn request do service worker phục vụ.
+ * Lộ trình mẫu S9.1 qua `page.route` cho spec E9 có mạng; cần `serviceWorkers: 'block'` (D10).
  */
 export const serveReviewCardsPath = async (page: Page): Promise<void> => {
   const words = withExtraWords(readBuiltWords());
@@ -44,6 +49,19 @@ export const serveReviewCardsPath = async (page: Page): Promise<void> => {
       : route.fulfill({ json: lesson });
   });
 };
+
+const COOKIE_SCOPE = { domain: 'localhost', path: '/' } as const;
+/**
+ * Bật nội dung mẫu S9.1 của bản build e2e (cookie fixture, D12; chỉ spec offline). Cảnh báo: cookie
+ * phải đặt trước khi service worker cài lần đầu (trước `page.goto` đầu tiên); đặt sau thì lộ trình
+ * là nội dung thật và không tự sửa trong cùng context.
+ */
+export const useReviewCardsFixture = async (
+  context: BrowserContext,
+): Promise<void> =>
+  context.addCookies([
+    { name: FIXTURE_COOKIE, value: REVIEW_CARDS_FIXTURE, ...COOKIE_SCOPE },
+  ]);
 
 /** Dòng bảng `cards`: thẻ + khóa `id` = `${wordId}:${facet}`. */
 const cardRowSchema = reviewCardSchema.extend({ id: z.string() });
