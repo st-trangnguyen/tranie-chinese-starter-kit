@@ -43,7 +43,7 @@ Test: `apps/web/src/app/shared/services/srs.service.rules.test.ts` (pure, không
 - [x] 4.2 GREEN: `createNewCard` (`ts-fsrs` `createEmptyCard`, bảng tra `State` → `CardState`), `planLessonCards` phần meaning/listening; kiểm: test 4.1 pass
 - [x] 4.3 RED: S9.1-AC1 "Câu cặp âm tạo thẻ cho cả hai từ" (Phần 2) — `collectLessonWordIds([sound-pair ['妈','马'] đáp án '妈'])` = `['妈','马']`; tone-choice, pinyin-type, stroke-write, speak `wordId` → từ của câu; trùng từ giữa câu → một lần; kiểm: fail
 - [x] 4.4 GREEN: `collectLessonWordIds`; kiểm: test 4.3 pass
-- [ ] 4.5 RED: S9.1-AC1 "Câu nói theo câu không tạo thẻ" (Phần 2) — `collectLessonWordIds([speak sentenceId])` = `[]`, `planLessonCards` với `wordIds: []` = `[]`; kiểm: chạy, nếu pass ngay nhờ 4.4 thì tạm cho speak câu trả `sentenceId` như từ để thấy fail rồi trả lại
+- [x] 4.5 RED: S9.1-AC1 "Câu nói theo câu không tạo thẻ" (Phần 2) — `collectLessonWordIds([speak sentenceId])` = `[]`, `planLessonCards` với `wordIds: []` = `[]`; kiểm: chạy, nếu pass ngay nhờ 4.4 thì tạm cho speak câu trả `sentenceId` như từ để thấy fail rồi trả lại
 - [ ] 4.6 GREEN: sửa đến khi pass; kiểm: test 4.5 pass
 - [ ] 4.7 RED: S9.1-AC1 "Học xong bài chưa có thẻ chiều viết" (Phần 2) — `planLessonCards(['人'], written: ∅, stroke: {人})` → meaning + listening, không writing; `canHaveWritingCard(人, ∅, {人})` false; kiểm: chạy, nếu pass ngay thì tạm cho `planLessonCards` luôn thêm writing để thấy fail rồi trả lại
 - [ ] 4.8 GREEN: `charactersOf`, `canHaveWritingCard`, nhánh writing của `planLessonCards`; kiểm: test 4.7 pass

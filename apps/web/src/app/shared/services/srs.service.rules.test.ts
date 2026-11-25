@@ -104,4 +104,16 @@ describe('SrsService — Phần 2 (quy tắc tạo thẻ)', () => {
       '马',
     ]);
   });
+
+  it('S9.1-AC1 Câu nói theo câu không tạo thẻ: bài chỉ có câu nói theo một câu → không có từ, không có thẻ', () => {
+    const exercises: readonly Exercise[] = [
+      { id: 'e1', kind: 'speak', sentenceId: 's-ni-hao-ma' },
+      { id: 'e2', kind: 'speak', sentenceId: 's-xie-xie-ni' },
+    ];
+
+    const wordIds = service.collectLessonWordIds(exercises);
+
+    expect(wordIds).toEqual([]);
+    expect(service.planLessonCards(lessonInput(wordIds))).toEqual([]);
+  });
 });
