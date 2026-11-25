@@ -24,10 +24,30 @@ export interface DailyStatRow {
   [field: string]: unknown;
 }
 
+/**
+ * Một dòng của bảng `cards`: `id` = `reviewCardId(wordId, facet)`.
+ * Chưa tin cậy, validate khi đọc.
+ */
+export interface CardRow {
+  id: string;
+  [field: string]: unknown;
+}
+
+/**
+ * Một dòng của bảng `writtenCharacters`: một chữ Hán đã viết xong.
+ * Chưa tin cậy, validate khi đọc.
+ */
+export interface WrittenCharacterRow {
+  character: string;
+  [field: string]: unknown;
+}
+
 export type AppDatabase = Dexie & {
   settings: EntityTable<SettingRow, 'key'>;
   lessonProgress: EntityTable<LessonProgressRow, 'lessonId'>;
   dailyStats: EntityTable<DailyStatRow, 'date'>;
+  cards: EntityTable<CardRow, 'id'>;
+  writtenCharacters: EntityTable<WrittenCharacterRow, 'character'>;
 };
 
 /**
@@ -48,6 +68,14 @@ export const createDatabase = (name: string = DB_NAME): AppDatabase => {
     settings: 'key',
     lessonProgress: 'lessonId',
     dailyStats: 'date',
+  });
+  // S9.1: hai bảng mới, không đụng dữ liệu cũ nên không cần `upgrade`. Index `due` cho S9.2.
+  db.version(4).stores({
+    settings: 'key',
+    lessonProgress: 'lessonId',
+    dailyStats: 'date',
+    cards: 'id, due',
+    writtenCharacters: 'character',
   });
 
   return db;

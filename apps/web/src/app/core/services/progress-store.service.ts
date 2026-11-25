@@ -2,6 +2,9 @@ import {
   dailyStatSchema,
   lessonProgressSchema,
   parseSettings,
+  reviewCardId,
+  reviewCardSchema,
+  writtenCharacterSchema,
   type DailyGoalMinutes,
   type DailyStat,
   type LessonProgress,
@@ -14,6 +17,18 @@ import { createDatabase, type AppDatabase } from '@core/helpers/db.helper';
 import type { ProgressStore } from './progress-store.interface';
 
 export type { ProgressStore } from './progress-store.interface';
+
+/** Schema tối thiểu cho `parseRows`: chỉ cần `safeParse` (Zod schema thỏa). */
+interface RowSchema<T> {
+  safeParse(row: unknown): { success: true; data: T } | { success: false };
+}
+
+/** Validate từng dòng thô của bảng; dòng hỏng bị bỏ. */
+const parseRows = <T>(rows: readonly unknown[], schema: RowSchema<T>): T[] =>
+  rows.flatMap((row) => {
+    const result = schema.safeParse(row);
+    return result.success ? [result.data] : [];
+  });
 
 export class DexieProgressStore implements ProgressStore {
   /**
@@ -44,10 +59,7 @@ export class DexieProgressStore implements ProgressStore {
 
   async getAllLessonProgress(): Promise<LessonProgress[]> {
     const rows = await this.db.lessonProgress.toArray();
-    return rows.flatMap((row) => {
-      const result = lessonProgressSchema.safeParse(row);
-      return result.success ? [result.data] : [];
-    });
+    return parseRows(rows, lessonProgressSchema);
   }
 
   async getLessonProgress(
@@ -78,10 +90,7 @@ export class DexieProgressStore implements ProgressStore {
   async getAllDailyStats(): Promise<DailyStat[]> {
     await this.studyTimeWrites;
     const rows = await this.db.dailyStats.toArray();
-    return rows.flatMap((row) => {
-      const result = dailyStatSchema.safeParse(row);
-      return result.success ? [result.data] : [];
-    });
+    return parseRows(rows, dailyStatSchema);
   }
 
   saveDailyGoal(date: string, goalMinutes: DailyGoalMinutes): Promise<void> {
@@ -104,14 +113,8 @@ export class DexieProgressStore implements ProgressStore {
         const dailyRows = await this.db.dailyStats.toArray();
         return {
           settings,
-          lessonProgress: lessonRows.flatMap((row) => {
-            const result = lessonProgressSchema.safeParse(row);
-            return result.success ? [result.data] : [];
-          }),
-          dailyStats: dailyRows.flatMap((row) => {
-            const result = dailyStatSchema.safeParse(row);
-            return result.success ? [result.data] : [];
-          }),
+          lessonProgress: parseRows(lessonRows, lessonProgressSchema),
+          dailyStats: parseRows(dailyRows, dailyStatSchema),
         };
       },
     );
@@ -127,21 +130,27 @@ export class DexieProgressStore implements ProgressStore {
     );
   }
 
-  // Skeleton RED S9.1 (task 3.1): chưa có hành vi, GREEN 3.2 cài đặt.
   async getAllCards(): Promise<ReviewCard[]> {
-    return [];
+    await this.studyTimeWrites;
+    const rows = await this.db.cards.toArray();
+    return parseRows(rows, reviewCardSchema);
   }
 
-  async addNewCards(): Promise<void> {
-    // Skeleton: chưa ghi gì.
+  addNewCards(cards: readonly ReviewCard[]): Promise<void> {
+    return this.enqueueStudyTimeWrite(() => this.writeNewCards(cards));
   }
 
   async getWrittenCharacters(): Promise<string[]> {
-    return [];
+    await this.studyTimeWrites;
+    const rows = await this.db.writtenCharacters.toArray();
+    return parseRows(rows, writtenCharacterSchema).map((row) => row.character);
   }
 
-  async addWrittenCharacter(): Promise<void> {
-    // Skeleton: chưa ghi gì.
+  addWrittenCharacter(character: string): Promise<void> {
+    // `put` theo khóa chữ: viết lại cùng chữ không tạo dòng mới.
+    return this.enqueueStudyTimeWrite(async () => {
+      await this.db.writtenCharacters.put({ character });
+    });
   }
 
   private enqueueStudyTimeWrite(task: () => Promise<void>): Promise<void> {
@@ -150,6 +159,19 @@ export class DexieProgressStore implements ProgressStore {
     // Lỗi vẫn reject cho người gọi qua `write`; bản trong chuỗi chỉ bỏ lỗi để lần sau chạy tiếp.
     this.studyTimeWrites = write.catch(() => undefined);
     return write;
+  }
+
+  private async writeNewCards(cards: readonly ReviewCard[]): Promise<void> {
+    if (cards.length === 0) {
+      return;
+    }
+    const rows = cards.map((card) => ({
+      ...card,
+      id: reviewCardId(card.wordId, card.facet),
+    }));
+    await this.db.transaction('rw', this.db.cards, async () => {
+      await this.db.cards.bulkAdd(rows);
+    });
   }
 
   private async writeSnapshot(snapshot: ProgressSnapshot): Promise<void> {
