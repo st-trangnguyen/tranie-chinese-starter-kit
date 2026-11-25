@@ -1,11 +1,12 @@
 import { createEmptyCard, State } from 'ts-fsrs';
 
-import type {
-  CardFacet,
-  CardState,
-  Exercise,
-  ReviewCard,
-  Word,
+import {
+  hanCharacterSchema,
+  type CardFacet,
+  type CardState,
+  type Exercise,
+  type ReviewCard,
+  type Word,
 } from '@csk/shared';
 
 import type { LessonCardPlanInput } from '@shared/models/review-card.model';
@@ -37,14 +38,28 @@ export class SrsService {
     return [...new Set(wordIds)];
   }
 
+  // Rule: chữ Hán của một từ, giữ thứ tự, bỏ trùng; ký tự không phải chữ Hán bị bỏ.
+  charactersOf(hanzi: string): string[] {
+    const characters = Array.from(hanzi).filter(
+      (character) => hanCharacterSchema.safeParse(character).success,
+    );
+    return [...new Set(characters)];
+  }
+
   // Rule: từ được có thẻ chiều viết khi mọi chữ của từ có dữ liệu nét và đã viết xong.
   canHaveWritingCard(
     word: Word,
     writtenCharacters: ReadonlySet<string>,
     strokeCharacters: ReadonlySet<string>,
   ): boolean {
-    void [word, writtenCharacters, strokeCharacters];
-    return false;
+    const characters = this.charactersOf(word.hanzi);
+    return (
+      characters.length > 0 &&
+      characters.every(
+        (character) =>
+          strokeCharacters.has(character) && writtenCharacters.has(character),
+      )
+    );
   }
 
   // Rule: thẻ "mới" của một chiều của từ, đến hạn ngay lúc tạo, chưa ôn (không có lastReview).
@@ -65,13 +80,25 @@ export class SrsService {
     };
   }
 
-  // Rule: thẻ cho bài vừa xong: nghĩa + nghe cho mọi từ của bài.
+  // Rule: thẻ cho bài vừa xong: nghĩa + nghe cho mọi từ của bài; viết cho từ có trong nội dung
+  // và đủ điều kiện chiều viết.
   planLessonCards(input: LessonCardPlanInput): ReviewCard[] {
-    return input.wordIds.flatMap((wordId) =>
-      LESSON_FACETS.map((facet) =>
+    return input.wordIds.flatMap((wordId) => {
+      const word = input.wordsById.get(wordId);
+      const isWritingAllowed =
+        word !== undefined &&
+        this.canHaveWritingCard(
+          word,
+          input.writtenCharacters,
+          input.strokeCharacters,
+        );
+      const facets: readonly CardFacet[] = isWritingAllowed
+        ? [...LESSON_FACETS, 'writing']
+        : LESSON_FACETS;
+      return facets.map((facet) =>
         this.createNewCard(wordId, facet, input.now),
-      ),
-    );
+      );
+    });
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
