@@ -183,7 +183,7 @@ Hành vi đã có test RED ở tầng dưới (nhóm 2–8); commit `test(e2e)`.
 ## 10. Tài liệu (docs thuần, miễn test-first)
 
 - [x] 10.1 `docs/03-architecture.md` theo design D11 (§4 `srs.service`, §6.2 bảng `cards` field + Dexie version 4 + bảng `writtenCharacters`, §6.3 method store mới, `ProgressSnapshot`, file sao lưu version 2 đọc được version 1); kiểm: đọc lại khớp tên trong code
-- [ ] 10.2 Mô tả PR code: `Spec PR: #148`, `Refs #39` hoặc `Closes #39`; đường dẫn bài mẫu (`apps/web/e2e/E9/review-cards.content.ts`) và file mẫu (`apps/web/e2e/E9/fixtures/progress-backup/`), cách e2e đọc/nạp/làm hỏng ghi thẻ, case chạy tay (cột "không" của `test-cases.md`), ghi chú "không tạo bù thẻ cho tiến độ trước S9.1"; Screenshots `N/A` (không đổi giao diện); kiểm: PR đủ mục theo `.github/pull_request_template.md`
+- [x] 10.2 Mô tả PR code: `Spec PR: #148`, `Refs #39` hoặc `Closes #39`; đường dẫn bài mẫu (`apps/web/e2e/E9/review-cards.content.ts`) và file mẫu (`apps/web/e2e/E9/fixtures/progress-backup/`), cách e2e đọc/nạp/làm hỏng ghi thẻ, case chạy tay (cột "không" của `test-cases.md`), ghi chú "không tạo bù thẻ cho tiến độ trước S9.1"; Screenshots `N/A` (không đổi giao diện); kiểm: PR đủ mục theo `.github/pull_request_template.md`
 
 ## 11. Kiểm tra cuối
 
