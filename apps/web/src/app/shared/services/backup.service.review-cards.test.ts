@@ -92,3 +92,38 @@ describe('BackupService.checkBackupText — file v2 có thẻ ôn tập', () => 
     });
   });
 });
+
+const SCENARIO_DUPLICATE_CARD =
+  'S9.1-AC1 (bổ sung) File có hai thẻ trùng bị từ chối cả file';
+
+describe('BackupService.checkBackupText — file v2 có thẻ trùng', () => {
+  it(`${SCENARIO_DUPLICATE_CARD}: hai thẻ 你好 chiều nghĩa (khác state) → corrupted`, () => {
+    const service = new BackupService();
+    const duplicateCard: ReviewCard = {
+      ...newCard('你好', 'meaning'),
+      state: 'review',
+      reps: 1,
+    };
+    const text = JSON.stringify(
+      buildV2File([newCard('你好', 'meaning'), duplicateCard]),
+    );
+
+    expect(service.checkBackupText(text)).toEqual({
+      status: 'rejected',
+      reason: 'corrupted',
+    });
+  });
+
+  it(`${SCENARIO_DUPLICATE_CARD}: 你好 chiều nghĩa và chiều nghe → valid`, () => {
+    const service = new BackupService();
+    const file = buildV2File([
+      newCard('你好', 'meaning'),
+      newCard('你好', 'listening'),
+    ]);
+
+    expect(service.checkBackupText(JSON.stringify(file))).toEqual({
+      status: 'valid',
+      file,
+    });
+  });
+});

@@ -279,3 +279,33 @@ describe('progressBackupV2Schema — thẻ ôn tập trong file', () => {
     ).toBe(false);
   });
 });
+
+const SCENARIO_DUPLICATE_CARD =
+  'S9.1-AC1 (bổ sung) File có hai thẻ trùng bị từ chối cả file';
+
+describe('progressBackupV2Schema — thẻ trùng trong file', () => {
+  it(`${SCENARIO_DUPLICATE_CARD}: hai thẻ 你好 chiều nghĩa (khác state) → cả file bị từ chối`, () => {
+    const duplicateCard = {
+      ...buildNewCard('你好', 'meaning'),
+      state: 'review',
+      reps: 1,
+    };
+
+    expect(
+      progressBackupV2Schema.safeParse(
+        buildValidV2File([buildNewCard('你好', 'meaning'), duplicateCard]),
+      ).success,
+    ).toBe(false);
+  });
+
+  it(`${SCENARIO_DUPLICATE_CARD}: 你好 chiều nghĩa và chiều nghe không trùng → qua`, () => {
+    expect(
+      progressBackupV2Schema.safeParse(
+        buildValidV2File([
+          buildNewCard('你好', 'meaning'),
+          buildNewCard('你好', 'listening'),
+        ]),
+      ).success,
+    ).toBe(true);
+  });
+});
