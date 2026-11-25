@@ -127,3 +127,41 @@ describe('BackupService.checkBackupText — file v2 có thẻ trùng', () => {
     });
   });
 });
+
+const SCENARIO_DUPLICATE_CHARACTER =
+  'S9.1-AC2 (bổ sung) File có chữ đã viết trùng bị từ chối cả file';
+
+const buildV2FileWithCharacters = (
+  writtenCharacters: readonly unknown[],
+): Record<string, unknown> => ({
+  ...buildV2File([newCard('你好', 'meaning'), newCard('你好', 'listening')]),
+  writtenCharacters,
+});
+
+describe('BackupService.checkBackupText — file v2 có chữ đã viết trùng', () => {
+  it.each<[string, readonly string[]]>([
+    ['chữ 你 xuất hiện hai lần', ['你', '你']],
+    ["mục không phải một chữ Hán ('ab')", ['ab']],
+  ])(
+    `${SCENARIO_DUPLICATE_CHARACTER}: %s → corrupted`,
+    (_label, characters) => {
+      const service = new BackupService();
+      const text = JSON.stringify(buildV2FileWithCharacters(characters));
+
+      expect(service.checkBackupText(text)).toEqual({
+        status: 'rejected',
+        reason: 'corrupted',
+      });
+    },
+  );
+
+  it(`${SCENARIO_DUPLICATE_CHARACTER}: chữ 你 và 好 → valid`, () => {
+    const service = new BackupService();
+    const file = buildV2FileWithCharacters(['你', '好']);
+
+    expect(service.checkBackupText(JSON.stringify(file))).toEqual({
+      status: 'valid',
+      file,
+    });
+  });
+});
