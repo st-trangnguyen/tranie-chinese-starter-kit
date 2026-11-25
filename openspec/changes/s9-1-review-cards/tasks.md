@@ -59,7 +59,7 @@ Test: `apps/web/src/app/shared/services/srs.service.rules.test.ts` (pure, không
 - [x] 4.18 GREEN: sửa đến khi pass; kiểm: test 4.17 pass
 - [x] 4.19 RED: S9.1-AC2 "Viết không gợi ý không tính" (Phần 2) — `人` có thẻ meaning, written ∅; `countsAsStrokeWritten({ character: '人', isGuided: false })` false; `addWrittenCharacter(∅, { 人, isGuided: false })` vẫn rỗng; `planWritingCards` với tập đó → `[]`; cùng đầu vào `isGuided: true` → tạo writing; kiểm: fail
 - [x] 4.20 GREEN: `countsAsStrokeWritten`, `addWrittenCharacter`; kiểm: test 4.19 pass
-- [ ] 4.21 RED: S9.1-AC1 "Bài chưa xong không tạo thẻ" + "Bài kiểm tra không tạo thẻ" (Phần 2) — `isCardEligibleLesson('lesson', phiên finished không bỏ câu)` true; phiên còn `answering` → false; finished nhưng `skippedCount: 1` → false; `'test'` đúng hết → false; kiểm: fail
+- [x] 4.21 RED: S9.1-AC1 "Bài chưa xong không tạo thẻ" + "Bài kiểm tra không tạo thẻ" (Phần 2) — `isCardEligibleLesson('lesson', phiên finished không bỏ câu)` true; phiên còn `answering` → false; finished nhưng `skippedCount: 1` → false; `'test'` đúng hết → false; kiểm: fail
 - [ ] 4.22 GREEN: `isCardEligibleLesson` (dùng `summarizeSession`); kiểm: test 4.21 pass, mọi method Phần 2 có `// Rule:`
 
 ## 5. Use case tạo thẻ — `SrsService` Phần 1 + 3 (design D4)

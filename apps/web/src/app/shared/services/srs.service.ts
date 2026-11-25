@@ -5,10 +5,12 @@ import {
   type CardFacet,
   type CardState,
   type Exercise,
+  type Lesson,
   type ReviewCard,
   type Word,
 } from '@csk/shared';
 
+import type { LessonSession } from '@shared/models/lesson-session.model';
 import type {
   CharacterWriting,
   LessonCardPlanInput,
@@ -30,6 +32,16 @@ export class SrsService {
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
+
+  // Rule: chỉ bài học kết thúc không bỏ câu nào mới tạo thẻ.
+  isCardEligibleLesson(
+    lessonType: Lesson['type'],
+    session: LessonSession,
+  ): boolean {
+    void lessonType;
+    void session;
+    return false;
+  }
 
   // Rule: từ của bài được tạo thẻ (bảng "Từ nào của bài được tạo thẻ").
   collectLessonWordIds(exercises: readonly Exercise[]): string[] {
