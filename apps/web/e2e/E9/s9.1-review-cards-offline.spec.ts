@@ -18,6 +18,7 @@ import {
   LEARNING_PATH_URL,
 } from '../E7/intro-lessons.helpers';
 import {
+  backupAlert,
   backupStatus,
   exportProgress,
   IMPORTED_MESSAGE,
@@ -26,7 +27,10 @@ import {
 } from '../E8/backup.helpers';
 import { finishLesson, learningPathLink } from '../E8/home.helpers';
 import { openOnceWithServiceWorker } from '../E8/offline-audio.helpers';
-import { openSettingsFromPath } from '../E8/settings.helpers';
+import {
+  alertsOutsideBackup,
+  openSettingsFromPath,
+} from '../E8/settings.helpers';
 
 import {
   REVIEW_LESSON_IDS,
@@ -76,7 +80,7 @@ const finishLessonFromPath = async (
   );
   await finishLesson(page);
   await expect(page.getByText(FINISHED_MESSAGE)).toBeVisible();
-  await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect(alertsOutsideBackup(page)).toHaveCount(0);
 };
 
 const expectCards = async (
@@ -181,7 +185,8 @@ test.describe('S9.1 Tạo thẻ ôn tập khi không có mạng', () => {
     await overwriteButton(machineB).click();
 
     await expect(backupStatus(machineB)).toHaveText(IMPORTED_MESSAGE);
-    await expect(machineB.getByRole('alert')).toHaveCount(0);
+    await expect(backupAlert(machineB)).toHaveText('');
+    await expect(alertsOutsideBackup(machineB)).toHaveCount(0);
     await expectCards(machineB, NEW_CARDS_LESSON_A);
   });
 });
