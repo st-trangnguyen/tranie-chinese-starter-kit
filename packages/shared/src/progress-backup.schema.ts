@@ -72,7 +72,7 @@ export const progressBackupV2Schema = progressBackupV1Schema.extend({
         cards.map((card) => reviewCardId(card.wordId, card.facet)),
       ),
     ),
-  writtenCharacters: z.array(hanCharacterSchema),
+  writtenCharacters: z.array(hanCharacterSchema).refine(hasNoDuplicates),
 });
 
 /** Toàn bộ tiến độ trên máy, đọc/ghi một lần (S8.5, S9.1). */
