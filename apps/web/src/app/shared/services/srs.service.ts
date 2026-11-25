@@ -1,37 +1,50 @@
-import type { CardFacet, ReviewCard } from '@csk/shared';
+import { createEmptyCard, State } from 'ts-fsrs';
+
+import type { CardFacet, CardState, ReviewCard } from '@csk/shared';
 
 import type { LessonCardPlanInput } from '@shared/models/review-card.model';
 
-// Skeleton RED (tasks 4.1): chưa có hành vi.
-const emptyCard = (wordId: string, facet: CardFacet): ReviewCard => ({
-  wordId,
-  facet,
-  state: 'new',
-  due: 0,
-  stability: 0,
-  difficulty: 0,
-  elapsedDays: 0,
-  scheduledDays: 0,
-  learningSteps: 0,
-  reps: 0,
-  lapses: 0,
-});
+/** Trạng thái số của `ts-fsrs` → chuỗi lưu trong `ReviewCard`. */
+const CARD_STATE_BY_FSRS_STATE: Record<State, CardState> = {
+  [State.New]: 'new',
+  [State.Learning]: 'learning',
+  [State.Review]: 'review',
+  [State.Relearning]: 'relearning',
+};
+
+/** Chiều luôn được tạo khi xong bài (chiều viết có điều kiện riêng). */
+const LESSON_FACETS: readonly CardFacet[] = ['meaning', 'listening'];
 
 export class SrsService {
   // ── PHẦN 1 — TRUY CẬP DỮ LIỆU ─────────────────────────
 
   // ── PHẦN 2 — QUY TẮC NGHIỆP VỤ ───────────────────────
 
-  // Rule: thẻ "mới" của một chiều của từ, đến hạn ngay lúc tạo.
+  // Rule: thẻ "mới" của một chiều của từ, đến hạn ngay lúc tạo, chưa ôn (không có lastReview).
   createNewCard(wordId: string, facet: CardFacet, now: number): ReviewCard {
-    void now;
-    return emptyCard(wordId, facet);
+    const card = createEmptyCard(new Date(now));
+    return {
+      wordId,
+      facet,
+      state: CARD_STATE_BY_FSRS_STATE[card.state],
+      due: card.due.getTime(),
+      stability: card.stability,
+      difficulty: card.difficulty,
+      elapsedDays: 0,
+      scheduledDays: card.scheduled_days,
+      learningSteps: card.learning_steps,
+      reps: card.reps,
+      lapses: card.lapses,
+    };
   }
 
-  // Rule: thẻ còn thiếu cho bài vừa xong.
+  // Rule: thẻ cho bài vừa xong: nghĩa + nghe cho mọi từ của bài.
   planLessonCards(input: LessonCardPlanInput): ReviewCard[] {
-    void input;
-    return [];
+    return input.wordIds.flatMap((wordId) =>
+      LESSON_FACETS.map((facet) =>
+        this.createNewCard(wordId, facet, input.now),
+      ),
+    );
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
