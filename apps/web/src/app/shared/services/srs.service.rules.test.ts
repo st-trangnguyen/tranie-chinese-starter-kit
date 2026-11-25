@@ -7,7 +7,10 @@ import {
   type Word,
 } from '@csk/shared';
 
-import type { LessonCardPlanInput } from '@shared/models/review-card.model';
+import type {
+  LessonCardPlanInput,
+  WritingCardPlanInput,
+} from '@shared/models/review-card.model';
 import { makeWord } from '@test/content-service.fixtures';
 
 import { SrsService } from './srs.service';
@@ -24,6 +27,19 @@ const lessonInput = (
   wordsById: new Map(wordIds.map((id) => [id, wordOf(id)])),
   cards: [],
   writtenCharacters: new Set(),
+  strokeCharacters: new Set(['人', '你', '好', '谢']),
+  now: NOW,
+  ...overrides,
+});
+
+const writingInput = (
+  character: string,
+  overrides: Partial<WritingCardPlanInput> = {},
+): WritingCardPlanInput => ({
+  character,
+  words: [wordOf('你好'), wordOf('人')],
+  cards: [],
+  writtenCharacters: new Set([character]),
   strokeCharacters: new Set(['人', '你', '好', '谢']),
   now: NOW,
   ...overrides,
@@ -130,5 +146,52 @@ describe('SrsService — Phần 2 (quy tắc tạo thẻ)', () => {
     expect(
       service.canHaveWritingCard(wordOf('人'), new Set(), new Set(['人'])),
     ).toBe(false);
+  });
+
+  it('S9.1-AC2 Từ nhiều chữ cần viết xong mọi chữ: 你好 chỉ được thẻ chiều viết khi đã viết cả 你 và 好', () => {
+    const strokeCharacters = new Set(['你', '好']);
+
+    expect(service.charactersOf('你好')).toEqual(['你', '好']);
+    expect(
+      service.canHaveWritingCard(
+        wordOf('你好'),
+        new Set(['你']),
+        strokeCharacters,
+      ),
+    ).toBe(false);
+    expect(
+      service.canHaveWritingCard(
+        wordOf('你好'),
+        new Set(['你', '好']),
+        strokeCharacters,
+      ),
+    ).toBe(true);
+  });
+
+  it('S9.1-AC2 Từ nhiều chữ cần viết xong mọi chữ: planWritingCards sau khi viết 好 → thẻ 你好 chiều viết chỉ khi 你 đã viết', () => {
+    const learnedCards = [
+      service.createNewCard('你好', 'meaning', NOW),
+      service.createNewCard('你好', 'listening', NOW),
+    ];
+
+    const onlyNi = service.planWritingCards(
+      writingInput('你', {
+        cards: learnedCards,
+        writtenCharacters: new Set(['你']),
+      }),
+    );
+    expect(onlyNi).toEqual([]);
+
+    const bothWritten = service.planWritingCards(
+      writingInput('好', {
+        cards: learnedCards,
+        writtenCharacters: new Set(['你', '好']),
+      }),
+    );
+    expect(keysOf(bothWritten)).toEqual(['你好:writing:new']);
+    for (const card of bothWritten) {
+      expect(reviewCardSchema.safeParse(card).success).toBe(true);
+      expect(card.due).toBe(NOW);
+    }
   });
 });

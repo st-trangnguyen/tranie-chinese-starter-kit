@@ -9,7 +9,10 @@ import {
   type Word,
 } from '@csk/shared';
 
-import type { LessonCardPlanInput } from '@shared/models/review-card.model';
+import type {
+  LessonCardPlanInput,
+  WritingCardPlanInput,
+} from '@shared/models/review-card.model';
 
 /** Trạng thái số của `ts-fsrs` → chuỗi lưu trong `ReviewCard`. */
 const CARD_STATE_BY_FSRS_STATE: Record<State, CardState> = {
@@ -99,6 +102,22 @@ export class SrsService {
         this.createNewCard(wordId, facet, input.now),
       );
     });
+  }
+
+  // Rule: (skeleton) từ đã học xong cho thẻ chiều viết.
+  isWordLearned(
+    wordId: string,
+    cards: readonly ReviewCard[],
+    completingWordIds: ReadonlySet<string>,
+  ): boolean {
+    void [wordId, cards, completingWordIds];
+    return false;
+  }
+
+  // Rule: (skeleton) thẻ chiều viết còn thiếu sau một lần viết.
+  planWritingCards(input: WritingCardPlanInput): ReviewCard[] {
+    void input;
+    return [];
   }
 
   // ── PHẦN 3 — USE CASES ───────────────────────────────
