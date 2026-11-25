@@ -86,6 +86,6 @@ export {
   reviewCardSchema,
   writtenCharacterSchema,
 } from './review-card.schema';
-export type { CardFacet, CardState } from './review-card.schema';
+export type { CardFacet, CardState, ReviewCard } from './review-card.schema';
 export { INTRO_STAGE_ID, audioIndexSchema } from './audio-index.schema';
 export type { AudioIndex } from './audio-index.schema';
